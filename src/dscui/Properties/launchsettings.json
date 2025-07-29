@@ -1,0 +1,10 @@
+﻿{
+    "profiles": {
+      "dscui (Package)": {
+        "commandName": "MsixPackage"
+      },
+      "dscui (Unpackaged)": {
+        "commandName": "Project"
+      }
+    }
+}
