@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "WinGetStudio (Package)": {
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": false
+    },
+    "WinGetStudio (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

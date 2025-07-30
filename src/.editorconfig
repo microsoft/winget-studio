@@ -7,6 +7,20 @@ root = true
 
 [*]
 trim_trailing_whitespace = true
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_auto_properties = true:silent
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:silent
+dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+tab_width = 4
+indent_size = 4
+end_of_line = crlf
+dotnet_style_explicit_tuple_names = true:suggestion
 
 [*.cs]
 
@@ -225,7 +239,7 @@ dotnet_naming_rule.private_fields_must_begin_with_underscore_and_be_in_camel_cas
 dotnet_naming_rule.private_fields_must_begin_with_underscore_and_be_in_camel_case.severity = warning
 
 dotnet_naming_rule.const_fields_must_begin_with_no_prefix_and_be_in_pascal_case.symbols = const_private_fields
-dotnet_naming_rule.const_fields_must_begin_with_no_prefix_and_be_in_pascal_case.style = require_no_prefix_and_pascal_case
+dotnet_naming_rule.const_fields_must_begin_with_no_prefix_and_be_in_pascal_case.style = pascal_case
 dotnet_naming_rule.const_fields_must_begin_with_no_prefix_and_be_in_pascal_case.severity = warning
 
 # Spelling
@@ -236,3 +250,4 @@ spelling_exclusion_path = .\exclusion.dic
 
 # CS8305: Type is for evaluation purposes only and is subject to change or removal in future updates.
 dotnet_diagnostic.CS8305.severity = suggestion
+csharp_prefer_system_threading_lock = true:suggestion

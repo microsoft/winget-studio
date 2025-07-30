@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)ToolingVersions.props" />
+  <PropertyGroup>
+    <RootNamespace>WinGetStudio.Services.DesiredStateConfiguration</RootNamespace>
+    <Platforms>x86;x64;arm64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="$(TargetDir)\Microsoft.Management.Configuration.dll" Link="Microsoft.Management.Configuration.dll" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(TargetDir)\Microsoft.Management.Configuration.winmd" Link="Microsoft.Management.Configuration.winmd" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.2.250402" />
+    <PackageReference Include="Microsoft.WindowsPackageManager.Configuration.OutOfProc" Version="1.11.430" GeneratePathProperty="True" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.106">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WinGetStudio.Services.Core\WinGetStudio.Services.Core.csproj" />
+  </ItemGroup>
+  <Target Name="CopyWinmdToTargetDir" BeforeTargets="BeforeBuild">
+    <Copy SourceFiles="$(PkgMicrosoft_WindowsPackageManager_Configuration_OutOfProc)\runtimes\win-$(Platform)\native\Microsoft.Management.Configuration.dll" DestinationFolder="$(TargetDir)" />
+    <Copy SourceFiles="$(PkgMicrosoft_WindowsPackageManager_Configuration_OutOfProc)\runtimes\win-$(Platform)\native\Microsoft.Management.Configuration.winmd" DestinationFolder="$(TargetDir)" />
+  </Target>
+</Project>
