@@ -13,8 +13,9 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 internal class DSCSetBuilder : IDSCSetBuilder
 {
     private readonly IDSCFactory _dscFactory;
-    
     private EditableDSCSet _dscSet = new();
+    private const string DSC_SCHEMA_URL = "https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json";
+    private const string DSC_VERSION_SRTING = "dscv3";
     public IReadOnlyList<IDSCUnit> Units => _dscSet.Units;
 
     public string TargetFilePath { get; set; } = string.Empty;
@@ -68,7 +69,6 @@ internal class DSCSetBuilder : IDSCSetBuilder
                 var u = new EditableDSCUnit(unit);
                 _dscSet.InternalUnits.Add(u);
             }
-
         }
     }
     public bool IsEmpty() => Units.Count == 0;
@@ -78,12 +78,12 @@ internal class DSCSetBuilder : IDSCSetBuilder
         var dscSet = await BuildAsync();
         var dscYaml = new Dictionary<string, object>
         {
-            ["$schema"] = "https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json",
+            ["$schema"] = DSC_SCHEMA_URL,
             ["metadata"] = new Dictionary<string, object>
             {
                 ["winget"] = new Dictionary<string, object>
                 {
-                    ["processor"] = "dscv3"
+                    ["processor"] = DSC_VERSION_SRTING
                 }
             },
             ["resources"] = new List<Dictionary<string, object>>()

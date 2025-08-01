@@ -27,12 +27,6 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     public partial string Title { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial bool IsV3 { get; set; } = false;
-
-    [ObservableProperty]
-    public partial bool ShowRawData { get; set; } = false;
-
-    [ObservableProperty]
     public partial string RawData { get; set; } = string.Empty;
 
     [ObservableProperty]

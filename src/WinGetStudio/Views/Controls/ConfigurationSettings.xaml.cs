@@ -8,9 +8,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 
 namespace WinGetStudio.Views.Controls;
+
 public sealed partial class ConfigurationSettings : UserControl
 {
-
 
     public static readonly DependencyProperty PropertiesProperty = DependencyProperty.Register(
         nameof(Properties),
@@ -18,7 +18,6 @@ public sealed partial class ConfigurationSettings : UserControl
         typeof(ConfigurationSettings),
         new PropertyMetadata(null));
     
-
     public ObservableCollection<ConfigurationProperty> Properties
     {
         get => (ObservableCollection<ConfigurationProperty>)GetValue(PropertiesProperty);
@@ -33,48 +32,40 @@ public sealed partial class ConfigurationSettings : UserControl
 
     private void NewValidationPropertyDefault(SplitButton sender, SplitButtonClickEventArgs e)
     {
-        ObservableCollection<ConfigurationProperty>? l = null;
-        if (sender.DataContext is ConfigurationProperty p && p.Value.Value is ObservableCollection<ConfigurationProperty> l1)
+        ObservableCollection<ConfigurationProperty>? listToUpdate = null;
+        if (sender.DataContext is ConfigurationProperty p && p.Value.Value is ObservableCollection<ConfigurationProperty> nestedList)
         {
-            l = l1;
+            listToUpdate = nestedList;
         }
-        else if (sender.DataContext is ConfigurationPropertyValueBase v && v.Value is ObservableCollection<ConfigurationProperty> l2)
+        listToUpdate ??= Properties;
+        if (listToUpdate != null)
         {
-            l = l2;
-        }
-        l ??= Properties;
-        if (l != null)
-        {
-            l.Add(new(string.Empty, new StringValue(string.Empty)));
+            listToUpdate.Add(new(string.Empty, new StringValue(string.Empty)));
         }
     }
     private void NewValidationProperty(object sender, RoutedEventArgs e)
     {
         if (sender is MenuFlyoutItem item && item.Tag is string tag)
         {
-            ObservableCollection<ConfigurationProperty>? l = null;
-            if (item.DataContext is ConfigurationProperty p && p.Value.Value is ObservableCollection<ConfigurationProperty> l1)
+            ObservableCollection<ConfigurationProperty>? listToUpdate = null;
+            if (item.DataContext is ConfigurationProperty p && p.Value.Value is ObservableCollection<ConfigurationProperty> nestedList)
             {
-                l = l1;
+                listToUpdate = nestedList;
             }
-            else if (item.DataContext is ConfigurationPropertyValueBase v && v.Value is ObservableCollection<ConfigurationProperty> l2)
-            {
-                l = l2;
-            }
-            l ??= Properties;
+            listToUpdate ??= Properties;
             switch (tag)
             {
                 case "Str":
-                    l.Add(new(string.Empty, new StringValue(string.Empty)));
+                    listToUpdate.Add(new(string.Empty, new StringValue(string.Empty)));
                     break;
                 case "Num":
-                    l.Add(new(string.Empty, new NumberValue(0)));
+                    listToUpdate.Add(new(string.Empty, new NumberValue(0)));
                     break;
                 case "Bool":
-                    l.Add(new(string.Empty, new BooleanValue(false)));
+                    listToUpdate.Add(new(string.Empty, new BooleanValue(false)));
                     break;
                 case "Obj":
-                    l.Add(new(string.Empty, new ObjectValue(new ObservableCollection<ConfigurationProperty>())));
+                    listToUpdate.Add(new(string.Empty, new ObjectValue(new ObservableCollection<ConfigurationProperty>())));
                     break;
             }
         }

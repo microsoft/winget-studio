@@ -105,9 +105,8 @@
 
             <TextBlock x:Uid="ManagePage_SelectFileBoxHeader" FontWeight="Bold" Grid.Row="0"/>
             <TextBox
-                x:Uid="ManagePage_SelectFileBox"
+                PlaceholderText="C:\Users\user\configuration.winget"
                 Text="{x:Bind ViewModel.FilePath, Mode=OneWay}"
-                PlaceholderText="Select File..."
                 IsReadOnly="True"
                 MinWidth="250"
                 Padding="8"

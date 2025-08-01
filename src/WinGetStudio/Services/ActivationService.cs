@@ -48,6 +48,7 @@ public class ActivationService : IActivationService
             // Execute tasks after activation.
             await StartupAsync();
         }
+
         // Handle activation via ActivationHandlers.
         await HandleActivationAsync(activationArgs);
     }

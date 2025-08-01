@@ -394,9 +394,6 @@
   <data name="ManagePage_LearnMoreLink.Text" xml:space="preserve">
     <value>Learn More</value>
   </data>
-  <data name="ManagePage_SelectFileBox.PlaceholderText" xml:space="preserve">
-    <value>C:\Users\user\configuration.winget</value>
-  </data>
   <data name="ManagePage_SelectFileBoxHeader.Text" xml:space="preserve">
     <value>Configuration File</value>
   </data>

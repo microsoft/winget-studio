@@ -48,7 +48,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             await ViewModel.StoreYamlStateCommand.ExecuteAsync(null);
             return;
         }
-        if (await ViewModel.IsSaveRequired())
+        if (await ViewModel.IsSaveRequiredAsync())
         {
             var dialog = SaveDialog;
 

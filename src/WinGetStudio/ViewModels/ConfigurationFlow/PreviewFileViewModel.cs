@@ -31,6 +31,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     public ObservableCollection<DSCConfigurationUnitViewModel> ConfigurationUnits = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditPanelVisible))]
     public partial DSCConfigurationUnitViewModel SelectedUnit { get; set; } = null;
 
     [ObservableProperty]
@@ -48,7 +49,6 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     public bool CanApply => ConfigurationUnits.Count > 0 && !IsStateChanged;
 
     public bool IsEditPanelVisible => SelectedUnit != null;
-
 
     partial void OnIsInEditModeChanging(bool value)
     {
@@ -91,7 +91,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         }
         LoadingUnits = false;
     }
-    
+
     partial void OnSelectedUnitChanged(DSCConfigurationUnitViewModel oldValue, DSCConfigurationUnitViewModel newValue)
     {
         OnPropertyChanged(nameof(IsEditPanelVisible));
@@ -134,7 +134,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         }
         else if(parameter is string filePath)
         {
-            _ = ImportDSCSetFromPath(filePath);
+            _ = ImportDSCSetFromPathAsync(filePath);
         }
         else
         {
@@ -148,7 +148,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         // No-op
     }
 
-    private async Task ImportDSCSetFromPath(string path)
+    private async Task ImportDSCSetFromPathAsync(string path)
     {
         var dscFile = await DSCFile.LoadAsync(path);
         var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
@@ -160,11 +160,10 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         _ = UpdateUnits();
     }
 
-    public async Task<bool> IsSaveRequired()
+    public async Task<bool> IsSaveRequiredAsync()
     {
         await UpdateUnits();
-        var a = await _dscSetBuilder.ConvertToYamlAsync();
-        if (Yaml == a)
+        if (Yaml == await _dscSetBuilder.ConvertToYamlAsync())
         {
             return false;
         }
@@ -186,6 +185,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             _navigationService.NavigateTo<ApplyFileViewModel>(await _dscSetBuilder.BuildAsync());
         }
     }
+
     [RelayCommand]
     private async Task OnSaveAsync()
     {
@@ -229,6 +229,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         Yaml = yaml;
         IsStateChanged = false;
     }
+
     [RelayCommand]
     private async Task OnDiscardAsync()
     {
@@ -272,7 +273,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
 
         try
         {
-            await ImportDSCSetFromPath(file.Path);
+            await ImportDSCSetFromPathAsync(file.Path);
         }
         catch (OpenConfigurationSetException e)
         {
@@ -284,7 +285,6 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             _logger.LogError(e, $"Unknown error while opening configuration set.");
             var message = _stringResource.GetLocalized("ConfigurationFileOpenUnknownError");
         }
-        await Task.CompletedTask;
     }
     private string GetErrorMessage(OpenConfigurationSetException exception)
     {
