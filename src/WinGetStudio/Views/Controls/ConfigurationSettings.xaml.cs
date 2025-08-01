@@ -33,7 +33,7 @@ public sealed partial class ConfigurationSettings : UserControl
     private void NewValidationPropertyDefault(SplitButton sender, SplitButtonClickEventArgs e)
     {
         ObservableCollection<ConfigurationProperty>? listToUpdate = null;
-        if (sender.DataContext is ConfigurationProperty p && p.Value.Value is ObservableCollection<ConfigurationProperty> nestedList)
+        if (sender.DataContext is ConfigurationProperty property && property.Value.Value is ObservableCollection<ConfigurationProperty> nestedList)
         {
             listToUpdate = nestedList;
         }
@@ -48,7 +48,7 @@ public sealed partial class ConfigurationSettings : UserControl
         if (sender is MenuFlyoutItem item && item.Tag is string tag)
         {
             ObservableCollection<ConfigurationProperty>? listToUpdate = null;
-            if (item.DataContext is ConfigurationProperty p && p.Value.Value is ObservableCollection<ConfigurationProperty> nestedList)
+            if (item.DataContext is ConfigurationProperty property && property.Value.Value is ObservableCollection<ConfigurationProperty> nestedList)
             {
                 listToUpdate = nestedList;
             }
@@ -82,11 +82,11 @@ public sealed partial class ConfigurationSettings : UserControl
             {
                 parent = VisualTreeHelper.GetParent(parent);
             }
-            if (parent is ListView lv
-                && lv.ItemsSource is ObservableCollection<ConfigurationProperty> l
-                && button.DataContext is ConfigurationProperty p)
+            if (parent is ListView listView
+                && listView.ItemsSource is ObservableCollection<ConfigurationProperty> list
+                && button.DataContext is ConfigurationProperty property)
             {
-                l.Remove(p);
+                list.Remove(property);
             }
         }
     }
@@ -144,12 +144,12 @@ public sealed partial class ConfigurationSettings : UserControl
                         newValue = new ObjectValue(new ObservableCollection<ConfigurationProperty>());
                         break;
                 }
-                if(parent is ListView lv
-                    && lv.ItemsSource is ObservableCollection<ConfigurationProperty> l)
+                if(parent is ListView listView
+                    && listView.ItemsSource is ObservableCollection<ConfigurationProperty> l)
                 {
                     if(property.Value.Type.ToString() != (comboBox.SelectedItem as ComboBoxItem).Content.ToString())
                     {
-                        var i = lv.Items.IndexOf(property);
+                        var i = listView.Items.IndexOf(property);
 
                         DispatcherQueue.TryEnqueue(() =>
                         {

@@ -15,13 +15,11 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IDSC _dsc;
 
-
     [ObservableProperty]
     public partial string ModuleName { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string Type { get; set; } = string.Empty;
-
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
@@ -43,7 +41,6 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     [ObservableProperty]
     public partial string TestBannerText { get; set; } = string.Empty;
-
     public bool IsPropertiesEmpty => Properties.Count == 0;
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
     
@@ -57,7 +54,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         };
     }
 
-    public async void OnNavigatedTo(object parameter)
+    public void OnNavigatedTo(object parameter)
     {
         if(parameter is IDSCUnit u)
         {
@@ -87,12 +84,11 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
                 }
             }
         }
-        await Task.CompletedTask;
     }
 
     public void OnNavigatedFrom()
     {
-
+        // No-op
     }
 
     /// <summary>
