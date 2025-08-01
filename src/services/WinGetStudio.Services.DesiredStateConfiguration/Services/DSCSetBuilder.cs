@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -68,18 +65,7 @@ internal class DSCSetBuilder : IDSCSetBuilder
 
             foreach(var unit in dscSet.UnitsInternal)
             {
-                var u = new EditableDSCUnit
-                {
-                    Id = unit.Id,
-                    ModuleName = unit.ModuleName,
-                    Type = unit.Type,
-                    Intent = unit.Intent,
-                    Metadata = unit.Metadata,
-                    Settings = unit.Settings,
-                    Dependencies = unit.Dependencies,
-                    Description = unit.Description,
-                    RequiresElevation = unit.RequiresElevation,
-                };
+                var u = new EditableDSCUnit(unit);
                 _dscSet.InternalUnits.Add(u);
             }
 

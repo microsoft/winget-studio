@@ -2,26 +2,19 @@
 // Licensed under the MIT License.
 
 using System.Collections.ObjectModel;
-using System.ComponentModel.Design;
-using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
-using WinGetStudio.Services;
 using WinGetStudio.Common.Windows.FileDialog;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using Microsoft.Extensions.Logging;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
-using Microsoft.VisualBasic.FileIO;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
-using YamlDotNet.Core.Tokens;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 

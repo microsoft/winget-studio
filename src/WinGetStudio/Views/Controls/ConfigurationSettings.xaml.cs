@@ -2,15 +2,10 @@
 // Licensed under the MIT License.
 
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using WinGetStudio.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
-using Windows.Devices.Enumeration;
 
 namespace WinGetStudio.Views.Controls;
 public sealed partial class ConfigurationSettings : UserControl
@@ -77,9 +72,6 @@ public sealed partial class ConfigurationSettings : UserControl
                     break;
                 case "Bool":
                     l.Add(new(string.Empty, new BooleanValue(false)));
-                    break;
-                case "Arr":
-                    l.Add(new(string.Empty, new ArrayValue(new ObservableCollection<ConfigurationPropertyValueBase>())));
                     break;
                 case "Obj":
                     l.Add(new(string.Empty, new ObjectValue(new ObservableCollection<ConfigurationProperty>())));

@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
-using WinGetStudio.Views;
 using WinGetStudio.Views.ConfigurationFlow;
 
 namespace WinGetStudio.Services;

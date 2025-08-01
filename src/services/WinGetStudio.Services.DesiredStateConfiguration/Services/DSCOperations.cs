@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using WinGetStudio.Models;
@@ -15,7 +13,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using Windows.Foundation;
 using Windows.Storage.Streams;
-using Windows.UI.Input.Preview.Injection;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 

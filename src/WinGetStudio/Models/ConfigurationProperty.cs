@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Security.Cryptography.Pkcs;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WinGetStudio.Models;
 

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using WinGetStudio.Contracts.Services;
+﻿using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
 using WinGetStudio.ViewModels;

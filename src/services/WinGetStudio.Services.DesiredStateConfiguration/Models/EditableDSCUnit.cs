@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -40,6 +38,10 @@ public class EditableDSCUnit : IDSCUnit
         Dependencies = unit.Dependencies;
         Description = unit.Description;
         RequiresElevation = unit.RequiresElevation;
+    }
+
+    public EditableDSCUnit()
+    {
     }
 
     public bool RequiresElevation { get; set; } = false;

@@ -3,7 +3,6 @@
 
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.ViewModels;
-using Microsoft.Windows.AppLifecycle;
 using Windows.ApplicationModel.Activation;
 
 namespace WinGetStudio.Activation;

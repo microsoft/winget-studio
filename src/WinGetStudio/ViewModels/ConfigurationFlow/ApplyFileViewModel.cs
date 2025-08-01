@@ -10,7 +10,6 @@ using Microsoft.UI.Dispatching;
 using Microsoft.Management.Configuration;
 using System.Collections.ObjectModel;
 using WinGetStudio.Models;
-using System.Diagnostics;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 

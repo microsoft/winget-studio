@@ -1,10 +1,6 @@
-﻿using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
-using WinGetStudio.ViewModels.ConfigurationFlow;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.ViewModels;
 

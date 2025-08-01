@@ -20,7 +20,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
-using Windows.ApplicationModel.Activation;
 
 
 namespace WinGetStudio;
@@ -75,7 +74,6 @@ public partial class App : Application
             services.AddSingleton<IValidationPageService, ValidationPageService>();
             services.AddSingleton<IAppNavigationService, AppNavigationService>();
             services.AddSingleton<IConfigurationNavigationService, ConfigurationNavigationService>();
-            services.AddSingleton<IConfigurationGenerationService, ConfigurationGenerationService>();
             services.AddSingleton<IValidationNavigationService, ValidationNavigationService>();
 
             // Core Services

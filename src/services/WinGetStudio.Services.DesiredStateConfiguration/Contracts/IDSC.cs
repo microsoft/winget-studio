@@ -3,7 +3,6 @@
 
 using System.Threading.Tasks;
 using WinGetStudio.Models;
-using Microsoft.Management.Configuration;
 using Windows.Foundation;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;

@@ -1,10 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.Models;
-using WinGetStudio.ViewModels.ConfigurationFlow;
-using WinGetStudio.Views.ConfigurationFlow;
-using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using Windows.Storage;
 using Windows.System;
 

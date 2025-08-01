@@ -20,23 +20,28 @@ internal class DSCFactory : IDSCFactory
         _configurationProcessor = null;
     }
 
-    public async Task<IDSCSet> CreateSetAsync(EditableDSCSet set)
+    public async Task<IDSCSet> CreateSetAsync(IDSCSet set)
     {
         if(_configurationProcessor == null)
         {
             await CreateProcessorAsync();
         }
-        ConfigurationStaticFunctions config = new();
-        var configSet = config.CreateConfigurationSet();
-        configSet.Name = set.Name;
-        DSCSet dscSet = new(_configurationProcessor, configSet);
-        foreach (var unit in set.InternalUnits)
+
+        if (set is EditableDSCSet editableDSCSet)
         {
-            var u = CreateUnit(unit);
-            dscSet.UnitsInternal.Add(u as DSCUnit);
-            dscSet.ConfigSet.Units.Add((u as DSCUnit).ConfigUnit);
+            ConfigurationStaticFunctions config = new();
+            var configSet = config.CreateConfigurationSet();
+            configSet.Name = editableDSCSet.Name;
+            DSCSet newDSCSet = new(_configurationProcessor, configSet);
+            foreach (var unit in editableDSCSet.InternalUnits)
+            {
+                var u = CreateUnit(unit);
+                newDSCSet.UnitsInternal.Add(u as DSCUnit);
+                newDSCSet.ConfigSet.Units.Add((u as DSCUnit).ConfigUnit);
+            }
+            return newDSCSet;
         }
-        return dscSet;
+        return set;
     }
 
     public IDSCUnit CreateUnit(IDSCUnit unit)

@@ -16,7 +16,6 @@
     <Page.Resources>
         <converters:BoolNegationConverter x:Key="BoolNegationConverter" />
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible" />
-        <localConverters:DivideByConverter x:Key="DivideByConverter"/>
         <converters:BoolToObjectConverter x:Key="BoolToIntConverter" TrueValue="1" FalseValue="0"/>
         <converters:BoolToObjectConverter x:Key="BoolToIntNegationConverter" TrueValue="0" FalseValue="1"/>
     </Page.Resources>
@@ -95,7 +94,7 @@
                                    TargetControl="{x:Bind PropertiesGrid}"/>
 
             <!-- Properties -->
-            <Grid Grid.Column="0" x:Name="PropertiesGrid" MinWidth="300" MaxWidth="{Binding ElementName=MainGrid, Path=ActualWidth, Mode=OneWay, Converter={StaticResource DivideByConverter}, ConverterParameter=1.33}">
+            <Grid Grid.Column="0" x:Name="PropertiesGrid" MinWidth="300">
                 <usercontrols:ConfigurationSettings Properties="{x:Bind ViewModel.Properties, Mode=OneWay}"
                                                 Grid.Column="0"
                                                 HorizontalAlignment="Stretch"/>

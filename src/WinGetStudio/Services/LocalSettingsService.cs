@@ -5,8 +5,6 @@ using WinGetStudio.Helpers;
 using WinGetStudio.Models;
 
 using Microsoft.Extensions.Options;
-
-using Windows.ApplicationModel;
 using Windows.Storage;
 
 namespace WinGetStudio.Services;

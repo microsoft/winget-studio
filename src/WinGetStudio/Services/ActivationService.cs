@@ -3,7 +3,6 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.ApplicationModel.Activation;
 
 namespace WinGetStudio.Services;
 

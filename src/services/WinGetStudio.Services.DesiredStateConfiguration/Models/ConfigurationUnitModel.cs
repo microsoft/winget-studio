@@ -1,18 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using Windows.ApplicationModel.VoiceCommands;
 using Windows.Foundation.Collections;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace WinGetStudio.Models;
 public class ConfigurationUnitModel
@@ -20,10 +13,15 @@ public class ConfigurationUnitModel
     public string Type { get; set; } = string.Empty;
     public ValueSet Settings { get; set; } = new();
     public bool ElevatedRequired { get; set; } = false;
-
     public bool TestResult { get; set; } = false;
 
-    /// <summary> Converts the ConfigurationUnitModel to a YAML string.</summary>
+    /// <summary>
+    /// Converts the current object to its YAML representation.
+    /// </summary>
+    /// <remarks>The method serializes the object's properties and settings into a YAML-formatted string using
+    /// a camel case naming convention. The resulting YAML string can be used for configuration or data exchange
+    /// purposes.</remarks>
+    /// <returns>A YAML-formatted string representing the current object.</returns>
     public string ToYaml()
     {
 
@@ -50,53 +48,73 @@ public class ConfigurationUnitModel
         return yaml;
     }
 
-    /// <summary> Converts a YAML string to a ConfigurationUnitModel.</summary>
-    public void FromYaml(string yaml)
+    /// <summary>
+    /// Attempts to load and parse the provided YAML string into the current object's properties.
+    /// </summary>
+    /// <remarks>This method deserializes the provided YAML string into a dictionary structure and extracts
+    /// specific properties to populate the object's state. If the YAML structure does not match the expected format, or
+    /// if an error occurs during deserialization, the method will fail silently and return <see
+    /// langword="false"/>.</remarks>
+    /// <param name="yaml">The YAML string to be deserialized and processed. Cannot be null or empty.</param>
+    /// <returns><see langword="true"/> if the YAML string was successfully parsed and the object's properties were populated;
+    /// otherwise, <see langword="false"/> if an error occurred during parsing or the YAML structure was invalid.</returns>
+    public bool TryLoad(string yaml)
     {
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
         var resource = deserializer.Deserialize<Dictionary<string, object>>(yaml);
-        try
+        if (resource != null
+            && resource.ContainsKey("properties")
+            && resource["properties"] is List<object> resourceList
+            && resourceList.Count > 0
+            && resourceList[0] is Dictionary<object, object> dict)
         {
-            var dict = ((resource["properties"] as Dictionary<object, object>)["resources"] as List<object>)[0] as Dictionary<object, object>;
             Type = dict["resource"] as string;
-
 
             Settings = new ValueSet();
 
-            FromYamlHelper(Settings, dict["settings"] as Dictionary<object, object>);
+            TryLoadHelper(Settings, dict["settings"] as Dictionary<object, object>);
+            return true;
         }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error deserializing YAML: {ex.Message}");
-        }
+        return false;
     }
 
-    /// <summary> Recursive helper function for FromYaml. </summary>
-    private void FromYamlHelper(ValueSet settings, Dictionary<object, object> dict)
+    /// <summary>
+    /// 
+    /// <summary>
+    /// Recursively populates a <see cref="ValueSet"/> with key-value pairs from a deserialized YAML dictionary.
+    /// </summary>
+    /// <param name="settings">The <see cref="ValueSet"/> to populate with values from the dictionary.</param>
+    /// <param name="dict">The dictionary containing key-value pairs parsed from YAML.</param>
+    private void TryLoadHelper(ValueSet settings, Dictionary<object, object> dict)
     {
         foreach (var kvp in dict)
         {
-            if (kvp.Value is string)
+            if (kvp.Key is string)
             {
-                object result = kvp.Value as string;
-                if (bool.TryParse(kvp.Value as string, out bool b))
+                if (kvp.Value is string)
                 {
-                    result = b;
-                }
-                else if (double.TryParse(kvp.Value as string, NumberStyles.Float, CultureInfo.InvariantCulture, out double d))
-                {
-                    result = d;
-                }
+                    // COM API returns strings for all values, so we need to convert them to appropriate types
+                    // Types will always be string, bool, number, or nested dictionary
+                    object result = kvp.Value as string;
+                    if (bool.TryParse(kvp.Value as string, out bool b))
+                    {
+                        result = b;
+                    }
+                    else if (double.TryParse(kvp.Value as string, NumberStyles.Float, CultureInfo.InvariantCulture, out double d))
+                    {
+                        result = d;
+                    }
 
-                settings[kvp.Key as string] = result;
-            }
-            else if (kvp.Value is Dictionary<object, object> subDict)
-            {
-                var subSettings = new ValueSet();
-                FromYamlHelper(subSettings, subDict);
-                settings[kvp.Key as string] = subSettings;
+                    settings[kvp.Key as string] = result;
+                }
+                else if (kvp.Value is Dictionary<object, object> subDict)
+                {
+                    var subSettings = new ValueSet();
+                    TryLoadHelper(subSettings, subDict);
+                    settings[kvp.Key as string] = subSettings;
+                }
             }
         }
     }

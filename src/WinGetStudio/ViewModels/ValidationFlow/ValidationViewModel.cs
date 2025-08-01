@@ -5,7 +5,6 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using Windows.Foundation.Collections;
 
 namespace WinGetStudio.ViewModels;
@@ -152,14 +151,20 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private async Task OnConvertYamlToUIAsync()
     {
         var unit = CreateConfigurationUnitModel();
-        unit.FromYaml(RawData);
-        Title = unit.Type;
-        ModuleName = Title.Split("/").First();
-        Type = Title.Split("/").Last();
+        if (unit.TryLoad(RawData))
+        {
+            Title = unit.Type;
+            ModuleName = Title.Split("/").First();
+            Type = Title.Split("/").Last();
 
-        Properties.Clear();
+            Properties.Clear();
 
-        ConvertYamlToUIHelper(Properties, unit.Settings);
+            ConvertYamlToUIHelper(Properties, unit.Settings);
+        }
+        else
+        {
+            //TODO implement error handling
+        }
     }
 
     /// <summary>
