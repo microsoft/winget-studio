@@ -1,6 +1,9 @@
-﻿using WinGetStudio.Helpers;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License
 
-using Windows.UI.ViewManagement;
+using WinGetStudio.Helpers;
+
+using WinGetStudio.Services;
 
 namespace WinGetStudio;
 
@@ -14,9 +17,10 @@ public sealed partial class MainWindow : WindowEx
     {
         InitializeComponent();
 
+        var appInfoService = App.GetService<IAppInfoService>();
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/WindowIcon.ico"));
         Content = null;
-        Title = "AppDisplayName".GetLocalized();
+        Title = appInfoService.GetAppNameLocalized();
 
         // Theme change code picked from https://github.com/microsoft/WinUI-Gallery/pull/1239
         dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();

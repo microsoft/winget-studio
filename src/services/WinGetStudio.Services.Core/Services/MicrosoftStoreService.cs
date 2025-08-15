@@ -5,10 +5,10 @@ using System;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using WinGetStudio.Services.Core.Contracts;
 using Microsoft.Extensions.Logging;
 using Windows.ApplicationModel.Store.Preview.InstallControl;
 using Windows.Foundation;
+using WinGetStudio.Services.Core.Contracts;
 
 namespace WinGetStudio.Services.Core.Services;
 

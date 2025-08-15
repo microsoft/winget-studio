@@ -1,8 +1,9 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System.Text;
-
-using WinGetStudio.Core.Contracts.Services;
-
 using Newtonsoft.Json;
+using WinGetStudio.Core.Contracts.Services;
 
 namespace WinGetStudio.Core.Services;
 

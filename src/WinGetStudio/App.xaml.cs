@@ -75,6 +75,7 @@ public partial class App : Application
             services.AddSingleton<IAppNavigationService, AppNavigationService>();
             services.AddSingleton<IConfigurationNavigationService, ConfigurationNavigationService>();
             services.AddSingleton<IValidationNavigationService, ValidationNavigationService>();
+            services.AddSingleton<IAppInfoService, AppInfoService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();

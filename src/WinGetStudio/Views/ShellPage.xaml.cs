@@ -1,18 +1,18 @@
-﻿using WinGetStudio.Contracts.Services;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
+using WinGetStudio.Services;
 using WinGetStudio.ViewModels;
-
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
-
-using Windows.System;
 
 namespace WinGetStudio.Views;
 
 public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
+    private readonly IAppInfoService _appInfoService;
+
     public ShellViewModel ViewModel
     {
         get;
@@ -20,6 +20,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 
     public ShellPage(ShellViewModel viewModel)
     {
+        _appInfoService = App.GetService<IAppInfoService>();
         ViewModel = viewModel;
         InitializeComponent();
 
@@ -32,7 +33,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         App.MainWindow.ExtendsContentIntoTitleBar = true;
         App.MainWindow.SetTitleBar(AppTitleBar);
         App.MainWindow.Activated += MainWindow_Activated;
-        AppTitleBarText.Text = "AppDisplayName".GetLocalized();
+        AppTitleBarText.Text = _appInfoService.GetAppNameLocalized();
     }
 
     private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
