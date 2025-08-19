@@ -1,6 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Reflection;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
+using Windows.ApplicationModel;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Helpers;
 using WinGetStudio.Services;

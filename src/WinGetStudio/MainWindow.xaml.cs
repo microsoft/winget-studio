@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License
 
+using Windows.UI.ViewManagement;
 using WinGetStudio.Helpers;
 
 using WinGetStudio.Services;

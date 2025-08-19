@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using WinGetStudio.Helpers;
+
 namespace WinGetStudio.Services;
 
 internal class AppInfoService : IAppInfoService

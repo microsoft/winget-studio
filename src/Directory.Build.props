@@ -12,8 +12,8 @@
     <AnalysisMode>Recommended</AnalysisMode>
     <PlatformTarget>$(Platform)</PlatformTarget>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-    <Configurations>Debug;Release;Debug_FailFast</Configurations>
-    <WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
+    <Configurations>Debug;Release</Configurations>
+    <WindowsSdkPackageVersion>10.0.26100.38</WindowsSdkPackageVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
