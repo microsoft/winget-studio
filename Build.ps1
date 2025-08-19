@@ -47,17 +47,12 @@ $env:msix_version = build\Scripts\CreateBuildInfo.ps1 -Version $Version -IsAzure
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')
 
 $msbuildPath = &"${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
-if ($IsAzurePipelineBuild) {
-  $nugetPath = "nuget.exe";
-} else {
-  $nugetPath = (Join-Path $env:Build_RootDirectory "build\NugetWrapper.cmd")
-}
 
 $ErrorActionPreference = "Stop"
 
 # Install NuGet Cred Provider
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-Expression "& { $(irm https://aka.ms/install-artifacts-credprovider.ps1) } -AddNetfx"
+Invoke-Expression "& { $(Invoke-RestMethod https://aka.ms/install-artifacts-credprovider.ps1) } -AddNetfx"
 
 . build\Scripts\CertSignAndInstall.ps1
 

@@ -1,0 +1,212 @@
+trigger:
+- main
+- release
+
+parameters:
+- name: SignOutput
+  type: boolean
+  default: False
+- name: Platforms
+  type: object
+  default:
+  - x86
+  - x64
+  - arm64
+- name: Configurations
+  type: object
+  default:
+  - Debug
+  - Release
+
+variables:
+ # MSIXVersion's second part should always be odd to account for stub app's version
+  MSIXVersion: '0.101'
+  solution: '**/WinGetStudio.sln'
+  appxPackageDir: 'AppxPackages'
+  testOutputArtifactDir: 'TestResults'
+
+resources:
+  repositories:
+  - repository: templates_onebranch
+    type: git
+    name: OneBranch.Pipelines/GovernedTemplates
+    ref: refs/heads/main
+  - repository: m365Pipelines
+    type: git
+    name: 1ESPipelineTemplates/M365GPT
+    ref: refs/tags/release
+
+extends:
+  template: v1/M365.Official.PipelineTemplate.yml@m365Pipelines
+  parameters:
+    sdl:
+      binskim:
+        break: false
+        scanOutputDirectoryOnly: true
+      roslyn:
+        enabled: true
+      arrow:
+        serviceConnection: WinGet Studio Build VM Generation
+      baseline:
+        baselineFile: $(Build.SourcesDirectory)\guardian\SDL\.gdnbaselines
+    pool:
+      name: Azure-Pipelines-1ESPT-ExDShared
+      image: windows-2022
+      os: windows
+    customBuildTags:
+    - ES365AIMigrationTooling
+    stages:
+    - stage: Build_WinGetStudio
+      dependsOn: []
+      jobs:
+      - ${{ each configuration in parameters.Configurations }}:
+        - ${{ each platform in parameters.Platforms }}:
+          - job: Build_${{ platform }}_${{ configuration }}
+            timeoutInMinutes: 120
+            steps:
+            - task: NuGetToolInstaller@1
+
+            - task: NuGetAuthenticate@1
+
+            - task: PowerShell@2
+              displayName: Build WinGet Studio
+              retryCountOnTaskFailure: 2
+              inputs:
+                filePath: 'Build.ps1'
+                arguments: -Platform "${{ platform }}" -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "fullMsix" -AzureBuildingBranch "$(BuildingBranch)" -IsAzurePipelineBuild
+
+            - task: PowerShell@2
+              displayName: Move BinLog to output directory
+              inputs:
+                targetType: inline
+                script: >-
+                  Move-Item -Path $(Build.SourcesDirectory)\WinGetStudio.${{ platform }}.${{ configuration }}.binlog -Destination $(Build.SourcesDirectory)\src\bin -Force
+                pwsh: true
+
+            - template: ./.pipelines/templates/EsrpSigning-Steps.yml@self
+              parameters:
+                displayName: Submit *.msix to ESRP for code signing
+                inputs:
+                  FolderPath: '$(appxPackageDir)\${{ configuration }}'
+                  Pattern: '*.msix'
+                  UseMinimatch: true
+                  signConfigType: inlineSignParams
+                  inlineOperation: >-
+                    [
+                      {
+                        "keycode": "CP-230012",
+                        "operationSetCode": "SigntoolvNextSign",
+                        "parameters": [
+                          {
+                            "parameterName": "OpusName",
+                            "parameterValue": "Microsoft"
+                          },
+                          {
+                            "parameterName": "OpusInfo",
+                            "parameterValue": "http://www.microsoft.com"
+                          },
+                          {
+                            "parameterName": "PageHash",
+                            "parameterValue": "/NPH"
+                          },
+                          {
+                            "parameterName": "FileDigest",
+                            "parameterValue": "/fd sha256"
+                          },
+                          {
+                            "parameterName": "TimeStamp",
+                            "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+                          }
+                        ],
+                        "toolName": "signtool.exe",
+                        "toolVersion": "6.2.9304.0"
+                      }
+                    ]
+
+            templateContext:
+              outputs:
+              - output: pipelineArtifact
+                displayName: 'Publish Artifact: Binaries'
+                artifactName: Binaries_${{ platform }}_${{ configuration }}
+                targetPath: $(Build.SourcesDirectory)\src\bin
+                sbomPackageName: wingetstudio.binaries
+                sbomPackageVersion: $(MSIXVersion)
+              - output: pipelineArtifact
+                displayName: Publish MSIX Artifact
+                artifactName: msix_${{ platform }}_${{ configuration }}
+                targetPath: $(appxPackageDir)\${{ configuration }}
+                sbomPackageName: wingetstudio.msixpackage
+                sbomPackageVersion: $(MSIXVersion)
+
+    - stage: Build_MsixBundle
+      dependsOn: [Build_WinGetStudio]
+      condition: in(dependencies.Build_WinGetStudio.result, 'Succeeded')
+      jobs:
+      - job: Build_MsixBundles
+        steps:
+        - ${{ each configuration in parameters.Configurations }}:
+          - ${{ each platform in parameters.Platforms }}:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                buildType: 'current'
+                artifactName: msix_${{ platform }}_${{ configuration }}
+                targetPath: $(appxPackageDir)\${{ configuration }}
+
+          - task: PowerShell@2
+            displayName: Build MsixBundle
+            inputs:
+              filePath: 'Build.ps1'
+              arguments: -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "msixbundle" -IsAzurePipelineBuild
+
+          - template: ./.pipelines/templates/EsrpSigning-Steps.yml@self
+            parameters:
+              displayName: Submit *.msixbundle to ESRP for code signing
+              inputs:
+                FolderPath: 'AppxBundles\${{ configuration }}'
+                Pattern: '*.msixbundle'
+                UseMinimatch: true
+                signConfigType: inlineSignParams
+                inlineOperation: |
+                  [
+                    {
+                      "keycode": "CP-230012",
+                      "operationSetCode": "SigntoolvNextSign",
+                      "parameters": [
+                        {
+                          "parameterName": "OpusName",
+                          "parameterValue": "Microsoft"
+                        },
+                        {
+                          "parameterName": "OpusInfo",
+                          "parameterValue": "http://www.microsoft.com"
+                        },
+                        {
+                          "parameterName": "PageHash",
+                          "parameterValue": "/NPH"
+                        },
+                        {
+                          "parameterName": "FileDigest",
+                          "parameterValue": "/fd sha256"
+                        },
+                        {
+                          "parameterName": "TimeStamp",
+                          "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+                        }
+                      ],
+                      "toolName": "signtool.exe",
+                      "toolVersion": "6.2.9304.0"
+                    }
+                  ]
+
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            displayName: Publish MSIX Bundle Artifacts
+            condition: ${{ containsValue(parameters.Configurations, 'release') }}
+            artifactName: MsixBundle_Release
+            targetPath: AppxBundles\Release
+          - output: pipelineArtifact
+            displayName: Publish MSIX Bundle Artifacts
+            condition: ${{ containsValue(parameters.Configurations, 'debug') }}
+            artifactName: MsixBundle_Debug
+            targetPath: AppxBundles\Debug
