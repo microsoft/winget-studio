@@ -8,13 +8,14 @@ where:
 configuration:
   resourceManagementConfiguration:
     eventResponderTasks:
-    - description: Add Needs-Attention to new issues
+    - description: Add Needs-Triage to new issues
       if:
       - payloadType: Issues
       - isAction:
           action: Opened
       then:
       - addLabel:
-          label: Needs-Attention
+          label: Needs-Triage
 onFailure: 
+
 onSuccess: 
