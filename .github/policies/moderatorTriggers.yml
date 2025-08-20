@@ -1,0 +1,86 @@
+id: moderatorTriggers
+name: GitOps.PullRequestIssueManagement
+description: GitOps.PullRequestIssueManagement primitive
+owner: 
+resource: repository
+disabled: false
+where: 
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+    #
+    # /dupe
+    - description: >-
+          Example triggers:
+          * /dup of #000
+          * /dupe of #000
+          * Duplicate of #000 (preferred)
+          * Duplicate of https://github.com/microsoft/winget-studio/issues/000
+      if:
+      - payloadType: Issue_Comment
+      - commentContains:
+          pattern: '(\/)?[Dd]up(licate|e)?(\s+of)?\s+(\#[\d]+|https)'
+          isRegex: True
+      - or:
+        - activitySenderHasAssociation:
+            association: Owner
+        - activitySenderHasAssociation:
+            association: Member
+      then:
+      - addReply:
+          reply: >- 
+              We've identified this as a duplicate of another one that already exists. This 
+              specific instance is being closed in favor of tracking the concern over on the the 
+              linked issue. Please add your 👍 to the other issue to raise its priority. Thanks 
+              for your report!
+      - closeIssue
+      - removeLabel:
+          label: Needs-Attention
+      - addLabel:
+          label: duplicate
+    #
+    # /needinfo
+    - description: >-
+          Trigger:
+          * /needinfo
+      if:
+      - payloadType: Issue_Comment
+      - commentContains:
+          pattern: '\/needinfo'
+          isRegex: True
+      - or:
+        - activitySenderHasAssociation:
+            association: Owner
+        - activitySenderHasAssociation:
+            association: Member
+      then:
+      - removeLabel:
+          label: Needs-Attention
+      - addLabel:
+          label: Needs-Author-Feedback
+    #
+    # /loc
+    - description: >-
+          Trigger:
+          * /loc
+      if:
+      - payloadType: Issue_Comment
+      - commentContains:
+          pattern: '\/loc\b'
+          isRegex: True
+      - or:
+        - activitySenderHasAssociation:
+            association: Owner
+        - activitySenderHasAssociation:
+            association: Member
+      then:
+      - removeLabel:
+          label: Needs-Triage
+      - addLabel:
+          label: Localization
+      - addReply:
+          reply: >-
+              Hi! Thanks for making us aware of the problem. We raised the issue with our internal 
+              localization team.
+onFailure: 
+onSuccess: 
