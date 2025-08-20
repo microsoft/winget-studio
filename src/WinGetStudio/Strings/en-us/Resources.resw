@@ -454,12 +454,6 @@
   <data name="MainPage_ValidateCard.Header" xml:space="preserve">
     <value>Validate Resource</value>
   </data>
-  <data name="MainPage_CopilotCard.Description" xml:space="preserve">
-    <value>Launch Github Copilot to generate a configuration file</value>
-  </data>
-  <data name="MainPage_CopilotCard.Header" xml:space="preserve">
-    <value>Generate Configuration</value>
-  </data>
   <data name="ValidationPage_ExportButton.Content" xml:space="preserve">
     <value>Export</value>
   </data>

@@ -25,11 +25,5 @@
             x:Uid="MainPage_ValidateCard"
             IsClickEnabled="True"
             Grid.Column="1"/>
-
-        <ct:SettingsCard
-            Command="{x:Bind ViewModel.LaunchAICommand}"
-            x:Uid="MainPage_CopilotCard"
-            IsClickEnabled="True"
-            Grid.Column="2"/>
     </Grid>
 </Page>

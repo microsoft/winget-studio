@@ -33,10 +33,4 @@ public partial class MainViewModel : ObservableRecipient
         _navigationService.NavigateTo<ValidationFrameViewModel>();
         await Task.CompletedTask;
     }
-
-    [RelayCommand]
-    private async Task OnLaunchAIAsync()
-    {
-        await Launcher.LaunchUriAsync(new Uri("vscode://GitHub.Copilot-Chat/chat?mode=agent&referrer=wingetstudio"));
-    }
 }
