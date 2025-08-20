@@ -1,10 +1,10 @@
-# Windows Package Manager Studio Contributor's Guide
+# WinGet Studio Contributor's Guide
 
 Below is our guidance for how to report issues, propose new features, and submit contributions via Pull Requests (PRs).
 
 ## Open Development Workflow
 
-The Windows Package Manager Studio team is VERY active in this GitHub Repository. In fact, we live in it all day long and carry out all our development in the open!
+The WinGet Studio team is VERY active in this GitHub Repository. In fact, we live in it all day long and carry out all our development in the open!
 
 When the team finds issues we file them in the repository. When we propose new ideas or think-up new features, we file new feature requests. When we work on fixes or features, we create branches and work on those improvements. And when PRs are reviewed, we review in public - including all the good, the bad, and the ugly parts.
 
