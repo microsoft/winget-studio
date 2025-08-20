@@ -42,7 +42,6 @@ extends:
       fetchTags: false
     stages:
     - stage: Build_WinGetStudio
-    
       dependsOn: []
       jobs:
       - ${{ each configuration in parameters.Configurations }}:
@@ -94,6 +93,10 @@ extends:
       condition: in(dependencies.Build_WinGetStudio.result, 'Succeeded')
       jobs:
       - job: Build_MsixBundles
+        pool:
+          type: windows
+        variables:
+          ob_outputDirectory: $(Build.ArtifactStagingDirectory)/winget-studio
         steps:
         - ${{ each configuration in parameters.Configurations }}:
           - ${{ each platform in parameters.Platforms }}:
