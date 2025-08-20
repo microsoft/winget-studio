@@ -24,6 +24,7 @@ variables:
   solution: '**/WinGetStudio.sln'
   appxPackageDir: 'AppxPackages'
   testOutputArtifactDir: 'TestResults'
+  WindowsContainerImage: 'onebranch.azurecr.io/windows/ltsc2019/vse2022:latest'
 
 resources:
   repositories:
@@ -37,7 +38,6 @@ extends:
   parameters:
     platform:
       name: 'windows_undocked'
-
     git:
       fetchTags: false
     stages:
@@ -50,6 +50,8 @@ extends:
             pool:
               type: windows
             variables:
+              runCodesignValidationInjection: ${{ false }}
+              skipComponentGovernanceDetection: ${{ true }}
               ob_outputDirectory: $(Build.ArtifactStagingDirectory)/winget-studio
             timeoutInMinutes: 120
             steps:
@@ -96,6 +98,8 @@ extends:
         pool:
           type: windows
         variables:
+          runCodesignValidationInjection: ${{ false }}
+          skipComponentGovernanceDetection: ${{ true }}
           ob_outputDirectory: $(Build.ArtifactStagingDirectory)/winget-studio
         steps:
         - ${{ each configuration in parameters.Configurations }}:
