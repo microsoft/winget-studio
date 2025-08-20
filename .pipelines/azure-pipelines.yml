@@ -27,41 +27,31 @@ variables:
 
 resources:
   repositories:
-  - repository: templates_onebranch
+  - repository: templates
     type: git
     name: OneBranch.Pipelines/GovernedTemplates
     ref: refs/heads/main
-  - repository: m365Pipelines
-    type: git
-    name: 1ESPipelineTemplates/M365GPT
-    ref: refs/tags/release
 
 extends:
-  template: v1/M365.Official.PipelineTemplate.yml@m365Pipelines
+  template: v2/Microsoft.Official.yml@templates
   parameters:
-    sdl:
-      binskim:
-        break: false
-        scanOutputDirectoryOnly: true
-      roslyn:
-        enabled: true
-      arrow:
-        serviceConnection: WinGet Studio Build VM Generation
-      baseline:
-        baselineFile: $(Build.SourcesDirectory)\guardian\SDL\.gdnbaselines
-    pool:
-      name: Azure-Pipelines-1ESPT-ExDShared
-      image: windows-2022
-      os: windows
-    customBuildTags:
-    - ES365AIMigrationTooling
+    platform:
+      name: 'windows_undocked'
+
+    git:
+      fetchTags: false
     stages:
     - stage: Build_WinGetStudio
+    
       dependsOn: []
       jobs:
       - ${{ each configuration in parameters.Configurations }}:
         - ${{ each platform in parameters.Platforms }}:
           - job: Build_${{ platform }}_${{ configuration }}
+            pool:
+              type: windows
+            variables:
+              ob_outputDirectory: $(Build.ArtifactStagingDirectory)/winget-studio
             timeoutInMinutes: 120
             steps:
             - task: NuGetToolInstaller@1
@@ -80,63 +70,24 @@ extends:
               inputs:
                 targetType: inline
                 script: >-
-                  Move-Item -Path $(Build.SourcesDirectory)\WinGetStudio.${{ platform }}.${{ configuration }}.binlog -Destination $(Build.SourcesDirectory)\src\bin -Force
+                  Move-Item -Path $(Build.SourcesDirectory)\WinGetStudio.${{ platform }}.${{ configuration }}.binlog -Destination $(ob_outputDirectory) -Force
                 pwsh: true
 
-            - template: ./.pipelines/templates/EsrpSigning-Steps.yml@self
-              parameters:
-                displayName: Submit *.msix to ESRP for code signing
-                inputs:
-                  FolderPath: '$(appxPackageDir)\${{ configuration }}'
-                  Pattern: '*.msix'
-                  UseMinimatch: true
-                  signConfigType: inlineSignParams
-                  inlineOperation: >-
-                    [
-                      {
-                        "keycode": "CP-230012",
-                        "operationSetCode": "SigntoolvNextSign",
-                        "parameters": [
-                          {
-                            "parameterName": "OpusName",
-                            "parameterValue": "Microsoft"
-                          },
-                          {
-                            "parameterName": "OpusInfo",
-                            "parameterValue": "http://www.microsoft.com"
-                          },
-                          {
-                            "parameterName": "PageHash",
-                            "parameterValue": "/NPH"
-                          },
-                          {
-                            "parameterName": "FileDigest",
-                            "parameterValue": "/fd sha256"
-                          },
-                          {
-                            "parameterName": "TimeStamp",
-                            "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
-                          }
-                        ],
-                        "toolName": "signtool.exe",
-                        "toolVersion": "6.2.9304.0"
-                      }
-                    ]
+            - task: CopyFiles@2
+              displayName: Copy files to be published to staging directory
+              inputs:
+                targetFolder: $(ob_outputDirectory)
+                contents: |
+                  $(Build.SourcesDirectory)\AppxPackages
 
-            templateContext:
-              outputs:
-              - output: pipelineArtifact
-                displayName: 'Publish Artifact: Binaries'
-                artifactName: Binaries_${{ platform }}_${{ configuration }}
-                targetPath: $(Build.SourcesDirectory)\src\bin
-                sbomPackageName: wingetstudio.binaries
-                sbomPackageVersion: $(MSIXVersion)
-              - output: pipelineArtifact
-                displayName: Publish MSIX Artifact
-                artifactName: msix_${{ platform }}_${{ configuration }}
-                targetPath: $(appxPackageDir)\${{ configuration }}
-                sbomPackageName: wingetstudio.msixpackage
-                sbomPackageVersion: $(MSIXVersion)
+            - task: onebranch.pipeline.signing@1
+              displayName: 'CodeSigning'
+              inputs:
+                command: 'sign'
+                cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
+                search_root: 'AppxPackages'
+                files_to_sign: |
+                    *.msix;
 
     - stage: Build_MsixBundle
       dependsOn: [Build_WinGetStudio]
@@ -158,55 +109,13 @@ extends:
               filePath: 'Build.ps1'
               arguments: -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "msixbundle" -IsAzurePipelineBuild
 
-          - template: ./.pipelines/templates/EsrpSigning-Steps.yml@self
-            parameters:
-              displayName: Submit *.msixbundle to ESRP for code signing
-              inputs:
-                FolderPath: 'AppxBundles\${{ configuration }}'
-                Pattern: '*.msixbundle'
-                UseMinimatch: true
-                signConfigType: inlineSignParams
-                inlineOperation: |
-                  [
-                    {
-                      "keycode": "CP-230012",
-                      "operationSetCode": "SigntoolvNextSign",
-                      "parameters": [
-                        {
-                          "parameterName": "OpusName",
-                          "parameterValue": "Microsoft"
-                        },
-                        {
-                          "parameterName": "OpusInfo",
-                          "parameterValue": "http://www.microsoft.com"
-                        },
-                        {
-                          "parameterName": "PageHash",
-                          "parameterValue": "/NPH"
-                        },
-                        {
-                          "parameterName": "FileDigest",
-                          "parameterValue": "/fd sha256"
-                        },
-                        {
-                          "parameterName": "TimeStamp",
-                          "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
-                        }
-                      ],
-                      "toolName": "signtool.exe",
-                      "toolVersion": "6.2.9304.0"
-                    }
-                  ]
-
-        templateContext:
-          outputs:
-          - output: pipelineArtifact
-            displayName: Publish MSIX Bundle Artifacts
-            condition: ${{ containsValue(parameters.Configurations, 'release') }}
-            artifactName: MsixBundle_Release
-            targetPath: AppxBundles\Release
-          - output: pipelineArtifact
-            displayName: Publish MSIX Bundle Artifacts
-            condition: ${{ containsValue(parameters.Configurations, 'debug') }}
-            artifactName: MsixBundle_Debug
-            targetPath: AppxBundles\Debug
+          - task: onebranch.pipeline.signing@1
+            displayName: 'CodeSigning'
+            inputs:
+              command: 'sign'
+              cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
+              search_root: 'AppxBundles'
+              files_to_sign: |
+                  *.msixbundle;
+          
+          
