@@ -79,9 +79,15 @@ extends:
               inputs:
                 command: 'sign'
                 cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-                search_root: $(ob_outputDirectory)\AppxPackages
+                search_root: $(ob_outputDirectory)\AppxPackages\${{ configuration }}
                 files_to_sign: |
                     *.msix;
+
+            - task: 1ES.PublishPipelineArtifact@1
+              inputs:
+                targetPath: $(ob_outputDirectory)\AppxPackages\${{ configuration }}
+                artifactName: msix_${{ platform }}_${{ configuration }}
+                displayName: Publish MSIX
 
     - stage: Build_MsixBundle
       dependsOn: [Build_WinGetStudio]
@@ -96,6 +102,13 @@ extends:
           ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
         steps:
         - ${{ each configuration in parameters.Configurations }}:
+          - ${{ each platform in parameters.Platforms }}:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                buildType: 'current'
+                artifactName: msix_${{ platform }}_${{ configuration }}
+                targetPath: $(ob_outputDirectory)\AppxPackages\${{ configuration }}
+
           - task: PowerShell@2
             displayName: Build MsixBundle
             inputs:
@@ -107,7 +120,7 @@ extends:
             inputs:
               command: 'sign'
               cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-              search_root: $(ob_outputDirectory)\AppxBundles
+              search_root: $(ob_outputDirectory)\AppxBundles\${{ configuration }}
               files_to_sign: |
                   *.msixbundle;
           
