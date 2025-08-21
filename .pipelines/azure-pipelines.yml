@@ -75,14 +75,6 @@ extends:
                   Move-Item -Path $(Build.SourcesDirectory)\WinGetStudio.${{ platform }}.${{ configuration }}.binlog -Destination $(ob_outputDirectory) -Force
                 pwsh: true
 
-            - task: onebranch.pipeline.signing@1
-              displayName: 'CodeSigning'
-              inputs:
-                command: 'sign'
-                files_to_sign: '**/*.msix'
-                cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-                search_root: '$(ob_outputDirectory)'
-
     - stage: Build_MsixBundle
       dependsOn: [Build_WinGetStudio]
       condition: in(dependencies.Build_WinGetStudio.result, 'Succeeded')
@@ -116,6 +108,6 @@ extends:
               command: 'sign'
               files_to_sign: '**/*.msixbundle'
               cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-              search_root: '$(ob_outputDirectory)\AppxBundles'
+              search_root: '$(ob_outputDirectory)'
           
           
