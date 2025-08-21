@@ -79,10 +79,9 @@ extends:
               displayName: 'CodeSigning'
               inputs:
                 command: 'sign'
+                files_to_sign: '**/*.msix'
                 cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-                search_root: $(ob_outputDirectory)\AppxPackages\${{ configuration }}
-                files_to_sign: |
-                    *.msix;
+                search_root: '$(ob_outputDirectory)'
 
     - stage: Build_MsixBundle
       dependsOn: [Build_WinGetStudio]
@@ -115,9 +114,8 @@ extends:
             displayName: 'CodeSigning'
             inputs:
               command: 'sign'
+              files_to_sign: '**/*.msixbundle'
               cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-              search_root: $(ob_outputDirectory)\AppxBundles\${{ configuration }}
-              files_to_sign: |
-                  *.msixbundle;
+              search_root: '$(ob_outputDirectory)\AppxBundles'
           
           
