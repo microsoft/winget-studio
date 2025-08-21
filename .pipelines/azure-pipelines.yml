@@ -64,14 +64,14 @@ extends:
               retryCountOnTaskFailure: 2
               inputs:
                 filePath: 'Build.ps1'
-                arguments: -Platform "${{ platform }}" -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "fullMsix" -AzureBuildingBranch "$(BuildingBranch)" -IsAzurePipelineBuild -OutputDir "$(ob_outputDirectory)"
+                arguments: -Platform "${{ platform }}" -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "msix" -AzureBuildingBranch "$(BuildingBranch)" -IsAzurePipelineBuild -OutputDir "$(ob_outputDirectory)"
 
             - task: PowerShell@2
               displayName: Move BinLog to output directory
               inputs:
                 targetType: inline
                 script: >-
-                  dir $(Build.SourcesDirectory);
+                  dir $(Build.SourcesDirectory) -Recurse;
                   Move-Item -Path $(Build.SourcesDirectory)\WinGetStudio.${{ platform }}.${{ configuration }}.binlog -Destination $(ob_outputDirectory) -Force
                 pwsh: true
 
@@ -115,7 +115,7 @@ extends:
             displayName: Build MsixBundle
             inputs:
               filePath: 'Build.ps1'
-              arguments: -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "msixbundle" -IsAzurePipelineBuild
+              arguments: -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "msixbundle" -IsAzurePipelineBuild -OutputDir "$(ob_outputDirectory)"
 
           - task: onebranch.pipeline.signing@1
             displayName: 'CodeSigning'
