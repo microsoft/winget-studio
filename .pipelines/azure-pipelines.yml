@@ -96,7 +96,6 @@ extends:
           ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
         steps:
         - ${{ each configuration in parameters.Configurations }}:
-          - ${{ each platform in parameters.Platforms }}:
           - task: PowerShell@2
             displayName: Build MsixBundle
             inputs:
