@@ -83,11 +83,11 @@ extends:
                 files_to_sign: |
                     *.msix;
 
-            - task: 1ES.PublishPipelineArtifact@1
+            - task: PublishPipelineArtifact@1
+              displayName: Publish MSIX
               inputs:
                 targetPath: $(ob_outputDirectory)\AppxPackages\${{ configuration }}
                 artifactName: msix_${{ platform }}_${{ configuration }}
-                displayName: Publish MSIX
 
     - stage: Build_MsixBundle
       dependsOn: [Build_WinGetStudio]
@@ -104,6 +104,7 @@ extends:
         - ${{ each configuration in parameters.Configurations }}:
           - ${{ each platform in parameters.Platforms }}:
             - task: DownloadPipelineArtifact@2
+              displayName: Download msix_${{ platform }}_${{ configuration }}
               inputs:
                 buildType: 'current'
                 artifactName: msix_${{ platform }}_${{ configuration }}
