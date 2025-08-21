@@ -103,6 +103,7 @@ extends:
               arguments: -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "msixbundle" -IsAzurePipelineBuild -OutputDir "$(ob_outputDirectory)"
 
           - task: onebranch.pipeline.signing@1
+            condition: and(succeeded(), eq('${{ parameters.SignOutput }}', true))
             displayName: 'CodeSigning'
             inputs:
               command: 'sign'
