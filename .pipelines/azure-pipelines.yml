@@ -19,10 +19,10 @@ parameters:
   - Release
 
 variables:
- # MSIXVersion's second part should always be odd to account for stub app's version
-  MSIXVersion: '0.101'
-  solution: '**/WinGetStudio.sln'
-  appxPackageDir: 'AppxPackages'
+  MSIXVersion: '0.100'
+  solution: 'src/WinGetStudio.sln'
+  msixPackageDir: 'AppxPackages'
+  msixbundlePackageDir: 'AppxBundles'
   testOutputArtifactDir: 'TestResults'
   WindowsContainerImage: 'onebranch.azurecr.io/windows/ltsc2019/vse2022:latest'
 
@@ -64,13 +64,14 @@ extends:
               retryCountOnTaskFailure: 2
               inputs:
                 filePath: 'Build.ps1'
-                arguments: -Platform "${{ platform }}" -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "fullMsix" -AzureBuildingBranch "$(BuildingBranch)" -IsAzurePipelineBuild
+                arguments: -Platform "${{ platform }}" -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "fullMsix" -AzureBuildingBranch "$(BuildingBranch)" -IsAzurePipelineBuild -OutputDir "$(ob_outputDirectory)"
 
             - task: PowerShell@2
               displayName: Move BinLog to output directory
               inputs:
                 targetType: inline
                 script: >-
+                  dir $(Build.SourcesDirectory);
                   Move-Item -Path $(Build.SourcesDirectory)\WinGetStudio.${{ platform }}.${{ configuration }}.binlog -Destination $(ob_outputDirectory) -Force
                 pwsh: true
 

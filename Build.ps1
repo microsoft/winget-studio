@@ -4,6 +4,7 @@ Param(
     [string]$Version,
     [string]$BuildStep = "all",
     [string]$AzureBuildingBranch = "main",
+    [string]$OutputDir,
     [switch]$IsAzurePipelineBuild = $false,
     [switch]$Help = $false
 )
@@ -47,6 +48,10 @@ $env:msix_version = build\Scripts\CreateBuildInfo.ps1 -Version $Version -IsAzure
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')
 
 $msbuildPath = &"${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+
+if ([string]::IsNullOrEmpty($OutputDir)) {
+    $OutputDir = $env:Build_RootDirectory
+}
 
 $ErrorActionPreference = "Stop"
 
@@ -95,7 +100,7 @@ Try {
 
     foreach ($platform in $env:Build_Platform.Split(",")) {
       foreach ($configuration in $env:Build_Configuration.Split(",")) {
-        $appxPackageDir = (Join-Path $env:Build_RootDirectory "AppxPackages\$configuration")
+        $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
         $msbuildArgs = @(
             ("src/WinGetStudio.sln"),
             ("/p:Platform="+$platform),
@@ -126,9 +131,11 @@ Try {
 
   if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msixbundle")) {
     foreach ($configuration in $env:Build_Configuration.Split(",")) {
-      .\build\scripts\Create-AppxBundle.ps1 -InputPath (Join-Path $env:Build_RootDirectory "AppxPackages\$configuration") -ProjectName WinGetStudio -BundleVersion ([version]$env:msix_version) -OutputPath (Join-Path $env:Build_RootDirectory ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + "_8wekyb3d8bbwe.msixbundle"))
+      $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
+      $appxBundlePath = (Join-Path $OutputDir ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + "_8wekyb3d8bbwe.msixbundle"))
+      .\build\scripts\Create-AppxBundle.ps1 -InputPath $appxPackageDir -ProjectName WinGetStudio -BundleVersion ([version]$env:msix_version) -OutputPath $appxBundlePath
       if (-not($IsAzurePipelineBuild) -And $isAdmin) {
-        Invoke-SignPackage ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + "_8wekyb3d8bbwe.msixbundle")
+        Invoke-SignPackage $appxBundlePath
       }
     }
   }
@@ -150,7 +157,7 @@ WARNING: Cert signing requires admin privileges.  To sign, run the following in 
 "@ -ForegroundColor GREEN
   foreach ($platform in $env:Build_Platform.Split(",")) {
     foreach ($configuration in $env:Build_Configuration.Split(",")) {
-      $appxPackageFile = (Join-Path $env:Build_RootDirectory "AppxPackages\$configuration\WinGetStudio-$platform.msix")
+      $appxPackageFile = (Join-Path $OutputDir "AppxPackages\$configuration\WinGetStudio-$platform.msix")
         Write-Host @"
 powershell -command "& { . build\scripts\CertSignAndInstall.ps1; Invoke-SignPackage $appxPackageFile }"
 "@ -ForegroundColor GREEN
