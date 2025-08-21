@@ -53,6 +53,7 @@ extends:
               runCodesignValidationInjection: ${{ false }}
               skipComponentGovernanceDetection: ${{ true }}
               ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
+              ob_artifactBaseName: msix_${{ platform }}_${{ configuration }}
             timeoutInMinutes: 120
             steps:
             - task: NuGetToolInstaller@1
@@ -82,12 +83,6 @@ extends:
                 search_root: $(ob_outputDirectory)\AppxPackages\${{ configuration }}
                 files_to_sign: |
                     *.msix;
-
-            - task: PublishPipelineArtifact@1
-              displayName: Publish MSIX
-              inputs:
-                targetPath: $(ob_outputDirectory)\AppxPackages\${{ configuration }}
-                artifactName: msix_${{ platform }}_${{ configuration }}
 
     - stage: Build_MsixBundle
       dependsOn: [Build_WinGetStudio]
