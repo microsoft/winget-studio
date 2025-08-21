@@ -34,7 +34,7 @@ resources:
     ref: refs/heads/main
 
 extends:
-  template: v2/Microsoft.Official.yml@templates
+  template: v2/Microsoft.NonOfficial.yml@templates
   parameters:
     platform:
       name: 'windows_undocked'
