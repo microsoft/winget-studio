@@ -52,7 +52,7 @@ extends:
             variables:
               runCodesignValidationInjection: ${{ false }}
               skipComponentGovernanceDetection: ${{ true }}
-              ob_outputDirectory: $(Build.ArtifactStagingDirectory)/winget-studio
+              ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
             timeoutInMinutes: 120
             steps:
             - task: NuGetToolInstaller@1
@@ -71,23 +71,15 @@ extends:
               inputs:
                 targetType: inline
                 script: >-
-                  dir $(Build.SourcesDirectory) -Recurse;
                   Move-Item -Path $(Build.SourcesDirectory)\WinGetStudio.${{ platform }}.${{ configuration }}.binlog -Destination $(ob_outputDirectory) -Force
                 pwsh: true
-
-            - task: CopyFiles@2
-              displayName: Copy files to be published to staging directory
-              inputs:
-                targetFolder: $(ob_outputDirectory)
-                contents: |
-                  $(Build.SourcesDirectory)\AppxPackages
 
             - task: onebranch.pipeline.signing@1
               displayName: 'CodeSigning'
               inputs:
                 command: 'sign'
                 cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-                search_root: 'AppxPackages'
+                search_root: $(ob_outputDirectory)\AppxPackages
                 files_to_sign: |
                     *.msix;
 
@@ -101,16 +93,10 @@ extends:
         variables:
           runCodesignValidationInjection: ${{ false }}
           skipComponentGovernanceDetection: ${{ true }}
-          ob_outputDirectory: $(Build.ArtifactStagingDirectory)/winget-studio
+          ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
         steps:
         - ${{ each configuration in parameters.Configurations }}:
           - ${{ each platform in parameters.Platforms }}:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                buildType: 'current'
-                artifactName: msix_${{ platform }}_${{ configuration }}
-                targetPath: $(appxPackageDir)\${{ configuration }}
-
           - task: PowerShell@2
             displayName: Build MsixBundle
             inputs:
@@ -122,7 +108,7 @@ extends:
             inputs:
               command: 'sign'
               cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-              search_root: 'AppxBundles'
+              search_root: $(ob_outputDirectory)\AppxBundles
               files_to_sign: |
                   *.msixbundle;
           
