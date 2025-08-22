@@ -18,7 +18,7 @@ parameters:
   - Release
 
 variables:
-  - template: variables/global.yml
+  - template: .pipelines/variables/global.yml
 
 resources:
   repositories:
@@ -50,7 +50,7 @@ extends:
               ob_artifactBaseName: msix_${{ platform }}_${{ configuration }}
             timeoutInMinutes: 120
             steps:
-            - template: steps/build-msix.yml@self
+            - template: .pipelines/steps/build-msix.yml@self
               parameters:
                 Platform: ${{ platform }}
                 Configuration: ${{ configuration }}
@@ -79,7 +79,7 @@ extends:
                 artifactName: msix_${{ platform }}_${{ configuration }}
                 targetPath: '$(ob_outputDirectory)'
 
-          - template: steps/build-msixbundle.yml@self
+          - template: .pipelines/steps/build-msixbundle.yml@self
             parameters:
               Configuration: ${{ configuration }}
               OutputDir: '$(ob_outputDirectory)'
