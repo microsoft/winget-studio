@@ -24,7 +24,7 @@ steps:
         -IsAzurePipelineBuild
 
   - ${{ if eq(parameters.SignOutput, true) }}:
-    - template: ./.pipelines/templates/codesign.yml@self
+    - template: /.pipelines/templates/codesign.yml@self
       parameters:
         FilesToSign: '**/*.msixbundle'
         SearchRoot: ${{ parameters.OutputDir }}

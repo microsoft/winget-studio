@@ -18,7 +18,7 @@ parameters:
   - Release
 
 variables:
-  - template: ./.pipelines/variables/global.yml@self
+  - template: /.pipelines/variables/global.yml@self
 
 resources:
   repositories:
@@ -50,12 +50,13 @@ extends:
               ob_artifactBaseName: msix_${{ platform }}_${{ configuration }}
             timeoutInMinutes: 120
             steps:
-            - template: ./.pipelines/steps/build-msix.yml@self
+            - template: /.pipelines/steps/build-msix.yml@self
               parameters:
                 Platform: ${{ platform }}
                 Configuration: ${{ configuration }}
                 BuildingBranch: 'main'
                 OutputDir: '$(ob_outputDirectory)'
+                SignOutput: ${{ parameters.SignOutput }}
 
     - stage: Build_MsixBundle
       dependsOn: [Build_WinGetStudio]
@@ -79,7 +80,7 @@ extends:
                 artifactName: msix_${{ platform }}_${{ configuration }}
                 targetPath: '$(ob_outputDirectory)'
 
-          - template: ./.pipelines/steps/build-msixbundle.yml@self
+          - template: /.pipelines/steps/build-msixbundle.yml@self
             parameters:
               Configuration: ${{ configuration }}
               OutputDir: '$(ob_outputDirectory)'
