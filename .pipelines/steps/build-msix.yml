@@ -20,6 +20,8 @@ steps:
     displayName: 'Display Build Msix Parameters'
   
   - task: NuGetToolInstaller@1
+    inputs:
+        versionSpec: '>=6.14'
 
   - task: NuGetAuthenticate@1
 
