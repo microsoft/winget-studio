@@ -42,7 +42,7 @@ steps:
     displayName: Move BinLog to output directory
 
   - ${{ if eq(parameters.SignOutput, true) }}:
-    - template: .pipelines/templates/codesign.yml
+    - template: ./.pipelines/templates/codesign.yml@self
       parameters:
         FilesToSign: '**/*.msix'
         SearchRoot: ${{ parameters.OutputDir }}
