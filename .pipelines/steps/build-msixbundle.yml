@@ -10,6 +10,7 @@ steps:
   - pwsh: |
       echo "Configuration: ${{ parameters.Configuration }}"
       echo "OutputDir: ${{ parameters.OutputDir }}"
+      echo "SignOutput: ${{ parameters.SignOutput }}"
     displayName: 'Display Build MsixBundle Parameters'
 
   - task: PowerShell@2
@@ -17,10 +18,10 @@ steps:
     inputs:
       filePath: 'Build.ps1'
       arguments: |
-        -Configuration "${{ parameters.Configuration }}"
-        -Version $(MsixVersion)
-        -BuildStep "msixbundle"
-        -OutputDir "${{ parameters.OutputDir }}"
+        -Configuration "${{ parameters.Configuration }}" `
+        -Version $(MsixVersion) `
+        -BuildStep "msixbundle" `
+        -OutputDir "${{ parameters.OutputDir }}" `
         -IsAzurePipelineBuild
 
   - ${{ if eq(parameters.SignOutput, true) }}:

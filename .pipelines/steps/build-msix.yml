@@ -16,6 +16,7 @@ steps:
       echo "Configuration: ${{ parameters.Configuration }}"
       echo "BuildingBranch: ${{ parameters.BuildingBranch }}"
       echo "OutputDir: ${{ parameters.OutputDir }}"
+      echo "SignOutput: ${{ parameters.SignOutput }}"
     displayName: 'Display Build Msix Parameters'
   
   - task: NuGetToolInstaller@1
@@ -27,17 +28,17 @@ steps:
     inputs:
       filePath: 'Build.ps1'
       arguments: |
-        -Platform "${{ parameters.Platform }}"
-        -Configuration "${{ parameters.Configuration }}"
-        -Version "$(MsixVersion)"
-        -BuildStep "msix"
-        -AzureBuildingBranch "${{ parameters.BuildingBranch }}"
-        -OutputDir "${{ parameters.OutputDir }}"
+        -Platform "${{ parameters.Platform }}" `
+        -Configuration "${{ parameters.Configuration }}" `
+        -Version "$(MsixVersion)" `
+        -BuildStep "msix" `
+        -AzureBuildingBranch "${{ parameters.BuildingBranch }}" `
+        -OutputDir "${{ parameters.OutputDir }}" `
         -IsAzurePipelineBuild
 
   - pwsh: |
-      Move-Item
-      -Path $(Build.SourcesDirectory)\WinGetStudio.${{ parameters.Platform }}.${{ parameters.Configuration }}.binlog
+      Move-Item `
+      -Path $(Build.SourcesDirectory)\WinGetStudio.${{ parameters.Platform }}.${{ parameters.Configuration }}.binlog `
       -Destination ${{ parameters.OutputDir }} -Force
     displayName: Move BinLog to output directory
 
