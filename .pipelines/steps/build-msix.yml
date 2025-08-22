@@ -21,7 +21,7 @@ steps:
   
   - task: NuGetToolInstaller@1
     inputs:
-        versionSpec: '>=6.14'
+        versionSpec: '6.14.0'
 
   - task: NuGetAuthenticate@1
 
