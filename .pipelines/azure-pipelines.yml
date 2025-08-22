@@ -1,6 +1,5 @@
 trigger:
 - main
-- release
 
 parameters:
 - name: SignOutput
@@ -19,12 +18,7 @@ parameters:
   - Release
 
 variables:
-  MSIXVersion: '0.100'
-  solution: 'src/WinGetStudio.sln'
-  msixPackageDir: 'AppxPackages'
-  msixbundlePackageDir: 'AppxBundles'
-  testOutputArtifactDir: 'TestResults'
-  WindowsContainerImage: 'onebranch.azurecr.io/windows/ltsc2019/vse2022:latest'
+  - template: variables/global.yml
 
 resources:
   repositories:
@@ -50,30 +44,18 @@ extends:
             pool:
               type: windows
             variables:
-              runCodesignValidationInjection: ${{ false }}
-              skipComponentGovernanceDetection: ${{ true }}
+              runCodesignValidationInjection: false
+              skipComponentGovernanceDetection: true
               ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
               ob_artifactBaseName: msix_${{ platform }}_${{ configuration }}
             timeoutInMinutes: 120
             steps:
-            - task: NuGetToolInstaller@1
-
-            - task: NuGetAuthenticate@1
-
-            - task: PowerShell@2
-              displayName: Build WinGet Studio
-              retryCountOnTaskFailure: 2
-              inputs:
-                filePath: 'Build.ps1'
-                arguments: -Platform "${{ platform }}" -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "msix" -AzureBuildingBranch "$(BuildingBranch)" -IsAzurePipelineBuild -OutputDir "$(ob_outputDirectory)"
-
-            - task: PowerShell@2
-              displayName: Move BinLog to output directory
-              inputs:
-                targetType: inline
-                script: >-
-                  Move-Item -Path $(Build.SourcesDirectory)\WinGetStudio.${{ platform }}.${{ configuration }}.binlog -Destination $(ob_outputDirectory) -Force
-                pwsh: true
+            - template: steps/build-msix.yml@self
+              parameters:
+                Platform: ${{ platform }}
+                Configuration: ${{ configuration }}
+                BuildingBranch: 'main'
+                OutputDir: '$(ob_outputDirectory)'
 
     - stage: Build_MsixBundle
       dependsOn: [Build_WinGetStudio]
@@ -83,9 +65,10 @@ extends:
         pool:
           type: windows
         variables:
-          runCodesignValidationInjection: ${{ false }}
-          skipComponentGovernanceDetection: ${{ true }}
+          runCodesignValidationInjection: false
+          skipComponentGovernanceDetection: true
           ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
+          ob_artifactBaseName: msixbundle_wingetstudio
         steps:
         - ${{ each configuration in parameters.Configurations }}:
           - ${{ each platform in parameters.Platforms }}:
@@ -94,21 +77,10 @@ extends:
               inputs:
                 buildType: 'current'
                 artifactName: msix_${{ platform }}_${{ configuration }}
-                targetPath: $(ob_outputDirectory)\AppxPackages\${{ configuration }}
+                targetPath: '$(ob_outputDirectory)'
 
-          - task: PowerShell@2
-            displayName: Build MsixBundle
-            inputs:
-              filePath: 'Build.ps1'
-              arguments: -Configuration "${{ configuration }}" -Version $(MSIXVersion) -BuildStep "msixbundle" -IsAzurePipelineBuild -OutputDir "$(ob_outputDirectory)"
-
-          - task: onebranch.pipeline.signing@1
-            condition: and(succeeded(), eq('${{ parameters.SignOutput }}', true))
-            displayName: 'CodeSigning'
-            inputs:
-              command: 'sign'
-              files_to_sign: '**/*.msixbundle'
-              cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
-              search_root: '$(ob_outputDirectory)'
-          
-          
+          - template: steps/build-msixbundle.yml@self
+            parameters:
+              Configuration: ${{ configuration }}
+              OutputDir: '$(ob_outputDirectory)'
+              SignOutput: ${{ parameters.SignOutput }}

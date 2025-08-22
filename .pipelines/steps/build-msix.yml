@@ -1,0 +1,48 @@
+parameters:
+  - name: Platform
+    type: string
+  - name: Configuration
+    type: string
+  - name: BuildingBranch
+    type: string
+  - name: OutputDir
+    type: string
+  - name: SignOutput
+    type: boolean
+
+steps:
+  - pwsh: |
+      echo "Platform: ${{ parameters.Platform }}"
+      echo "Configuration: ${{ parameters.Configuration }}"
+      echo "BuildingBranch: ${{ parameters.BuildingBranch }}"
+      echo "OutputDir: ${{ parameters.OutputDir }}"
+    displayName: 'Display Build Msix Parameters'
+  
+  - task: NuGetToolInstaller@1
+
+  - task: NuGetAuthenticate@1
+
+  - task: PowerShell@2
+    displayName: Build Msix
+    inputs:
+      filePath: 'Build.ps1'
+      arguments: |
+        -Platform "${{ parameters.Platform }}"
+        -Configuration "${{ parameters.Configuration }}"
+        -Version "$(MsixVersion)"
+        -BuildStep "msix"
+        -AzureBuildingBranch "${{ parameters.BuildingBranch }}"
+        -OutputDir "${{ parameters.OutputDir }}"
+        -IsAzurePipelineBuild
+
+  - pwsh: |
+      Move-Item
+      -Path $(Build.SourcesDirectory)\WinGetStudio.${{ parameters.Platform }}.${{ parameters.Configuration }}.binlog
+      -Destination ${{ parameters.OutputDir }} -Force
+    displayName: Move BinLog to output directory
+
+  - ${{ if eq(parameters.SignOutput, true) }}:
+    - template: ../templates/codesign.yml
+      parameters:
+        FilesToSign: '**/*.msix'
+        SearchRoot: ${{ parameters.OutputDir }}

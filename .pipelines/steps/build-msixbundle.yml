@@ -1,0 +1,30 @@
+parameters:
+  - name: Configuration
+    type: string
+  - name: OutputDir
+    type: string
+  - name: SignOutput
+    type: boolean
+
+steps:
+  - pwsh: |
+      echo "Configuration: ${{ parameters.Configuration }}"
+      echo "OutputDir: ${{ parameters.OutputDir }}"
+    displayName: 'Display Build MsixBundle Parameters'
+
+  - task: PowerShell@2
+    displayName: Build MsixBundle
+    inputs:
+      filePath: 'Build.ps1'
+      arguments: |
+        -Configuration "${{ parameters.Configuration }}"
+        -Version $(MsixVersion)
+        -BuildStep "msixbundle"
+        -OutputDir "${{ parameters.OutputDir }}"
+        -IsAzurePipelineBuild
+
+  - ${{ if eq(parameters.SignOutput, true) }}:
+    - template: ../templates/codesign.yml
+      parameters:
+        FilesToSign: '**/*.msixbundle'
+        SearchRoot: ${{ parameters.OutputDir }}
