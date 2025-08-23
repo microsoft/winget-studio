@@ -24,8 +24,8 @@ jobs:
           artifactName: msix_${{ platform }}_${{ parameters.Configuration }}
           targetPath: '$(ob_outputDirectory)'
 
-      - template: /.pipelines/steps/build-msixbundle.yml@self
-        parameters:
-          Configuration: ${{ parameters.Configuration }}
-          OutputDir: '$(ob_outputDirectory)'
-          SignOutput: ${{ parameters.SignOutput }}
+    - template: /.pipelines/steps/build-msixbundle.yml@self
+      parameters:
+        Configuration: ${{ parameters.Configuration }}
+        OutputDir: '$(ob_outputDirectory)'
+        SignOutput: ${{ parameters.SignOutput }}
