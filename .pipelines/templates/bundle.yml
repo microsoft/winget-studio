@@ -1,5 +1,5 @@
 parameters:
-  - name: Platform
+  - name: Platforms
     type: object
   - name: Configuration
     type: string
