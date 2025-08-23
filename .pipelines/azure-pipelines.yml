@@ -35,53 +35,24 @@ extends:
     git:
       fetchTags: false
     stages:
+
     - stage: Build_WinGetStudio
-      dependsOn: []
       jobs:
       - ${{ each configuration in parameters.Configurations }}:
         - ${{ each platform in parameters.Platforms }}:
-          - job: Build_${{ platform }}_${{ configuration }}
-            pool:
-              type: windows
-            variables:
-              runCodesignValidationInjection: false
-              skipComponentGovernanceDetection: true
-              ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
-              ob_artifactBaseName: msix_${{ platform }}_${{ configuration }}
-            timeoutInMinutes: 120
-            steps:
-            - template: /.pipelines/steps/build-msix.yml@self
-              parameters:
-                Platform: ${{ platform }}
-                Configuration: ${{ configuration }}
-                BuildingBranch: 'main'
-                OutputDir: '$(ob_outputDirectory)'
-                SignOutput: ${{ parameters.SignOutput }}
+          - template: /.pipelines/templates/build.yml@self
+            parameters:
+              Platform: ${{ platform }}
+              Configuration: ${{ configuration }}
+              SignOutput: ${{ parameters.SignOutput }}
 
-    - stage: Build_MsixBundle
+    - stage: Bundle_WinGetStudio
       dependsOn: [Build_WinGetStudio]
       condition: in(dependencies.Build_WinGetStudio.result, 'Succeeded')
       jobs:
-      - job: Build_MsixBundles
-        pool:
-          type: windows
-        variables:
-          runCodesignValidationInjection: false
-          skipComponentGovernanceDetection: true
-          ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
-          ob_artifactBaseName: msixbundle_wingetstudio
-        steps:
-        - ${{ each configuration in parameters.Configurations }}:
-          - ${{ each platform in parameters.Platforms }}:
-            - task: DownloadPipelineArtifact@2
-              displayName: Download msix_${{ platform }}_${{ configuration }}
-              inputs:
-                buildType: 'current'
-                artifactName: msix_${{ platform }}_${{ configuration }}
-                targetPath: '$(ob_outputDirectory)'
-
-          - template: /.pipelines/steps/build-msixbundle.yml@self
-            parameters:
-              Configuration: ${{ configuration }}
-              OutputDir: '$(ob_outputDirectory)'
-              SignOutput: ${{ parameters.SignOutput }}
+      - ${{ each configuration in parameters.Configurations }}:
+        - template: /.pipelines/templates/bundle.yml@self
+          parameters:
+            Platforms: ${{ parameters.Platforms }}
+            Configuration: ${{ configuration }}
+            SignOutput: ${{ parameters.SignOutput }}

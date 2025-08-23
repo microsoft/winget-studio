@@ -1,0 +1,26 @@
+parameters:
+  - name: Platform
+    type: string
+  - name: Configuration
+    type: string
+  - name: SignOutput
+    type: boolean
+
+jobs:
+- job: Build_${{ parameters.Platform }}_${{ parameters.Configuration }}
+  pool:
+    type: windows
+  variables:
+    runCodesignValidationInjection: false
+    skipComponentGovernanceDetection: true
+    ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
+    ob_artifactBaseName: msix_${{ parameters.Platform }}_${{ parameters.Configuration }}
+  timeoutInMinutes: 120
+  steps:
+  - template: /.pipelines/steps/build-msix.yml@self
+    parameters:
+      Platform: ${{ parameters.Platform }}
+      Configuration: ${{ parameters.Configuration }}
+      BuildingBranch: 'main'
+      OutputDir: '$(ob_outputDirectory)'
+      SignOutput: ${{ parameters.SignOutput }}
