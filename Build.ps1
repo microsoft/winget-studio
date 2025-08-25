@@ -64,11 +64,11 @@ Invoke-Expression "& { $(Invoke-RestMethod https://aka.ms/install-artifacts-cred
 Try {
     if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix")) {
         # Load current (dev) appxmanifest
+        [Reflection.Assembly]::LoadWithPartialName("System.Xml.Linq")
         $appxmanifestPath = (Join-Path $env:Build_RootDirectory "src\WinGetStudio\Package.appxmanifest")
         $appxmanifest = [System.Xml.Linq.XDocument]::Load($appxmanifestPath)
 
         # Define the xml namespaces
-        [Reflection.Assembly]::LoadWithPartialName("System.Xml.Linq")
         $xIdentity = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Identity");
         $xProperties = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Properties");
         $xDisplayName = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}DisplayName");
