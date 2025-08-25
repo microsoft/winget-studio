@@ -1,19 +1,20 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml.Navigation;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Views;
-
-using Microsoft.UI.Xaml.Navigation;
 
 namespace WinGetStudio.ViewModels;
 
 public partial class ShellViewModel : ObservableRecipient
 {
     [ObservableProperty]
-    private bool isBackEnabled;
+    public partial bool IsBackEnabled { get; set; }
 
     [ObservableProperty]
-    private object? selected;
+    public partial object? Selected { get; set; }
 
     public IAppNavigationService NavigationService { get; }
 

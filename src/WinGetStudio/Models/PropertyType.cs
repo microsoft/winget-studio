@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 namespace WinGetStudio.Models;
+
 public enum PropertyType
 {
-    String,
-    Boolean,
-    Number,
-    Object
+    StringType,
+    BooleanType,
+    NumberType,
+    ObjectType,
 }

@@ -1,4 +1,7 @@
-﻿namespace WinGetStudio.Contracts.ViewModels;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+namespace WinGetStudio.Contracts.ViewModels;
 
 public interface INavigationAware
 {

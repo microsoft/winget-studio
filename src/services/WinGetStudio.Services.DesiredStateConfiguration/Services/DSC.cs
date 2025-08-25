@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
+using Windows.Foundation;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using Windows.Foundation;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 
@@ -35,14 +35,14 @@ internal sealed class DSC : IDSC
     public void GetConfigurationUnitDetails(IDSCSet set) => _dscOperations.GetConfigurationUnitDetails(set);
 
     /// <inheritdoc/>
-    public async Task Get(ConfigurationUnitModel unit) => await _dscOperations.GetUnit(unit);
+    public async Task DscGet(ConfigurationUnitModel unit) => await _dscOperations.GetUnit(unit);
 
     /// <inheritdoc/>
-    public async Task Set(ConfigurationUnitModel unit) => await _dscOperations.SetUnit(unit);
+    public async Task DscSet(ConfigurationUnitModel unit) => await _dscOperations.SetUnit(unit);
 
     /// <inheritdoc/>
-    public async Task Test(ConfigurationUnitModel unit) => await _dscOperations.TestUnit(unit);
+    public async Task DscTest(ConfigurationUnitModel unit) => await _dscOperations.TestUnit(unit);
 
     /// <inheritdoc/>
-    public async Task Export(ConfigurationUnitModel unit) => await _dscOperations.ExportUnit(unit);
+    public async Task DscExport(ConfigurationUnitModel unit) => await _dscOperations.ExportUnit(unit);
 }

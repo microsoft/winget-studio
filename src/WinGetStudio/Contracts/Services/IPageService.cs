@@ -9,5 +9,6 @@ public interface IPageService
 {
     Type GetPageType(Type viewModelType);
 
-    Type GetPageType<VM>() where VM : ObservableObject;
+    Type GetPageType<TVM>()
+        where TVM : ObservableObject;
 }

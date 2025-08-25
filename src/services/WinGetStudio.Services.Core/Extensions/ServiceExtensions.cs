@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using WinGetStudio.Services.Core.Contracts;
-using WinGetStudio.Services.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using WinGetStudio.Services.Core.Contracts;
+using WinGetStudio.Services.Core.Services;
 
 namespace WinGetStudio.Services.Core.Extensions;
 

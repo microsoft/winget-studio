@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using Microsoft.Management.Configuration;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
@@ -23,11 +23,11 @@ internal sealed class DSCApplyUnitResult : IDSCApplyUnitResult
 
     public IDSCUnit Unit { get; }
 
-    public ConfigurationUnitState State{ get; }
+    public ConfigurationUnitState State { get; }
 
     public bool PreviouslyInDesiredState { get; }
 
-    public bool RebootRequired{ get; }
+    public bool RebootRequired { get; }
 
-    public IDSCUnitResultInformation ResultInformation{ get; }
+    public IDSCUnitResultInformation ResultInformation { get; }
 }

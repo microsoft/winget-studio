@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System.Globalization;
-using WinGetStudio.Contracts.Services;
 using Microsoft.Windows.ApplicationModel.Resources;
+using WinGetStudio.Contracts.Services;
 
 namespace WinGetStudio.Services;
 

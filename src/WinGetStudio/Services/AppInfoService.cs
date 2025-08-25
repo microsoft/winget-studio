@@ -6,7 +6,7 @@ using WinGetStudio.Helpers;
 
 namespace WinGetStudio.Services;
 
-internal class AppInfoService : IAppInfoService
+internal sealed class AppInfoService : IAppInfoService
 {
     /// <inheritdoc/>
     public string GetAppNameLocalized()

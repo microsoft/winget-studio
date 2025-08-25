@@ -2,25 +2,24 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.WinUI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
 using WinGetStudio.Activation;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Core.Contracts.Services;
 using WinGetStudio.Core.Services;
 using WinGetStudio.Models;
 using WinGetStudio.Services;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
 using WinGetStudio.Views;
 using WinGetStudio.Views.ConfigurationFlow;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
-using WinGetStudio.Services.WindowsPackageManager.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
-using Microsoft.Windows.AppLifecycle;
-
 
 namespace WinGetStudio;
 
@@ -132,8 +131,6 @@ public partial class App : Application
 
     private async void OnActivated(object? sender, AppActivationArguments args)
     {
-        
-
         var localArgsDataReference = args.Data;
 
         await _dispatcherQueue.EnqueueAsync(async () =>

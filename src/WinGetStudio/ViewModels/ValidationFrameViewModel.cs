@@ -1,4 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using CommunityToolkit.Mvvm.ComponentModel;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 
@@ -17,6 +20,7 @@ public partial class ValidationFrameViewModel : ObservableRecipient, INavigation
     {
         NavigationService.NavigateTo<ValidationViewModel>(parameter);
     }
+
     public void OnNavigatedFrom()
     {
         // No-op

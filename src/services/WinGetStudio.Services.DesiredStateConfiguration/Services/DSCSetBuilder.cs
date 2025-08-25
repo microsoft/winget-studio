@@ -10,12 +10,14 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
-internal class DSCSetBuilder : IDSCSetBuilder
+
+internal sealed class DSCSetBuilder : IDSCSetBuilder
 {
     private readonly IDSCFactory _dscFactory;
     private EditableDSCSet _dscSet = new();
-    private const string DSC_SCHEMA_URL = "https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json";
-    private const string DSC_VERSION_SRTING = "dscv3";
+    private const string DscSchemaUrl = "https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json";
+    private const string DscVersionSrting = "dscv3";
+
     public IReadOnlyList<IDSCUnit> Units => _dscSet.Units;
 
     public string TargetFilePath { get; set; } = string.Empty;
@@ -44,6 +46,7 @@ internal class DSCSetBuilder : IDSCSetBuilder
     {
         _dscSet.InternalUnits.Remove(unit);
     }
+
     public void UpdateUnit(EditableDSCUnit unit)
     {
         var existingUnit = _dscSet.InternalUnits.FirstOrDefault(u => u.InstanceId == unit.InstanceId);
@@ -53,24 +56,26 @@ internal class DSCSetBuilder : IDSCSetBuilder
             _dscSet.InternalUnits[i] = unit;
         }
     }
+
     public void ImportSet(IDSCSet set)
     {
-        if(set is EditableDSCSet e)
+        if (set is EditableDSCSet e)
         {
             _dscSet = e;
         }
-        else if ( set is DSCSet dscSet)
+        else if (set is DSCSet dscSet)
         {
             _dscSet = new();
             _dscSet.Name = dscSet.Name;
 
-            foreach(var unit in dscSet.UnitsInternal)
+            foreach (var unit in dscSet.UnitsInternal)
             {
                 var u = new EditableDSCUnit(unit);
                 _dscSet.InternalUnits.Add(u);
             }
         }
     }
+
     public bool IsEmpty() => Units.Count == 0;
 
     public async Task<string> ConvertToYamlAsync()
@@ -78,15 +83,15 @@ internal class DSCSetBuilder : IDSCSetBuilder
         var dscSet = await BuildAsync();
         var dscYaml = new Dictionary<string, object>
         {
-            ["$schema"] = DSC_SCHEMA_URL,
+            ["$schema"] = DscSchemaUrl,
             ["metadata"] = new Dictionary<string, object>
             {
                 ["winget"] = new Dictionary<string, object>
                 {
-                    ["processor"] = DSC_VERSION_SRTING
-                }
+                    ["processor"] = DscVersionSrting,
+                },
             },
-            ["resources"] = new List<Dictionary<string, object>>()
+            ["resources"] = new List<Dictionary<string, object>>(),
         };
 
         foreach (var unit in dscSet.Units)
@@ -96,6 +101,7 @@ internal class DSCSetBuilder : IDSCSetBuilder
             {
                 metadata.Add("securityContext", "elevated");
             }
+
             (dscYaml["resources"] as List<Dictionary<string, object>>).Add(new Dictionary<string, object>
             {
                 ["name"] = unit.Id,
@@ -104,6 +110,7 @@ internal class DSCSetBuilder : IDSCSetBuilder
                 ["properties"] = unit.Settings.ToDictionary(kv => kv.Key, kv => kv.Value),
             });
         }
+
         var serializer = new SerializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
         .WithIndentedSequences()
@@ -111,8 +118,8 @@ internal class DSCSetBuilder : IDSCSetBuilder
 
         var yaml = serializer.Serialize(dscYaml);
         return yaml;
-
     }
+
     public async Task<bool> EqualsYamlAsync(string yaml)
     {
         return await ConvertToYamlAsync() == yaml;

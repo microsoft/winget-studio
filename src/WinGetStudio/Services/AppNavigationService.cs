@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.UI.Xaml.Controls;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.ViewModels;
-using Microsoft.UI.Xaml.Controls;
 
 namespace WinGetStudio.Services;
 
-internal class AppNavigationService : NavigationService, IAppNavigationService
+internal sealed class AppNavigationService : NavigationService, IAppNavigationService
 {
     public AppNavigationService(IAppPageService pageService)
         : base(pageService)

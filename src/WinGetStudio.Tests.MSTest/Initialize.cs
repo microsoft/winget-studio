@@ -1,4 +1,7 @@
-﻿using Microsoft.Windows.ApplicationModel.DynamicDependency;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using Microsoft.Windows.ApplicationModel.DynamicDependency;
 
 [assembly: WinUITestTarget(typeof(WinGetStudio.App))]
 

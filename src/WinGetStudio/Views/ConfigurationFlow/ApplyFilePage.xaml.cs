@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.UI.Xaml.Controls;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.ViewModels.ConfigurationFlow;
-using Microsoft.UI.Xaml.Controls;
 
 namespace WinGetStudio.Views.ConfigurationFlow;
 

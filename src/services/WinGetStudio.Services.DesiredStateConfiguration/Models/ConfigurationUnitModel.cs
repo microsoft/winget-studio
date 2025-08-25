@@ -8,12 +8,16 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace WinGetStudio.Models;
+
 public class ConfigurationUnitModel
 {
     public string Type { get; set; } = string.Empty;
+
     public ValueSet Settings { get; set; } = new();
-    public bool ElevatedRequired { get; set; } = false;
-    public bool TestResult { get; set; } = false;
+
+    public bool ElevatedRequired { get; set; }
+
+    public bool TestResult { get; set; }
 
     /// <summary>
     /// Converts the current object to its YAML representation.
@@ -24,20 +28,19 @@ public class ConfigurationUnitModel
     /// <returns>A YAML-formatted string representing the current object.</returns>
     public string ToYaml()
     {
-
         var resource = new Dictionary<string, object>
         {
             ["properties"] = new Dictionary<string, object>
             {
                 ["resources"] = new List<Dictionary<string, object>>
                  {
-                     new Dictionary<string, object>
+                     new()
                      {
                         ["resource"] = Type,
-                        ["settings"] = Settings
-                     }
-                 }
-            }
+                        ["settings"] = Settings,
+                     },
+                 },
+            },
         };
 
         var serializer = new SerializerBuilder()
@@ -65,8 +68,8 @@ public class ConfigurationUnitModel
             .Build();
         var resource = deserializer.Deserialize<Dictionary<string, object>>(yaml);
         if (resource != null
-            && resource.ContainsKey("properties")
-            && resource["properties"] is List<object> resourceList
+            && resource.TryGetValue("properties", out var properties)
+            && properties is List<object> resourceList
             && resourceList.Count > 0
             && resourceList[0] is Dictionary<object, object> dict)
         {
@@ -77,11 +80,12 @@ public class ConfigurationUnitModel
             TryLoadHelper(Settings, dict["settings"] as Dictionary<object, object>);
             return true;
         }
+
         return false;
     }
 
     /// <summary>
-    /// 
+    /// Helper method to recursively load settings from a dictionary into a ValueSet.
     /// <summary>
     /// Recursively populates a <see cref="ValueSet"/> with key-value pairs from a deserialized YAML dictionary.
     /// </summary>

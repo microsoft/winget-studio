@@ -1,18 +1,21 @@
-﻿using WinGetStudio.Contracts.Services;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System.Diagnostics;
+using Microsoft.Extensions.Options;
+using Windows.Storage;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Core.Contracts.Services;
 using WinGetStudio.Core.Helpers;
 using WinGetStudio.Helpers;
 using WinGetStudio.Models;
 
-using Microsoft.Extensions.Options;
-using Windows.Storage;
-
 namespace WinGetStudio.Services;
 
 public class LocalSettingsService : ILocalSettingsService
 {
-    private const string _defaultApplicationDataFolder = "WinGetStudio/ApplicationData";
-    private const string _defaultLocalSettingsFile = "LocalSettings.json";
+    private const string DefaultApplicationDataFolder = "WinGetStudio/ApplicationData";
+    private const string DefaultLocalSettingsFile = "LocalSettings.json";
 
     private readonly IFileService _fileService;
     private readonly LocalSettingsOptions _options;
@@ -30,8 +33,8 @@ public class LocalSettingsService : ILocalSettingsService
         _fileService = fileService;
         _options = options.Value;
 
-        _applicationDataFolder = Path.Combine(_localApplicationData, _options.ApplicationDataFolder ?? _defaultApplicationDataFolder);
-        _localsettingsFile = _options.LocalSettingsFile ?? _defaultLocalSettingsFile;
+        _applicationDataFolder = Path.Combine(_localApplicationData, _options.ApplicationDataFolder ?? DefaultApplicationDataFolder);
+        _localsettingsFile = _options.LocalSettingsFile ?? DefaultLocalSettingsFile;
 
         _settings = new Dictionary<string, object>();
     }
@@ -69,6 +72,7 @@ public class LocalSettingsService : ILocalSettingsService
     }
 
     public async Task SaveSettingAsync<T>(string key, T value)
+        where T : notnull
     {
         if (RuntimeHelper.IsMSIX)
         {

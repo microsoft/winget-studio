@@ -1,4 +1,7 @@
-﻿namespace WinGetStudio.Core.Contracts.Services;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+namespace WinGetStudio.Core.Contracts.Services;
 
 public interface IFileService
 {

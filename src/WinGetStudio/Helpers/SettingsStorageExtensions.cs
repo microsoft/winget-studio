@@ -1,7 +1,9 @@
-﻿using WinGetStudio.Core.Helpers;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 using Windows.Storage;
 using Windows.Storage.Streams;
+using WinGetStudio.Core.Helpers;
 
 namespace WinGetStudio.Helpers;
 
@@ -14,32 +16,6 @@ public static class SettingsStorageExtensions
     public static bool IsRoamingStorageAvailable(this ApplicationData appData)
     {
         return appData.RoamingStorageQuota == 0;
-    }
-
-    public static async Task SaveAsync<T>(this StorageFolder folder, string name, T content)
-    {
-        var file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
-        var fileContent = await Json.StringifyAsync(content);
-
-        await FileIO.WriteTextAsync(file, fileContent);
-    }
-
-    public static async Task<T?> ReadAsync<T>(this StorageFolder folder, string name)
-    {
-        if (!File.Exists(Path.Combine(folder.Path, GetFileName(name))))
-        {
-            return default;
-        }
-
-        var file = await folder.GetFileAsync($"{name}.json");
-        var fileContent = await FileIO.ReadTextAsync(file);
-
-        return await Json.ToObjectAsync<T>(fileContent);
-    }
-
-    public static async Task SaveAsync<T>(this ApplicationDataContainer settings, string key, T value)
-    {
-        settings.SaveString(key, await Json.StringifyAsync(value));
     }
 
     public static void SaveString(this ApplicationDataContainer settings, string key, string value)
@@ -61,10 +37,7 @@ public static class SettingsStorageExtensions
 
     public static async Task<StorageFile> SaveFileAsync(this StorageFolder folder, byte[] content, string fileName, CreationCollisionOption options = CreationCollisionOption.ReplaceExisting)
     {
-        if (content == null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content);
 
         if (string.IsNullOrEmpty(fileName))
         {

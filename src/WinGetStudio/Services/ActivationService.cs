@@ -1,8 +1,11 @@
-﻿using WinGetStudio.Activation;
-using WinGetStudio.Contracts.Services;
-using WinGetStudio.Views;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using WinGetStudio.Activation;
+using WinGetStudio.Contracts.Services;
+using WinGetStudio.Views;
 
 namespace WinGetStudio.Services;
 
@@ -12,7 +15,7 @@ public class ActivationService : IActivationService
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly ILocalSettingsService _localSettingsService;
-    private UIElement? _shell = null;
+    private UIElement? _shell;
     private bool _isInitialActivation = true;
 
     public ActivationService(
@@ -32,6 +35,7 @@ public class ActivationService : IActivationService
         if (_isInitialActivation)
         {
             _isInitialActivation = false;
+
             // Execute tasks before activation.
             await InitializeAsync();
 

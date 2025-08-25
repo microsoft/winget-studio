@@ -1,5 +1,8 @@
-﻿using WinGetStudio.Contracts.Views;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using Microsoft.UI.Xaml.Controls;
+using WinGetStudio.Contracts.Views;
 
 namespace WinGetStudio.Helpers;
 

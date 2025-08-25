@@ -6,7 +6,7 @@ using WinGetStudio.ViewModels.ConfigurationFlow;
 
 namespace WinGetStudio.Services;
 
-internal class ConfigurationNavigationService : NavigationService, IConfigurationNavigationService
+internal sealed class ConfigurationNavigationService : NavigationService, IConfigurationNavigationService
 {
     public ConfigurationNavigationService(IConfigurationPageService pageService)
         : base(pageService)

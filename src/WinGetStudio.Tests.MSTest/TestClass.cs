@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+using System.Diagnostics;
 using Microsoft.UI.Xaml.Controls;
 
 namespace WinGetStudio.Tests.MSTest;
@@ -8,7 +10,6 @@ namespace WinGetStudio.Tests.MSTest;
 // https://docs.microsoft.com/visualstudio/test/getting-started-with-unit-testing
 // https://docs.microsoft.com/visualstudio/test/using-microsoft-visualstudio-testtools-unittesting-members-in-unit-tests
 // https://docs.microsoft.com/visualstudio/test/run-unit-tests-with-test-explorer
-
 [TestClass]
 public class TestClass
 {

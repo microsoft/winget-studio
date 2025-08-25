@@ -5,7 +5,8 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Services;
-internal class ValidationNavigationService : NavigationService, IValidationNavigationService
+
+internal sealed class ValidationNavigationService : NavigationService, IValidationNavigationService
 {
     public ValidationNavigationService(IValidationPageService pageService)
         : base(pageService)

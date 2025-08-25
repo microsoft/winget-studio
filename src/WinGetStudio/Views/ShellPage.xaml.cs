@@ -60,7 +60,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             Left = sender.CompactPaneLength * (sender.DisplayMode == NavigationViewDisplayMode.Minimal ? 2 : 1),
             Top = AppTitleBar.Margin.Top,
             Right = AppTitleBar.Margin.Right,
-            Bottom = AppTitleBar.Margin.Bottom
+            Bottom = AppTitleBar.Margin.Bottom,
         };
     }
 

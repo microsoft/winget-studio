@@ -23,12 +23,12 @@ internal abstract class PageService
     /// <summary>
     /// Gets the page type associated with the specified typeparamref name="VM"/>.
     /// </summary>
-    /// <typeparam name="VM">ViewModel type that is associated with the page.</typeparam>
+    /// <typeparam name="TVM">ViewModel type that is associated with the page.</typeparam>
     /// <returns>Type of the page associated with the specified ViewModel type.</returns>
-    public Type GetPageType<VM>()
-        where VM : ObservableObject
+    public Type GetPageType<TVM>()
+        where TVM : ObservableObject
     {
-        return GetPageType(typeof(VM));
+        return GetPageType(typeof(TVM));
     }
 
     /// <summary>
@@ -54,21 +54,21 @@ internal abstract class PageService
     /// <summary>
     /// Configures a page with the specified ViewModel and Page types.
     /// </summary>
-    /// <typeparam name="VM">ViewModel type that is associated with the page.</typeparam>
-    /// <typeparam name="V">Page type that is associated with the ViewModel.</typeparam>
-    protected void Configure<VM, V>()
-        where VM : ObservableObject
-        where V : Page
+    /// <typeparam name="TVM">ViewModel type that is associated with the page.</typeparam>
+    /// <typeparam name="TV">Page type that is associated with the ViewModel.</typeparam>
+    protected void Configure<TVM, TV>()
+        where TVM : ObservableObject
+        where TV : Page
     {
         lock (_pages)
         {
-            var key = typeof(VM).FullName!;
+            var key = typeof(TVM).FullName!;
             if (_pages.ContainsKey(key))
             {
                 throw new ArgumentException($"The key {key} is already configured");
             }
 
-            var type = typeof(V);
+            var type = typeof(TV);
             if (_pages.ContainsValue(type))
             {
                 throw new ArgumentException($"This type is already configured with key {_pages.First(p => p.Value == type).Key}");

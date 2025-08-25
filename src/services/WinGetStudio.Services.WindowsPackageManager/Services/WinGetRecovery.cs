@@ -4,9 +4,9 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.WindowsPackageManager.Contracts;
 using WinGetStudio.Services.WindowsPackageManager.Exceptions;
-using Microsoft.Extensions.Logging;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Services;
 

@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WinGetStudio.Services.WindowsPackageManager.Models;
 using Microsoft.Management.Deployment;
+using WinGetStudio.Services.WindowsPackageManager.Models;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Contracts;
 
