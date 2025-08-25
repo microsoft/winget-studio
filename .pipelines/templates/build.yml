@@ -1,9 +1,18 @@
 parameters:
+  # The platform to build for
   - name: Platform
     type: string
+
+  # The configuration to build for
   - name: Configuration
     type: string
+
+  # Whether to sign the output artifacts
   - name: SignOutput
+    type: boolean
+
+  # Whether this is a release build
+  - name: IsRelease
     type: boolean
 
 jobs:
@@ -21,6 +30,6 @@ jobs:
     parameters:
       Platform: ${{ parameters.Platform }}
       Configuration: ${{ parameters.Configuration }}
-      BuildingBranch: 'main'
+      IsRelease: ${{ parameters.IsRelease }}
       OutputDir: '$(ob_outputDirectory)'
       SignOutput: ${{ parameters.SignOutput }}

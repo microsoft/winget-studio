@@ -1,8 +1,13 @@
 parameters:
+  # The platforms to bundle for
   - name: Platforms
     type: object
+
+  # The configuration to bundle for
   - name: Configuration
     type: string
+
+  # Whether to sign the output artifacts
   - name: SignOutput
     type: boolean
 
@@ -16,6 +21,7 @@ jobs:
       ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
       ob_artifactBaseName: msixbundle_${{ parameters.Configuration }}
     steps:
+      # Download the MSIX artifacts
     - ${{ each platform in parameters.Platforms }}:
       - task: DownloadPipelineArtifact@2
         displayName: Download msix_${{ platform }}_${{ parameters.Configuration }}
@@ -24,6 +30,7 @@ jobs:
           artifactName: msix_${{ platform }}_${{ parameters.Configuration }}
           targetPath: '$(ob_outputDirectory)'
 
+      # Bundle the MSIX artifacts
     - template: /.pipelines/steps/build-msixbundle.yml@self
       parameters:
         Configuration: ${{ parameters.Configuration }}

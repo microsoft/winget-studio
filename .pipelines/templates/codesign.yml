@@ -1,6 +1,9 @@
 parameters:
+  # The files to sign
   - name: FilesToSign
     type: string
+
+  # The root directory to search for files
   - name: SearchRoot
     type: string
 
@@ -13,4 +16,3 @@ steps:
       files_to_sign: ${{ parameters.FilesToSign }}
       cp_code: 400 # CP-230012 - Microsoft Corporation (SHA2 Root - Standard Root)
       search_root: ${{ parameters.SearchRoot }}
-

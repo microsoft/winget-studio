@@ -3,7 +3,7 @@ Param(
     [string]$Configuration = "Debug",
     [string]$Version,
     [string]$BuildStep = "all",
-    [string]$AzureBuildingBranch = "main",
+    [bool]$IsRelease = $false,
     [string]$OutputDir,
     [switch]$IsAzurePipelineBuild = $false,
     [switch]$Help = $false
@@ -37,7 +37,7 @@ Options:
   -Help
       Display this usage message.
 "@
-  Exit
+    Exit
 }
 
 $env:Build_RootDirectory = (Split-Path $MyInvocation.MyCommand.Path)
@@ -62,107 +62,115 @@ Invoke-Expression "& { $(Invoke-RestMethod https://aka.ms/install-artifacts-cred
 . build\Scripts\CertSignAndInstall.ps1
 
 Try {
-  if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix")) {
-    $buildRing = "Dev"
-    $newPackageName = $null
-    $newPackageDisplayName = $null
-    $newAppDisplayNameResource = $null
+    if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix")) {
+        # Load current (dev) appxmanifest
+        $appxmanifestPath = (Join-Path $env:Build_RootDirectory "src\WinGetStudio\Package.appxmanifest")
+        $appxmanifest = [System.Xml.Linq.XDocument]::Load($appxmanifestPath)
 
-    if ($AzureBuildingBranch -ieq "release") {
-      $buildRing = "Stable"
-      $newPackageName = "Microsoft.Windows.WinGetStudio"
-      $newPackageDisplayName = "WinGet Studio (Preview)"
-      $newAppDisplayNameResource = "ms-resource:AppDisplayNameStable"
-    }
+        # Define the xml namespaces
+        [Reflection.Assembly]::LoadWithPartialName("System.Xml.Linq")
+        $xIdentity = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Identity");
+        $xProperties = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Properties");
+        $xDisplayName = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}DisplayName");
+        $xApplications = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Applications");
+        $xApplication = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Application");
+        $uapVisualElements = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/uap/windows10}VisualElements");
 
-    [Reflection.Assembly]::LoadWithPartialName("System.Xml.Linq")
-    $xIdentity = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Identity");
-    $xProperties = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Properties");
-    $xDisplayName = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}DisplayName");
-    $xApplications = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Applications");
-    $xApplication = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Application");
-    $uapVisualElements = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/uap/windows10}VisualElements");
+        # Cache current (dev) values
+        $devVersion = $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value
+        $devPackageName = $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value
+        $devPackageDisplayName = $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value
+        $devAppDisplayNameResource = $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value
 
-    # Update the appxmanifest
-    $appxmanifestPath = (Join-Path $env:Build_RootDirectory "src\WinGetStudio\Package.appxmanifest")
-    $appxmanifest = [System.Xml.Linq.XDocument]::Load($appxmanifestPath)
-    $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value = $env:msix_version
-    if (-not ([string]::IsNullOrEmpty($newPackageName))) {
-      $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value = $newPackageName
-    } 
-    if (-not ([string]::IsNullOrEmpty($newPackageDisplayName))) {
-      $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value = $newPackageDisplayName
-    }
-    if (-not ([string]::IsNullOrEmpty($newAppDisplayNameResource))) {
-      $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value = $newAppDisplayNameResource
-    }
-    $appxmanifest.Save($appxmanifestPath)
+        # For dev build, use the cached values
+        $buildRing = "Dev"
+        $packageName = $devPackageName
+        $packageDisplayName = $devPackageDisplayName
+        $appDisplayNameResource = $devAppDisplayNameResource
 
-    foreach ($platform in $env:Build_Platform.Split(",")) {
-      foreach ($configuration in $env:Build_Configuration.Split(",")) {
-        $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
-        $msbuildArgs = @(
-            ("src/WinGetStudio.sln"),
-            ("/p:Platform="+$platform),
-            ("/p:Configuration="+$configuration),
-            ("/restore"),
-            ("/binaryLogger:WinGetStudio.$platform.$configuration.binlog"),
-            ("/p:AppxPackageOutput=$appxPackageDir\WinGetStudio-$platform.msix"),
-            ("/p:AppxPackageSigningEnabled=false"),
-            ("/p:GenerateAppxPackageOnBuild=true"),
-            ("/p:BuildRing=$buildRing")
-        )
-
-        & $msbuildPath $msbuildArgs
-        if (-not($IsAzurePipelineBuild) -And $isAdmin) {
-          Invoke-SignPackage "$appxPackageDir\WinGetStudio-$platform.msix"
+        # For release build, use the new values
+        if ($IsRelease) {
+            $buildRing = "Stable"
+            $packageName = "Microsoft.Windows.WinGetStudio"
+            $packageDisplayName = "WinGet Studio (Preview)"
+            $appDisplayNameResource = "ms-resource:AppDisplayNameStable"
         }
-      }
+
+        Try {
+            # Update the appxmanifest
+            $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value = $env:msix_version
+            $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value = $packageName
+            $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value = $packageDisplayName
+            $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value = $appDisplayNameResource
+            $appxmanifest.Save($appxmanifestPath)
+
+            foreach ($platform in $env:Build_Platform.Split(",")) {
+                foreach ($configuration in $env:Build_Configuration.Split(",")) {
+                    $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
+                    $msbuildArgs = @(
+                        ("src/WinGetStudio.sln"),
+                        ("/p:Platform=" + $platform),
+                        ("/p:Configuration=" + $configuration),
+                        ("/restore"),
+                        ("/binaryLogger:WinGetStudio.$platform.$configuration.binlog"),
+                        ("/p:AppxPackageOutput=$appxPackageDir\WinGetStudio-$platform.msix"),
+                        ("/p:AppxPackageSigningEnabled=false"),
+                        ("/p:GenerateAppxPackageOnBuild=true"),
+                        ("/p:BuildRing=$buildRing")
+                    )
+
+                    & $msbuildPath $msbuildArgs
+                    if (-not($IsAzurePipelineBuild) -And $isAdmin) {
+                        Invoke-SignPackage "$appxPackageDir\WinGetStudio-$platform.msix"
+                    }
+                }
+            }
+        }
+        finally {
+            # Revert the appxmanifest to dev values
+            $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value = $devVersion
+            $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value = $devPackageName
+            $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value = $devPackageDisplayName
+            $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value = $devAppDisplayNameResource
+            $appxmanifest.Save($appxmanifestPath) 
+        }
     }
 
-    # Reset the appxmanifest to prevent unnecessary code changes
-    $appxmanifest = [System.Xml.Linq.XDocument]::Load($appxmanifestPath)
-    $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value = "0.0.0.0"
-    $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value = "Microsoft.Windows.WinGetStudio.Dev"
-    $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value = "WinGet Studio (Dev)"
-    $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value = "ms-resource:AppDisplayNameDev"    
-    $appxmanifest.Save($appxmanifestPath)
-  }
-
-  if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msixbundle")) {
-    foreach ($configuration in $env:Build_Configuration.Split(",")) {
-      $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
-      $appxBundlePath = (Join-Path $OutputDir ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + "_8wekyb3d8bbwe.msixbundle"))
-      .\build\scripts\Create-AppxBundle.ps1 -InputPath $appxPackageDir -ProjectName WinGetStudio -BundleVersion ([version]$env:msix_version) -OutputPath $appxBundlePath
-      if (-not($IsAzurePipelineBuild) -And $isAdmin) {
-        Invoke-SignPackage $appxBundlePath
-      }
+    if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msixbundle")) {
+        foreach ($configuration in $env:Build_Configuration.Split(",")) {
+            $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
+            $appxBundlePath = (Join-Path $OutputDir ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + "_8wekyb3d8bbwe.msixbundle"))
+            .\build\scripts\Create-AppxBundle.ps1 -InputPath $appxPackageDir -ProjectName WinGetStudio -BundleVersion ([version]$env:msix_version) -OutputPath $appxBundlePath
+            if (-not($IsAzurePipelineBuild) -And $isAdmin) {
+                Invoke-SignPackage $appxBundlePath
+            }
+        }
     }
-  }
-} Catch {
-  $formatString = "`n{0}`n`n{1}`n`n"
-  $fields = $_, $_.ScriptStackTrace
-  Write-Host ($formatString -f $fields) -ForegroundColor RED
-  Exit 1
+}
+Catch {
+    $formatString = "`n{0}`n`n{1}`n`n"
+    $fields = $_, $_.ScriptStackTrace
+    Write-Host ($formatString -f $fields) -ForegroundColor RED
+    Exit 1
 }
 
-$TotalTime = (Get-Date)-$StartTime
+$TotalTime = (Get-Date) - $StartTime
 $TotalMinutes = [math]::Floor($TotalTime.TotalMinutes)
 $TotalSeconds = [math]::Ceiling($TotalTime.TotalSeconds) - ($totalMinutes * 60)
 
 if (-not($isAdmin)) {
-  Write-Host @"
+    Write-Host @"
 
 WARNING: Cert signing requires admin privileges.  To sign, run the following in an elevated Developer Command Prompt.
 "@ -ForegroundColor GREEN
-  foreach ($platform in $env:Build_Platform.Split(",")) {
-    foreach ($configuration in $env:Build_Configuration.Split(",")) {
-      $appxPackageFile = (Join-Path $OutputDir "AppxPackages\$configuration\WinGetStudio-$platform.msix")
-        Write-Host @"
+    foreach ($platform in $env:Build_Platform.Split(",")) {
+        foreach ($configuration in $env:Build_Configuration.Split(",")) {
+            $appxPackageFile = (Join-Path $OutputDir "AppxPackages\$configuration\WinGetStudio-$platform.msix")
+            Write-Host @"
 powershell -command "& { . build\scripts\CertSignAndInstall.ps1; Invoke-SignPackage $appxPackageFile }"
 "@ -ForegroundColor GREEN
+        }
     }
-  }
 }
 
 Write-Host @"

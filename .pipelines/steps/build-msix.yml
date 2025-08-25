@@ -1,22 +1,31 @@
 parameters:
+  # The platform to build for
   - name: Platform
     type: string
+
+  # The configuration to build for
   - name: Configuration
     type: string
-  - name: BuildingBranch
-    type: string
+
+  # The output directory for the build artifacts
   - name: OutputDir
     type: string
+
+  # Whether to sign the output artifacts
   - name: SignOutput
+    type: boolean
+
+  # Whether this is a release build
+  - name: IsRelease
     type: boolean
 
 steps:
   - pwsh: |
       echo "Platform: ${{ parameters.Platform }}"
       echo "Configuration: ${{ parameters.Configuration }}"
-      echo "BuildingBranch: ${{ parameters.BuildingBranch }}"
       echo "OutputDir: ${{ parameters.OutputDir }}"
       echo "SignOutput: ${{ parameters.SignOutput }}"
+      echo "IsRelease: ${{ parameters.IsRelease }}"
     displayName: 'Display Build Msix Parameters'
   
   - task: NuGetToolInstaller@1
@@ -34,7 +43,7 @@ steps:
         -Configuration "${{ parameters.Configuration }}" `
         -Version "$(MsixVersion)" `
         -BuildStep "msix" `
-        -AzureBuildingBranch "${{ parameters.BuildingBranch }}" `
+        -IsRelease ${{ parameters.IsRelease }} `
         -OutputDir "${{ parameters.OutputDir }}" `
         -IsAzurePipelineBuild
 
@@ -48,4 +57,4 @@ steps:
     - template: /.pipelines/templates/codesign.yml@self
       parameters:
         FilesToSign: '**/*.msix'
-        SearchRoot: ${{ parameters.OutputDir }}
+        SearchRoot: '${{ parameters.OutputDir }}'

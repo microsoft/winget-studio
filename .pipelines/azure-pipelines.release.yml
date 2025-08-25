@@ -1,11 +1,10 @@
-trigger:
-- main
+trigger: none
 
 parameters:
   # Whether to sign the output artifacts
 - name: SignOutput
   type: boolean
-  default: False
+  default: True
 
   # The platforms to build for
 - name: Platforms
@@ -19,7 +18,6 @@ parameters:
 - name: Configurations
   type: object
   default:
-  - Debug
   - Release
 
 variables:
@@ -33,7 +31,7 @@ resources:
     ref: refs/heads/main
 
 extends:
-  template: v2/Microsoft.NonOfficial.yml@templates
+  template: v2/Microsoft.Official.yml@templates
   parameters:
     platform:
       name: 'windows_undocked'
@@ -45,4 +43,4 @@ extends:
         Platforms: ${{ parameters.Platforms }}
         Configuration: ${{ parameters.Configurations }}
         SignOutput: ${{ parameters.SignOutput }}
-        IsRelease: False
+        IsRelease: True
