@@ -1,8 +1,13 @@
 parameters:
+  # The configuration to build for
   - name: Configuration
     type: string
+
+  # The output directory for the build artifacts
   - name: OutputDir
     type: string
+
+  # Whether to sign the output files
   - name: SignOutput
     type: boolean
 
