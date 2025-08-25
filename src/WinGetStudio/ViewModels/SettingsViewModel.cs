@@ -9,7 +9,6 @@ using Microsoft.UI.Xaml;
 using Windows.ApplicationModel;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Helpers;
-using WinGetStudio.Services;
 
 namespace WinGetStudio.ViewModels;
 

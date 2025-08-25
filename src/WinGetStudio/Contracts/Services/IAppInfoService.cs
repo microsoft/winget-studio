@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Contracts.Services;
 
 public interface IAppInfoService
 {

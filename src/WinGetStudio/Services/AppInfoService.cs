@@ -1,13 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Helpers;
 
 namespace WinGetStudio.Services;
 
 internal class AppInfoService : IAppInfoService
 {
-        public string GetAppNameLocalized()
+    /// <inheritdoc/>
+    public string GetAppNameLocalized()
     {
 #if STABLE_BUILD
         return "AppDisplayNameStable".GetLocalized();
@@ -15,5 +17,4 @@ internal class AppInfoService : IAppInfoService
         return "AppDisplayNameDev".GetLocalized();
 #endif
     }
-
 }

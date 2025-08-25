@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Windows.ApplicationModel;
 using WinGetStudio.Services.Core.Models;
+using Windows.ApplicationModel;
 
 namespace WinGetStudio.Services.Core.Contracts;
 

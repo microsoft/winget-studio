@@ -2,9 +2,8 @@
 // Licensed under the MIT License
 
 using Windows.UI.ViewManagement;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Helpers;
-
-using WinGetStudio.Services;
 
 namespace WinGetStudio;
 
