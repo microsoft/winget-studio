@@ -43,7 +43,7 @@ steps:
         -Configuration "${{ parameters.Configuration }}" `
         -Version "$(MsixVersion)" `
         -BuildStep "msix" `
-        -IsRelease ${{ parameters.IsRelease }} `
+        -IsRelease:$${{ parameters.IsRelease }} `
         -OutputDir "${{ parameters.OutputDir }}" `
         -IsAzurePipelineBuild
 
