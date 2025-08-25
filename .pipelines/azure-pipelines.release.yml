@@ -41,6 +41,6 @@ extends:
     - template: /.pipelines/templates/main.yml@self
       parameters:
         Platforms: ${{ parameters.Platforms }}
-        Configuration: ${{ parameters.Configurations }}
+        Configurations: ${{ parameters.Configurations }}
         SignOutput: ${{ parameters.SignOutput }}
         IsRelease: True
