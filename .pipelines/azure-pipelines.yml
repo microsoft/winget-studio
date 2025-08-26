@@ -1,6 +1,11 @@
 trigger:
 - main
 
+pr:
+  branches:
+    include:
+      - main
+
 parameters:
   # Whether to sign the output artifacts
 - name: SignOutput
