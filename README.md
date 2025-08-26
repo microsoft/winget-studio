@@ -6,7 +6,7 @@ This repository contains the source code for [WinGet Studio](https://github.com/
 
 ## Overview
 
-<!-- Overview -->
+WinGet Studio is designed to help users create and modify WinGet Configuration files. It also includes the ability to use "get", "set", and "test" for any installed Desired State Configuration (DSC) resources.
 
 ## Installation
 
