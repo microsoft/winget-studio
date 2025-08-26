@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using WinGetStudio.Services.WindowsPackageManager.COM;
 using Microsoft.Management.Deployment;
+using WinGetStudio.Services.WindowsPackageManager.COM;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Extensions;
 

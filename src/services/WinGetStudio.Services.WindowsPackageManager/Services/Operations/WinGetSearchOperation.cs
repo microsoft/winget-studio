@@ -2,12 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.WindowsPackageManager.Contracts;
 using WinGetStudio.Services.WindowsPackageManager.Contracts.Operations;
 using WinGetStudio.Services.WindowsPackageManager.Models;
-using Microsoft.Extensions.Logging;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Services.Operations;
 

@@ -1,0 +1,35 @@
+parameters:
+  # The platform to build for
+  - name: Platform
+    type: string
+
+  # The configuration to build for
+  - name: Configuration
+    type: string
+
+  # Whether to sign the output artifacts
+  - name: SignOutput
+    type: boolean
+
+  # Whether this is a release build
+  - name: IsRelease
+    type: boolean
+
+jobs:
+- job: Build_${{ parameters.Platform }}_${{ parameters.Configuration }}
+  pool:
+    type: windows
+  variables:
+    runCodesignValidationInjection: false
+    skipComponentGovernanceDetection: true
+    ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
+    ob_artifactBaseName: msix_${{ parameters.Platform }}_${{ parameters.Configuration }}
+  timeoutInMinutes: 120
+  steps:
+  - template: /.pipelines/steps/build-msix.yml@self
+    parameters:
+      Platform: ${{ parameters.Platform }}
+      Configuration: ${{ parameters.Configuration }}
+      IsRelease: ${{ parameters.IsRelease }}
+      OutputDir: '$(ob_outputDirectory)'
+      SignOutput: ${{ parameters.SignOutput }}

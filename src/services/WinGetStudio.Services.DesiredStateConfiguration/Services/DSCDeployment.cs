@@ -3,9 +3,9 @@
 
 using System;
 using System.Threading.Tasks;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 

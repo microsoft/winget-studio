@@ -6,7 +6,8 @@ using WinGetStudio.ViewModels;
 using WinGetStudio.Views;
 
 namespace WinGetStudio.Services;
-internal class ValidationPageService : PageService, IValidationPageService
+
+internal sealed class ValidationPageService : PageService, IValidationPageService
 {
     protected override void ConfigurePages()
     {

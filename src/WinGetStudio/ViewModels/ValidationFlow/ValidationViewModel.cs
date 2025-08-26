@@ -1,11 +1,14 @@
-﻿using System.Collections.ObjectModel;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using Windows.Foundation.Collections;
 
 namespace WinGetStudio.ViewModels;
 
@@ -41,9 +44,11 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     [ObservableProperty]
     public partial string TestBannerText { get; set; } = string.Empty;
+
     public bool IsPropertiesEmpty => Properties.Count == 0;
+
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
-    
+
     public ValidationViewModel(IDSC dsc, IDSCSetBuilder setBuilder, IAppNavigationService navService)
     {
         _dsc = dsc;
@@ -56,7 +61,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     public void OnNavigatedTo(object parameter)
     {
-        if(parameter is IDSCUnit u)
+        if (parameter is IDSCUnit u)
         {
             ModuleName = u.ModuleName;
             Type = u.Type;
@@ -94,7 +99,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// Creates a new <see cref="ConfigurationUnitModel"/> instance based on the current module name and properties.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Newly created <see cref="ConfigurationUnitModel"/> instance.</returns>
     private ConfigurationUnitModel CreateConfigurationUnitModel()
     {
         ConfigurationUnitModel unit = new();
@@ -102,6 +107,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         ConfigurationPropertiesToValueSet(unit.Settings, Properties);
         return unit;
     }
+
     private void ConfigurationPropertiesToValueSet(ValueSet settings, ObservableCollection<ConfigurationProperty> properties)
     {
         foreach (var property in properties)
@@ -126,6 +132,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
             }
         }
     }
+
     partial void OnModuleNameChanged(string oldValue, string newValue)
     {
         TabHeader = newValue;
@@ -134,11 +141,10 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// Converts YAML data into a user interface representation asynchronously.
     /// </summary>
-    /// <remarks>This method processes the raw YAML data and updates the UI-related properties accordingly. 
+    /// <remarks>This method processes the raw YAML data and updates the UI-related properties accordingly.
     /// It clears the existing properties and populates them based on the parsed YAML configuration.</remarks>
-    /// <returns></returns>
     [RelayCommand]
-    private async Task OnConvertYamlToUIAsync()
+    private void OnConvertYamlToUI()
     {
         var unit = CreateConfigurationUnitModel();
         if (unit.TryLoad(RawData))
@@ -153,7 +159,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         }
         else
         {
-            //TODO implement error handling
+            // TODO implement error handling
         }
     }
 
@@ -182,7 +188,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
             else if (kvp.Value is double d)
             {
                 properties.Add(new(kvp.Key, new NumberValue(d)));
-            }else if (kvp.Value is ValueSet v)
+            }
+            else if (kvp.Value is ValueSet v)
             {
                 ObservableCollection<ConfigurationProperty> nestedProperties = new();
                 ConvertYamlToUIHelper(nestedProperties, v);
@@ -194,13 +201,12 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// Retrieves the current configuration unit from the system asynchronously.
     /// </summary>
-    /// <returns></returns>
     [RelayCommand]
     private async Task OnGetAsync()
     {
         ActionsEnabled = false;
         ConfigurationUnitModel unit = CreateConfigurationUnitModel();
-        await _dsc.Get(unit);
+        await _dsc.DscGet(unit);
         RawData = unit.ToYaml();
         ActionsEnabled = true;
     }
@@ -208,26 +214,24 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// Sets the current machine state to the specified configuration unit asynchronously.
     /// </summary>
-    /// <returns></returns>
     [RelayCommand]
     private async Task OnSetAsync()
     {
         ActionsEnabled = false;
         ConfigurationUnitModel unit = CreateConfigurationUnitModel();
-        await _dsc.Set(unit);
+        await _dsc.DscSet(unit);
         ActionsEnabled = true;
     }
 
     /// <summary>
     /// Tests whether the current machine state matches the specified configuration unit asynchronously.
     /// </summary>
-    /// <returns></returns>
     [RelayCommand]
     private async Task OnTestAsync()
     {
         ActionsEnabled = false;
         ConfigurationUnitModel unit = CreateConfigurationUnitModel();
-        await _dsc.Test(unit);
+        await _dsc.DscTest(unit);
         TestResult = unit.TestResult;
         if (unit.TestResult)
         {
@@ -237,6 +241,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         {
             TestBannerText = "Machine is not in desired state";
         }
+
         TestBannerVisible = true;
         ActionsEnabled = true;
     }
@@ -244,13 +249,12 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// Exports the current configuration asynchronously and updates the raw data representation.
     /// </summary>
-    /// <returns></returns>
     [RelayCommand]
     private async Task OnExportAsync()
     {
         ActionsEnabled = false;
         ConfigurationUnitModel unit = CreateConfigurationUnitModel();
-        await _dsc.Export(unit);
+        await _dsc.DscExport(unit);
         RawData = unit.ToYaml();
         ActionsEnabled = true;
     }

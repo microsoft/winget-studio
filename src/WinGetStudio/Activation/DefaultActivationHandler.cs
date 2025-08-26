@@ -1,7 +1,8 @@
-using WinGetStudio.Contracts.Services;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using Windows.ApplicationModel.Activation;
-
-
+using WinGetStudio.Contracts.Services;
 
 namespace WinGetStudio.Activation;
 

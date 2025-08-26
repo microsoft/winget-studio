@@ -17,10 +17,10 @@
         <localConverters:PropertyTypeToNumberConverter x:Key="PropertyTypeToNumberConverter"/>
 
         <selectors:PropertyTemplateSelector x:Key="PropertyTemplateSelector"
-             Boolean="{StaticResource BooleanTemplate}"
-             Number="{StaticResource NumberTemplate}"
-             String="{StaticResource StringTemplate}"
-             Object="{StaticResource ObjectTemplate}"/>
+             BooleanTemplate="{StaticResource BooleanTemplate}"
+             NumberTemplate="{StaticResource NumberTemplate}"
+             StringTemplate="{StaticResource StringTemplate}"
+             ObjectTemplate="{StaticResource ObjectTemplate}"/>
 
         <DataTemplate x:Key="StringTemplate" x:DataType="model:ConfigurationProperty">
             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">

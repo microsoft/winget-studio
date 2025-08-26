@@ -1,0 +1,60 @@
+parameters:
+  # The platform to build for
+  - name: Platform
+    type: string
+
+  # The configuration to build for
+  - name: Configuration
+    type: string
+
+  # The output directory for the build artifacts
+  - name: OutputDir
+    type: string
+
+  # Whether to sign the output artifacts
+  - name: SignOutput
+    type: boolean
+
+  # Whether this is a release build
+  - name: IsRelease
+    type: boolean
+
+steps:
+  - pwsh: |
+      echo "Platform: ${{ parameters.Platform }}"
+      echo "Configuration: ${{ parameters.Configuration }}"
+      echo "OutputDir: ${{ parameters.OutputDir }}"
+      echo "SignOutput: ${{ parameters.SignOutput }}"
+      echo "IsRelease: ${{ parameters.IsRelease }}"
+    displayName: 'Display Build Msix Parameters'
+  
+  - task: NuGetToolInstaller@1
+    inputs:
+        versionSpec: '6.14.0'
+
+  - task: NuGetAuthenticate@1
+
+  - task: PowerShell@2
+    displayName: Build Msix
+    inputs:
+      filePath: 'Build.ps1'
+      arguments: |
+        -Platform "${{ parameters.Platform }}" `
+        -Configuration "${{ parameters.Configuration }}" `
+        -Version "$(MsixVersion)" `
+        -BuildStep "msix" `
+        -IsRelease:$${{ parameters.IsRelease }} `
+        -OutputDir "${{ parameters.OutputDir }}" `
+        -IsAzurePipelineBuild
+
+  - pwsh: |
+      Move-Item `
+      -Path $(Build.SourcesDirectory)\WinGetStudio.${{ parameters.Platform }}.${{ parameters.Configuration }}.binlog `
+      -Destination ${{ parameters.OutputDir }} -Force
+    displayName: Move BinLog to output directory
+
+  - ${{ if eq(parameters.SignOutput, true) }}:
+    - template: /.pipelines/templates/codesign.yml@self
+      parameters:
+        FilesToSign: '**/*.msix'
+        SearchRoot: '${{ parameters.OutputDir }}'

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
+
 public class EditableDSCUnit : IDSCUnit
 {
     public string Type { get; set; } = string.Empty;
@@ -44,7 +45,7 @@ public class EditableDSCUnit : IDSCUnit
     {
     }
 
-    public bool RequiresElevation { get; set; } = false;
+    public bool RequiresElevation { get; set; }
 
     public Task<IDSCUnitDetails> GetDetailsAsync()
     {

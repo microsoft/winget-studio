@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Management.Configuration;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.ViewModels;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using Microsoft.Management.Configuration;
+using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Models;
 
@@ -17,13 +17,13 @@ public partial class ApplySetUnit : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLoading))]
     [NotifyPropertyChangedFor(nameof(IsExpanded))]
-    private ApplySetUnitState _state;
+    public partial ApplySetUnitState State { get; set; }
 
     [ObservableProperty]
-    private string? _message;
+    public partial string? Message { get; set; }
 
     [ObservableProperty]
-    private string? _description;
+    public partial string? Description { get; set; }
 
     public bool IsLoading => State == ApplySetUnitState.InProgress;
 
@@ -45,7 +45,7 @@ public partial class ApplySetUnit : ObservableObject
         {
             Message = _stringResource.GetLocalized("ConfigurationUnitSuccess");
         }
-        else if(State == ApplySetUnitState.NotStarted)
+        else if (State == ApplySetUnitState.NotStarted)
         {
             Message = _stringResource.GetLocalized("ConfigurationUnitNotStarted");
         }

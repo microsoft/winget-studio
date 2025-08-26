@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Management.Configuration;
+using Microsoft.UI.Dispatching;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using Microsoft.UI.Dispatching;
-using Microsoft.Management.Configuration;
-using System.Collections.ObjectModel;
 using WinGetStudio.Models;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
@@ -23,7 +23,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DoneCommand))]
-    private bool _isLoading = true;
+    public partial bool IsLoading { get; set; } = true;
 
     private bool IsDone => !IsLoading;
 
@@ -45,7 +45,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
         if (parameter is IDSCSet dscSet)
         {
             _dscSet = dscSet;
-            foreach(var unit in dscSet.Units)
+            foreach (var unit in dscSet.Units)
             {
                 Units.Add(new(unit, _stringResource));
             }
@@ -60,7 +60,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private async Task OnLoadedAsync()
     {
-        if(_dscSet != null)
+        if (_dscSet != null)
         {
             var task = _dsc.ApplySetAsync(_dscSet);
             task.Progress = (_, data) => OnDataChanged(data);

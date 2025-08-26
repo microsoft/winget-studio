@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+
 public interface IDSCSetBuilder
 {
     // Target file path for when the set is saved to a file
@@ -41,10 +42,10 @@ public interface IDSCSetBuilder
     public void UpdateUnit(EditableDSCUnit unit);
 
     /// <summary>
-    /// Loads the state of <paramref name="set"/> into this object
+    /// Loads the state of <paramref name="dscSet"/> into this object
     /// </summary>
-    /// <param name="set"></param>
-    public void ImportSet(IDSCSet set);
+    /// <param name="dscSet">The DSCSet to load from</param>
+    public void ImportSet(IDSCSet dscSet);
 
     /// <summary>
     /// Checks whether Units is Empty

@@ -7,7 +7,7 @@ using WinGetStudio.Views.ConfigurationFlow;
 
 namespace WinGetStudio.Services;
 
-internal class ConfigurationPageService : PageService, IConfigurationPageService
+internal sealed class ConfigurationPageService : PageService, IConfigurationPageService
 {
     protected override void ConfigurePages()
     {

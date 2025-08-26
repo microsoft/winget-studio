@@ -1,38 +1,39 @@
-﻿using System.Reflection;
-using System.Windows.Input;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+using System.Reflection;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
+using Microsoft.UI.Xaml;
+using Windows.ApplicationModel;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Helpers;
-
-using Microsoft.UI.Xaml;
-
-using Windows.ApplicationModel;
 
 namespace WinGetStudio.ViewModels;
 
 public partial class SettingsViewModel : ObservableRecipient
 {
     private readonly IThemeSelectorService _themeSelectorService;
+    private readonly IAppInfoService _appInfoService;
 
     [ObservableProperty]
-    private ElementTheme _elementTheme;
+    public partial ElementTheme ElementTheme { get; set; }
 
     [ObservableProperty]
-    private string _versionDescription;
+    public partial string VersionDescription { get; set; }
 
     public ICommand SwitchThemeCommand
     {
         get;
     }
 
-    public SettingsViewModel(IThemeSelectorService themeSelectorService)
+    public SettingsViewModel(IThemeSelectorService themeSelectorService, IAppInfoService appInfoService)
     {
+        _appInfoService = appInfoService;
         _themeSelectorService = themeSelectorService;
-        _elementTheme = _themeSelectorService.Theme;
-        _versionDescription = GetVersionDescription();
+        ElementTheme = _themeSelectorService.Theme;
+        VersionDescription = GetVersionDescription();
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>
@@ -45,7 +46,7 @@ public partial class SettingsViewModel : ObservableRecipient
             });
     }
 
-    private static string GetVersionDescription()
+    private string GetVersionDescription()
     {
         Version version;
 
@@ -60,6 +61,6 @@ public partial class SettingsViewModel : ObservableRecipient
             version = Assembly.GetExecutingAssembly().GetName().Version!;
         }
 
-        return $"{"AppDisplayName".GetLocalized()} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+        return $"{_appInfoService.GetAppNameLocalized()} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
     }
 }

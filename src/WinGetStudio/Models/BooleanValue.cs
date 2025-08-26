@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 namespace WinGetStudio.Models;
+
 public class BooleanValue : ConfigurationPropertyValueBase
 {
     private bool _value;
@@ -11,7 +12,9 @@ public class BooleanValue : ConfigurationPropertyValueBase
         get => _value;
         set => _value = (bool)value;
     }
-    public BooleanValue(bool value) : base(PropertyType.Boolean)
+
+    public BooleanValue(bool value)
+        : base(PropertyType.BooleanType)
     {
         _value = value;
     }

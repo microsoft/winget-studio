@@ -9,14 +9,14 @@ namespace WinGetStudio.Models;
 public partial class SelectFileResult : ObservableObject
 {
     [ObservableProperty]
-    private string? _filePath;
+    public partial string? FilePath { get; set; }
 
     [ObservableProperty]
-    private bool _success;
+    public partial bool Success { get; set; }
 
     [ObservableProperty]
-    private string? _message;
+    public partial string? Message { get; set; }
 
     [ObservableProperty]
-    private IDSCSet? _configurationSet;
+    public partial IDSCSet? ConfigurationSet { get; set; }
 }

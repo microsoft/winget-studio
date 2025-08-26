@@ -1,0 +1,41 @@
+parameters:
+# Whether to sign the output artifacts
+- name: SignOutput
+  type: boolean
+
+# The platforms to build for
+- name: Platforms
+  type: object
+
+# The configurations to build for
+- name: Configurations
+  type: object
+
+# Whether this is a release build
+- name: IsRelease
+  type: boolean
+
+stages:
+    # Build stage for WinGetStudio
+  - stage: Build_WinGetStudio
+    jobs:
+    - ${{ each configuration in parameters.Configurations }}:
+      - ${{ each platform in parameters.Platforms }}:
+        - template: /.pipelines/templates/build.yml@self
+          parameters:
+            Platform: ${{ platform }}
+            Configuration: ${{ configuration }}
+            SignOutput: ${{ parameters.SignOutput }}
+            IsRelease: ${{ parameters.IsRelease }}
+
+    # Bundle stage for WinGetStudio
+  - stage: Bundle_WinGetStudio
+    dependsOn: [Build_WinGetStudio]
+    condition: in(dependencies.Build_WinGetStudio.result, 'Succeeded')
+    jobs:
+    - ${{ each configuration in parameters.Configurations }}:
+      - template: /.pipelines/templates/bundle.yml@self
+        parameters:
+          Platforms: ${{ parameters.Platforms }}
+          Configuration: ${{ configuration }}
+          SignOutput: ${{ parameters.SignOutput }}

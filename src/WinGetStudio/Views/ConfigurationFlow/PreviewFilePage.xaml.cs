@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.WinUI;
-using WinGetStudio.Contracts.Views;
-using WinGetStudio.ViewModels.ConfigurationFlow;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
+using WinGetStudio.Contracts.Views;
+using WinGetStudio.ViewModels.ConfigurationFlow;
 
 namespace WinGetStudio.Views.ConfigurationFlow;
 
@@ -40,6 +40,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             }
         }
     }
+
     private async void ShowSaveDialog(object sender, RoutedEventArgs e)
     {
         if (!ViewModel.IsInEditMode)
@@ -48,16 +49,18 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             await ViewModel.StoreYamlStateCommand.ExecuteAsync(null);
             return;
         }
+
         if (await ViewModel.IsSaveRequiredAsync())
         {
             var dialog = SaveDialog;
 
             await dialog.ShowAsync();
         }
-        
+
         ViewModel.IsInEditMode = !ViewModel.IsInEditMode;
         ViewModel.IsStateChanged = false;
     }
+
     private async void ShowApplyDialog(object sender, RoutedEventArgs e)
     {
         var dialog = ApplyDialog;

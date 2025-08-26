@@ -8,13 +8,14 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;arm64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-    <PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
-	<ImplicitUsings>enable</ImplicitUsings>
-	<Nullable>enable</Nullable>
-	<UseWinUI>true</UseWinUI>
-	<EnableMsixTooling>true</EnableMsixTooling>
-	<LangVersion>preview</LangVersion>
-	<AssemblyName>Winget Studio</AssemblyName>
+    <PublishProfile>Properties\PublishProfiles\win-$(Platform).pubxml</PublishProfile>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <LangVersion>preview</LangVersion>
+    <AssemblyName>Winget Studio</AssemblyName>
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Views\ConfigurationFlow\ApplyFilePage.xaml" />
@@ -26,16 +27,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Common" Version="8.4.0" />
-    <PackageReference Include="CommunityToolkit.Labs.WinUI.Shimmer" Version="0.1.250513-build.2126" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250129-preview2" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250129-preview2" />
-    <PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.2.250129-preview2" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
-    <PackageReference Include="WinUIEx" Version="2.5.1" />
+    <PackageReference Include="CommunityToolkit.Common" />
+    <PackageReference Include="CommunityToolkit.Labs.WinUI.Shimmer" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" />
+    <PackageReference Include="CommunityToolkit.WinUI.Converters" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Windows.CsWinRT" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" />
+    <PackageReference Include="WinUIEx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,26 +65,6 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm64'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm64'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	
   
   <ItemGroup>
     <PRIResource Update="Strings\en-us\Resources.resw">

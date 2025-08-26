@@ -3,12 +3,12 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Management.Deployment;
 using WinGetStudio.Services.Core.Contracts;
 using WinGetStudio.Services.Core.Exceptions;
 using WinGetStudio.Services.WindowsPackageManager.COM;
 using WinGetStudio.Services.WindowsPackageManager.Contracts;
-using Microsoft.Extensions.Logging;
-using Microsoft.Management.Deployment;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Services;
 

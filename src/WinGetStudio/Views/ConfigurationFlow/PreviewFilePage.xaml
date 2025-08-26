@@ -11,7 +11,6 @@
     xmlns:models="using:WinGetStudio.Models"
     xmlns:viewmodels="using:WinGetStudio.ViewModels"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
-    xmlns:ic="using:Microsoft.Xaml.Interactions.Core"
     xmlns:userControls="using:WinGetStudio.Views.Controls"
     mc:Ignorable="d">
 
@@ -182,9 +181,9 @@
                                   HorizontalAlignment="Stretch">
 
                             <i:Interaction.Behaviors>
-                                <ic:EventTriggerBehavior EventName="Loaded">
-                                    <ic:InvokeCommandAction Command="{x:Bind LoadedCommand}" />
-                                </ic:EventTriggerBehavior>
+                                <i:EventTriggerBehavior EventName="Loaded">
+                                    <i:InvokeCommandAction Command="{x:Bind LoadedCommand}" />
+                                </i:EventTriggerBehavior>
                             </i:Interaction.Behaviors>
 
                             <!-- Expander header -->

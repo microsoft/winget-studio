@@ -4,14 +4,14 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Management.Deployment;
+using Windows.Win32.Foundation;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.COM;
 using WinGetStudio.Services.WindowsPackageManager.Contracts;
 using WinGetStudio.Services.WindowsPackageManager.Exceptions;
 using WinGetStudio.Services.WindowsPackageManager.Models;
-using Microsoft.Extensions.Logging;
-using Microsoft.Management.Deployment;
-using Windows.Win32.Foundation;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Services;
 
