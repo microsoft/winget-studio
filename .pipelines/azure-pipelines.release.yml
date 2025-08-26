@@ -33,9 +33,6 @@ resources:
 extends:
   template: v2/Microsoft.Official.yml@templates
   parameters:
-    globalSdl:
-      tsa:
-        enabled: false # Disable TSA to force build breaks
     platform:
       name: 'windows_undocked'
     git:

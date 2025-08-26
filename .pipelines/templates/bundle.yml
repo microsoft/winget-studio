@@ -18,7 +18,7 @@ jobs:
     variables:
       runCodesignValidationInjection: false
       skipComponentGovernanceDetection: true
-      ob_outputDirectory: $(Build.ArtifactStagingDirectory)\winget-studio
+      ob_outputDirectory: $(Build.ArtifactStagingDirectory)\wingetstudio
       ob_artifactBaseName: msixbundle_${{ parameters.Configuration }}
     steps:
       # Download the MSIX artifacts
