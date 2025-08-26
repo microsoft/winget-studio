@@ -1,8 +1,11 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using WinGetStudio.Contracts.Services;
 using Windows.Storage;
 using Windows.System;
+using WinGetStudio.Contracts.Services;
 
 namespace WinGetStudio.ViewModels;
 
@@ -27,6 +30,7 @@ public partial class MainViewModel : ObservableRecipient
         _navigationService.NavigateTo<ConfigurationViewModel>();
         await Task.CompletedTask;
     }
+
     [RelayCommand]
     private async Task OnNavigateToValidationAsync()
     {

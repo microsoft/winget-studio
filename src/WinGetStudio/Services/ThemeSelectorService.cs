@@ -1,7 +1,9 @@
-﻿using WinGetStudio.Contracts.Services;
-using WinGetStudio.Helpers;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 using Microsoft.UI.Xaml;
+using WinGetStudio.Contracts.Services;
+using WinGetStudio.Helpers;
 
 namespace WinGetStudio.Services;
 

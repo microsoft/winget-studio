@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
-using WinGetStudio.Models;
 using Windows.Foundation;
+using WinGetStudio.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 

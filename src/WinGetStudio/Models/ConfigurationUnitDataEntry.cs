@@ -8,8 +8,8 @@ namespace WinGetStudio.Models;
 public partial class ConfigurationUnitDataEntry : ObservableObject
 {
     [ObservableProperty]
-    private string _key;
+    public partial string Key { get; set; }
 
     [ObservableProperty]
-    private string _value;
+    public partial string Value { get; set; }
 }

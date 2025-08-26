@@ -7,7 +7,7 @@ using WinGetStudio.Views;
 
 namespace WinGetStudio.Services;
 
-internal class AppPageService : PageService, IAppPageService
+internal sealed class AppPageService : PageService, IAppPageService
 {
     protected override void ConfigurePages()
     {

@@ -1,8 +1,9 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System.Text;
-
-using WinGetStudio.Core.Contracts.Services;
-
 using Newtonsoft.Json;
+using WinGetStudio.Core.Contracts.Services;
 
 namespace WinGetStudio.Core.Services;
 
@@ -14,10 +15,14 @@ public class FileService : IFileService
         if (File.Exists(path))
         {
             var json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<T>(json);
+            var result = JsonConvert.DeserializeObject<T>(json);
+            if (result is not null)
+            {
+                return result;
+            }
         }
 
-        return default;
+        return default!;
     }
 
     public void Save<T>(string folderPath, string fileName, T content)

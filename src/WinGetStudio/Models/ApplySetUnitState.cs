@@ -9,5 +9,5 @@ public enum ApplySetUnitState
     InProgress,
     Succeeded,
     Failed,
-    Skipped
+    Skipped,
 }

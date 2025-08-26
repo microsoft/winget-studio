@@ -5,14 +5,14 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using WinGetStudio.Models;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using Windows.Foundation;
 using Windows.Storage.Streams;
+using WinGetStudio.Models;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 
@@ -41,7 +41,8 @@ internal sealed class DSCOperations : IDSCOperations
             throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
         }
 
-        return AsyncInfo.Run<IDSCApplySetResult, IDSCSetChangeData>(async (cancellationToken, progress) => {
+        return AsyncInfo.Run<IDSCApplySetResult, IDSCSetChangeData>(async (cancellationToken, progress) =>
+        {
             _logger.LogInformation("Starting to apply configuration set");
             var task = dscSet.Processor.ApplySetAsync(dscSet.ConfigSet, ApplyConfigurationSetFlags.None);
             task.Progress += (sender, args) => progress.Report(new DSCSetChangeData(args));
@@ -122,7 +123,6 @@ internal sealed class DSCOperations : IDSCOperations
         var result = await Task.Run(() => processor.TestUnit(input));
         System.Diagnostics.Debug.WriteLine($"TestUnit result: {result.TestResult}");
         unit.TestResult = result.TestResult == ConfigurationTestResult.Positive;
-        
     }
 
     /// <inheritdoc />
@@ -161,7 +161,7 @@ internal sealed class DSCOperations : IDSCOperations
         processor.MinimumLevel = DiagnosticLevel.Verbose;
         return processor;
     }
-    
+
     /// <summary>
     /// Open a configuration set using DSC configuration API
     /// </summary>

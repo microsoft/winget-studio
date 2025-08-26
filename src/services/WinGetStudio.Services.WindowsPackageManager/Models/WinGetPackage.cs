@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using WinGetStudio.Services.WindowsPackageManager.Contracts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Deployment;
 using Windows.Storage.Streams;
+using WinGetStudio.Services.WindowsPackageManager.Contracts;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Models;
 

@@ -4,16 +4,16 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using WinGetStudio.Contracts.Services;
-using WinGetStudio.Contracts.ViewModels;
-using WinGetStudio.Models;
-using WinGetStudio.Common.Windows.FileDialog;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using Microsoft.Extensions.Logging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using WinGetStudio.Common.Windows.FileDialog;
+using WinGetStudio.Contracts.Services;
+using WinGetStudio.Contracts.ViewModels;
+using WinGetStudio.Models;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WinRT.Interop;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
@@ -23,16 +23,16 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     private readonly IConfigurationNavigationService _navigationService;
     private readonly IDSC _dsc;
     private readonly IDSCSetBuilder _dscSetBuilder;
-    private IDSCSet _dscSet;
     private readonly IStringResource _stringResource;
     private readonly ILogger<PreviewFileViewModel> _logger;
-    public string Yaml = string.Empty;
+    private IDSCSet? _dscSet;
+    private string _yaml = string.Empty;
 
-    public ObservableCollection<DSCConfigurationUnitViewModel> ConfigurationUnits = new();
+    public ObservableCollection<DSCConfigurationUnitViewModel> ConfigurationUnits { get; } = new();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditPanelVisible))]
-    public partial DSCConfigurationUnitViewModel SelectedUnit { get; set; } = null;
+    public partial DSCConfigurationUnitViewModel? SelectedUnit { get; set; }
 
     [ObservableProperty]
     public partial bool LoadingUnits { get; set; } = true;
@@ -73,12 +73,14 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
                     _dscSetBuilder.UpdateUnit(editableUnit);
                 }
             }
+
             ConfigurationUnits.Clear();
             var dscSet = await _dscSetBuilder.BuildAsync();
             foreach (var u in dscSet.Units)
             {
                 ConfigurationUnits.Add(new(u));
             }
+
             _dsc.GetConfigurationUnitDetails(dscSet);
         }
         else
@@ -89,10 +91,11 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
                 ConfigurationUnits.Add(new(u));
             }
         }
+
         LoadingUnits = false;
     }
 
-    partial void OnSelectedUnitChanged(DSCConfigurationUnitViewModel oldValue, DSCConfigurationUnitViewModel newValue)
+    partial void OnSelectedUnitChanged(DSCConfigurationUnitViewModel? oldValue, DSCConfigurationUnitViewModel? newValue)
     {
         OnPropertyChanged(nameof(IsEditPanelVisible));
         IsStateChanged = true;
@@ -125,14 +128,16 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             {
                 _dscSet = new EditableDSCSet();
             }
+
             if (configParameter.ResetDSCSet)
             {
                 _dscSetBuilder.ClearUnits();
                 ConfigurationUnits.Clear();
             }
+
             _ = UpdateUnits();
         }
-        else if(parameter is string filePath)
+        else if (parameter is string filePath)
         {
             _ = ImportDSCSetFromPathAsync(filePath);
         }
@@ -140,6 +145,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         {
             _ = UpdateUnits();
         }
+
         FilePath = _dscSetBuilder.TargetFilePath;
     }
 
@@ -163,10 +169,11 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     public async Task<bool> IsSaveRequiredAsync()
     {
         await UpdateUnits();
-        if (Yaml == await _dscSetBuilder.ConvertToYamlAsync())
+        if (_yaml == await _dscSetBuilder.ConvertToYamlAsync())
         {
             return false;
         }
+
         return true;
     }
 
@@ -174,13 +181,13 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     private async Task OnStoreYamlStateAsync()
     {
         _dscSet = await _dscSetBuilder.BuildAsync();
-        Yaml = await _dscSetBuilder.ConvertToYamlAsync();
+        _yaml = await _dscSetBuilder.ConvertToYamlAsync();
     }
 
     [RelayCommand]
     private async Task OnApplyAsync()
     {
-        if( !_dscSetBuilder.IsEmpty())
+        if (!_dscSetBuilder.IsEmpty())
         {
             _navigationService.NavigateTo<ApplyFileViewModel>(await _dscSetBuilder.BuildAsync());
         }
@@ -199,7 +206,8 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         {
             File.WriteAllText(FilePath, yaml);
         }
-        Yaml = yaml;
+
+        _yaml = yaml;
         IsStateChanged = false;
     }
 
@@ -226,12 +234,13 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             FilePath = file.Path;
             await FileIO.WriteTextAsync(file, yaml);
         }
-        Yaml = yaml;
+
+        _yaml = yaml;
         IsStateChanged = false;
     }
 
     [RelayCommand]
-    private async Task OnDiscardAsync()
+    private void OnDiscard()
     {
         _dscSetBuilder.ImportSet(_dscSet);
     }
@@ -252,10 +261,12 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         {
             _dscSetBuilder.RemoveUnit(editableUnit);
             ConfigurationUnits.Remove(context);
-            if(SelectedUnit != null && context.InstanceId == SelectedUnit.InstanceId) {
+            if (SelectedUnit != null && context.InstanceId == SelectedUnit.InstanceId)
+            {
                 SelectedUnit = null;
             }
         }
+
         await Task.CompletedTask;
     }
 
@@ -265,6 +276,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         var fileDialog = new WindowOpenFileDialog();
         fileDialog.AddFileType("YAML files", ".yaml", ".yml", ".winget");
         var file = await fileDialog.ShowAsync(App.MainWindow);
+
         // Check if a file was selected
         if (file == null)
         {
@@ -278,14 +290,13 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         catch (OpenConfigurationSetException e)
         {
             _logger.LogError(e, $"Opening configuration set failed.");
-            var message = GetErrorMessage(e);
         }
         catch (Exception e)
         {
             _logger.LogError(e, $"Unknown error while opening configuration set.");
-            var message = _stringResource.GetLocalized("ConfigurationFileOpenUnknownError");
         }
     }
+
     private string GetErrorMessage(OpenConfigurationSetException exception)
     {
         switch (exception.ResultCode.HResult)

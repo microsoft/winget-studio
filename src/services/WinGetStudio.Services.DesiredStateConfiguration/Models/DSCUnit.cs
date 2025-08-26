@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using Microsoft.Management.Configuration;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
@@ -52,6 +52,7 @@ internal sealed class DSCUnit : IDSCUnit
     public DSCUnit(ConfigurationUnit unit)
     {
         ConfigUnit = unit;
+
         // Constructor copies all the required data from the out-of-proc COM
         // objects over to the current process. This ensures that we have this
         // information available even if the out-of-proc COM objects are no
@@ -72,7 +73,7 @@ internal sealed class DSCUnit : IDSCUnit
         // Load dictionary values into list of key value pairs
         Settings = unit.Settings.Select(s => new KeyValuePair<string, object>(s.Key, s.Value)).ToList();
         Metadata = unit.Metadata.Select(m => new KeyValuePair<string, string>(m.Key, m.Value.ToString())).ToList();
-        
+
         // Get module name from metadata
         ModuleName = Metadata.FirstOrDefault(m => m.Key == ModuleMetadataKey).Value?.ToString() ?? string.Empty;
 

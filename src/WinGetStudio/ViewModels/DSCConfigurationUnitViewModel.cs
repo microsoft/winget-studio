@@ -4,11 +4,11 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
-using Windows.Foundation.Collections;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -16,12 +16,12 @@ namespace WinGetStudio.ViewModels;
 
 public partial class DSCConfigurationUnitViewModel : ObservableObject
 {
-    public readonly IDSCUnit ConfigurationUnit;
     private readonly IAppNavigationService _navigationService;
-    private readonly IDSCSetBuilder _dscSetBuilder;
+
+    public IDSCUnit ConfigurationUnit { get; }
 
     [ObservableProperty]
-    private DSCConfigurationUnitDetailsViewModel _details;
+    public partial DSCConfigurationUnitDetailsViewModel? Details { get; set; }
 
     public string Id => ConfigurationUnit.Id;
 
@@ -67,7 +67,6 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
         ModuleName = configurationUnit.ModuleName;
         Settings = configurationUnit.Settings;
         ConvertKeyValueListToProperties(Properties, Settings);
-        _dscSetBuilder = App.GetService<IDSCSetBuilder>();
 
         var dict = Settings.ToDictionary();
 
@@ -78,7 +77,6 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
         SettingsString = serializer.Serialize(dict);
     }
 
-
     partial void OnTypeChanged(string oldValue, string newValue)
     {
         OnPropertyChanged(nameof(Title));
@@ -88,7 +86,6 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(Title));
     }
-
 
     private void ConvertKeyValueListToProperties(ObservableCollection<ConfigurationProperty> properties, IList<KeyValuePair<string, object>> settings)
     {
@@ -117,7 +114,7 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
 
     public void UpdateUnit()
     {
-        if(ConfigurationUnit is EditableDSCUnit e)
+        if (ConfigurationUnit is EditableDSCUnit e)
         {
             e.RequiresElevation = RequiresElevation;
             e.Description = Description;

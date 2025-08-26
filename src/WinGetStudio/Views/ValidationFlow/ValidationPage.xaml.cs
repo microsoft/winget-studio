@@ -1,7 +1,10 @@
-﻿using WinGetStudio.Contracts.Views;
-using WinGetStudio.ViewModels;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
+using WinGetStudio.Contracts.Views;
+using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;
 

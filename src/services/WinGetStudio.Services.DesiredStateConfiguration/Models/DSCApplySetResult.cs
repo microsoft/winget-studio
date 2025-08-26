@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using Microsoft.Management.Configuration;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 

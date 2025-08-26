@@ -1,10 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.UI.Xaml.Controls;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Helpers;
 using WinGetStudio.ViewModels;
-
-using Microsoft.UI.Xaml.Controls;
 
 namespace WinGetStudio.Services;
 

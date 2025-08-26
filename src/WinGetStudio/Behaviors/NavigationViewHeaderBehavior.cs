@@ -1,9 +1,11 @@
-﻿using WinGetStudio.Contracts.Services;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Xaml.Interactivity;
+using WinGetStudio.Contracts.Services;
 
 namespace WinGetStudio.Behaviors;
 

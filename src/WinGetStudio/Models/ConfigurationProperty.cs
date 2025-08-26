@@ -1,4 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WinGetStudio.Models;
 

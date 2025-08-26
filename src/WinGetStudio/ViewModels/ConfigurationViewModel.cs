@@ -21,6 +21,7 @@ public partial class ConfigurationViewModel : ObservableRecipient, INavigationAw
     {
         NavigationService.NavigateTo<PreviewFileViewModel>(parameter);
     }
+
     public void OnNavigatedFrom()
     {
         // No-op

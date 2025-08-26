@@ -4,13 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using Microsoft.Management.Configuration;
 using Windows.Foundation.Collections;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
-internal class DSCFactory : IDSCFactory
+
+internal sealed class DSCFactory : IDSCFactory
 {
     private ConfigurationProcessor _configurationProcessor;
     private const string DSCv3DynamicRuntimeHandlerIdentifier = "{5f83e564-ca26-41ca-89db-36f5f0517ffd}";
@@ -22,7 +23,7 @@ internal class DSCFactory : IDSCFactory
 
     public async Task<IDSCSet> CreateSetAsync(IDSCSet set)
     {
-        if(_configurationProcessor == null)
+        if (_configurationProcessor == null)
         {
             await CreateProcessorAsync();
         }
@@ -39,8 +40,10 @@ internal class DSCFactory : IDSCFactory
                 newDSCSet.UnitsInternal.Add(u as DSCUnit);
                 newDSCSet.ConfigSet.Units.Add((u as DSCUnit).ConfigUnit);
             }
+
             return newDSCSet;
         }
+
         return set;
     }
 
@@ -65,10 +68,12 @@ internal class DSCFactory : IDSCFactory
             {
                 configUnit.Metadata.Add(metadata.Key, metadata.Value);
             }
+
             if (editableUnit.ModuleName != string.Empty)
             {
                 configUnit.Metadata["module"] = editableUnit.ModuleName;
             }
+
             if (editableUnit.Description != string.Empty)
             {
                 configUnit.Metadata["description"] = editableUnit.Description;
@@ -82,6 +87,7 @@ internal class DSCFactory : IDSCFactory
             {
                 configUnit.Dependencies.Add(dependency);
             }
+
             DSCUnit dscUnit = new(configUnit);
             return dscUnit;
         }

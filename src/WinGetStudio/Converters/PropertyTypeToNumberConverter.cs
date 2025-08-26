@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using WinGetStudio.Models;
 using Microsoft.UI.Xaml.Data;
+using WinGetStudio.Models;
 
 namespace WinGetStudio.Converters;
-public class PropertyTypeToNumberConverter : IValueConverter
+
+public partial class PropertyTypeToNumberConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
@@ -13,19 +14,19 @@ public class PropertyTypeToNumberConverter : IValueConverter
         {
             switch (p)
             {
-                case PropertyType.String:
+                case PropertyType.StringType:
                     return 0;
-                case PropertyType.Boolean:
+                case PropertyType.BooleanType:
                     return 1;
-                case PropertyType.Number:
+                case PropertyType.NumberType:
                     return 2;
-                case PropertyType.Object:
+                case PropertyType.ObjectType:
                     return 3;
             }
         }
+
         return 0;
     }
-
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
     {
@@ -34,15 +35,16 @@ public class PropertyTypeToNumberConverter : IValueConverter
             switch ((int)d)
             {
                 case 0:
-                    return PropertyType.String;
+                    return PropertyType.StringType;
                 case 1:
-                    return PropertyType.Number;
+                    return PropertyType.NumberType;
                 case 2:
-                    return PropertyType.Boolean;
+                    return PropertyType.BooleanType;
                 case 3:
-                    return PropertyType.Object;
+                    return PropertyType.ObjectType;
             }
         }
-        return PropertyType.String;
+
+        return PropertyType.StringType;
     }
 }

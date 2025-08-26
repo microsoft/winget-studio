@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using WinGetStudio.Services.WindowsPackageManager.Models;
 using Windows.Storage.Streams;
+using WinGetStudio.Services.WindowsPackageManager.Models;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Contracts;
 

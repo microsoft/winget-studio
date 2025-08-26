@@ -1,1 +1,4 @@
-﻿global using WinUIEx;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+global using WinUIEx;

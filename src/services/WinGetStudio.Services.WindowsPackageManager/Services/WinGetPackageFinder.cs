@@ -6,13 +6,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Management.Deployment;
 using WinGetStudio.Services.WindowsPackageManager.COM;
 using WinGetStudio.Services.WindowsPackageManager.Contracts;
 using WinGetStudio.Services.WindowsPackageManager.Exceptions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Models;
-using Microsoft.Extensions.Logging;
-using Microsoft.Management.Deployment;
 
 namespace WinGetStudio.Services.WindowsPackageManager.Services;
 

@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using Microsoft.Management.Configuration;
+using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
-internal class DSCUnitResultInformation : IDSCUnitResultInformation
+internal sealed class DSCUnitResultInformation : IDSCUnitResultInformation
 {
     /// <inheritdoc/>
     public Exception ResultCode { get; }
