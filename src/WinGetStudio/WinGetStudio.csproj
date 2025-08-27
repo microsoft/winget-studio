@@ -14,7 +14,7 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <LangVersion>preview</LangVersion>
-    <AssemblyName>Winget Studio</AssemblyName>
+    <AssemblyName>WingetStudio</AssemblyName>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

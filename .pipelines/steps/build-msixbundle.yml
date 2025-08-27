@@ -29,6 +29,16 @@ steps:
         -OutputDir "${{ parameters.OutputDir }}" `
         -IsAzurePipelineBuild
 
+  - task: PowerShell@2
+    displayName: "Create the corresponding hash files"
+    inputs:
+      targetType: inline
+      script: |
+        $msixBundles = Get-ChildItem -Path "${{ parameters.OutputDir }}" -Filter "*.msixbundle" -Recurse
+        foreach ($bundle in $msixBundles) {
+          (Get-FileHash -Algorithm SHA256 -Path $bundle.FullName).Hash > "$($bundle.FullName).txt"
+        }
+
   - ${{ if eq(parameters.SignOutput, true) }}:
     - template: /.pipelines/templates/codesign.yml@self
       parameters:
