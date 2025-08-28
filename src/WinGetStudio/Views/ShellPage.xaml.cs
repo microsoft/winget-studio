@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -8,7 +9,6 @@ using Windows.System;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
-using WinGetStudio.Services;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;
@@ -27,6 +27,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         _appInfoService = App.GetService<IAppInfoService>();
         ViewModel = viewModel;
         InitializeComponent();
+        AddLogsFolderShortcut();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
@@ -40,7 +41,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         AppTitleBarText.Text = _appInfoService.GetAppNameLocalized();
     }
 
-    private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void OnLoaded(object sender, RoutedEventArgs e)
     {
         TitleBarHelper.UpdateTitleBar(RequestedTheme);
 
@@ -85,5 +86,22 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         var result = navigationService.GoBack();
 
         args.Handled = result;
+    }
+
+    [Conditional("DEBUG")]
+    private void AddLogsFolderShortcut()
+    {
+        var logsButton = new Button()
+        {
+            Content = "Open Logs Folder",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        logsButton.Click += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
+        NavigationViewControl.PaneFooter = new StackPanel()
+        {
+            Orientation = Orientation.Vertical,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Children = { logsButton },
+        };
     }
 }
