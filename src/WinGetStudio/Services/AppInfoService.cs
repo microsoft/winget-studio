@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Globalization;
 using System.Reflection;
 using Windows.ApplicationModel;
 using Windows.Storage;
@@ -12,6 +13,9 @@ namespace WinGetStudio.Services;
 
 internal sealed class AppInfoService : IAppInfoService
 {
+    // Unique log path for each app instance
+    private readonly string _instanceLogPath = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff", CultureInfo.InvariantCulture);
+
     /// <inheritdoc/>
     public string GetAppNameLocalized()
     {
@@ -40,8 +44,14 @@ internal sealed class AppInfoService : IAppInfoService
     }
 
     /// <inheritdoc/>
-    public string GetAppLogsFolder()
+    public string GetAppLogsPath()
     {
         return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, "Logs");
+    }
+
+    /// <inheritdoc/>
+    public string GetAppInstanceLogPath()
+    {
+        return Path.Combine(GetAppLogsPath(), _instanceLogPath);
     }
 }

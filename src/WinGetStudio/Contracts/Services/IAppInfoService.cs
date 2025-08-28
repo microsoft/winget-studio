@@ -21,5 +21,11 @@ public interface IAppInfoService
     /// Gets the application logs folder.
     /// </summary>
     /// <returns>The application logs folder.</returns>
-    public string GetAppLogsFolder();
+    public string GetAppLogsPath();
+
+    /// <summary>
+    /// Gets the application instance log path.
+    /// </summary>
+    /// <returns>The application instance log path.</returns>
+    public string GetAppInstanceLogPath();
 }

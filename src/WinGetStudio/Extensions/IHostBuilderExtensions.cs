@@ -11,12 +11,17 @@ namespace WinGetStudio.Extensions;
 
 public static class IHostBuilderExtensions
 {
+    /// <summary>
+    /// Configure logging for the host builder.
+    /// </summary>
+    /// <param name="hostBuilder">The host builder.</param>
+    /// <returns>The host builder with logging configured.</returns>
     public static IHostBuilder UseLogger(this IHostBuilder hostBuilder)
     {
         return hostBuilder.UseSerilog((context, services, loggerConfig) =>
         {
             var appInfo = services.GetRequiredService<IAppInfoService>();
-            Environment.SetEnvironmentVariable("WINGETSTUDIO_LOGS_ROOT", appInfo.GetAppLogsFolder());
+            Environment.SetEnvironmentVariable("WINGETSTUDIO_LOGS_ROOT", appInfo.GetAppInstanceLogPath());
 
             // Logging
             var config = new ConfigurationBuilder()
