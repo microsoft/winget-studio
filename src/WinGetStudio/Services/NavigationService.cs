@@ -6,7 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
-using WinGetStudio.Helpers;
+using WinGetStudio.Extensions;
 
 namespace WinGetStudio.Services;
 

@@ -11,6 +11,7 @@ using WinGetStudio.Activation;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Core.Contracts.Services;
 using WinGetStudio.Core.Services;
+using WinGetStudio.Extensions;
 using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -50,62 +51,63 @@ public partial class App : Application
 
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
-        Host = Microsoft.Extensions.Hosting.Host.
-        CreateDefaultBuilder().
-        UseContentRoot(AppContext.BaseDirectory).
-        ConfigureServices((context, services) =>
-        {
-            // Default Activation Handler
-            services.AddTransient<ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs>, DefaultActivationHandler>();
+        Host = Microsoft.Extensions.Hosting.Host
+            .CreateDefaultBuilder()
+            .UseContentRoot(AppContext.BaseDirectory)
+            .ConfigureServices((context, services) =>
+            {
+                // Default Activation Handler
+                services.AddTransient<ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs>, DefaultActivationHandler>();
 
-            // Other Activation Handlers
-            services.AddTransient<IActivationHandler, ConfigurationFileActivationHandler>();
-            services.AddTransient<IActivationHandler, FileActivationHandler>();
+                // Other Activation Handlers
+                services.AddTransient<IActivationHandler, ConfigurationFileActivationHandler>();
+                services.AddTransient<IActivationHandler, FileActivationHandler>();
 
-            // Services
-            services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
-            services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
-            services.AddTransient<INavigationViewService, NavigationViewService>();
-            services.AddTransient<IStringResource, StringResource>();
-            services.AddSingleton<IActivationService, ActivationService>();
-            services.AddSingleton<IAppPageService, AppPageService>();
-            services.AddSingleton<IConfigurationPageService, ConfigurationPageService>();
-            services.AddSingleton<IValidationPageService, ValidationPageService>();
-            services.AddSingleton<IAppNavigationService, AppNavigationService>();
-            services.AddSingleton<IConfigurationNavigationService, ConfigurationNavigationService>();
-            services.AddSingleton<IValidationNavigationService, ValidationNavigationService>();
-            services.AddSingleton<IAppInfoService, AppInfoService>();
+                // Services
+                services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
+                services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
+                services.AddTransient<INavigationViewService, NavigationViewService>();
+                services.AddTransient<IStringResource, StringResource>();
+                services.AddSingleton<IActivationService, ActivationService>();
+                services.AddSingleton<IAppPageService, AppPageService>();
+                services.AddSingleton<IConfigurationPageService, ConfigurationPageService>();
+                services.AddSingleton<IValidationPageService, ValidationPageService>();
+                services.AddSingleton<IAppNavigationService, AppNavigationService>();
+                services.AddSingleton<IConfigurationNavigationService, ConfigurationNavigationService>();
+                services.AddSingleton<IValidationNavigationService, ValidationNavigationService>();
+                services.AddSingleton<IAppInfoService, AppInfoService>();
 
-            // Core Services
-            services.AddSingleton<IFileService, FileService>();
-            services.AddDSC();
-            services.AddWinGet();
+                // Core Services
+                services.AddSingleton<IFileService, FileService>();
+                services.AddDSC();
+                services.AddWinGet();
 
-            // Views and ViewModels
-            services.AddTransient<SettingsViewModel>();
-            services.AddTransient<SettingsPage>();
-            services.AddTransient<ConfigurationViewModel>();
-            services.AddTransient<ConfigurationPage>();
-            services.AddTransient<ValidationViewModel>();
-            services.AddTransient<ValidationPage>();
-            services.AddTransient<ValidationFrameViewModel>();
-            services.AddTransient<ValidationFramePage>();
-            services.AddTransient<MainViewModel>();
-            services.AddTransient<MainPage>();
-            services.AddTransient<ShellPage>();
-            services.AddTransient<ShellViewModel>();
-            services.AddTransient<PreviewFilePage>();
-            services.AddTransient<PreviewFileViewModel>();
-            services.AddTransient<ApplyFilePage>();
-            services.AddTransient<ApplyFileViewModel>();
+                // Views and ViewModels
+                services.AddTransient<SettingsViewModel>();
+                services.AddTransient<SettingsPage>();
+                services.AddTransient<ConfigurationViewModel>();
+                services.AddTransient<ConfigurationPage>();
+                services.AddTransient<ValidationViewModel>();
+                services.AddTransient<ValidationPage>();
+                services.AddTransient<ValidationFrameViewModel>();
+                services.AddTransient<ValidationFramePage>();
+                services.AddTransient<MainViewModel>();
+                services.AddTransient<MainPage>();
+                services.AddTransient<ShellPage>();
+                services.AddTransient<ShellViewModel>();
+                services.AddTransient<PreviewFilePage>();
+                services.AddTransient<PreviewFileViewModel>();
+                services.AddTransient<ApplyFilePage>();
+                services.AddTransient<ApplyFileViewModel>();
 
-            // Factories
-            services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));
+                // Factories
+                services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));
 
-            // Configuration
-            services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
-        }).
-        Build();
+                // Configuration
+                services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
+            })
+            .UseLogger()
+            .Build();
 
         UnhandledException += App_UnhandledException;
         AppInstance.GetCurrent().Activated += OnActivated;

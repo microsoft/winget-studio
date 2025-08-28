@@ -4,7 +4,7 @@
 using Microsoft.UI.Xaml.Controls;
 using WinGetStudio.Contracts.Views;
 
-namespace WinGetStudio.Helpers;
+namespace WinGetStudio.Extensions;
 
 public static class FrameExtensions
 {

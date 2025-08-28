@@ -2,7 +2,7 @@
   "profiles": {
     "WinGetStudio (Package)": {
       "commandName": "MsixPackage",
-      "doNotLaunchApp": true
+      "doNotLaunchApp": false
     },
     "WinGetStudio (Unpackaged)": {
       "commandName": "Project"

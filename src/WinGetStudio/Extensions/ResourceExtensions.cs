@@ -3,7 +3,7 @@
 
 using WinGetStudio.Contracts.Services;
 
-namespace WinGetStudio.Helpers;
+namespace WinGetStudio.Extensions;
 
 public static class ResourceExtensions
 {
