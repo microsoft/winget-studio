@@ -11,15 +11,15 @@ namespace WinGetStudio.Services.Telemetry.Services;
 /// <summary>
 /// Telemetry service implementation.
 /// </summary>
-internal sealed partial class Telemetry : TelemetryEventSource, ITelemetry
+internal sealed partial class TelemetryService : TelemetryEventSource, ITelemetryService
 {
     private readonly TelemetryEventListener _telemetryEventListener;
     private const string EventSourceName = "Microsoft.WinGetStudio";
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Telemetry"/> class.
+    /// Initializes a new instance of the <see cref="TelemetryService"/> class.
     /// </summary>
-    public Telemetry()
+    public TelemetryService()
         : base(EventSourceName, TelemetryGroup.MicrosoftTelemetry)
     {
         _telemetryEventListener = new(this);

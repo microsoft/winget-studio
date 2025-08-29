@@ -5,7 +5,7 @@ using WinGetStudio.Services.Telemetry.Models;
 
 namespace WinGetStudio.Services.Telemetry.Contracts;
 
-public interface ITelemetry
+public interface ITelemetryService
 {
     /// <summary>
     /// Publishes ETW event when an action is triggered on.
