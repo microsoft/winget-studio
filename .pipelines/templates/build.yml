@@ -34,7 +34,7 @@ jobs:
     - task: DeleteFiles@1
       displayName: 'Delete existing stubbed TelemetryEventSources.cs'
       inputs:
-        Contents: '$(WorkingDirectory)\services\WinGetStudio.Services.Telemetry\TelemetryEventSource.cs'
+        Contents: '$(WorkingDirectory)\services\WinGetStudio.Services.Telemetry\Stub\TelemetryEventSource.cs'
 
     - task: PkgESGitFetch@10
       displayName: 'Fetch TelemetryEventSource.cs from OS repo'
@@ -42,7 +42,7 @@ jobs:
         repository: 'https://microsoft.visualstudio.com/os/_git/os.2020'
         branch: official/main
         source: 'minkernel\published\internal\telemetry\TelemetryEventSource.cs'
-        destination: '$(WorkingDirectory)\services\WinGetStudio.Services.Telemetry\'
+        destination: '$(WorkingDirectory)\services\WinGetStudio.Services.Telemetry\Stub\'
 
   - template: /.pipelines/steps/build-msix.yml@self
     parameters:
