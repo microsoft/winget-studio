@@ -9,7 +9,7 @@ namespace WinGetStudio.Services.Telemetry.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddDSC(this IServiceCollection services)
+    public static IServiceCollection AddTelemetry(this IServiceCollection services)
     {
         services.AddCore();
         services.AddSingleton<ITelemetry, Services.Telemetry>();
