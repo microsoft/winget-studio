@@ -1,3 +1,4 @@
 variables:
   MsixVersion: '0.100'
   WindowsContainerImage: 'onebranch.azurecr.io/windows/ltsc2019/vse2022:latest'
+  WorkingDirectory: '$(System.DefaultWorkingDirectory)\src'

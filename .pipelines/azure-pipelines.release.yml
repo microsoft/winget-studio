@@ -44,3 +44,4 @@ extends:
         Configurations: ${{ parameters.Configurations }}
         SignOutput: ${{ parameters.SignOutput }}
         IsRelease: True
+        UnstubTelemetry: True
