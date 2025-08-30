@@ -416,3 +416,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Ignore the app icon file, which is copied from the build ring directory
+src/WinGetStudio/Assets/Icons/WinGetStudio.ico
