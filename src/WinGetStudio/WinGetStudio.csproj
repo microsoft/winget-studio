@@ -18,8 +18,12 @@
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
 
-  <!-- Copy icon assets from the build ring specific folder -->
   <ItemGroup>
+    <!-- Ensure Dev and Preview directories are not packaged -->
+    <Content Remove="Assets\Icons\Dev\**" />
+    <Content Remove="Assets\Icons\Preview\**" />
+
+    <!-- Copy icons from Dev or Preview into the expected directory -->
     <Content Condition="'$(BuildRing)' == 'Dev'" Include="Assets\Icons\Dev\**" Link="Assets\Icons\%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
     <Content Condition="'$(BuildRing)' == 'Stable'" Include="Assets\Icons\Preview\**" Link="Assets\Icons\%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>
