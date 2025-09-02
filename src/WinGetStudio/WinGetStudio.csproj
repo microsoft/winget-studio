@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>WinGetStudio</RootNamespace>
-    <ApplicationIcon>Assets/WindowIcon.ico</ApplicationIcon>
+    <ApplicationIcon>Assets/Icons/WinGetStudio.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;arm64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
@@ -17,9 +17,15 @@
     <AssemblyName>WingetStudio</AssemblyName>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
+
   <ItemGroup>
-    <None Remove="Views\ConfigurationFlow\ApplyFilePage.xaml" />
-    <None Remove="Views\ConfigurationFlow\PreviewFilePage.xaml" />
+    <!-- Ensure Dev and Preview directories are not packaged -->
+    <Content Remove="Assets\Icons\Dev\**" />
+    <Content Remove="Assets\Icons\Preview\**" />
+
+    <!-- Copy icons from Dev or Preview into the expected directory -->
+    <Content Condition="'$(BuildRing)' == 'Dev'" Include="Assets\Icons\Dev\**" Link="Assets\Icons\%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
+    <Content Condition="'$(BuildRing)' == 'Stable'" Include="Assets\Icons\Preview\**" Link="Assets\Icons\%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,33 +64,33 @@
     <ProjectReference Include="..\services\WinGetStudio.Services.DesiredStateConfiguration\WinGetStudio.Services.DesiredStateConfiguration.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.WindowsPackageManager\WinGetStudio.Services.WindowsPackageManager.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Page Update="Views\ConfigurationFlow\ApplyFilePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="Views\ConfigurationFlow\PreviewFilePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
 
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <ProjectCapability Include="Msix" />
   </ItemGroup>
-  
+
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PRIResource Update="Strings\en-us\Resources.resw">
       <Generator>PublicResXFileCodeGenerator</Generator>
     </PRIResource>
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Views\ValidationFlow\" />
-  </ItemGroup>
-  </Project>
+
+  <!-- Icon should be copied before the build starts -->
+  <Target Name="PrepareAppIcon" BeforeTargets="BeforeBuild">
+    <ItemGroup>
+      <SourceIcon Include="Assets\Icons\Dev\WinGetStudio.ico" Condition="'$(BuildRing)' == 'Dev'" />
+      <SourceIcon Include="Assets\Icons\Preview\WinGetStudio.ico" Condition="'$(BuildRing)' == 'Stable'" />
+    </ItemGroup>
+    <Copy SourceFiles="@(SourceIcon)" DestinationFiles="Assets\Icons\WinGetStudio.ico" />
+  </Target>
+</Project>
