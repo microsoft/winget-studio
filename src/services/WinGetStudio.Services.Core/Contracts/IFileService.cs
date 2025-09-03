@@ -15,7 +15,7 @@ public interface IFileService
     /// <param name="filePath">The path to the JSON file.</param>
     /// <param name="options">Optional JsonSerializerOptions for deserialization.</param>
     /// <returns>A tuple where the first item indicates success, and the second item is the deserialized object (or default if failed).</returns>
-    public Task<(bool, T)> TryReadJsonAsync<T>(string filePath, JsonSerializerOptions options = null);
+    Task<(bool, T)> TryReadJsonAsync<T>(string filePath, JsonSerializerOptions options = null);
 
     /// <summary>
     /// Try to serialize an object of type T and save it as a JSON file.
@@ -25,12 +25,21 @@ public interface IFileService
     /// <param name="content">The object to serialize.</param>
     /// <param name="options">Optional JsonSerializerOptions for serialization.</param>
     /// <returns>True if the operation succeeded, false otherwise.</returns>
-    public Task<bool> TrySaveJsonAsync<T>(string filePath, T content, JsonSerializerOptions options = null);
+    Task<bool> TrySaveJsonAsync<T>(string filePath, T content, JsonSerializerOptions options = null);
 
     /// <summary>
     /// Try to delete a file at the specified path.
     /// </summary>
     /// <param name="filePath">The path to the file to delete.</param>
     /// <returns>True if the operation succeeded, false otherwise.</returns>
-    public Task<bool> TryDeleteAsync(string filePath);
+    Task<bool> TryDeleteAsync(string filePath);
+
+    /// <summary>
+    /// Try to copy a file from sourceFilePath to destinationFilePath.
+    /// </summary>
+    /// <param name="sourceFilePath">The path to the source file.</param>
+    /// <param name="destinationFilePath">The path to the destination file.</param>
+    /// <param name="overwrite">Whether to overwrite the destination file if it already exists.</param>
+    /// <returns>True if the operation succeeded, false otherwise.</returns>
+    Task<bool> TryCopyAsync(string sourceFilePath, string destinationFilePath, bool overwrite = false);
 }

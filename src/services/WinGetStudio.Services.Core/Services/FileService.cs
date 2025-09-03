@@ -63,4 +63,23 @@ public class FileService : IFileService
             return false;
         }
     }
+
+    /// <inheritdoc/>
+    public async Task<bool> TryCopyAsync(string sourceFilePath, string destinationFilePath, bool overwrite = false)
+    {
+        try
+        {
+            if (File.Exists(sourceFilePath))
+            {
+                await Task.Run(() => File.Copy(sourceFilePath, destinationFilePath, overwrite));
+                return true;
+            }
+
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
