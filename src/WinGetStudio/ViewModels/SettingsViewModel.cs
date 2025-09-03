@@ -3,8 +3,6 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.WinUI;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Settings.Contracts;
@@ -16,7 +14,7 @@ public partial class SettingsViewModel : ObservableRecipient
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly IAppInfoService _appInfoService;
     private readonly IUserSettings _userSettings;
-    private readonly DispatcherQueue _dispatcherQueue;
+    private readonly IUIDispatcher _dispatcher;
 
     [ObservableProperty]
     public partial ElementTheme ElementTheme { get; set; }
@@ -27,23 +25,15 @@ public partial class SettingsViewModel : ObservableRecipient
     public SettingsViewModel(
         IThemeSelectorService themeSelectorService,
         IAppInfoService appInfoService,
-        IUserSettings userSettings)
+        IUserSettings userSettings,
+        IUIDispatcher dispatcher)
     {
         _appInfoService = appInfoService;
         _themeSelectorService = themeSelectorService;
         _userSettings = userSettings;
-        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        _dispatcher = dispatcher;
         ElementTheme = _themeSelectorService.Theme;
         VersionDescription = GetVersionDescription();
-
-        _userSettings.SettingsChanged += async (_, _) =>
-        {
-            await _dispatcherQueue.EnqueueAsync(async () =>
-            {
-                await _themeSelectorService.InitializeAsync();
-                await SwitchThemeAsync(_themeSelectorService.Theme);
-            });
-        };
     }
 
     private string GetVersionDescription()
@@ -59,5 +49,22 @@ public partial class SettingsViewModel : ObservableRecipient
             ElementTheme = theme;
             await _themeSelectorService.SetThemeAsync(theme);
         }
+    }
+
+    [RelayCommand]
+    private void OnLoaded()
+    {
+        _userSettings.SettingsChanged += OnSettingsChanged;
+    }
+
+    [RelayCommand]
+    private void OnUnloaded()
+    {
+        _userSettings.SettingsChanged -= OnSettingsChanged;
+    }
+
+    private async void OnSettingsChanged(object? sender, IGeneralSettings e)
+    {
+        await _dispatcher.EnqueueAsync(() => ElementTheme = _themeSelectorService.Theme);
     }
 }

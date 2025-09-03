@@ -33,9 +33,6 @@ public class ActivationService : IActivationService
         {
             _isInitialActivation = false;
 
-            // Execute tasks before activation.
-            await InitializeAsync();
-
             // Set the MainWindow Content.
             if (App.MainWindow.Content == null)
             {
@@ -69,15 +66,8 @@ public class ActivationService : IActivationService
         }
     }
 
-    private async Task InitializeAsync()
-    {
-        await _themeSelectorService.InitializeAsync().ConfigureAwait(false);
-        await Task.CompletedTask;
-    }
-
     private async Task StartupAsync()
     {
-        await _themeSelectorService.SetRequestedThemeAsync();
-        await Task.CompletedTask;
+        await _themeSelectorService.ApplyThemeAsync();
     }
 }

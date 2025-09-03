@@ -7,14 +7,9 @@ namespace WinGetStudio.Contracts.Services;
 
 public interface IThemeSelectorService
 {
-    ElementTheme Theme
-    {
-        get;
-    }
-
-    Task InitializeAsync();
+    ElementTheme Theme { get; }
 
     Task SetThemeAsync(ElementTheme theme);
 
-    Task SetRequestedThemeAsync();
+    Task ApplyThemeAsync();
 }

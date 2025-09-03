@@ -12,9 +12,9 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Extensions;
 using WinGetStudio.Models;
 using WinGetStudio.Services;
+using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
-using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
@@ -68,6 +68,7 @@ public partial class App : Application
                 services.AddTransient<IActivationHandler, FileActivationHandler>();
 
                 // Services
+                services.AddSingleton<IThemeApplierService, ThemeApplierService>();
                 services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
                 services.AddTransient<INavigationViewService, NavigationViewService>();
                 services.AddTransient<IStringResource, StringResource>();
@@ -85,6 +86,7 @@ public partial class App : Application
                 services.AddSingleton<IUIDispatcher, UIDispatcher>();
 
                 // Core Services
+                services.AddCore();
                 services.AddDSC();
                 services.AddWinGet();
                 services.AddSettings();
@@ -118,7 +120,6 @@ public partial class App : Application
 
         UnhandledException += App_UnhandledException;
         AppInstance.GetCurrent().Activated += OnActivated;
-        GetService<IUserSettings>().SettingsChanged += OnSettingsChanged;
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
@@ -146,16 +147,6 @@ public partial class App : Application
         await _dispatcherQueue.EnqueueAsync(async () =>
         {
             await GetService<IActivationService>().ActivateAsync(localArgsDataReference);
-        });
-    }
-
-    private async void OnSettingsChanged(object? sender, IGeneralSettings e)
-    {
-        await _dispatcherQueue.EnqueueAsync(async () =>
-        {
-            var themeService = GetService<IThemeSelectorService>();
-            await themeService.InitializeAsync();
-            await themeService.SetRequestedThemeAsync();
         });
     }
 }
