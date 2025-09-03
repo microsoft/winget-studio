@@ -9,6 +9,7 @@ using Windows.System;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
+using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;
@@ -16,6 +17,7 @@ namespace WinGetStudio.Views;
 public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
     private readonly IAppInfoService _appInfoService;
+    private readonly IUserSettings _userSettings;
 
     public ShellViewModel ViewModel
     {
@@ -25,9 +27,10 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
     public ShellPage(ShellViewModel viewModel)
     {
         _appInfoService = App.GetService<IAppInfoService>();
+        _userSettings = App.GetService<IUserSettings>();
         ViewModel = viewModel;
         InitializeComponent();
-        AddLogsFolderShortcut();
+        AddDebugShortcuts();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
@@ -89,19 +92,30 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
     }
 
     [Conditional("DEBUG")]
-    private void AddLogsFolderShortcut()
+    private void AddDebugShortcuts()
     {
+        // Open logs folder button
         var logsButton = new Button()
         {
             Content = "Open Logs Folder",
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         logsButton.Click += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
+
+        // Open settings button
+        var settingsButton = new Button()
+        {
+            Content = "Open Settings",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        settingsButton.Click += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_userSettings.FullPath));
+
+        // Add buttons to the NavigationView footer
         NavigationViewControl.PaneFooter = new StackPanel()
         {
             Orientation = Orientation.Vertical,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            Children = { logsButton },
+            Children = { settingsButton, logsButton },
         };
     }
 }

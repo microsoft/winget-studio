@@ -9,11 +9,35 @@ namespace WinGetStudio.Services.Settings.Models;
 
 public class GeneralSettings : IGeneralSettings
 {
+    [JsonIgnore]
+    private static readonly JsonSerializerOptions _cachedJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false,
+    };
+
     [JsonPropertyName("theme")]
     public string Theme { get; set; }
 
     public GeneralSettings Clone()
     {
         return JsonSerializer.Deserialize<GeneralSettings>(JsonSerializer.Serialize(this));
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is GeneralSettings other)
+        {
+            var thisJson = JsonSerializer.SerializeToElement(this);
+            var otherJson = JsonSerializer.SerializeToElement(other);
+            return JsonElement.DeepEquals(thisJson, otherJson);
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return JsonSerializer.Serialize(this, _cachedJsonOptions).GetHashCode();
     }
 }

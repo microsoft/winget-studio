@@ -118,16 +118,7 @@ public partial class App : Application
 
         UnhandledException += App_UnhandledException;
         AppInstance.GetCurrent().Activated += OnActivated;
-
-        GetService<IUserSettings>().SettingsChanged += async (_, _) =>
-        {
-            await _dispatcherQueue.EnqueueAsync(async () =>
-            {
-                var themeService = GetService<IThemeSelectorService>();
-                await themeService.InitializeAsync();
-                await themeService.SetRequestedThemeAsync();
-            });
-        };
+        GetService<IUserSettings>().SettingsChanged += OnSettingsChanged;
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
@@ -155,6 +146,16 @@ public partial class App : Application
         await _dispatcherQueue.EnqueueAsync(async () =>
         {
             await GetService<IActivationService>().ActivateAsync(localArgsDataReference);
+        });
+    }
+
+    private async void OnSettingsChanged(object? sender, IGeneralSettings e)
+    {
+        await _dispatcherQueue.EnqueueAsync(async () =>
+        {
+            var themeService = GetService<IThemeSelectorService>();
+            await themeService.InitializeAsync();
+            await themeService.SetRequestedThemeAsync();
         });
     }
 }

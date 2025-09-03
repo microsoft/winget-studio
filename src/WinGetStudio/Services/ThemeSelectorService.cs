@@ -63,7 +63,6 @@ public class ThemeSelectorService : IThemeSelectorService
 
     private async Task SaveThemeInSettingsAsync(ElementTheme theme)
     {
-        await Task.CompletedTask;
-        _userSettings.Save(settings => settings.Theme = theme.ToString());
+        await _userSettings.SaveAsync(settings => settings.Theme = theme.ToString());
     }
 }

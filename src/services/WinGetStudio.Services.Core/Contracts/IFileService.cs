@@ -2,14 +2,15 @@
 // Licensed under the MIT License.
 
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace WinGetStudio.Services.Core.Contracts;
 
 public interface IFileService
 {
-    public bool TryReadJson<T>(string filePath, out T result, JsonSerializerOptions options = null);
+    public Task<(bool, T)> TryReadJsonAsync<T>(string filePath, JsonSerializerOptions options = null);
 
-    public bool TrySaveJson<T>(string filePath, T content, JsonSerializerOptions options = null);
+    public Task<bool> TrySaveJsonAsync<T>(string filePath, T content, JsonSerializerOptions options = null);
 
-    public bool TryDelete(string filePath);
+    public Task<bool> TryDeleteAsync(string filePath);
 }

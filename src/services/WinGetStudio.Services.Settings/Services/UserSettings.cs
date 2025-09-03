@@ -3,6 +3,10 @@
 
 using System;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Windows.Storage;
@@ -13,13 +17,14 @@ using WinGetStudio.Services.Settings.Models;
 
 namespace WinGetStudio.Services.Settings.Services;
 
-internal sealed class UserSettings : IUserSettings
+internal sealed partial class UserSettings : IUserSettings, IDisposable
 {
+    private readonly JsonSerializerOptions _serializerOptions;
     private readonly IOptionsMonitor<IGeneralSettings> _settingsOptions;
     private readonly IFileService _fileService;
-    private readonly object _lock = new();
     private readonly ILogger<UserSettings> _logger;
-
+    private readonly SemaphoreSlim _lock = new(1, 1);
+    private bool _disposedValue;
     public const string ApplicationDataFolder = "WinGetStudio/ApplicationData";
     public const string SettingsFile = "settings.json";
 
@@ -37,26 +42,30 @@ internal sealed class UserSettings : IUserSettings
         _settingsOptions = settingsOptions;
         _fileService = fileService;
         _logger = logger;
+        _serializerOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = true,
+        };
 
         _settingsOptions.OnChange(OnSettingsChanged);
 
-        EnsureFileExists();
+        _ = EnsureFileExistsAsync();
     }
 
-    public void Save(Action<GeneralSettings> changes = null)
+    public async Task SaveAsync(Action<GeneralSettings> changes)
     {
-        lock (_lock)
+        ArgumentNullException.ThrowIfNull(changes);
+        var newSettings = Current.Clone();
+        changes(newSettings);
+
+        if (Current.Equals(newSettings))
         {
-            var settings = Current.Clone();
-            changes?.Invoke(settings);
-            if (_fileService.TrySaveJson(FullPath, settings))
-            {
-                _logger.LogInformation("Settings saved successfully.");
-            }
-            else
-            {
-                _logger.LogWarning("Failed to save settings. Falling back to default settings.");
-            }
+            _logger.LogInformation("No changes detected in settings. Save operation skipped.");
+        }
+        else
+        {
+            await SaveInternalAsync(newSettings);
         }
     }
 
@@ -67,17 +76,57 @@ internal sealed class UserSettings : IUserSettings
              : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ApplicationDataFolder);
     }
 
-    private void EnsureFileExists()
+    private async Task EnsureFileExistsAsync()
     {
         _logger.LogInformation($"Ensuring settings file exists at: {FullPath}");
         if (!File.Exists(FullPath))
         {
             _logger.LogInformation("Settings file does not exist. Creating default settings file.");
-            Save();
+            await SaveInternalAsync(Current);
         }
         else
         {
             _logger.LogInformation("Settings file already exists.");
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _lock.Dispose();
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    private async Task SaveInternalAsync(IGeneralSettings newSettings)
+    {
+        await _lock.WaitAsync();
+        try
+        {
+            if (await _fileService.TrySaveJsonAsync(FullPath, newSettings, _serializerOptions))
+            {
+                _logger.LogInformation("Settings saved successfully.");
+            }
+            else
+            {
+                _logger.LogWarning("Failed to save settings. Falling back to default settings.");
+            }
+        }
+        finally
+        {
+            _lock.Release();
         }
     }
 

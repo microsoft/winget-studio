@@ -4,38 +4,38 @@
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using WinGetStudio.Services.Core.Contracts;
 
 namespace WinGetStudio.Services.Core.Services;
 
 public class FileService : IFileService
 {
-    public bool TryReadJson<T>(string filePath, out T result, JsonSerializerOptions options = null)
+    public async Task<(bool, T)> TryReadJsonAsync<T>(string filePath, JsonSerializerOptions options = null)
     {
-        result = default;
         try
         {
             if (!File.Exists(filePath))
             {
-                return false;
+                return (false, default);
             }
 
-            var fileContent = File.ReadAllText(filePath, Encoding.UTF8);
-            result = JsonSerializer.Deserialize<T>(fileContent, options);
-            return true;
+            var fileContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
+            var result = JsonSerializer.Deserialize<T>(fileContent, options);
+            return (true, result);
         }
         catch
         {
-            return false;
+            return (false, default);
         }
     }
 
-    public bool TrySaveJson<T>(string filePath, T content, JsonSerializerOptions options = null)
+    public async Task<bool> TrySaveJsonAsync<T>(string filePath, T content, JsonSerializerOptions options = null)
     {
         try
         {
             var fileContent = JsonSerializer.Serialize(content, options);
-            File.WriteAllText(filePath, fileContent, Encoding.UTF8);
+            await File.WriteAllTextAsync(filePath, fileContent, Encoding.UTF8);
             return true;
         }
         catch
@@ -44,13 +44,13 @@ public class FileService : IFileService
         }
     }
 
-    public bool TryDelete(string filePath)
+    public async Task<bool> TryDeleteAsync(string filePath)
     {
         try
         {
             if (File.Exists(filePath))
             {
-                File.Delete(filePath);
+                await Task.Run(() => File.Delete(filePath));
             }
 
             return true;
