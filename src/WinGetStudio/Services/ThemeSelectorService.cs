@@ -37,7 +37,7 @@ public class ThemeSelectorService : IThemeSelectorService
 
     private ElementTheme GetElementTheme(string theme)
     {
-        if (Enum.TryParse(theme, out ElementTheme cacheTheme))
+        if (Enum.TryParse(theme, ignoreCase: true, out ElementTheme cacheTheme))
         {
             return cacheTheme;
         }

@@ -20,7 +20,7 @@ namespace WinGetStudio.Services.Settings.Services;
 internal sealed partial class UserSettings : IUserSettings, IDisposable
 {
     private readonly JsonSerializerOptions _serializerOptions;
-    private readonly IOptionsMonitor<IGeneralSettings> _settingsOptions;
+    private readonly IOptionsMonitor<GeneralSettings> _settingsOptions;
     private readonly IFileService _fileService;
     private readonly ILogger<UserSettings> _logger;
     private readonly SemaphoreSlim _lock = new(1, 1);
@@ -82,7 +82,7 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         if (!File.Exists(FullPath))
         {
             _logger.LogInformation("Settings file does not exist. Creating default settings file.");
-            await SaveInternalAsync(Current);
+            await SaveInternalAsync(_settingsOptions.CurrentValue);
         }
         else
         {
@@ -110,7 +110,7 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         }
     }
 
-    private async Task SaveInternalAsync(IGeneralSettings newSettings)
+    private async Task SaveInternalAsync(GeneralSettings newSettings)
     {
         await _lock.WaitAsync();
         try

@@ -9,13 +9,6 @@ namespace WinGetStudio.Services.Settings.Models;
 
 public class GeneralSettings : IGeneralSettings
 {
-    [JsonIgnore]
-    private static readonly JsonSerializerOptions _cachedJsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false,
-    };
-
     [JsonPropertyName("theme")]
     public string Theme { get; set; }
 
@@ -38,6 +31,6 @@ public class GeneralSettings : IGeneralSettings
 
     public override int GetHashCode()
     {
-        return JsonSerializer.Serialize(this, _cachedJsonOptions).GetHashCode();
+        return JsonSerializer.Serialize(this).GetHashCode();
     }
 }
