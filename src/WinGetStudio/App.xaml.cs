@@ -9,13 +9,13 @@ using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using WinGetStudio.Activation;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.Core.Contracts.Services;
-using WinGetStudio.Core.Services;
 using WinGetStudio.Extensions;
 using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WinGetStudio.Services.Settings.Contracts;
+using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
@@ -54,6 +54,10 @@ public partial class App : Application
         Host = Microsoft.Extensions.Hosting.Host
             .CreateDefaultBuilder()
             .UseContentRoot(AppContext.BaseDirectory)
+            .UseDefaultServiceProvider((context, options) =>
+            {
+                options.ValidateOnBuild = true;
+            })
             .ConfigureServices((context, services) =>
             {
                 // Default Activation Handler
@@ -64,7 +68,6 @@ public partial class App : Application
                 services.AddTransient<IActivationHandler, FileActivationHandler>();
 
                 // Services
-                services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
                 services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
                 services.AddTransient<INavigationViewService, NavigationViewService>();
                 services.AddTransient<IStringResource, StringResource>();
@@ -78,9 +81,9 @@ public partial class App : Application
                 services.AddSingleton<IAppInfoService, AppInfoService>();
 
                 // Core Services
-                services.AddSingleton<IFileService, FileService>();
                 services.AddDSC();
                 services.AddWinGet();
+                services.AddSettings();
 
                 // Views and ViewModels
                 services.AddTransient<SettingsViewModel>();
@@ -111,6 +114,16 @@ public partial class App : Application
 
         UnhandledException += App_UnhandledException;
         AppInstance.GetCurrent().Activated += OnActivated;
+
+        GetService<IUserSettings>().SettingsChanged += async (_, _) =>
+        {
+            await _dispatcherQueue.EnqueueAsync(async () =>
+            {
+                var themeService = GetService<IThemeSelectorService>();
+                await themeService.InitializeAsync();
+                await themeService.SetRequestedThemeAsync();
+            });
+        };
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)

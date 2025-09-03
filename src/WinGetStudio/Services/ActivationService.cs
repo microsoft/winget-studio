@@ -14,20 +14,17 @@ public class ActivationService : IActivationService
     private readonly ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> _defaultHandler;
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
-    private readonly ILocalSettingsService _localSettingsService;
     private UIElement? _shell;
     private bool _isInitialActivation = true;
 
     public ActivationService(
         ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> defaultHandler,
         IEnumerable<IActivationHandler> activationHandlers,
-        IThemeSelectorService themeSelectorService,
-        ILocalSettingsService localSettingsService)
+        IThemeSelectorService themeSelectorService)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
-        _localSettingsService = localSettingsService;
     }
 
     public async Task ActivateAsync(object activationArgs)

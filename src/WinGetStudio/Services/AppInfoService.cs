@@ -7,7 +7,7 @@ using Windows.ApplicationModel;
 using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Extensions;
-using WinGetStudio.Helpers;
+using WinGetStudio.Services.Core.Helpers;
 
 namespace WinGetStudio.Services;
 

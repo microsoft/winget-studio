@@ -4,20 +4,19 @@
 using Microsoft.UI.Xaml;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Helpers;
+using WinGetStudio.Services.Settings.Contracts;
 
 namespace WinGetStudio.Services;
 
 public class ThemeSelectorService : IThemeSelectorService
 {
-    private const string SettingsKey = "AppBackgroundRequestedTheme";
-
     public ElementTheme Theme { get; set; } = ElementTheme.Default;
 
-    private readonly ILocalSettingsService _localSettingsService;
+    private readonly IUserSettings _userSettings;
 
-    public ThemeSelectorService(ILocalSettingsService localSettingsService)
+    public ThemeSelectorService(IUserSettings userSettings)
     {
-        _localSettingsService = localSettingsService;
+        _userSettings = userSettings;
     }
 
     public async Task InitializeAsync()
@@ -28,10 +27,13 @@ public class ThemeSelectorService : IThemeSelectorService
 
     public async Task SetThemeAsync(ElementTheme theme)
     {
-        Theme = theme;
+        if (Theme != theme)
+        {
+            Theme = theme;
 
-        await SetRequestedThemeAsync();
-        await SaveThemeInSettingsAsync(Theme);
+            await SetRequestedThemeAsync();
+            await SaveThemeInSettingsAsync(Theme);
+        }
     }
 
     public async Task SetRequestedThemeAsync()
@@ -48,7 +50,8 @@ public class ThemeSelectorService : IThemeSelectorService
 
     private async Task<ElementTheme> LoadThemeFromSettingsAsync()
     {
-        var themeName = await _localSettingsService.ReadSettingAsync<string>(SettingsKey);
+        await Task.CompletedTask;
+        var themeName = _userSettings.Current.Theme;
 
         if (Enum.TryParse(themeName, out ElementTheme cacheTheme))
         {
@@ -60,6 +63,7 @@ public class ThemeSelectorService : IThemeSelectorService
 
     private async Task SaveThemeInSettingsAsync(ElementTheme theme)
     {
-        await _localSettingsService.SaveSettingAsync(SettingsKey, theme.ToString());
+        await Task.CompletedTask;
+        _userSettings.Save(settings => settings.Theme = theme.ToString());
     }
 }
