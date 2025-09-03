@@ -80,6 +80,10 @@ public partial class App : Application
                 services.AddSingleton<IValidationNavigationService, ValidationNavigationService>();
                 services.AddSingleton<IAppInfoService, AppInfoService>();
 
+                // Dispatcher Queue
+                services.AddSingleton(_dispatcherQueue);
+                services.AddSingleton<IUIDispatcher, UIDispatcher>();
+
                 // Core Services
                 services.AddDSC();
                 services.AddWinGet();
