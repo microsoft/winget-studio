@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WinGetStudio.Activation;
 using WinGetStudio.Contracts.Services;
+using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Views;
 
 namespace WinGetStudio.Services;
@@ -14,17 +15,20 @@ public class ActivationService : IActivationService
     private readonly ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> _defaultHandler;
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
+    private readonly IUserSettings _userSettings;
     private UIElement? _shell;
     private bool _isInitialActivation = true;
 
     public ActivationService(
         ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> defaultHandler,
         IEnumerable<IActivationHandler> activationHandlers,
-        IThemeSelectorService themeSelectorService)
+        IThemeSelectorService themeSelectorService,
+        IUserSettings userSettings)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
+        _userSettings = userSettings;
     }
 
     public async Task ActivateAsync(object activationArgs)
@@ -32,6 +36,9 @@ public class ActivationService : IActivationService
         if (_isInitialActivation)
         {
             _isInitialActivation = false;
+
+            // Execute tasks before activation.
+            await InitializeAsync();
 
             // Set the MainWindow Content.
             if (App.MainWindow.Content == null)
@@ -64,6 +71,11 @@ public class ActivationService : IActivationService
         {
             await _defaultHandler.HandleAsync(activationArgs);
         }
+    }
+
+    private async Task InitializeAsync()
+    {
+        await _userSettings.InitializeAsync().ConfigureAwait(false);
     }
 
     private async Task StartupAsync()

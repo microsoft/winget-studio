@@ -12,6 +12,7 @@ public class GeneralSettings : IGeneralSettings
     [JsonPropertyName("theme")]
     public string Theme { get; set; }
 
+    /// <inheritdoc/>
     public GeneralSettings Clone()
     {
         return JsonSerializer.Deserialize<GeneralSettings>(JsonSerializer.Serialize(this));

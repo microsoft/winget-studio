@@ -11,6 +11,7 @@ namespace WinGetStudio.Services.Core.Services;
 
 public class FileService : IFileService
 {
+    /// <inheritdoc/>
     public async Task<(bool, T)> TryReadJsonAsync<T>(string filePath, JsonSerializerOptions options = null)
     {
         try
@@ -30,6 +31,7 @@ public class FileService : IFileService
         }
     }
 
+    /// <inheritdoc/>
     public async Task<bool> TrySaveJsonAsync<T>(string filePath, T content, JsonSerializerOptions options = null)
     {
         try
@@ -44,6 +46,7 @@ public class FileService : IFileService
         }
     }
 
+    /// <inheritdoc/>
     public async Task<bool> TryDeleteAsync(string filePath)
     {
         try

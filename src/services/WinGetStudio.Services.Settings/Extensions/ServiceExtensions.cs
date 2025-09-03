@@ -1,13 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Windows.Storage;
 using WinGetStudio.Services.Core.Extensions;
-using WinGetStudio.Services.Core.Helpers;
 using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Models;
 using WinGetStudio.Services.Settings.Services;
@@ -18,14 +15,14 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddSettings(this IServiceCollection services)
     {
-        var settingsFullPath = GetSettingsFullPath(UserSettings.ApplicationDataFolder);
-        if (!Directory.Exists(settingsFullPath))
+        var settingsDirectory = UserSettings.GetSettingsDirectory();
+        if (!Directory.Exists(settingsDirectory))
         {
-            Directory.CreateDirectory(settingsFullPath);
+            Directory.CreateDirectory(settingsDirectory);
         }
 
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(settingsFullPath)
+            .SetBasePath(settingsDirectory)
             .AddJsonFile(UserSettings.SettingsFile, optional: true, reloadOnChange: true)
             .Build();
 
@@ -33,12 +30,5 @@ public static class ServiceExtensions
         services.Configure<GeneralSettings>(configuration);
         services.AddSingleton<IUserSettings, UserSettings>();
         return services;
-    }
-
-    private static string GetSettingsFullPath(string settingsPath)
-    {
-        return RuntimeHelper.IsMSIX
-             ? ApplicationData.Current.LocalFolder.Path
-             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), settingsPath);
     }
 }

@@ -25,6 +25,7 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
     private readonly ILogger<UserSettings> _logger;
     private readonly SemaphoreSlim _lock = new(1, 1);
     private bool _disposedValue;
+
     public const string ApplicationDataFolder = "WinGetStudio/ApplicationData";
     public const string SettingsFile = "settings.json";
 
@@ -49,17 +50,22 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         };
 
         _settingsOptions.OnChange(OnSettingsChanged);
-
-        _ = EnsureFileExistsAsync();
     }
 
+    /// <inheritdoc/>
+    public async Task InitializeAsync()
+    {
+        await EnsureFileExistsAsync();
+    }
+
+    /// <inheritdoc/>
     public async Task SaveAsync(Action<GeneralSettings> changes)
     {
         ArgumentNullException.ThrowIfNull(changes);
         var newSettings = Current.Clone();
         changes(newSettings);
 
-        if (Current.Equals(newSettings))
+        if (_settingsOptions.CurrentValue.Equals(newSettings))
         {
             _logger.LogInformation("No changes detected in settings. Save operation skipped.");
         }
@@ -76,6 +82,11 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
              : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ApplicationDataFolder);
     }
 
+    /// <summary>
+    /// Ensures that the settings file exists. If it does not exist, creates a
+    /// new file with default settings.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task EnsureFileExistsAsync()
     {
         _logger.LogInformation($"Ensuring settings file exists at: {FullPath}");
@@ -110,6 +121,12 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         }
     }
 
+    /// <summary>
+    /// Saves the provided settings to the settings file in a thread-safe
+    /// manner.
+    /// </summary>
+    /// <param name="newSettings">The new settings to save.</param>
+    /// <returns>A task that represents the asynchronous save operation.</returns>
     private async Task SaveInternalAsync(GeneralSettings newSettings)
     {
         await _lock.WaitAsync();

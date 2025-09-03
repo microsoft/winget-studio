@@ -16,11 +16,18 @@ internal sealed class ThemeApplierService : IThemeApplierService
         _dispatcher = dispatcher;
     }
 
+    /// <inheritdoc/>
     public Task ApplyThemeAsync(ElementTheme theme)
     {
         return _dispatcher.EnqueueAsync(() => SetRequestedThemeAsync(theme));
     }
 
+    /// <summary>
+    /// Sets the requested theme for the application's main window.
+    /// </summary>
+    /// <param name="theme">The heme to apply to the application's main
+    /// window.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task SetRequestedThemeAsync(ElementTheme theme)
     {
         if (App.MainWindow.Content is FrameworkElement rootElement)
