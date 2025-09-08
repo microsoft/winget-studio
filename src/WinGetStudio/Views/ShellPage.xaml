@@ -76,8 +76,15 @@
                     </behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
                 </behaviors:NavigationViewHeaderBehavior>
             </i:Interaction.Behaviors>
-            <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
-                <Frame x:Name="NavigationFrame" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <ProgressBar Grid.Row="0" Value="100" IsIndeterminate="True" />
+                <Grid Grid.Row="1" Margin="{StaticResource NavigationViewPageContentMargin}">
+                    <Frame x:Name="NavigationFrame" />
+                </Grid>
             </Grid>
         </NavigationView>
     </Grid>
