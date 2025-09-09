@@ -91,17 +91,17 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
     [Conditional("DEBUG")]
     private void AddLogsFolderShortcut()
     {
-        var logsButton = new Button()
+        var logsItem = new NavigationViewItem()
         {
             Content = "Open Logs Folder",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Icon = new FontIcon() { Glyph = "\uEBE8" },
         };
-        logsButton.Click += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
+        logsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
         NavigationViewControl.PaneFooter = new StackPanel()
         {
             Orientation = Orientation.Vertical,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            Children = { logsButton },
+            Children = { logsItem, new NavigationViewItemSeparator() },
         };
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Navigation;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Views;
@@ -15,6 +16,9 @@ public partial class ShellViewModel : ObservableRecipient
 
     [ObservableProperty]
     public partial object? Selected { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsSplitViewPaneOpen { get; set; }
 
     public IAppNavigationService NavigationService { get; }
 
@@ -42,5 +46,11 @@ public partial class ShellViewModel : ObservableRecipient
         {
             Selected = selectedItem;
         }
+    }
+
+    [RelayCommand]
+    private void OnToggleSplitViewPanel()
+    {
+        IsSplitViewPaneOpen = !IsSplitViewPaneOpen;
     }
 }
