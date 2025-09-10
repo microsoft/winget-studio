@@ -8,7 +8,7 @@
     xmlns:helpers="using:WinGetStudio.Helpers"
     xmlns:behaviors="using:WinGetStudio.Behaviors"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
-    xmlns:notifications="using:WingetStudio.Services.VisualFeedback.Models" xmlns:converters="using:CommunityToolkit.WinUI.Converters"
+    xmlns:converters="using:CommunityToolkit.WinUI.Converters" xmlns:views="using:WinGetStudio.Views"
     Loaded="OnLoaded">
 
     <Page.Resources>
@@ -63,78 +63,7 @@
                     </Grid.RowDefinitions>
                     <Grid Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}" />
                     <Grid Grid.Row="1" Padding="12" Background="{ThemeResource SystemChromeMediumLowColor}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}">Notifications</TextBlock>
-                            <HyperlinkButton Grid.Row="1"
-                                             Style="{ThemeResource TextBlockButtonStyle}">Show all notifications</HyperlinkButton>
-                            <ScrollViewer Grid.Row="2">
-                                <StackPanel Grid.Row="2" Spacing="12">
-                                    <!-- Unread notifications section -->
-                                    <ListView ItemsSource="{x:Bind ViewModel.UnreadNotifications}"
-                                              SelectionMode="None">
-                                        <ListView.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Spacing="4" />
-                                            </ItemsPanelTemplate>
-                                        </ListView.ItemsPanel>
-                                        <ListView.ItemContainerStyle>
-                                            <Style TargetType="ListViewItem">
-                                                <Setter Property="Padding" Value="0" />
-                                                <Setter Property="Margin" Value="0" />
-                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                            </Style>
-                                        </ListView.ItemContainerStyle>
-                                        <ListView.ItemTemplate>
-                                            <DataTemplate x:DataType="notifications:NotificationMessage">
-                                                <InfoBar IsOpen="True"
-                                                         IsClosable="False"
-                                                         Severity="Informational"
-                                                         IsIconVisible="False"
-                                                         Title="{x:Bind Title}"
-                                                         Message="{x:Bind Message}" />
-                                            </DataTemplate>
-                                        </ListView.ItemTemplate>
-                                    </ListView>
-
-                                    <!-- Previous notifications section -->
-                                    <StackPanel Spacing="12"
-                                                Visibility="{x:Bind ViewModel.PreviousNotifications.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
-                                        <NavigationViewItemSeparator />
-                                        <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center">Previous notifications</TextBlock>
-                                        <ListView ItemsSource="{x:Bind ViewModel.PreviousNotifications}"
-                                              SelectionMode="None">
-                                            <ListView.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Spacing="4" />
-                                                </ItemsPanelTemplate>
-                                            </ListView.ItemsPanel>
-                                            <ListView.ItemContainerStyle>
-                                                <Style TargetType="ListViewItem">
-                                                    <Setter Property="Padding" Value="0" />
-                                                    <Setter Property="Margin" Value="0" />
-                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                                </Style>
-                                            </ListView.ItemContainerStyle>
-                                            <ListView.ItemTemplate>
-                                                <DataTemplate x:DataType="notifications:NotificationMessage">
-                                                    <InfoBar IsOpen="True"
-                                                         IsClosable="False"
-                                                         Severity="Informational"
-                                                         IsIconVisible="False"
-                                                         Title="{x:Bind Title}"
-                                                         Message="{x:Bind Message}" />
-                                                </DataTemplate>
-                                            </ListView.ItemTemplate>
-                                        </ListView>
-                                    </StackPanel>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </Grid>
+                        <views:NotificationPane />
                     </Grid>
                 </Grid>
             </SplitView.Pane>
@@ -188,7 +117,8 @@
                             <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xEDAC;"/>
                         </NavigationViewItem.Icon>
                         <NavigationViewItem.InfoBadge>
-                            <InfoBadge Value="100" />
+                            <InfoBadge Value="{x:Bind ViewModel.UnreadNotificationsCount, Mode=OneWay}"
+                                       Visibility="{x:Bind ViewModel.UnreadNotificationsCount, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"/>
                         </NavigationViewItem.InfoBadge>
                     </NavigationViewItem>
                 </NavigationView.FooterMenuItems>

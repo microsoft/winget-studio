@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI;
@@ -37,9 +36,8 @@ public partial class ShellViewModel : ObservableRecipient
     [ObservableProperty]
     public partial bool IsProgressVisible { get; set; }
 
-    public ObservableCollection<NotificationMessage> UnreadNotifications { get; }
-
-    public ObservableCollection<NotificationMessage> PreviousNotifications { get; }
+    [ObservableProperty]
+    public partial int UnreadNotificationsCount { get; set; }
 
     public IAppNavigationService NavigationService { get; }
 
@@ -55,9 +53,6 @@ public partial class ShellViewModel : ObservableRecipient
         NavigationViewService = navigationViewService;
         _uiFeedbackService = uiFeedbackService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-
-        UnreadNotifications = new(_uiFeedbackService.Notification.UnreadNotifications);
-        PreviousNotifications = new(_uiFeedbackService.Notification.ReadNotifications);
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
@@ -111,18 +106,19 @@ public partial class ShellViewModel : ObservableRecipient
 
     private async void OnNotificationRead(object? sender, NotificationMessage message)
     {
-        await _dispatcherQueue.EnqueueAsync(() =>
-        {
-            UnreadNotifications.Remove(message);
-            PreviousNotifications.Insert(0, message);
-        });
+        await UpdateUnreadNotificationsCount();
     }
 
     private async void OnNotificationShown(object? sender, NotificationMessage message)
     {
+        await UpdateUnreadNotificationsCount();
+    }
+
+    private async Task UpdateUnreadNotificationsCount()
+    {
         await _dispatcherQueue.EnqueueAsync(() =>
         {
-            UnreadNotifications.Insert(0, message);
+            UnreadNotificationsCount = _uiFeedbackService.Notification.UnreadCount;
         });
     }
 }
