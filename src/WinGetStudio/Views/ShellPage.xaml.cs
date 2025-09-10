@@ -9,6 +9,7 @@ using Windows.System;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
+using WingetStudio.Services.VisualFeedback.Contracts;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;
@@ -103,5 +104,42 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Children = { logsItem, new NavigationViewItemSeparator() },
         };
+    }
+
+    private void Progress_Visibility(object sender, RoutedEventArgs e)
+    {
+        var loading = App.GetService<IUIFeedbackService>().Loading;
+        loading.SetVisibility(!loading.IsVisible);
+    }
+
+    private void Progress_Indeterminate(object sender, RoutedEventArgs e)
+    {
+        var loading = App.GetService<IUIFeedbackService>().Loading;
+        loading.SetIndeterminate(!loading.IsIndeterminate);
+    }
+
+    private void Progress_Value(object sender, RoutedEventArgs e)
+    {
+        var loading = App.GetService<IUIFeedbackService>().Loading;
+        loading.SetProgressValue((loading.ProgressValue + 5) % 100);
+    }
+
+    private void Notification_Add(object sender, RoutedEventArgs e)
+    {
+        var notification = App.GetService<IUIFeedbackService>().Notification;
+        notification.Show(new()
+        {
+            Title = Guid.NewGuid().ToString(),
+            Message = $"Example message",
+        });
+    }
+
+    private void Notification_Read(object sender, RoutedEventArgs e)
+    {
+        var notification = App.GetService<IUIFeedbackService>().Notification;
+        foreach (var item in notification.UnreadNotifications)
+        {
+            notification.MarkAsRead(item);
+        }
     }
 }

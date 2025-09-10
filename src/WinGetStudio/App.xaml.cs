@@ -16,6 +16,7 @@ using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WinGetStudio.Services.VisualFeedback.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
@@ -81,6 +82,7 @@ public partial class App : Application
                 services.AddSingleton<IFileService, FileService>();
                 services.AddDSC();
                 services.AddWinGet();
+                services.AddVisualFeedback();
 
                 // Views and ViewModels
                 services.AddTransient<SettingsViewModel>();
