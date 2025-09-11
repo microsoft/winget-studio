@@ -8,26 +8,26 @@ namespace WinGetStudio.Helpers;
 
 public static class NotificationHelper
 {
-    public static NotificationMessageType GetNotificationMessageType(InfoBarSeverity severity)
+    public static NotificationMessageSeverity GetNotificationMessageSeverity(InfoBarSeverity severity)
     {
         return severity switch
         {
-            InfoBarSeverity.Informational => NotificationMessageType.Informational,
-            InfoBarSeverity.Warning => NotificationMessageType.Warning,
-            InfoBarSeverity.Error => NotificationMessageType.Error,
-            InfoBarSeverity.Success => NotificationMessageType.Success,
-            _ => NotificationMessageType.Informational,
+            InfoBarSeverity.Informational => NotificationMessageSeverity.Informational,
+            InfoBarSeverity.Warning => NotificationMessageSeverity.Warning,
+            InfoBarSeverity.Error => NotificationMessageSeverity.Error,
+            InfoBarSeverity.Success => NotificationMessageSeverity.Success,
+            _ => NotificationMessageSeverity.Informational,
         };
     }
 
-    public static InfoBarSeverity GetInfoBarSeverity(NotificationMessageType type)
+    public static InfoBarSeverity GetInfoBarSeverity(NotificationMessageSeverity type)
     {
         return type switch
         {
-            NotificationMessageType.Informational => InfoBarSeverity.Informational,
-            NotificationMessageType.Warning => InfoBarSeverity.Warning,
-            NotificationMessageType.Error => InfoBarSeverity.Error,
-            NotificationMessageType.Success => InfoBarSeverity.Success,
+            NotificationMessageSeverity.Informational => InfoBarSeverity.Informational,
+            NotificationMessageSeverity.Warning => InfoBarSeverity.Warning,
+            NotificationMessageSeverity.Error => InfoBarSeverity.Error,
+            NotificationMessageSeverity.Success => InfoBarSeverity.Success,
             _ => InfoBarSeverity.Informational,
         };
     }

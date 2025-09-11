@@ -148,6 +148,13 @@
                 <!-- Content -->
                 <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
                     <Frame x:Name="NavigationFrame" />
+                    <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="4">
+                        <Button Click="ProgressVisibility">Toggle progress visibility</Button>
+                        <Button Click="AddProgress">Add progress</Button>
+                        <Button Click="ProgressInd">Toggle progress indeterminate</Button>
+                        <Button Click="SendNotification">Send persistent notification</Button>
+                        <Button Click="SendNotification">Send non-persistent notification</Button>
+                    </StackPanel>
                 </Grid>
             </NavigationView>
         </SplitView>

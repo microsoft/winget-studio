@@ -132,4 +132,30 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             ViewModel.MarkAsRead(message);
         }
     }
+
+    private void ProgressVisibility(object sender, RoutedEventArgs e)
+    {
+        _uiFeedbackService.Loading.SetVisibility(!_uiFeedbackService.Loading.IsVisible);
+    }
+
+    private void AddProgress(object sender, RoutedEventArgs e)
+    {
+        _uiFeedbackService.Loading.SetProgressValue((_uiFeedbackService.Loading.ProgressValue + 10) % 100);
+    }
+
+    private void ProgressInd(object sender, RoutedEventArgs e)
+    {
+        _uiFeedbackService.Loading.SetIndeterminate(!_uiFeedbackService.Loading.IsIndeterminate);
+    }
+
+    private void SendNotification(object sender, RoutedEventArgs e)
+    {
+        var types = Enum.GetValues<NotificationMessageSeverity>();
+        _uiFeedbackService.Notification.Show(new()
+        {
+            Title = "Sample Notification",
+            Message = Guid.NewGuid().ToString(),
+            Type = types[new Random().Next(types.Length)],
+        });
+    }
 }

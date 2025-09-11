@@ -3,7 +3,7 @@
 
 namespace WingetStudio.Services.VisualFeedback.Models;
 
-public enum NotificationMessageType
+public enum NotificationMessageSeverity
 {
     Informational,
     Success,

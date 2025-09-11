@@ -16,7 +16,7 @@ public sealed class NotificationMessage
     public string Message { get; set; }
 
     /// <summary>
-    /// Gets or sets the type of the notification.
+    /// Gets or sets the severity of the notification.
     /// </summary>
-    public NotificationMessageType Type { get; set; } = NotificationMessageType.Informational;
+    public NotificationMessageSeverity Type { get; set; } = NotificationMessageSeverity.Informational;
 }
