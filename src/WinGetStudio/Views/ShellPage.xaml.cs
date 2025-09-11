@@ -103,16 +103,13 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
     {
         var logsItem = new NavigationViewItem()
         {
+            SelectsOnInvoked = false,
             Content = "Open Logs Folder",
             Icon = new FontIcon() { Glyph = "\uEBE8" },
         };
         logsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
-        NavigationViewControl.PaneFooter = new StackPanel()
-        {
-            Orientation = Orientation.Vertical,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Children = { logsItem, new NavigationViewItemSeparator() },
-        };
+        NavigationViewControl.FooterMenuItems.Insert(0, new NavigationViewItemSeparator());
+        NavigationViewControl.FooterMenuItems.Insert(0, logsItem);
     }
 
     private void OnNotificationShown(object? sender, NotificationMessage message)
@@ -124,7 +121,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             Severity = NotificationHelper.GetInfoBarSeverity(message.Type),
             Content = message,
             ContentTemplate = new DataTemplate(),
-            Duration = TimeSpan.FromSeconds(5),
+            Duration = TimeSpan.FromSeconds(3),
         });
     }
 
