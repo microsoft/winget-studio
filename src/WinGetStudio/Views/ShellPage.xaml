@@ -6,11 +6,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:WinGetStudio.ViewModels"
     xmlns:helpers="using:WinGetStudio.Helpers"
-    xmlns:behaviors="using:WinGetStudio.Behaviors"
+    xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors"
+    xmlns:localBehaviors="using:WinGetStudio.Behaviors"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:converters="using:CommunityToolkit.WinUI.Converters"
-    xmlns:views="using:WinGetStudio.Views"
-    Loaded="OnLoaded">
+    xmlns:controls="using:WinGetStudio.Views.Controls"
+    Loaded="OnLoaded"
+    Unloaded="OnUnloaded">
 
     <Page.Resources>
         <converters:DoubleToVisibilityConverter x:Key="CountToVisibilityConverter" GreaterThan="0" FalseValue="Collapsed" TrueValue="Visible" />
@@ -26,6 +28,7 @@
     </i:Interaction.Behaviors>
 
     <Grid>
+        <!-- Title bar -->
         <Grid x:Name="AppTitleBar"
               Canvas.ZIndex="1"
               Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
@@ -42,21 +45,21 @@
                        Margin="28,0,0,0"/>
         </Grid>
 
+        <!-- Loading progress bar -->
         <Grid VerticalAlignment="Top"
               Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}">
-            <ProgressBar Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}"
-                         IsIndeterminate="{x:Bind ViewModel.IsProgressIndeterminate, Mode=OneWay}"
-                         Visibility="{x:Bind ViewModel.IsProgressVisible, Mode=OneWay}"
-                         VerticalAlignment="Bottom" />
+            <controls:LoadingProgressBar VerticalAlignment="Bottom" />
         </Grid>
 
+        <!-- Notification split view -->
         <SplitView x:Name="SplitView"
                    DisplayMode="CompactInline"
                    CompactPaneLength="0"
-                   IsPaneOpen="{x:Bind ViewModel.IsSplitViewPaneOpen, Mode=TwoWay}"
+                   IsPaneOpen="{x:Bind ViewModel.IsNotificationPaneOpen, Mode=OneWay}"
                    PaneBackground="Transparent"
                    PanePlacement="Right">
             <SplitView.Pane>
+                <!-- Notification pane -->
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -69,11 +72,12 @@
                     <Grid Grid.Row="1"
                           x:Name="SplitViewPaneContent"
                           Padding="12" Background="{ThemeResource SystemChromeMediumLowColor}">
-                        <views:NotificationPane />
+                        <controls:NotificationPane />
                     </Grid>
                 </Grid>
             </SplitView.Pane>
 
+            <!-- Navigation view -->
             <NavigationView
                 x:Name="NavigationViewControl"
                 Canvas.ZIndex="0"
@@ -116,7 +120,7 @@
                     <NavigationViewItem SelectsOnInvoked="False" x:Uid="Shell_Notifications">
                         <i:Interaction.Behaviors>
                             <i:EventTriggerBehavior EventName="Tapped">
-                                <i:InvokeCommandAction Command="{x:Bind ViewModel.ToggleSplitViewPanelCommand}" />
+                                <i:InvokeCommandAction Command="{x:Bind ViewModel.ToggleNotificationPaneCommand}" />
                             </i:EventTriggerBehavior>
                         </i:Interaction.Behaviors>
                         <NavigationViewItem.Icon>
@@ -130,23 +134,41 @@
                 </NavigationView.FooterMenuItems>
 
                 <i:Interaction.Behaviors>
-                    <behaviors:NavigationViewHeaderBehavior
-                    DefaultHeader="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
-                        <behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
+                    <localBehaviors:NavigationViewHeaderBehavior DefaultHeader="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
+                        <localBehaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock
-                                    Text="{Binding}"
-                                    Style="{ThemeResource TitleTextBlockStyle}" />
+                                    <TextBlock Text="{Binding}" Style="{ThemeResource TitleTextBlockStyle}" />
                                 </Grid>
                             </DataTemplate>
-                        </behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
-                    </behaviors:NavigationViewHeaderBehavior>
+                        </localBehaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
+                    </localBehaviors:NavigationViewHeaderBehavior>
                 </i:Interaction.Behaviors>
+
+                <!-- Content -->
                 <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
                     <Frame x:Name="NavigationFrame" />
                 </Grid>
             </NavigationView>
         </SplitView>
+
+        <!-- Stacked notification -->
+        <Grid Visibility="{x:Bind ViewModel.IsStackedNotificationVisible, Mode=OneWay}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"/>
+            <InfoBar Grid.Row="1"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Right"
+                     Style="{ThemeResource UnreadInAppNotification}"
+                     CloseButtonClick="NotificationRead"
+                     Margin="32">
+                <i:Interaction.Behaviors>
+                    <behaviors:StackedNotificationsBehavior x:Name="NotificationQueue" />
+                </i:Interaction.Behaviors>
+            </InfoBar>
+        </Grid>
     </Grid>
 </Page>

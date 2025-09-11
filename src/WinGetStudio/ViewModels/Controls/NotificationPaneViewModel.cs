@@ -9,7 +9,7 @@ using Microsoft.UI.Dispatching;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 
-namespace WinGetStudio.ViewModels;
+namespace WinGetStudio.ViewModels.Controls;
 
 public partial class NotificationPaneViewModel : ObservableRecipient
 {

@@ -10,6 +10,7 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
 using WingetStudio.Services.VisualFeedback.Contracts;
+using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;
@@ -17,15 +18,14 @@ namespace WinGetStudio.Views;
 public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
     private readonly IAppInfoService _appInfoService;
+    private readonly IUIFeedbackService _uiFeedbackService;
 
-    public ShellViewModel ViewModel
-    {
-        get;
-    }
+    public ShellViewModel ViewModel { get; }
 
     public ShellPage(ShellViewModel viewModel)
     {
         _appInfoService = App.GetService<IAppInfoService>();
+        _uiFeedbackService = App.GetService<IUIFeedbackService>();
         ViewModel = viewModel;
         InitializeComponent();
         AddLogsFolderShortcut();
@@ -48,6 +48,13 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
+
+        _uiFeedbackService.Notification.NotificationShown += OnNotificationShown;
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        _uiFeedbackService.Notification.NotificationShown -= OnNotificationShown;
     }
 
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -106,5 +113,26 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Children = { logsItem, new NavigationViewItemSeparator() },
         };
+    }
+
+    private void OnNotificationShown(object? sender, NotificationMessage message)
+    {
+        NotificationQueue.Show(new()
+        {
+            Title = message.Title,
+            Message = message.Message,
+            Severity = NotificationHelper.GetInfoBarSeverity(message.Type),
+            Content = message,
+            ContentTemplate = new DataTemplate(),
+            Duration = TimeSpan.FromSeconds(5),
+        });
+    }
+
+    private void NotificationRead(InfoBar sender, object args)
+    {
+        if (sender?.Content is NotificationMessage message)
+        {
+            ViewModel.MarkAsRead(message);
+        }
     }
 }

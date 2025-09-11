@@ -25,19 +25,15 @@ public partial class ShellViewModel : ObservableRecipient
     public partial object? Selected { get; set; }
 
     [ObservableProperty]
-    public partial bool IsSplitViewPaneOpen { get; set; }
-
-    [ObservableProperty]
-    public partial int ProgressValue { get; set; }
-
-    [ObservableProperty]
-    public partial bool IsProgressIndeterminate { get; set; }
-
-    [ObservableProperty]
-    public partial bool IsProgressVisible { get; set; }
+    [NotifyPropertyChangedFor(nameof(IsStackedNotificationVisible))]
+    public partial bool IsNotificationPaneOpen { get; set; }
 
     [ObservableProperty]
     public partial int UnreadNotificationsCount { get; set; }
+
+    public INotificationService NotificationService => _uiFeedbackService.Notification;
+
+    public bool IsStackedNotificationVisible => !IsNotificationPaneOpen;
 
     public IAppNavigationService NavigationService { get; }
 
@@ -75,7 +71,6 @@ public partial class ShellViewModel : ObservableRecipient
     [RelayCommand]
     private void OnLoaded()
     {
-        _uiFeedbackService.Loading.StateChanged += OnLoadingStateChanged;
         _uiFeedbackService.Notification.NotificationRead += OnNotificationRead;
         _uiFeedbackService.Notification.NotificationShown += OnNotificationShown;
     }
@@ -83,25 +78,19 @@ public partial class ShellViewModel : ObservableRecipient
     [RelayCommand]
     private void OnUnloaded()
     {
-        _uiFeedbackService.Loading.StateChanged -= OnLoadingStateChanged;
         _uiFeedbackService.Notification.NotificationRead -= OnNotificationRead;
         _uiFeedbackService.Notification.NotificationShown -= OnNotificationShown;
     }
 
     [RelayCommand]
-    private void OnToggleSplitViewPanel()
+    private void OnToggleNotificationPane()
     {
-        IsSplitViewPaneOpen = !IsSplitViewPaneOpen;
+        IsNotificationPaneOpen = !IsNotificationPaneOpen;
     }
 
-    private async void OnLoadingStateChanged(object? sender, EventArgs e)
+    public void MarkAsRead(NotificationMessage message)
     {
-        await _dispatcherQueue.EnqueueAsync(() =>
-        {
-            ProgressValue = _uiFeedbackService.Loading.ProgressValue;
-            IsProgressIndeterminate = _uiFeedbackService.Loading.IsIndeterminate;
-            IsProgressVisible = _uiFeedbackService.Loading.IsVisible;
-        });
+        _uiFeedbackService.Notification.MarkAsRead(message);
     }
 
     private async void OnNotificationRead(object? sender, NotificationMessage message)

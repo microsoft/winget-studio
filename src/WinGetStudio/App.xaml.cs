@@ -20,6 +20,7 @@ using WinGetStudio.Services.VisualFeedback.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
+using WinGetStudio.ViewModels.Controls;
 using WinGetStudio.Views;
 using WinGetStudio.Views.ConfigurationFlow;
 
@@ -102,6 +103,7 @@ public partial class App : Application
                 services.AddTransient<ApplyFilePage>();
                 services.AddTransient<ApplyFileViewModel>();
                 services.AddTransient<NotificationPaneViewModel>();
+                services.AddTransient<LoadingProgressBarViewModel>();
 
                 // Factories
                 services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));
