@@ -108,7 +108,7 @@
                 </NavigationView.HeaderTemplate>
 
                 <NavigationView.FooterMenuItems>
-                    <NavigationViewItem SelectsOnInvoked="False" Content="Notifications">
+                    <NavigationViewItem SelectsOnInvoked="False" x:Uid="Shell_Notifications">
                         <i:Interaction.Behaviors>
                             <i:EventTriggerBehavior EventName="Tapped">
                                 <i:InvokeCommandAction Command="{x:Bind ViewModel.ToggleSplitViewPanelCommand}" />

@@ -39,10 +39,11 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}">Notifications</TextBlock>
+        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" x:Uid="NotificationPane_Title" />
         <HyperlinkButton Grid.Row="1"
+                         x:Uid="NotificationPane_ShowAll"
                          Style="{ThemeResource TextBlockButtonStyle}"
-                         Command="{x:Bind ViewModel.ShowPreviousNotificationsCommand}">Show all notifications</HyperlinkButton>
+                         Command="{x:Bind ViewModel.ShowPreviousNotificationsCommand}"/>
         <ScrollViewer Grid.Row="2">
             <StackPanel Grid.Row="2" Spacing="12">
                 <!-- Unread notifications section -->
@@ -83,7 +84,10 @@
                     <StackPanel Spacing="12"
                                 Visibility="{x:Bind ViewModel.PreviousNotifications.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
                         <NavigationViewItemSeparator />
-                        <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center">Previous notifications</TextBlock>
+                        <TextBlock Style="{ThemeResource BodyTextBlockStyle}"
+                                   x:Uid="NotificationPane_Previous"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   HorizontalAlignment="Center"/>
                         <ListView ItemsSource="{x:Bind ViewModel.PreviousNotifications}"
                                   ItemsPanel="{StaticResource ItemsPanel}"
                                   ItemContainerStyle="{StaticResource ItemContainerStyle}"
