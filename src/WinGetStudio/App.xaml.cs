@@ -16,6 +16,7 @@ using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.Settings.Extensions;
+using WinGetStudio.Services.Telemetry.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
@@ -90,6 +91,7 @@ public partial class App : Application
                 services.AddDSC();
                 services.AddWinGet();
                 services.AddSettings();
+                services.AddTelemetry();
 
                 // Views and ViewModels
                 services.AddTransient<SettingsViewModel>();
