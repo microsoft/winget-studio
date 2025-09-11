@@ -60,6 +60,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\services\WinGetStudio.Services.Settings\WinGetStudio.Services.Settings.csproj" />
+    <ProjectReference Include="..\services\WinGetStudio.Services.Telemetry\WinGetStudio.Services.Telemetry.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.VisualFeedback\WinGetStudio.Services.VisualFeedback.csproj" />
     <ProjectReference Include="..\WinGetStudio.Core\WinGetStudio.Common.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.DesiredStateConfiguration\WinGetStudio.Services.DesiredStateConfiguration.csproj" />

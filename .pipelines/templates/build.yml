@@ -15,6 +15,10 @@ parameters:
   - name: IsRelease
     type: boolean
 
+  # Whether to unstub the telemetry
+  - name: UnstubTelemetry
+    type: boolean
+
 jobs:
 - job: Build_${{ parameters.Platform }}_${{ parameters.Configuration }}
   pool:
@@ -26,6 +30,20 @@ jobs:
     ob_artifactBaseName: msix_${{ parameters.Platform }}_${{ parameters.Configuration }}
   timeoutInMinutes: 120
   steps:
+  - ${{ if eq(parameters.UnstubTelemetry, true) }}:
+    - task: DeleteFiles@1
+      displayName: 'Delete existing stubbed TelemetryEventSources.cs'
+      inputs:
+        Contents: '$(WorkingDirectory)\services\WinGetStudio.Services.Telemetry\Stub\TelemetryEventSource.cs'
+
+    - task: PkgESGitFetch@10
+      displayName: 'Fetch TelemetryEventSource.cs from OS repo'
+      inputs:
+        repository: 'https://microsoft.visualstudio.com/os/_git/os.2020'
+        branch: official/main
+        source: 'minkernel\published\internal\telemetry\TelemetryEventSource.cs'
+        destination: '$(WorkingDirectory)\services\WinGetStudio.Services.Telemetry\Stub\'
+
   - template: /.pipelines/steps/build-msix.yml@self
     parameters:
       Platform: ${{ parameters.Platform }}

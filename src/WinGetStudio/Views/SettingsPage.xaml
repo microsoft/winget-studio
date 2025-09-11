@@ -6,10 +6,19 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:helpers="using:WinGetStudio.Helpers"
     xmlns:xaml="using:Microsoft.UI.Xaml"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
     </Page.Resources>
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+        <i:EventTriggerBehavior EventName="Unloaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.UnloadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
     <Grid>
         <StackPanel
             x:Name="ContentArea">

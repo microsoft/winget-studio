@@ -9,6 +9,7 @@ using Windows.System;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
+using WinGetStudio.Services.Settings.Contracts;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
@@ -19,6 +20,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
     private readonly IAppInfoService _appInfoService;
     private readonly IUIFeedbackService _uiFeedbackService;
+    private readonly IUserSettings _userSettings;
 
     public ShellViewModel ViewModel { get; }
 
@@ -26,9 +28,10 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
     {
         _appInfoService = App.GetService<IAppInfoService>();
         _uiFeedbackService = App.GetService<IUIFeedbackService>();
+        _userSettings = App.GetService<IUserSettings>();
         ViewModel = viewModel;
         InitializeComponent();
-        AddLogsFolderShortcut();
+        AddDebugShortcuts();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
@@ -99,7 +102,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
     }
 
     [Conditional("DEBUG")]
-    private void AddLogsFolderShortcut()
+    private void AddDebugShortcuts()
     {
         var logsItem = new NavigationViewItem()
         {
@@ -108,8 +111,17 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             Icon = new FontIcon() { Glyph = "\uEBE8" },
         };
         logsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
+
+        var settingsItem = new NavigationViewItem()
+        {
+            SelectsOnInvoked = false,
+            Content = "Open Settings",
+            Icon = new FontIcon() { Glyph = "\uEBE8" },
+        };
+        settingsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_userSettings.FullPath));
         NavigationViewControl.FooterMenuItems.Insert(0, new NavigationViewItemSeparator());
         NavigationViewControl.FooterMenuItems.Insert(0, logsItem);
+        NavigationViewControl.FooterMenuItems.Insert(0, settingsItem);
     }
 
     private void OnNotificationShown(object? sender, NotificationMessage message)

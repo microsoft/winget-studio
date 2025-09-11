@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WinGetStudio.Activation;
 using WinGetStudio.Contracts.Services;
+using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Views;
 
 namespace WinGetStudio.Services;
@@ -14,7 +15,7 @@ public class ActivationService : IActivationService
     private readonly ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> _defaultHandler;
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
-    private readonly ILocalSettingsService _localSettingsService;
+    private readonly IUserSettings _userSettings;
     private UIElement? _shell;
     private bool _isInitialActivation = true;
 
@@ -22,12 +23,12 @@ public class ActivationService : IActivationService
         ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> defaultHandler,
         IEnumerable<IActivationHandler> activationHandlers,
         IThemeSelectorService themeSelectorService,
-        ILocalSettingsService localSettingsService)
+        IUserSettings userSettings)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
-        _localSettingsService = localSettingsService;
+        _userSettings = userSettings;
     }
 
     public async Task ActivateAsync(object activationArgs)
@@ -74,13 +75,11 @@ public class ActivationService : IActivationService
 
     private async Task InitializeAsync()
     {
-        await _themeSelectorService.InitializeAsync().ConfigureAwait(false);
-        await Task.CompletedTask;
+        await _userSettings.InitializeAsync().ConfigureAwait(false);
     }
 
     private async Task StartupAsync()
     {
-        await _themeSelectorService.SetRequestedThemeAsync();
-        await Task.CompletedTask;
+        await _themeSelectorService.ApplyThemeAsync();
     }
 }
