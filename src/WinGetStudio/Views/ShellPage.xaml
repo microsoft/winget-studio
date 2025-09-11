@@ -56,7 +56,7 @@
                    PaneBackground="Transparent"
                    PanePlacement="Right">
             <SplitView.Pane>
-                <Grid>
+                <Grid RowSpacing="1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="*" />
@@ -139,14 +139,6 @@
                 </i:Interaction.Behaviors>
                 <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
                     <Frame x:Name="NavigationFrame" />
-                    <!-- DEBUG -->
-                    <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="4">
-                        <Button Click="Progress_Visibility">Toggle progress bar visibility</Button>
-                        <Button Click="Progress_Indeterminate">Toggle progress indeterminate</Button>
-                        <Button Click="Progress_Value">Set progress value</Button>
-                        <Button Click="Notification_Add">Add notification</Button>
-                        <Button Click="Notification_Read">Mark all notification read</Button>
-                    </StackPanel>
                 </Grid>
             </NavigationView>
         </SplitView>

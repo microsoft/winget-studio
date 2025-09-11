@@ -48,7 +48,11 @@ public partial class NotificationPaneViewModel : ObservableRecipient
 
     private async void OnNotificationRead(object? sender, NotificationMessage message)
     {
-        await _dispatcherQueue.EnqueueAsync(() => OnNotificationRead(message));
+        await _dispatcherQueue.EnqueueAsync(() =>
+        {
+            UnreadNotifications.Remove(message);
+            PreviousNotifications.Insert(0, message);
+        });
     }
 
     private async void OnNotificationShown(object? sender, NotificationMessage message)
@@ -66,9 +70,8 @@ public partial class NotificationPaneViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void OnNotificationRead(NotificationMessage message)
+    private void OnMarkAsRead(NotificationMessage message)
     {
-        UnreadNotifications.Remove(message);
-        PreviousNotifications.Insert(0, message);
+        _uiFeedbackService.Notification.MarkAsRead(message);
     }
 }

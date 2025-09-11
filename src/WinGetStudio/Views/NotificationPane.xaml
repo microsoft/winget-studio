@@ -7,10 +7,21 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:CommunityToolkit.WinUI.Converters"
-    xmlns:i="using:Microsoft.Xaml.Interactivity" xmlns:notifications="using:WingetStudio.Services.VisualFeedback.Models"
+    xmlns:localConverters="using:WinGetStudio.Converters"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:notifications="using:WingetStudio.Services.VisualFeedback.Models"
     mc:Ignorable="d">
     <UserControl.Resources>
         <converters:DoubleToVisibilityConverter x:Key="CountToVisibilityConverter" GreaterThan="0" FalseValue="Collapsed" TrueValue="Visible" />
+        <localConverters:NotificationTypeToSeverityConverter x:Key="SeverityConverter" />
+        <Style x:Key="ItemContainerStyle" TargetType="ListViewItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <ItemsPanelTemplate x:Key="ItemsPanel">
+            <StackPanel Spacing="4" />
+        </ItemsPanelTemplate>
     </UserControl.Resources>
 
     <i:Interaction.Behaviors>
@@ -35,29 +46,22 @@
         <ScrollViewer Grid.Row="2">
             <StackPanel Grid.Row="2" Spacing="12">
                 <!-- Unread notifications section -->
-                <ListView ItemsSource="{x:Bind ViewModel.UnreadNotifications}" SelectionMode="None">
-                    <ListView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Spacing="4" />
-                        </ItemsPanelTemplate>
-                    </ListView.ItemsPanel>
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Margin" Value="0" />
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        </Style>
-                    </ListView.ItemContainerStyle>
+                <ListView ItemsSource="{x:Bind ViewModel.UnreadNotifications}"
+                          SelectionMode="None"
+                          ItemsPanel="{StaticResource ItemsPanel}"
+                          ItemContainerStyle="{StaticResource ItemContainerStyle}">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="notifications:NotificationMessage">
                             <InfoBar IsOpen="True"
-                                     Severity="Informational"
+                                     Severity="{x:Bind Type, Converter={StaticResource SeverityConverter}}"
                                      IsClosable="True"
                                      IsIconVisible="False"
-                                     CloseButtonCommand="{Binding ElementName=PaneRoot, Path=Tag.ViewModel.NotificationReadCommand, Mode=OneWay}"
+                                     CloseButtonCommand="{Binding ElementName=PaneRoot, Path=Tag.ViewModel.MarkAsReadCommand, Mode=OneWay}"
                                      CloseButtonCommandParameter="{x:Bind}"
                                      Title="{x:Bind Title}"
                                      Message="{x:Bind Message}">
+
+                                <!-- Mark as read button style -->
                                 <InfoBar.CloseButtonStyle>
                                     <Style TargetType="Button" BasedOn="{StaticResource InfoBarCloseButtonStyle}">
                                         <Setter Property="ContentTemplate">
@@ -80,25 +84,16 @@
                                 Visibility="{x:Bind ViewModel.PreviousNotifications.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
                         <NavigationViewItemSeparator />
                         <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center">Previous notifications</TextBlock>
-                        <ListView ItemsSource="{x:Bind ViewModel.PreviousNotifications}" SelectionMode="None">
-                            <ListView.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Spacing="4" />
-                                </ItemsPanelTemplate>
-                            </ListView.ItemsPanel>
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
+                        <ListView ItemsSource="{x:Bind ViewModel.PreviousNotifications}"
+                                  ItemsPanel="{StaticResource ItemsPanel}"
+                                  ItemContainerStyle="{StaticResource ItemContainerStyle}"
+                                  SelectionMode="None">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="notifications:NotificationMessage">
                                     <InfoBar IsOpen="True"
                                              IsClosable="False"
-                                             Severity="Informational"
                                              IsIconVisible="False"
+                                             Severity="{x:Bind Type, Converter={StaticResource SeverityConverter}}"
                                              Title="{x:Bind Title}"
                                              Message="{x:Bind Message}" />
                                 </DataTemplate>
