@@ -64,6 +64,8 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             Right = AppTitleBar.Margin.Right,
             Bottom = AppTitleBar.Margin.Bottom,
         };
+
+        SplitViewPaneHeader.Background = sender.DisplayMode == NavigationViewDisplayMode.Minimal ? SplitViewPaneContent.Background : null;
     }
 
     private static KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key, VirtualKeyModifiers? modifiers = null)

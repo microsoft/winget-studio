@@ -57,13 +57,18 @@
                    PaneBackground="Transparent"
                    PanePlacement="Right">
             <SplitView.Pane>
-                <Grid RowSpacing="1">
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Grid Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}" />
-                    <Grid Grid.Row="1" Padding="12" Background="{ThemeResource SystemChromeMediumLowColor}">
+                    <Grid x:Name="SplitViewPaneHeader"
+                          Margin="0,1,0,0"
+                          Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}">
+                    </Grid>
+                    <Grid Grid.Row="1"
+                          x:Name="SplitViewPaneContent"
+                          Padding="12" Background="{ThemeResource SystemChromeMediumLowColor}">
                         <views:NotificationPane />
                     </Grid>
                 </Grid>
