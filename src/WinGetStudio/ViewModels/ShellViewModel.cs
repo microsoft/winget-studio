@@ -31,8 +31,6 @@ public partial class ShellViewModel : ObservableRecipient
     [ObservableProperty]
     public partial int UnreadNotificationsCount { get; set; }
 
-    public INotificationService NotificationService => _uiFeedbackService.Notification;
-
     public bool IsStackedNotificationVisible => !IsNotificationPaneOpen;
 
     public IAppNavigationService NavigationService { get; }
