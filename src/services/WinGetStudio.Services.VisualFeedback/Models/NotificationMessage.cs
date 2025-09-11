@@ -10,6 +10,4 @@ public sealed class NotificationMessage
     public string Message { get; set; }
 
     public NotificationMessageType Type { get; set; } = NotificationMessageType.Informational;
-
-    public NotificationAction Action { get; set; }
 }

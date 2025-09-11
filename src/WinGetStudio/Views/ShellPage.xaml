@@ -8,7 +8,8 @@
     xmlns:helpers="using:WinGetStudio.Helpers"
     xmlns:behaviors="using:WinGetStudio.Behaviors"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
-    xmlns:converters="using:CommunityToolkit.WinUI.Converters" xmlns:views="using:WinGetStudio.Views"
+    xmlns:converters="using:CommunityToolkit.WinUI.Converters"
+    xmlns:views="using:WinGetStudio.Views"
     Loaded="OnLoaded">
 
     <Page.Resources>
