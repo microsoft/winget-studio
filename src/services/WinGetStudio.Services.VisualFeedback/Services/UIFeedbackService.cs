@@ -7,8 +7,10 @@ namespace WingetStudio.Services.VisualFeedback.Services;
 
 internal sealed class UIFeedbackService : IUIFeedbackService
 {
+    /// <inheritdoc/>
     public ILoadingService Loading { get; }
 
+    /// <inheritdoc/>
     public INotificationService Notification { get; }
 
     public UIFeedbackService(ILoadingService loadingService, INotificationService notificationService)

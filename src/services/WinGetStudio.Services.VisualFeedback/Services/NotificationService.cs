@@ -14,18 +14,25 @@ internal sealed class NotificationService : INotificationService
 {
     private readonly ConcurrentStack<NotificationEntry> _notification = [];
 
+    /// <inheritdoc/>
     public event EventHandler<NotificationMessage> NotificationShown;
 
+    /// <inheritdoc/>
     public event EventHandler<NotificationMessage> NotificationRead;
 
+    /// <inheritdoc/>
     public IReadOnlyCollection<NotificationMessage> AllNotifications => [.. _notification.Select(n => n.Message)];
 
+    /// <inheritdoc/>
     public IReadOnlyCollection<NotificationMessage> UnreadNotifications => [.. _notification.Where(n => !n.IsRead).Select(n => n.Message)];
 
+    /// <inheritdoc/>
     public IReadOnlyCollection<NotificationMessage> ReadNotifications => [.. _notification.Where(n => n.IsRead).Select(n => n.Message)];
 
+    /// <inheritdoc/>
     public int UnreadCount => _notification.Count(n => !n.IsRead);
 
+    /// <inheritdoc/>
     public void Show(NotificationMessage message)
     {
         _notification.Push(new()
@@ -36,12 +43,14 @@ internal sealed class NotificationService : INotificationService
         NotificationShown?.Invoke(this, message);
     }
 
+    /// <inheritdoc/>
     public bool IsRead(NotificationMessage message)
     {
         var entry = _notification.FirstOrDefault(n => n.Message == message);
         return entry is not null && entry.IsRead;
     }
 
+    /// <inheritdoc/>
     public bool MarkAsRead(NotificationMessage message)
     {
         var entry = _notification.FirstOrDefault(n => n.Message == message);

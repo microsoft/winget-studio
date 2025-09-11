@@ -12,14 +12,19 @@ internal sealed class LoadingService : ILoadingService
     private readonly object _lock = new();
     private readonly LoadingChange _currentState = new();
 
+    /// <inheritdoc/>
     public event EventHandler StateChanged;
 
+    /// <inheritdoc/>
     public bool IsVisible => SafeGet(() => _currentState.IsVisible);
 
+    /// <inheritdoc/>
     public int ProgressValue => SafeGet(() => _currentState.ProgressValue);
 
+    /// <inheritdoc/>
     public bool IsIndeterminate => SafeGet(() => _currentState.IsIndeterminate);
 
+    /// <inheritdoc/>
     public void SetVisibility(bool isVisible)
     {
         SafeSet(
@@ -27,6 +32,7 @@ internal sealed class LoadingService : ILoadingService
             () => _currentState.IsVisible = isVisible);
     }
 
+    /// <inheritdoc/>
     public void SetProgressValue(int value)
     {
         value = Math.Clamp(value, 0, 100);
@@ -35,6 +41,7 @@ internal sealed class LoadingService : ILoadingService
             () => _currentState.ProgressValue = value);
     }
 
+    /// <inheritdoc/>
     public void SetIndeterminate(bool isIndeterminate)
     {
         SafeSet(
@@ -42,6 +49,12 @@ internal sealed class LoadingService : ILoadingService
             () => _currentState.IsIndeterminate = isIndeterminate);
     }
 
+    /// <summary>
+    /// Thread-safe getter.
+    /// </summary>
+    /// <typeparam name="T">Type of the value to get.</typeparam>
+    /// <param name="getter">Function to get the value.</param>
+    /// <returns>The value.</returns>
     private T SafeGet<T>(Func<T> getter)
     {
         lock (_lock)
@@ -50,6 +63,11 @@ internal sealed class LoadingService : ILoadingService
         }
     }
 
+    /// <summary>
+    /// Thread-safe setter that raises StateChanged event if the condition is met.
+    /// </summary>
+    /// <param name="condition">Function that returns true if the setter should be executed.</param>
+    /// <param name="setter">Action that sets the value.</param>
     public void SafeSet(Func<bool> condition, Action setter)
     {
         EventHandler handler = null;
