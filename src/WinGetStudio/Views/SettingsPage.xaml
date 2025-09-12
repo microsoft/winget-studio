@@ -24,6 +24,7 @@
             x:Name="ContentArea">
             <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
 
+            <!-- Telemetry setting -->
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <TextBlock x:Uid="Settings_Telemetry" Text="Telemetry" />
                 <CheckBox x:Uid="Settings_DisableTelemetry"
@@ -31,6 +32,7 @@
                           Command="{x:Bind ViewModel.ToggleTelemetryCommand}" />
             </StackPanel>
 
+            <!-- Theme -->
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <TextBlock x:Uid="Settings_Theme" />
 
@@ -65,8 +67,8 @@
                 </StackPanel>
             </StackPanel>
 
+            <!-- About -->
             <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
-
             <StackPanel Margin="{StaticResource XSmallTopMargin}">
                 <TextBlock Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" Style="{ThemeResource BodyTextBlockStyle}" />
 

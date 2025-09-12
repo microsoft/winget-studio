@@ -7,17 +7,18 @@ using WinGetStudio.Contracts.Services;
 
 namespace WinGetStudio.Services;
 
-public class AppSettings : IAppSettingsService
+public class AppSettingsService : IAppSettingsService
 {
-    private readonly ILogger<AppSettings> _logger;
+    private readonly ILogger<AppSettingsService> _logger;
     private readonly Dictionary<Type, IFeatureSettingsService> _featureSettings;
 
-    public AppSettings(ILogger<AppSettings> logger, IEnumerable<IFeatureSettingsService> featureSettings)
+    public AppSettingsService(ILogger<AppSettingsService> logger, IEnumerable<IFeatureSettingsService> featureSettings)
     {
         _logger = logger;
         _featureSettings = featureSettings.ToDictionary(f => f.GetType());
     }
 
+    /// <inheritdoc/>
     public async Task ApplySettingsAsync()
     {
         _logger.LogInformation("Applying application settings...");
@@ -28,6 +29,7 @@ public class AppSettings : IAppSettingsService
         }
     }
 
+    /// <inheritdoc/>
     public TFeatureSettings GetFeature<TFeatureSettings>()
         where TFeatureSettings : IFeatureSettingsService
     {

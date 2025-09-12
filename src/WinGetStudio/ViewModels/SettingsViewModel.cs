@@ -43,6 +43,10 @@ public partial class SettingsViewModel : ObservableRecipient
         RefreshSettings();
     }
 
+    /// <summary>
+    /// Gets the version description of the app.
+    /// </summary>
+    /// <returns>The version description.</returns>
     private string GetVersionDescription()
     {
         return $"{_appInfoService.GetAppNameLocalized()} - {_appInfoService.GetAppVersion()}";
@@ -72,11 +76,19 @@ public partial class SettingsViewModel : ObservableRecipient
         _userSettings.SettingsChanged -= OnSettingsChanged;
     }
 
+    /// <summary>
+    /// Handles settings changes.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
     private async void OnSettingsChanged(object? sender, GeneralSettings e)
     {
         await _dispatcher.EnqueueAsync(RefreshSettings);
     }
 
+    /// <summary>
+    /// Refreshes the settings from the user settings.
+    /// </summary>
     private void RefreshSettings()
     {
         ElementTheme = _appSettings.GetFeature<ThemeFeatureSettings>().Theme;

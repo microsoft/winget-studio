@@ -87,7 +87,7 @@ public partial class App : Application
                 services.AddSingleton<IUIDispatcher, UIDispatcher>();
 
                 // Settings
-                services.AddSingleton<IAppSettingsService, AppSettings>();
+                services.AddSingleton<IAppSettingsService, AppSettingsService>();
                 services.AddSingleton<IFeatureSettingsService, ThemeFeatureSettings>();
                 services.AddSingleton<IFeatureSettingsService, TelemetryFeatureSettings>();
 
