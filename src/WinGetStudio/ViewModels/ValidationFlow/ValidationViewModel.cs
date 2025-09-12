@@ -9,6 +9,8 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WingetStudio.Services.VisualFeedback.Contracts;
+using WingetStudio.Services.VisualFeedback.Models;
 
 namespace WinGetStudio.ViewModels;
 
@@ -17,6 +19,8 @@ public delegate ValidationViewModel ValidationViewModelFactory();
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IDSC _dsc;
+    private readonly IUIFeedbackService _ui;
+    private readonly IStringResource _stringResource;
 
     [ObservableProperty]
     public partial string ModuleName { get; set; } = string.Empty;
@@ -40,18 +44,17 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     public partial bool TestBannerVisible { get; set; } = false;
 
     [ObservableProperty]
-    public partial bool TestResult { get; set; } = false;
-
-    [ObservableProperty]
     public partial string TestBannerText { get; set; } = string.Empty;
 
     public bool IsPropertiesEmpty => Properties.Count == 0;
 
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
 
-    public ValidationViewModel(IDSC dsc, IDSCSetBuilder setBuilder, IAppNavigationService navService)
+    public ValidationViewModel(IDSC dsc, IUIFeedbackService ui, IStringResource stringResource)
     {
         _dsc = dsc;
+        _ui = ui;
+        _stringResource = stringResource;
 
         Properties.CollectionChanged += (_, __) =>
         {
@@ -204,11 +207,14 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private async Task OnGetAsync()
     {
-        ActionsEnabled = false;
-        ConfigurationUnitModel unit = CreateConfigurationUnitModel();
-        await _dsc.DscGet(unit);
-        RawData = unit.ToYaml();
-        ActionsEnabled = true;
+        await RunDscOperationAsync(async () =>
+        {
+            ActionsEnabled = false;
+            var unit = CreateConfigurationUnitModel();
+            await _dsc.DscGet(unit);
+            RawData = unit.ToYaml();
+            ActionsEnabled = true;
+        });
     }
 
     /// <summary>
@@ -217,10 +223,13 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private async Task OnSetAsync()
     {
-        ActionsEnabled = false;
-        ConfigurationUnitModel unit = CreateConfigurationUnitModel();
-        await _dsc.DscSet(unit);
-        ActionsEnabled = true;
+        await RunDscOperationAsync(async () =>
+        {
+            ActionsEnabled = false;
+            var unit = CreateConfigurationUnitModel();
+            await _dsc.DscSet(unit);
+            ActionsEnabled = true;
+        });
     }
 
     /// <summary>
@@ -229,33 +238,34 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private async Task OnTestAsync()
     {
-        ActionsEnabled = false;
-        ConfigurationUnitModel unit = CreateConfigurationUnitModel();
-        await _dsc.DscTest(unit);
-        TestResult = unit.TestResult;
-        if (unit.TestResult)
+        await RunDscOperationAsync(async () =>
         {
-            TestBannerText = "Machine is in desired state";
-        }
-        else
-        {
-            TestBannerText = "Machine is not in desired state";
-        }
-
-        TestBannerVisible = true;
-        ActionsEnabled = true;
+            var unit = CreateConfigurationUnitModel();
+            await _dsc.DscTest(unit);
+            if (unit.TestResult)
+            {
+                var message = _stringResource.GetLocalized("Notification_MachineInDesiredState");
+                _ui.ShowOutcomeNotification(null, message, NotificationMessageSeverity.Success);
+            }
+            else
+            {
+                var message = _stringResource.GetLocalized("Notification_MachineNotInDesiredState");
+                _ui.ShowOutcomeNotification(null, message, NotificationMessageSeverity.Error);
+            }
+        });
     }
 
     /// <summary>
-    /// Exports the current configuration asynchronously and updates the raw data representation.
+    /// Runs a DSC operation while managing UI feedback.
     /// </summary>
-    [RelayCommand]
-    private async Task OnExportAsync()
+    /// <param name="action">The DSC operation to execute.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private async Task RunDscOperationAsync(Func<Task> action)
     {
         ActionsEnabled = false;
-        ConfigurationUnitModel unit = CreateConfigurationUnitModel();
-        await _dsc.DscExport(unit);
-        RawData = unit.ToYaml();
+        _ui.ShowTaskProgress();
+        await action();
+        _ui.HideTaskProgress();
         ActionsEnabled = true;
     }
 }

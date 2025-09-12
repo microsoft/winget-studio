@@ -21,6 +21,7 @@ internal sealed class UIFeedbackService : IUIFeedbackService
         Notification = notificationService;
     }
 
+    /// <inheritdoc/>
     public void ShowOutcomeNotification(string title, string message, NotificationMessageSeverity severity)
     {
         Notification.Show(new()
@@ -34,6 +35,7 @@ internal sealed class UIFeedbackService : IUIFeedbackService
         });
     }
 
+    /// <inheritdoc/>
     public void ClearOverlayNotifications()
     {
         Notification.Show(new()
@@ -41,5 +43,26 @@ internal sealed class UIFeedbackService : IUIFeedbackService
             Delivery = NotificationDelivery.None,
             ShownBehavior = NotificationShownBehavior.ClearOverlays,
         });
+    }
+
+    /// <inheritdoc/>
+    public void ShowTaskProgress(int progressValue = 0)
+    {
+        if (Math.Max(progressValue, 0) == 0)
+        {
+            Loading.SetIndeterminate(true);
+        }
+        else
+        {
+            Loading.SetProgressValue(progressValue);
+        }
+
+        Loading.SetVisibility(true);
+    }
+
+    /// <inheritdoc/>
+    public void HideTaskProgress()
+    {
+        Loading.SetVisibility(false);
     }
 }

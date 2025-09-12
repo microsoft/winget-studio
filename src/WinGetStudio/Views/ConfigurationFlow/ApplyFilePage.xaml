@@ -28,12 +28,8 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel BorderThickness="0,0,0,1" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" Spacing="12">
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}">Applying Configuration File</TextBlock>
-            <ProgressBar IsIndeterminate="{x:Bind ViewModel.IsLoading, Mode=OneWay}" Value="100" />
-        </StackPanel>
-
-        <ScrollView Grid.Row="1">
+        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}">Applying Configuration File</TextBlock>
+        <ScrollView Grid.Row="1" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}">
             <ItemsRepeater ItemsSource="{x:Bind ViewModel.Units}">
                 <ItemsRepeater.Layout>
                     <StackLayout Spacing="8" />

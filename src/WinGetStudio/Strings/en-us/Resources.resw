@@ -520,4 +520,10 @@
   <data name="NotificationPane_Previous.Text" xml:space="preserve">
     <value>Previous notifications</value>
   </data>
+  <data name="Notification_MachineInDesiredState" xml:space="preserve">
+    <value>Machine is in the desired state</value>
+  </data>
+  <data name="Notification_MachineNotInDesiredState" xml:space="preserve">
+    <value>Machine is not in the desired state</value>
+  </data>
 </root>

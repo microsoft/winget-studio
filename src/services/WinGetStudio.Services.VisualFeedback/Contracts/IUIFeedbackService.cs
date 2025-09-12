@@ -30,4 +30,15 @@ public interface IUIFeedbackService
     /// Clears all overlay notifications.
     /// </summary>
     void ClearOverlayNotifications();
+
+    /// <summary>
+    /// Shows task progress.
+    /// </summary>
+    /// <param name="progressValue">The progress value (0-100). Default is 0 (indeterminate).</param>
+    void ShowTaskProgress(int progressValue = 0);
+
+    /// <summary>
+    /// Hides task progress.
+    /// </summary>
+    void HideTaskProgress();
 }
