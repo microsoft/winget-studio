@@ -75,8 +75,12 @@
                                     </controls:Case>
                                     <controls:Case Value="False">
                                         <StackPanel Spacing="8">
-                                            <TextBlock Text="{x:Bind Message, Mode=OneWay}" Visibility="{x:Bind Message, Converter={StaticResource StringVisibilityConverter}, Mode=OneWay}" />
-                                            <TextBlock Text="{x:Bind Description, Mode=OneWay}" Visibility="{x:Bind Description, Converter={StaticResource StringVisibilityConverter}, Mode=OneWay}" />
+                                            <TextBlock Text="{x:Bind Message, Mode=OneWay}"
+                                                       IsTextSelectionEnabled="True"
+                                                       Visibility="{x:Bind Message, Converter={StaticResource StringVisibilityConverter}, Mode=OneWay}" />
+                                            <TextBlock Text="{x:Bind Description, Mode=OneWay}"
+                                                       IsTextSelectionEnabled="True"
+                                                       Visibility="{x:Bind Description, Converter={StaticResource StringVisibilityConverter}, Mode=OneWay}" />
                                         </StackPanel>
                                     </controls:Case>
                                 </controls:SwitchPresenter>
