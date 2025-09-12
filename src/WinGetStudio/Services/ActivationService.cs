@@ -14,24 +14,22 @@ public class ActivationService : IActivationService
 {
     private readonly ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> _defaultHandler;
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
-    private readonly IThemeSelectorService _themeSelectorService;
+    private readonly IAppSettingsService _appSettings;
     private readonly IUserSettings _userSettings;
-    private readonly ITelemetrySettingsService _telemetrySettingsService;
+
     private UIElement? _shell;
     private bool _isInitialActivation = true;
 
     public ActivationService(
         ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> defaultHandler,
         IEnumerable<IActivationHandler> activationHandlers,
-        IThemeSelectorService themeSelectorService,
         IUserSettings userSettings,
-        ITelemetrySettingsService telemetrySettingsService)
+        IAppSettingsService appSettings)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
-        _themeSelectorService = themeSelectorService;
         _userSettings = userSettings;
-        _telemetrySettingsService = telemetrySettingsService;
+        _appSettings = appSettings;
     }
 
     public async Task ActivateAsync(object activationArgs)
@@ -78,12 +76,13 @@ public class ActivationService : IActivationService
 
     private async Task InitializeAsync()
     {
+        // Initialize the user settings (JSON file).
         await _userSettings.InitializeAsync().ConfigureAwait(false);
-        _telemetrySettingsService.ApplySettings();
     }
 
     private async Task StartupAsync()
     {
-        await _themeSelectorService.ApplyThemeAsync();
+        // Apply settings to the app (theme, etc.).
+        await _appSettings.ApplySettingsAsync().ConfigureAwait(false);
     }
 }

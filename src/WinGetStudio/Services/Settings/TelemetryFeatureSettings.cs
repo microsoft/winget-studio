@@ -6,16 +6,16 @@ using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Models;
 using WinGetStudio.Services.Telemetry.Contracts;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Settings;
 
-internal sealed class TelemetrySettingsService : ITelemetrySettingsService
+internal sealed class TelemetryFeatureSettings : IFeatureSettingsService
 {
     private readonly IUserSettings _userSettings;
     private readonly ITelemetryService _telemetry;
 
     public bool IsDisabled => _userSettings.Current.Telemetry.Disable;
 
-    public TelemetrySettingsService(IUserSettings userSettings, ITelemetryService telemetry)
+    public TelemetryFeatureSettings(IUserSettings userSettings, ITelemetryService telemetry)
     {
         _userSettings = userSettings;
         _telemetry = telemetry;
@@ -23,9 +23,10 @@ internal sealed class TelemetrySettingsService : ITelemetrySettingsService
         _userSettings.SettingsChanged += OnSettingsChanged;
     }
 
-    public void ApplySettings()
+    public async Task ApplySettingsAsync()
     {
         _telemetry.Configure(IsDisabled);
+        await Task.CompletedTask;
     }
 
     private void OnSettingsChanged(object? sender, GeneralSettings newSettings)

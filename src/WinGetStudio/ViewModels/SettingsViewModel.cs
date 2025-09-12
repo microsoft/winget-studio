@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using WinGetStudio.Contracts.Services;
+using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Models;
 
@@ -12,11 +13,10 @@ namespace WinGetStudio.ViewModels;
 
 public partial class SettingsViewModel : ObservableRecipient
 {
-    private readonly IThemeSelectorService _themeSelectorService;
     private readonly IAppInfoService _appInfoService;
     private readonly IUserSettings _userSettings;
+    private readonly IAppSettingsService _appSettings;
     private readonly IUIDispatcher _dispatcher;
-    private readonly ITelemetrySettingsService _telemetrySettingsService;
 
     [ObservableProperty]
     public partial ElementTheme ElementTheme { get; set; }
@@ -28,17 +28,15 @@ public partial class SettingsViewModel : ObservableRecipient
     public partial bool DisableTelemetry { get; set; }
 
     public SettingsViewModel(
-        IThemeSelectorService themeSelectorService,
         IAppInfoService appInfoService,
         IUserSettings userSettings,
-        IUIDispatcher dispatcher,
-        ITelemetrySettingsService telemetrySettingsService)
+        IAppSettingsService appSettings,
+        IUIDispatcher dispatcher)
     {
         _appInfoService = appInfoService;
-        _themeSelectorService = themeSelectorService;
         _userSettings = userSettings;
+        _appSettings = appSettings;
         _dispatcher = dispatcher;
-        _telemetrySettingsService = telemetrySettingsService;
 
         // Initialize settings
         VersionDescription = GetVersionDescription();
@@ -81,7 +79,7 @@ public partial class SettingsViewModel : ObservableRecipient
 
     private void RefreshSettings()
     {
-        ElementTheme = _themeSelectorService.Theme;
-        DisableTelemetry = _telemetrySettingsService.IsDisabled;
+        ElementTheme = _appSettings.GetFeature<ThemeFeatureSettings>().Theme;
+        DisableTelemetry = _appSettings.GetFeature<TelemetryFeatureSettings>().IsDisabled;
     }
 }

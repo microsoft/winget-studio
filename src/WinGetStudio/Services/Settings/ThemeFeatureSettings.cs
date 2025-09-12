@@ -6,25 +6,28 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Models;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Settings;
 
-public class ThemeSelectorService : IThemeSelectorService
+public class ThemeFeatureSettings : IFeatureSettingsService
 {
     private readonly IUserSettings _userSettings;
     private readonly IThemeApplierService _themeApplier;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the current theme.
+    /// </summary>
     public ElementTheme Theme => GetElementTheme(_userSettings.Current.Theme);
 
-    public ThemeSelectorService(IUserSettings userSettings, IThemeApplierService themeApplier)
+    public ThemeFeatureSettings(IUserSettings userSettings, IThemeApplierService themeApplier)
     {
         _userSettings = userSettings;
         _themeApplier = themeApplier;
+
         _userSettings.SettingsChanged += OnSettingsChanged;
     }
 
     /// <inheritdoc/>
-    public async Task ApplyThemeAsync()
+    public async Task ApplySettingsAsync()
     {
         await _themeApplier.ApplyThemeAsync(Theme);
     }
