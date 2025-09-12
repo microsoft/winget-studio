@@ -20,9 +20,9 @@ public static class NotificationHelper
         };
     }
 
-    public static InfoBarSeverity GetInfoBarSeverity(NotificationMessageSeverity type)
+    public static InfoBarSeverity GetInfoBarSeverity(NotificationMessageSeverity severity)
     {
-        return type switch
+        return severity switch
         {
             NotificationMessageSeverity.Informational => InfoBarSeverity.Informational,
             NotificationMessageSeverity.Warning => InfoBarSeverity.Warning,

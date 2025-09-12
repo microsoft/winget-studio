@@ -61,7 +61,7 @@
                         <DataTemplate x:DataType="notifications:NotificationMessage">
                             <InfoBar IsOpen="True"
                                      Style="{ThemeResource UnreadInAppNotification}"
-                                     Severity="{x:Bind Type, Converter={StaticResource SeverityConverter}}"
+                                     Severity="{x:Bind Severity, Converter={StaticResource SeverityConverter}}"
                                      CloseButtonCommand="{Binding ElementName=PaneRoot, Path=Tag.ViewModel.MarkAsReadCommand, Mode=OneWay}"
                                      CloseButtonCommandParameter="{x:Bind}"
                                      Title="{x:Bind Title}"
@@ -88,7 +88,7 @@
                                 <DataTemplate x:DataType="notifications:NotificationMessage">
                                     <InfoBar IsOpen="True"
                                              Style="{ThemeResource ReadInAppNotification}"
-                                             Severity="{x:Bind Type, Converter={StaticResource SeverityConverter}}"
+                                             Severity="{x:Bind Severity, Converter={StaticResource SeverityConverter}}"
                                              Title="{x:Bind Title}"
                                              Message="{x:Bind Message}" />
                                 </DataTemplate>

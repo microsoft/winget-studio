@@ -130,7 +130,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         {
             Title = message.Title,
             Message = message.Message,
-            Severity = NotificationHelper.GetInfoBarSeverity(message.Type),
+            Severity = NotificationHelper.GetInfoBarSeverity(message.Severity),
             Content = message,
             ContentTemplate = new DataTemplate(),
             Duration = TimeSpan.FromSeconds(3),
@@ -167,7 +167,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         {
             Title = "Sample Notification",
             Message = Guid.NewGuid().ToString(),
-            Type = types[new Random().Next(types.Length)],
+            Severity = types[new Random().Next(types.Length)],
         });
     }
 }
