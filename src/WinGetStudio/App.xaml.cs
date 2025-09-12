@@ -81,6 +81,7 @@ public partial class App : Application
                 services.AddSingleton<IConfigurationNavigationService, ConfigurationNavigationService>();
                 services.AddSingleton<IValidationNavigationService, ValidationNavigationService>();
                 services.AddSingleton<IAppInfoService, AppInfoService>();
+                services.AddSingleton<ITelemetrySettingsService, TelemetrySettingsService>();
 
                 // Dispatcher Queue
                 services.AddSingleton(_dispatcherQueue);

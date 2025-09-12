@@ -16,6 +16,7 @@ public class ActivationService : IActivationService
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly IUserSettings _userSettings;
+    private readonly ITelemetrySettingsService _telemetrySettingsService;
     private UIElement? _shell;
     private bool _isInitialActivation = true;
 
@@ -23,12 +24,14 @@ public class ActivationService : IActivationService
         ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs> defaultHandler,
         IEnumerable<IActivationHandler> activationHandlers,
         IThemeSelectorService themeSelectorService,
-        IUserSettings userSettings)
+        IUserSettings userSettings,
+        ITelemetrySettingsService telemetrySettingsService)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
         _userSettings = userSettings;
+        _telemetrySettingsService = telemetrySettingsService;
     }
 
     public async Task ActivateAsync(object activationArgs)
@@ -76,6 +79,7 @@ public class ActivationService : IActivationService
     private async Task InitializeAsync()
     {
         await _userSettings.InitializeAsync().ConfigureAwait(false);
+        _telemetrySettingsService.ApplySettings();
     }
 
     private async Task StartupAsync()

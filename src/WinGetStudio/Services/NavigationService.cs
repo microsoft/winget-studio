@@ -82,7 +82,7 @@ internal class NavigationService
         return false;
     }
 
-    public bool NavigateTo(Type pageKey, object? parameter = null, bool clearNavigation = false)
+    public virtual bool NavigateTo(Type pageKey, object? parameter = null, bool clearNavigation = false)
     {
         var pageType = _pageService.GetPageType(pageKey);
 

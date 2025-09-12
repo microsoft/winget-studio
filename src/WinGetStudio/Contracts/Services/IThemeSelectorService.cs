@@ -16,13 +16,6 @@ public interface IThemeSelectorService
     ElementTheme Theme { get; }
 
     /// <summary>
-    /// Sets the requested theme and applies it to the application.
-    /// </summary>
-    /// <param name="theme">The requested <see cref="ElementTheme"/>.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    Task SetThemeAsync(ElementTheme theme);
-
-    /// <summary>
     /// Applies the current theme to the application.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>

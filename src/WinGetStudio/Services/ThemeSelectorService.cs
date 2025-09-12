@@ -4,6 +4,7 @@
 using Microsoft.UI.Xaml;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Settings.Contracts;
+using WinGetStudio.Services.Settings.Models;
 
 namespace WinGetStudio.Services;
 
@@ -20,16 +21,6 @@ public class ThemeSelectorService : IThemeSelectorService
         _userSettings = userSettings;
         _themeApplier = themeApplier;
         _userSettings.SettingsChanged += OnSettingsChanged;
-    }
-
-    /// <inheritdoc/>
-    public async Task SetThemeAsync(ElementTheme theme)
-    {
-        if (theme != Theme)
-        {
-            await _themeApplier.ApplyThemeAsync(Theme);
-            await _userSettings.SaveAsync(settings => settings.Theme = theme.ToString());
-        }
     }
 
     /// <inheritdoc/>
@@ -54,7 +45,7 @@ public class ThemeSelectorService : IThemeSelectorService
         return ElementTheme.Default;
     }
 
-    private async void OnSettingsChanged(object? sender, IGeneralSettings newSettings)
+    private async void OnSettingsChanged(object? sender, GeneralSettings newSettings)
     {
         var theme = GetElementTheme(newSettings.Theme);
         await _themeApplier.ApplyThemeAsync(theme);
