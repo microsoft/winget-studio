@@ -214,15 +214,15 @@
 
                             <!-- Expander content -->
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
-                                <StackPanel Padding="12" Spacing="16">
+                                <StackPanel Padding="{StaticResource SectionPadding}" Spacing="{StaticResource SectionSpacing}">
                                     <!-- Individual records -->
                                     <Border
-                                        Padding="16"
+                                        Padding="{StaticResource SectionPadding}"
                                         Background="{ThemeResource LayerFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8">
-                                        <StackPanel Spacing="8">
+                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                        CornerRadius="{StaticResource CornerRadiusMedium}">
+                                        <StackPanel Spacing="{StaticResource SectionSpacing}">
                                             <TextBlock
                                                 Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                 Style="{ThemeResource BodyStrongTextBlockStyle}"
@@ -236,13 +236,13 @@
 
                                     <!--  Dependencies  -->
                                     <Border
-                                        Padding="16"
+                                        Padding="{StaticResource SectionPadding}"
                                         Background="{ThemeResource LayerFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
+                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                        CornerRadius="{StaticResource CornerRadiusMedium}"
                                         Visibility="{x:Bind Dependencies, Converter={StaticResource CollectionVisibilityConverter}}">
-                                        <StackPanel Spacing="8">
+                                        <StackPanel Spacing="{StaticResource SectionSpacing}">
                                             <TextBlock
                                                 x:Uid="ConfigurationUnit_Dependencies"
                                                 Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
@@ -256,8 +256,8 @@
                                                 <ListView.ItemTemplate>
                                                     <DataTemplate x:DataType="x:String">
                                                         <Border
-                                                            Padding="8,4"
-                                                            CornerRadius="4">
+                                                            Padding="{StaticResource Padding8x4}"
+                                                            CornerRadius="{StaticResource CornerRadiusSmall}">
                                                             <TextBlock Tag="{x:Bind}">
                                                                 <Hyperlink Click="Dependency_Click">
                                                                     <Run Text="{x:Bind}" />
@@ -272,11 +272,11 @@
 
                                     <!-- Metadata -->
                                     <Border
-                                        Padding="16"
+                                        Padding="{StaticResource SectionPadding}"
                                         Background="{ThemeResource LayerFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
+                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                        CornerRadius="{StaticResource CornerRadiusMedium}"
                                         Visibility="{x:Bind Metadata, Converter={StaticResource CollectionVisibilityConverter}}">
                                         <StackPanel Spacing="8">
                                             <TextBlock
@@ -292,22 +292,22 @@
 
                                     <!-- Settings -->
                                     <Border
-                                        Padding="16"
+                                        Padding="{StaticResource SectionPadding}"
                                         Background="{ThemeResource LayerFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
+                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                        CornerRadius="{StaticResource CornerRadiusMedium}"
                                         Visibility="{x:Bind Settings, Converter={StaticResource CollectionVisibilityConverter}}">
-                                        <StackPanel Spacing="8">
+                                        <StackPanel Spacing="{StaticResource SectionSpacing}">
                                             <TextBlock
                                                 x:Uid="ConfigurationUnit_Settings"
                                                 Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                 Style="{ThemeResource BodyStrongTextBlockStyle}" />
                                             <ScrollViewer
-                                                MaxHeight="200"
-                                                Padding="12"
+                                                MaxHeight="{StaticResource MaxSettingsHeight}"
+                                                Padding="{StaticResource SectionPadding}"
                                                 Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                CornerRadius="4"
+                                                CornerRadius="{StaticResource CornerRadiusSmall}"
                                                 VerticalScrollBarVisibility="Auto">
                                                 <TextBlock
                                                     FontFamily="Consolas"
@@ -320,13 +320,13 @@
 
                                     <!-- Details -->
                                     <Border
-                                        Padding="16"
+                                        Padding="{StaticResource SectionPadding}"
                                         Background="{ThemeResource LayerFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
+                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                        CornerRadius="{StaticResource CornerRadiusMedium}"
                                         Visibility="{x:Bind Settings, Converter={StaticResource CollectionVisibilityConverter}}">
-                                        <StackPanel Spacing="8">
+                                        <StackPanel Spacing="{StaticResource SectionSpacing}">
                                             <TextBlock
                                                 x:Uid="ConfigurationUnit_Details"
                                                 Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
@@ -337,8 +337,8 @@
                                                 <StackPanel.Resources>
                                                     <Style TargetType="labs:Shimmer">
                                                         <Setter Property="Margin" Value="0" />
-                                                        <Setter Property="Height" Value="20" />
-                                                        <Setter Property="CornerRadius" Value="4" />
+                                                        <Setter Property="Height" Value="{StaticResource ShimmerHeight}" />
+                                                        <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusSmall}" />
                                                     </Style>
                                                 </StackPanel.Resources>
                                                 <labs:Shimmer />
