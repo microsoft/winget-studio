@@ -257,7 +257,6 @@
                                                     <DataTemplate x:DataType="x:String">
                                                         <Border
                                                             Padding="8,4"
-                                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                             CornerRadius="4">
                                                             <TextBlock Tag="{x:Bind}">
                                                                 <Hyperlink Click="Dependency_Click">
