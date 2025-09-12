@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI;
@@ -46,20 +47,24 @@ public partial class NotificationPaneViewModel : ObservableRecipient
         _uiFeedbackService.Notification.NotificationShown -= OnNotificationShown;
     }
 
-    private async void OnNotificationRead(object? sender, NotificationMessage message)
-    {
-        await _dispatcherQueue.EnqueueAsync(() =>
-        {
-            UnreadNotifications.Remove(message);
-            PreviousNotifications.Insert(0, message);
-        });
-    }
-
     private async void OnNotificationShown(object? sender, NotificationMessage message)
     {
         await _dispatcherQueue.EnqueueAsync(() =>
         {
-            UnreadNotifications.Insert(0, message);
+            if (message.Delivery.HasFlag(NotificationDelivery.Panel))
+            {
+                UnreadNotifications.Insert(0, message);
+            }
+        });
+    }
+
+    private async void OnNotificationRead(object? sender, NotificationMessage message)
+    {
+        await _dispatcherQueue.EnqueueAsync(() =>
+        {
+            Debug.Assert(message.Delivery.HasFlag(NotificationDelivery.Panel), "Only panel notifications should raise the read event.");
+            UnreadNotifications.Remove(message);
+            PreviousNotifications.Insert(0, message);
         });
     }
 

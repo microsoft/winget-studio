@@ -25,13 +25,10 @@ public partial class ShellViewModel : ObservableRecipient
     public partial object? Selected { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsStackedNotificationVisible))]
     public partial bool IsNotificationPaneOpen { get; set; }
 
     [ObservableProperty]
     public partial int UnreadNotificationsCount { get; set; }
-
-    public bool IsStackedNotificationVisible => !IsNotificationPaneOpen;
 
     public IAppNavigationService NavigationService { get; }
 

@@ -126,15 +126,29 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 
     private void OnNotificationShown(object? sender, NotificationMessage message)
     {
-        NotificationQueue.Show(new()
+        if (message.ShownBehavior == NotificationShownBehavior.ClearOverlays)
         {
-            Title = message.Title,
-            Message = message.Message,
-            Severity = NotificationHelper.GetInfoBarSeverity(message.Severity),
-            Content = message,
-            ContentTemplate = new DataTemplate(),
-            Duration = TimeSpan.FromSeconds(3),
-        });
+            NotificationQueue.Clear();
+        }
+
+        if (message.Delivery.HasFlag(NotificationDelivery.Overlay))
+        {
+            TimeSpan? duration = null;
+            if (message.DismissBehavior == NotificationDismissBehavior.Timeout && message.Duration > TimeSpan.Zero)
+            {
+                duration = message.Duration;
+            }
+
+            NotificationQueue.Show(new()
+            {
+                Title = message.Title,
+                Message = message.Message,
+                Severity = NotificationHelper.GetInfoBarSeverity(message.Severity),
+                Content = message,
+                ContentTemplate = new DataTemplate(),
+                Duration = duration,
+            });
+        }
     }
 
     private void NotificationRead(InfoBar sender, object args)
@@ -160,7 +174,7 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         _uiFeedbackService.Loading.SetIndeterminate(!_uiFeedbackService.Loading.IsIndeterminate);
     }
 
-    private void SendNotification(object sender, RoutedEventArgs e)
+    public void SendNotification_Panel(object sender, RoutedEventArgs e)
     {
         var types = Enum.GetValues<NotificationMessageSeverity>();
         _uiFeedbackService.Notification.Show(new()
@@ -168,6 +182,88 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             Title = "Sample Notification",
             Message = Guid.NewGuid().ToString(),
             Severity = types[new Random().Next(types.Length)],
+            Delivery = NotificationDelivery.Panel,
         });
+    }
+
+    private void SendNotification_OverlayDefault(object sender, RoutedEventArgs e)
+    {
+        var types = Enum.GetValues<NotificationMessageSeverity>();
+        _uiFeedbackService.Notification.Show(new()
+        {
+            Title = "Sample Notification",
+            Message = Guid.NewGuid().ToString(),
+            Severity = types[new Random().Next(types.Length)],
+            Delivery = NotificationDelivery.Overlay,
+        });
+    }
+
+    private void SendNotification_OverlayForOneSecond(object sender, RoutedEventArgs e)
+    {
+        var types = Enum.GetValues<NotificationMessageSeverity>();
+        _uiFeedbackService.Notification.Show(new()
+        {
+            Title = "Sample Notification",
+            Message = Guid.NewGuid().ToString(),
+            Severity = types[new Random().Next(types.Length)],
+            Delivery = NotificationDelivery.Overlay,
+            Duration = TimeSpan.FromSeconds(1),
+        });
+    }
+
+    private void SendNotification_OverlayDismissedByUser(object sender, RoutedEventArgs e)
+    {
+        var types = Enum.GetValues<NotificationMessageSeverity>();
+        _uiFeedbackService.Notification.Show(new()
+        {
+            Title = "Sample Notification",
+            Message = Guid.NewGuid().ToString(),
+            Severity = types[new Random().Next(types.Length)],
+            Delivery = NotificationDelivery.Overlay,
+            DismissBehavior = NotificationDismissBehavior.User,
+        });
+    }
+
+    private void SendNotification_OverlayDismissedByUserAndClearOverlays(object sender, RoutedEventArgs e)
+    {
+        var types = Enum.GetValues<NotificationMessageSeverity>();
+        _uiFeedbackService.Notification.Show(new()
+        {
+            Title = "Sample Notification",
+            Message = Guid.NewGuid().ToString(),
+            Severity = types[new Random().Next(types.Length)],
+            Delivery = NotificationDelivery.Overlay,
+            DismissBehavior = NotificationDismissBehavior.User,
+            ShownBehavior = NotificationShownBehavior.ClearOverlays,
+        });
+    }
+
+    private void SendNotification_None(object sender, RoutedEventArgs e)
+    {
+        var types = Enum.GetValues<NotificationMessageSeverity>();
+        _uiFeedbackService.Notification.Show(new()
+        {
+            Title = "Sample Notification",
+            Message = Guid.NewGuid().ToString(),
+            Severity = types[new Random().Next(types.Length)],
+            Delivery = NotificationDelivery.None,
+        });
+    }
+
+    private void SendNotification_Both(object sender, RoutedEventArgs e)
+    {
+        var types = Enum.GetValues<NotificationMessageSeverity>();
+        _uiFeedbackService.Notification.Show(new()
+        {
+            Title = "Sample Notification",
+            Message = Guid.NewGuid().ToString(),
+            Severity = types[new Random().Next(types.Length)],
+            Delivery = NotificationDelivery.Overlay | NotificationDelivery.Panel,
+        });
+    }
+
+    private void SendNotification_Outcome(object sender, RoutedEventArgs e)
+    {
+        _uiFeedbackService.ShowOutcomeNotification("Sample Outcome", Guid.NewGuid().ToString(), NotificationMessageSeverity.Warning);
     }
 }
