@@ -148,27 +148,6 @@
                     <!-- Content -->
                     <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
                         <Frame x:Name="NavigationFrame" />
-                        <StackPanel VerticalAlignment="Bottom" Orientation="Vertical" Spacing="4">
-                            <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="4">
-                                <Button Click="ProgressVisibility">Toggle progress visibility</Button>
-                                <Button Click="AddProgress">Add progress</Button>
-                                <Button Click="ProgressInd">Toggle progress indeterminate</Button>
-                            </StackPanel>
-                            <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="4">
-                                <Button Click="SendNotification_None">Send notification (none)</Button>
-                                <Button Click="SendNotification_OverlayDefault">Send notification (overlay default)</Button>
-                                <Button Click="SendNotification_OverlayDismissedByUser">Send notification (overlay dismissed by user)</Button>
-                            </StackPanel>
-                            <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="4">
-                                <Button Click="SendNotification_OverlayDismissedByUserAndClearOverlays">Send notification (overlay dismissed by user and clear overlays)</Button>
-                                <Button Click="SendNotification_OverlayForOneSecond">Send notification (overlay for one second)</Button>
-                                <Button Click="SendNotification_Panel">Send notification (panel)</Button>
-                            </StackPanel>
-                            <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="4">
-                                <Button Click="SendNotification_Both">Send notification (both)</Button>
-                                <Button Click="SendNotification_Outcome">Send notification (outcome)</Button>
-                            </StackPanel>
-                        </StackPanel>
                     </Grid>
                 </NavigationView>
 
