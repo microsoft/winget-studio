@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.Services.Setti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.Services.Telemetry", "services\WinGetStudio.Services.Telemetry\WinGetStudio.Services.Telemetry.csproj", "{2D414AE2-A4D7-46A9-9ED4-917EE54BCCC0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.CLI", "WinGetStudio.CLI\WinGetStudio.CLI.csproj", "{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|arm64 = Debug|arm64
@@ -144,6 +146,18 @@ Global
 		{2D414AE2-A4D7-46A9-9ED4-917EE54BCCC0}.Release|x64.Build.0 = Release|x64
 		{2D414AE2-A4D7-46A9-9ED4-917EE54BCCC0}.Release|x86.ActiveCfg = Release|x86
 		{2D414AE2-A4D7-46A9-9ED4-917EE54BCCC0}.Release|x86.Build.0 = Release|x86
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Debug|arm64.ActiveCfg = Debug|ARM64
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Debug|arm64.Build.0 = Debug|ARM64
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Debug|x64.ActiveCfg = Debug|x64
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Debug|x64.Build.0 = Debug|x64
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Debug|x86.ActiveCfg = Debug|x86
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Debug|x86.Build.0 = Debug|x86
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|arm64.ActiveCfg = Release|ARM64
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|arm64.Build.0 = Release|ARM64
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|x64.ActiveCfg = Release|x64
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|x64.Build.0 = Release|x64
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|x86.ActiveCfg = Release|x86
+		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

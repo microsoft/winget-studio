@@ -22,6 +22,7 @@
     <PackageVersion Include="Microsoft.WindowsPackageManager.Configuration.OutOfProc" Version="1.11.430" />
     <!-- WinUI and related -->
     <PackageVersion Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
+    <PackageVersion Include="NJsonSchema" Version="11.4.0" />
     <PackageVersion Include="Serilog" Version="4.3.0" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Process" Version="3.0.0" />
@@ -34,9 +35,10 @@
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
     <PackageVersion Include="WinUIEx" Version="2.6.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.183" />
+    <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.205" />
     <PackageVersion Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
