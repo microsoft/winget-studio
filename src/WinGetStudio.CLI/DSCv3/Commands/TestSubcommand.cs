@@ -5,15 +5,16 @@ using System.CommandLine;
 
 namespace WinGetStudio.CLI.DSCv3.Commands;
 
-internal sealed partial class GetSubcommand : BaseDscSubcommand
+internal sealed partial class TestSubcommand : BaseDscSubcommand
 {
-    public GetSubcommand()
-        : base("get", "Get DSC resources")
+    public TestSubcommand()
+        : base("test", "Test DSC resources")
     {
     }
 
+    /// <inheritdoc/>
     public override bool CommandHandlerInternal(ParseResult parseResult)
     {
-        return Resource.GetState(Input);
+        return Resource.TestState(Input);
     }
 }

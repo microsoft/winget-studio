@@ -64,7 +64,12 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         ArgumentNullException.ThrowIfNull(changes);
         var newSettings = Current.Clone();
         changes(newSettings);
+        await SaveAsync(newSettings);
+    }
 
+    /// <inheritdoc/>
+    public async Task SaveAsync(GeneralSettings newSettings)
+    {
         if (_settingsOptions.CurrentValue.Equals(newSettings))
         {
             _logger.LogInformation("No changes detected in settings. Save operation skipped.");

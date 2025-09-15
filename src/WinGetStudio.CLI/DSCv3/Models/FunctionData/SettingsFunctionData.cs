@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using WinGetStudio.CLI.DSCv3.Models.ResourceObjects;
+using WinGetStudio.Services.Settings.Models;
 
 namespace WinGetStudio.CLI.DSCv3.Models.FunctionData;
 
@@ -12,7 +15,7 @@ internal sealed partial class SettingsFunctionData : BaseFunctionData
 
     public SettingsResourceObject Output { get; set; }
 
-    public SettingsFunctionData(string input)
+    public SettingsFunctionData(string input = null)
     {
         if (!string.IsNullOrWhiteSpace(input))
         {
@@ -21,5 +24,75 @@ internal sealed partial class SettingsFunctionData : BaseFunctionData
 
         Input ??= new();
         Output = new();
+    }
+
+    /// <summary>
+    /// Gets the current settings.
+    /// </summary>
+    public void GetState()
+    {
+        Output.Settings = GetSettings();
+    }
+
+    /// <summary>
+    /// Sets the current settings.
+    /// </summary>
+    public void SetState()
+    {
+        Debug.Assert(Output.Settings != null, "Output settings should not be null");
+        SaveSettings(Output.Settings);
+    }
+
+    /// <summary>
+    /// Tests if the current settings and the desired state are valid.
+    /// </summary>
+    /// <returns>True if the current settings match the desired state; otherwise false.</returns>
+    public bool TestState()
+    {
+        var input = JsonSerializer.SerializeToNode(Input.Settings);
+        var output = JsonSerializer.SerializeToNode(Output.Settings);
+        return JsonNode.DeepEquals(input, output);
+    }
+
+    /// <summary>
+    /// Gets the difference between the current settings and the desired state in JSON format.
+    /// </summary>
+    /// <returns>A JSON array representing the differences.</returns>
+    public JsonArray GetDiffJson()
+    {
+        var diff = new JsonArray();
+        if (!TestState())
+        {
+            diff.Add(SettingsResourceObject.SettingsJsonPropertyName);
+        }
+
+        return diff;
+    }
+
+    /// <summary>
+    /// Gets the schema for the settings resource object.
+    /// </summary>
+    /// <returns>A JSON schema string.</returns>
+    public string Schema()
+    {
+        return GenerateSchema<SettingsResourceObject>();
+    }
+
+    /// <summary>
+    /// Gets the settings configuration.
+    /// </summary>
+    /// <returns>The settings configuration.</returns>
+    private static GeneralSettings GetSettings()
+    {
+        return WinGetStudioCLI.UserSettings.Current;
+    }
+
+    /// <summary>
+    /// Saves the settings configuration to the settings utils for a specific module.
+    /// </summary>
+    /// <param name="settings">The settings configuration to save.</param>
+    private static void SaveSettings(GeneralSettings settings)
+    {
+        WinGetStudioCLI.UserSettings.SaveAsync(settings);
     }
 }

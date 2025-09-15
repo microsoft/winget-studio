@@ -6,7 +6,7 @@ namespace WinGetStudio.CLI.DSCv3.Models;
 /// <summary>
 /// Specifies the severity level of a message.
 /// </summary>
-public enum DscMessageLevel
+internal enum DscMessageLevel
 {
     /// <summary>
     /// Represents an error message.

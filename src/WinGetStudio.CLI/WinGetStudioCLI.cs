@@ -3,14 +3,28 @@
 
 using System;
 using System.CommandLine;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Windows.Win32;
 using WinGetStudio.CLI.DSCv3.Commands;
+using WinGetStudio.Services.Settings.Contracts;
+using WinGetStudio.Services.Settings.Extensions;
 
 namespace WinGetStudio.CLI;
 
 public sealed class WinGetStudioCLI
 {
     private const uint AttachParentProcess = uint.MaxValue;
+
+    public static IHost Host { get; private set; }
+
+    public static IUserSettings UserSettings => Host.Services.GetService<IUserSettings>();
+
+    public WinGetStudioCLI()
+    {
+        Initialize();
+        Build();
+    }
 
     public int Invoke(string[] args)
     {
@@ -23,7 +37,7 @@ public sealed class WinGetStudioCLI
         return parseResult.Invoke();
     }
 
-    public void Initialize()
+    private void Initialize()
     {
         if (PInvoke.AttachConsole(AttachParentProcess))
         {
@@ -39,5 +53,21 @@ public sealed class WinGetStudioCLI
         {
             // No-op
         }
+    }
+
+    private void Build()
+    {
+        Host = Microsoft.Extensions.Hosting.Host
+            .CreateDefaultBuilder()
+            .UseContentRoot(AppContext.BaseDirectory)
+            .UseDefaultServiceProvider((context, options) =>
+            {
+                options.ValidateOnBuild = true;
+            })
+            .ConfigureServices((context, services) =>
+            {
+                services.AddSettings();
+            })
+            .Build();
     }
 }

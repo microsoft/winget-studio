@@ -14,7 +14,6 @@ public static class Program
         if (args.Length > 0)
         {
             var cli = new WinGetStudioCLI();
-            cli.Initialize();
             var result = cli.Invoke(args);
             Environment.Exit(result);
         }
