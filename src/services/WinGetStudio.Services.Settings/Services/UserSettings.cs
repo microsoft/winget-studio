@@ -31,9 +31,9 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
 
     public string FullPath => Path.Combine(GetSettingsDirectory(), SettingsFile);
 
-    public IGeneralSettings Current => _settingsOptions.CurrentValue;
+    public GeneralSettings Current => _settingsOptions.CurrentValue;
 
-    public event EventHandler<IGeneralSettings> SettingsChanged;
+    public event EventHandler<GeneralSettings> SettingsChanged;
 
     public UserSettings(
         IOptionsMonitor<GeneralSettings> settingsOptions,
@@ -147,7 +147,7 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         }
     }
 
-    private void OnSettingsChanged(IGeneralSettings settings)
+    private void OnSettingsChanged(GeneralSettings settings)
     {
         SettingsChanged?.Invoke(this, settings);
         _logger.LogInformation("Settings have changed and event has been raised.");
