@@ -3,6 +3,7 @@
 
 using System.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Telemetry;
+using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.Telemetry.Contracts;
 using WinGetStudio.Services.Telemetry.Models;
 
@@ -13,36 +14,46 @@ namespace WinGetStudio.Services.Telemetry.Services;
 /// </summary>
 internal sealed partial class TelemetryService : TelemetryEventSource, ITelemetryService
 {
-    private readonly TelemetryEventListener _telemetryEventListener;
     private const string EventSourceName = "Microsoft.WinGetStudio";
+    private readonly object _lock = new();
+    private readonly ILogger<TelemetryService> _logger;
+
+    private bool _isConfigured;
+    private bool _isDisabled;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TelemetryService"/> class.
     /// </summary>
-    public TelemetryService()
+    public TelemetryService(ILogger<TelemetryService> logger)
         : base(EventSourceName, TelemetryGroup.MicrosoftTelemetry)
     {
-        _telemetryEventListener = new(this);
+        _logger = logger;
     }
 
     /// <inheritdoc/>
     public void WriteEvent<T>(T telemetryEvent)
         where T : EventBase
     {
-        Write<T>(
-            null,
-            new EventSourceOptions()
+        lock (_lock)
+        {
+            if (!_isConfigured)
             {
-                Keywords = CriticalDataKeyword,
-            },
-            telemetryEvent);
-
-        EventBase.IncrementCorrelationVector();
+                _logger.LogWarning("Telemetry cannot be written before the service is configured.");
+            }
+            else if (!_isDisabled)
+            {
+                Write<T>(null, new EventSourceOptions() { Keywords = CriticalDataKeyword }, telemetryEvent);
+                EventBase.IncrementCorrelationVector();
+            }
+        }
     }
 
-    /// <inheritdoc/>
-    public void DisableEvents()
+    public void Configure(bool disableEvents)
     {
-        _telemetryEventListener.DisableEvents();
+        lock (_lock)
+        {
+            _isDisabled = disableEvents;
+            _isConfigured = true;
+        }
     }
 }

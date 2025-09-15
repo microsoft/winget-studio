@@ -15,12 +15,12 @@ public interface IUserSettings
     /// <remarks>This event is triggered whenever the general settings are
     /// modified.  Subscribers can use this event to respond to changes in the
     /// settings.</remarks>
-    event EventHandler<IGeneralSettings> SettingsChanged;
+    event EventHandler<GeneralSettings> SettingsChanged;
 
     /// <summary>
     /// Gets the current general settings.
     /// </summary>
-    IGeneralSettings Current { get; }
+    GeneralSettings Current { get; }
 
     /// <summary>
     /// Gets the full path of the file or directory.

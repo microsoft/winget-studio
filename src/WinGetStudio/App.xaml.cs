@@ -15,6 +15,7 @@ using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.Telemetry.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
@@ -70,7 +71,6 @@ public partial class App : Application
 
                 // Services
                 services.AddSingleton<IThemeApplierService, ThemeApplierService>();
-                services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
                 services.AddTransient<INavigationViewService, NavigationViewService>();
                 services.AddTransient<IStringResource, StringResource>();
                 services.AddSingleton<IActivationService, ActivationService>();
@@ -85,6 +85,11 @@ public partial class App : Application
                 // Dispatcher Queue
                 services.AddSingleton(_dispatcherQueue);
                 services.AddSingleton<IUIDispatcher, UIDispatcher>();
+
+                // Settings
+                services.AddSingleton<IAppSettingsService, AppSettingsService>();
+                services.AddSingleton<IFeatureSettingsService, ThemeFeatureSettings>();
+                services.AddSingleton<IFeatureSettingsService, TelemetryFeatureSettings>();
 
                 // Core Services
                 services.AddCore();
