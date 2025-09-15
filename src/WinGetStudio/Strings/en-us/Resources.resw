@@ -147,6 +147,12 @@
   <data name="Settings_Theme_Default.Content" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="Settings_Telemetry.Text" xml:space="preserve">
+    <value>Telemetry</value>
+  </data>
+  <data name="Settings_DisableTelemetry.Content" xml:space="preserve">
+    <value>Disable telemetry</value>
+  </data>
   <data name="Settings_About.Text" xml:space="preserve">
     <value>About this application</value>
   </data>

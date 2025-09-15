@@ -16,7 +16,8 @@ public interface ITelemetryService
         where T : EventBase;
 
     /// <summary>
-    /// Disable all telemetry events.
+    /// Configure the telemetry service.
     /// </summary>
-    public void DisableEvents();
+    /// <param name="disableEvents">If true, disables telemetry events.</param>
+    void Configure(bool disableEvents);
 }

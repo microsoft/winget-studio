@@ -74,7 +74,7 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
          .WithNamingConvention(CamelCaseNamingConvention.Instance)
          .Build();
 
-        SettingsString = serializer.Serialize(dict);
+        SettingsString = serializer.Serialize(dict).Trim();
     }
 
     partial void OnTypeChanged(string oldValue, string newValue)
