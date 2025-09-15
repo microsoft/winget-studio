@@ -32,5 +32,18 @@
     <Thickness x:Key="MenuBarContentMargin">36,24,36,0</Thickness>
 
     <Thickness x:Key="SettingsPageHyperlinkButtonMargin">-12,4,0,0</Thickness>
-    
+
+    <!-- PreviewFilePage size resources -->
+    <Thickness x:Key="Padding8x4">8,4,8,4</Thickness>
+    <Thickness x:Key="Padding8Uniform">8</Thickness>
+    <Thickness x:Key="BorderThicknessThin">1</Thickness>
+    <Thickness x:Key="SectionPadding">16</Thickness>
+
+    <CornerRadius x:Key="CornerRadiusSmall">4</CornerRadius>
+    <CornerRadius x:Key="CornerRadiusMedium">8</CornerRadius>
+
+    <x:Double x:Key="ShimmerHeight">20</x:Double>
+    <x:Double x:Key="MaxSettingsHeight">200</x:Double>
+    <x:Double x:Key="SectionSpacing">16</x:Double>
+
 </ResourceDictionary>

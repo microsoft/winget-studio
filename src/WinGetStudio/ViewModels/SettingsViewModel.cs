@@ -5,15 +5,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using WinGetStudio.Contracts.Services;
+using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Contracts;
+using WinGetStudio.Services.Settings.Models;
 
 namespace WinGetStudio.ViewModels;
 
 public partial class SettingsViewModel : ObservableRecipient
 {
-    private readonly IThemeSelectorService _themeSelectorService;
     private readonly IAppInfoService _appInfoService;
     private readonly IUserSettings _userSettings;
+    private readonly IAppSettingsService _appSettings;
     private readonly IUIDispatcher _dispatcher;
 
     [ObservableProperty]
@@ -22,20 +24,29 @@ public partial class SettingsViewModel : ObservableRecipient
     [ObservableProperty]
     public partial string VersionDescription { get; set; }
 
+    [ObservableProperty]
+    public partial bool DisableTelemetry { get; set; }
+
     public SettingsViewModel(
-        IThemeSelectorService themeSelectorService,
         IAppInfoService appInfoService,
         IUserSettings userSettings,
+        IAppSettingsService appSettings,
         IUIDispatcher dispatcher)
     {
         _appInfoService = appInfoService;
-        _themeSelectorService = themeSelectorService;
         _userSettings = userSettings;
+        _appSettings = appSettings;
         _dispatcher = dispatcher;
-        ElementTheme = _themeSelectorService.Theme;
+
+        // Initialize settings
         VersionDescription = GetVersionDescription();
+        RefreshSettings();
     }
 
+    /// <summary>
+    /// Gets the version description of the app.
+    /// </summary>
+    /// <returns>The version description.</returns>
     private string GetVersionDescription()
     {
         return $"{_appInfoService.GetAppNameLocalized()} - {_appInfoService.GetAppVersion()}";
@@ -44,11 +55,13 @@ public partial class SettingsViewModel : ObservableRecipient
     [RelayCommand]
     private async Task SwitchThemeAsync(ElementTheme theme)
     {
-        if (ElementTheme != theme)
-        {
-            ElementTheme = theme;
-            await _themeSelectorService.SetThemeAsync(theme);
-        }
+        await _userSettings.SaveAsync(settings => settings.Theme = theme.ToString());
+    }
+
+    [RelayCommand]
+    private async Task ToggleTelemetryAsync()
+    {
+        await _userSettings.SaveAsync(settings => settings.Telemetry.Disable = DisableTelemetry);
     }
 
     [RelayCommand]
@@ -63,8 +76,22 @@ public partial class SettingsViewModel : ObservableRecipient
         _userSettings.SettingsChanged -= OnSettingsChanged;
     }
 
-    private async void OnSettingsChanged(object? sender, IGeneralSettings e)
+    /// <summary>
+    /// Handles settings changes.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private async void OnSettingsChanged(object? sender, GeneralSettings e)
     {
-        await _dispatcher.EnqueueAsync(() => ElementTheme = _themeSelectorService.Theme);
+        await _dispatcher.EnqueueAsync(RefreshSettings);
+    }
+
+    /// <summary>
+    /// Refreshes the settings from the user settings.
+    /// </summary>
+    private void RefreshSettings()
+    {
+        ElementTheme = _appSettings.GetFeature<ThemeFeatureSettings>().Theme;
+        DisableTelemetry = _appSettings.GetFeature<TelemetryFeatureSettings>().IsDisabled;
     }
 }
