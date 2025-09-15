@@ -78,7 +78,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             var dscSet = await _dscSetBuilder.BuildAsync();
             foreach (var u in dscSet.Units)
             {
-                ConfigurationUnits.Add(new(u));
+                ConfigurationUnits.Add(new(u, _logger));
             }
 
             _dsc.GetConfigurationUnitDetails(dscSet);
@@ -88,7 +88,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             ConfigurationUnits.Clear();
             foreach (var u in _dscSetBuilder.Units)
             {
-                ConfigurationUnits.Add(new(u));
+                ConfigurationUnits.Add(new(u, _logger));
             }
         }
 
@@ -250,7 +250,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     {
         EditableDSCUnit u = new();
         _dscSetBuilder.AddUnit(u);
-        ConfigurationUnits.Add(new(u));
+        ConfigurationUnits.Add(new(u, _logger));
         await Task.CompletedTask;
     }
 

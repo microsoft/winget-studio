@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -31,9 +32,9 @@ public partial class ApplySetUnit : ObservableObject
 
     public DSCConfigurationUnitViewModel Unit { get; }
 
-    public ApplySetUnit(IDSCUnit unit, IStringResource stringResource)
+    public ApplySetUnit(IDSCUnit unit, IStringResource stringResource, ILogger logger)
     {
-        Unit = new(unit);
+        Unit = new(unit, logger);
         _stringResource = stringResource;
         Update(ApplySetUnitState.NotStarted);
     }
