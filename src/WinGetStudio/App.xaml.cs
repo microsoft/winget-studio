@@ -9,12 +9,12 @@ using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using WinGetStudio.Activation;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.Extensions;
 using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WinGetStudio.Services.Logging.Extensions;
 using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.Telemetry.Extensions;
@@ -97,6 +97,7 @@ public partial class App : Application
                 services.AddWinGet();
                 services.AddSettings();
                 services.AddTelemetry();
+                services.AddCustomLogging();
 
                 // Views and ViewModels
                 services.AddTransient<SettingsViewModel>();
@@ -122,7 +123,6 @@ public partial class App : Application
                 // Configuration
                 services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
             })
-            .UseLogger()
             .Build();
 
         UnhandledException += App_UnhandledException;

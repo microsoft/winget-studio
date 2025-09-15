@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.Services.Telem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.CLI", "WinGetStudio.CLI\WinGetStudio.CLI.csproj", "{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.Services.Logging", "services\WinGetStudio.Services.Logging\WinGetStudio.Services.Logging.csproj", "{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|arm64 = Debug|arm64
@@ -158,6 +160,18 @@ Global
 		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|x64.Build.0 = Release|x64
 		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|x86.ActiveCfg = Release|x86
 		{25EAD5CE-5501-4CBF-BC78-1FC0416D04CF}.Release|x86.Build.0 = Release|x86
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Debug|arm64.ActiveCfg = Debug|ARM64
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Debug|arm64.Build.0 = Debug|ARM64
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Debug|x64.ActiveCfg = Debug|x64
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Debug|x64.Build.0 = Debug|x64
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Debug|x86.ActiveCfg = Debug|x86
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Debug|x86.Build.0 = Debug|x86
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Release|arm64.ActiveCfg = Release|ARM64
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Release|arm64.Build.0 = Release|ARM64
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Release|x64.ActiveCfg = Release|x64
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Release|x64.Build.0 = Release|x64
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Release|x86.ActiveCfg = Release|x86
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -168,6 +182,7 @@ Global
 		{25C64CC9-3BFE-11DE-3ABA-45CB502A6128} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{641D2F91-7644-4158-93B9-17FD470454B8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2D414AE2-A4D7-46A9-9ED4-917EE54BCCC0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{9291A83F-2CD2-4E0D-8D2B-3D0ECB983907} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1B1B29AB-8EF8-44B2-9CE2-E58329CCC870}

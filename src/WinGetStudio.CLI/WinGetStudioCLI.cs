@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Windows.Win32;
 using WinGetStudio.CLI.DSCv3.Commands;
+using WinGetStudio.Services.Logging.Extensions;
 using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Extensions;
 
@@ -67,6 +68,7 @@ public sealed class WinGetStudioCLI
             .ConfigureServices((context, services) =>
             {
                 services.AddSettings();
+                services.AddCustomLogging();
             })
             .Build();
     }

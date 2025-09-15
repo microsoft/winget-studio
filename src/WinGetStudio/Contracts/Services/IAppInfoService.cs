@@ -9,23 +9,23 @@ public interface IAppInfoService
     /// Gets the localized application name.
     /// </summary>
     /// <returns>The localized application name.</returns>
-    public string GetAppNameLocalized();
+    string GetAppNameLocalized();
 
     /// <summary>
     /// Gets the application version.
     /// </summary>
     /// <returns>The application version.</returns>
-    public string GetAppVersion();
+    string GetAppVersion();
 
     /// <summary>
     /// Gets the application logs folder.
     /// </summary>
     /// <returns>The application logs folder.</returns>
-    public string GetAppLogsPath();
+    string GetAppLogsPath();
 
     /// <summary>
     /// Gets the application instance log path.
     /// </summary>
     /// <returns>The application instance log path.</returns>
-    public string GetAppInstanceLogPath();
+    string GetAppInstanceLogPath();
 }
