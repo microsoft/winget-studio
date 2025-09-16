@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.CommandLine;
+using System.Threading.Tasks;
 
 namespace WinGetStudio.CLI.DSCv3.Commands;
 
@@ -13,8 +14,8 @@ internal sealed partial class TestSubcommand : BaseDscSubcommand
     }
 
     /// <inheritdoc/>
-    public override bool CommandHandlerInternal(ParseResult parseResult)
+    protected override Task<bool> CommandHandlerInternalAsync(ParseResult parseResult)
     {
-        return Resource.TestState(Input);
+        return Resource.TestAsync(Input);
     }
 }

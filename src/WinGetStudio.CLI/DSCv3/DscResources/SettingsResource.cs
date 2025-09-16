@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using WinGetStudio.CLI.DSCv3.Models;
 using WinGetStudio.CLI.DSCv3.Models.FunctionData;
 
@@ -19,22 +20,22 @@ internal sealed partial class SettingsResource : BaseResource
     }
 
     /// <inheritdoc/>
-    public override bool ExportState(string input)
+    public async override Task<bool> ExportAsync(string input)
     {
         var data = new SettingsFunctionData();
-        data.GetState();
+        await data.GetAsync();
         WriteJsonOutputLine(data.Output.ToJson());
         return true;
     }
 
     /// <inheritdoc/>
-    public override bool GetState(string input)
+    public override Task<bool> GetAsync(string input)
     {
-        return ExportState(input);
+        return ExportAsync(input);
     }
 
     /// <inheritdoc/>
-    public override bool SetState(string input)
+    public async override Task<bool> SetAsync(string input)
     {
         if (string.IsNullOrEmpty(input))
         {
@@ -43,7 +44,7 @@ internal sealed partial class SettingsResource : BaseResource
         }
 
         var data = new SettingsFunctionData(input);
-        data.GetState();
+        await data.GetAsync();
 
         // Capture the diff before updating the output
         var diff = data.GetDiffJson();
@@ -52,7 +53,7 @@ internal sealed partial class SettingsResource : BaseResource
         if (!data.TestState())
         {
             data.Output.Settings = data.Input.Settings;
-            data.SetState();
+            await data.SetAsync();
         }
 
         WriteJsonOutputLine(data.Output.ToJson());
@@ -61,7 +62,7 @@ internal sealed partial class SettingsResource : BaseResource
     }
 
     /// <inheritdoc/>
-    public override bool TestState(string input)
+    public async override Task<bool> TestAsync(string input)
     {
         if (string.IsNullOrEmpty(input))
         {
@@ -70,7 +71,7 @@ internal sealed partial class SettingsResource : BaseResource
         }
 
         var data = new SettingsFunctionData(input);
-        data.GetState();
+        await data.GetAsync();
         data.Output.InDesiredState = data.TestState();
 
         WriteJsonOutputLine(data.Output.ToJson());

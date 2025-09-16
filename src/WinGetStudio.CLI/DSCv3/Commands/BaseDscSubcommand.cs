@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.Threading.Tasks;
 using Windows.Win32.Foundation;
 using WinGetStudio.CLI.DSCv3.DscResources;
 using WinGetStudio.CLI.DSCv3.Options;
@@ -51,14 +52,15 @@ internal abstract class BaseDscSubcommand : Command
     /// </summary>
     /// <param name="parseResult">The parse result containing the command line arguments.</param>
     /// <returns>The exit code of the command.</returns>
-    protected virtual int CommandHandler(ParseResult parseResult)
+    private async Task<int> CommandHandler(ParseResult parseResult)
     {
         // Resource option is validated prior the command handler being invoked.
         Resource = _resourceFactories[parseResult.GetValue(_resourceOption)]();
         Input = parseResult.GetValue(_inputOption);
 
         // Continue to the specific command handler.
-        return CommandHandlerInternal(parseResult) ? HRESULT.S_OK : HRESULT.E_FAIL;
+        var result = await CommandHandlerInternalAsync(parseResult);
+        return result ? HRESULT.S_OK : HRESULT.E_FAIL;
     }
 
     /// <summary>
@@ -66,5 +68,5 @@ internal abstract class BaseDscSubcommand : Command
     /// </summary>
     /// <param name="parseResult">The parse result containing the command line arguments.</param>
     /// <returns>True if the command was successful; otherwise false.</returns>
-    public abstract bool CommandHandlerInternal(ParseResult parseResult);
+    protected abstract Task<bool> CommandHandlerInternalAsync(ParseResult parseResult);
 }

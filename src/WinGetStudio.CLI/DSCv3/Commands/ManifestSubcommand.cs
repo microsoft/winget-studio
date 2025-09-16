@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.CommandLine;
+using System.Threading.Tasks;
 using WinGetStudio.CLI.DSCv3.Options;
 
 namespace WinGetStudio.CLI.DSCv3.Commands;
@@ -21,9 +22,9 @@ internal sealed partial class ManifestSubcommand : BaseDscSubcommand
     }
 
     /// <inheritdoc/>
-    public override bool CommandHandlerInternal(ParseResult parseResult)
+    protected override Task<bool> CommandHandlerInternalAsync(ParseResult parseResult)
     {
         var outputDir = parseResult.GetValue(_outputDirectoryOption);
-        return Resource.Manifest(outputDir);
+        return Task.FromResult(Resource.Manifest(outputDir));
     }
 }

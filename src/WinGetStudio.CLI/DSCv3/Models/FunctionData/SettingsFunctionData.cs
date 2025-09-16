@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using WinGetStudio.CLI.DSCv3.Models.ResourceObjects;
 using WinGetStudio.Services.Settings.Models;
 
@@ -29,18 +30,18 @@ internal sealed partial class SettingsFunctionData : BaseFunctionData
     /// <summary>
     /// Gets the current settings.
     /// </summary>
-    public void GetState()
+    public async Task GetAsync()
     {
-        Output.Settings = GetSettings();
+        Output.Settings = await GetSettingsAsync();
     }
 
     /// <summary>
     /// Sets the current settings.
     /// </summary>
-    public void SetState()
+    public Task SetAsync()
     {
         Debug.Assert(Output.Settings != null, "Output settings should not be null");
-        SaveSettings(Output.Settings);
+        return SaveSettingsAsync(Output.Settings);
     }
 
     /// <summary>
@@ -82,17 +83,17 @@ internal sealed partial class SettingsFunctionData : BaseFunctionData
     /// Gets the settings configuration.
     /// </summary>
     /// <returns>The settings configuration.</returns>
-    private static GeneralSettings GetSettings()
+    private static Task<GeneralSettings> GetSettingsAsync()
     {
-        return WinGetStudioCLI.UserSettings.Current;
+        return Task.FromResult(WinGetStudioCLI.UserSettings.Current);
     }
 
     /// <summary>
     /// Saves the settings configuration to the settings utils for a specific module.
     /// </summary>
     /// <param name="settings">The settings configuration to save.</param>
-    private static void SaveSettings(GeneralSettings settings)
+    private static Task SaveSettingsAsync(GeneralSettings settings)
     {
-        WinGetStudioCLI.UserSettings.SaveAsync(settings);
+        return WinGetStudioCLI.UserSettings.SaveAsync(settings);
     }
 }

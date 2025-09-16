@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using WinGetStudio.CLI.DSCv3.Models;
 
 namespace WinGetStudio.CLI.DSCv3.DscResources;
@@ -23,28 +24,28 @@ internal abstract class BaseResource
     /// </summary>
     /// <param name="input">The input string, if any.</param>
     /// <returns>True if the operation was successful; otherwise false.</returns>
-    public abstract bool GetState(string input);
+    public abstract Task<bool> GetAsync(string input);
 
     /// <summary>
     /// Calls the set method on the resource.
     /// </summary>
     /// <param name="input">The input string, if any.</param>
     /// <returns>True if the operation was successful; otherwise false.</returns>
-    public abstract bool SetState(string input);
+    public abstract Task<bool> SetAsync(string input);
 
     /// <summary>
     /// Calls the test method on the resource.
     /// </summary>
     /// <param name="input">The input string, if any.</param>
     /// <returns>True if the operation was successful; otherwise false.</returns>
-    public abstract bool TestState(string input);
+    public abstract Task<bool> TestAsync(string input);
 
     /// <summary>
     /// Calls the export method on the resource.
     /// </summary>
     /// <param name="input"> The input string, if any.</param>
     /// <returns>True if the operation was successful; otherwise false.</returns>
-    public abstract bool ExportState(string input);
+    public abstract Task<bool> ExportAsync(string input);
 
     /// <summary>
     /// Calls the schema method on the resource.

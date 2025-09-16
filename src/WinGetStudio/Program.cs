@@ -11,6 +11,7 @@ public static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // If arguments are provided, run in CLI mode
         if (args.Length > 0)
         {
             var cli = new WinGetStudioCLI();

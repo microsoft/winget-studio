@@ -16,6 +16,9 @@ public static class RuntimeHelper
 {
     // Unique log path for each app instance
     private static readonly string _instanceLogPath = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff", CultureInfo.InvariantCulture);
+    private const string ApplicationDataFolder = "WinGetStudio/ApplicationData";
+
+    public const string SettingsFile = "settings.json";
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern int GetCurrentPackageFullName(ref int packageFullNameLength, StringBuilder packageFullName);
@@ -30,6 +33,26 @@ public static class RuntimeHelper
             var length = 0;
             return GetCurrentPackageFullName(ref length, null) != 15700L;
         }
+    }
+
+    /// <summary>
+    /// Gets the settings folder path.
+    /// </summary>
+    /// <returns>The settings folder path.</returns>
+    public static string GetSettingsDirectory()
+    {
+        return IsMSIX
+             ? ApplicationData.Current.LocalFolder.Path
+             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ApplicationDataFolder);
+    }
+
+    /// <summary>
+    /// Gets the settings file path.
+    /// </summary>
+    /// <returns>The settings file path.</returns>
+    public static string GetSettingsFilePath()
+    {
+        return Path.Combine(GetSettingsDirectory(), SettingsFile);
     }
 
     /// <summary>

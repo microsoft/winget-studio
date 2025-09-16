@@ -2,11 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Windows.Win32;
-using WinGetStudio.CLI.DSCv3.Commands;
 using WinGetStudio.Services.Logging.Extensions;
 using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Extensions;
@@ -16,29 +14,35 @@ namespace WinGetStudio.CLI;
 public sealed class WinGetStudioCLI
 {
     private const uint AttachParentProcess = uint.MaxValue;
+    private readonly WinGetStudioCommand _command;
 
-    public static IHost Host { get; private set; }
+    internal static IHost Host { get; private set; }
 
-    public static IUserSettings UserSettings => Host.Services.GetService<IUserSettings>();
+    internal static IUserSettings UserSettings => Host.Services.GetService<IUserSettings>();
 
     public WinGetStudioCLI()
     {
-        Initialize();
-        Build();
+        _command = [];
+        BuildHost();
+        AttachConsole();
     }
 
+    /// <summary>
+    /// Invoke the CLI with the specified arguments.
+    /// </summary>
+    /// <param name="args">The command line arguments.</param>
+    /// <returns> The exit code.</returns>
     public int Invoke(string[] args)
     {
-        var rootCommand = new RootCommand("WinGet Studio Command Line Interface")
-        {
-            new DscCommand(),
-        };
-
-        var parseResult = rootCommand.Parse(args);
+        var parseResult = _command.Parse(args);
         return parseResult.Invoke();
     }
 
-    private void Initialize()
+    /// <summary>
+    /// Attach to the parent console if it exists, otherwise allocate a new
+    /// console.
+    /// </summary>
+    private void AttachConsole()
     {
         if (PInvoke.AttachConsole(AttachParentProcess))
         {
@@ -56,7 +60,10 @@ public sealed class WinGetStudioCLI
         }
     }
 
-    private void Build()
+    /// <summary>
+    /// Build the host for dependency injection.
+    /// </summary>
+    private void BuildHost()
     {
         Host = Microsoft.Extensions.Hosting.Host
             .CreateDefaultBuilder()
