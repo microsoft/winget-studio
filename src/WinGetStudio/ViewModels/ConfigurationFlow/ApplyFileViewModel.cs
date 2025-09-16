@@ -4,6 +4,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using Microsoft.UI.Dispatching;
 using WinGetStudio.Contracts.Services;
@@ -21,6 +22,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
     private readonly IDSC _dsc;
     private readonly IUIFeedbackService _ui;
 
+    private readonly ILogger _logger;
     private readonly DispatcherQueue _dq;
     private IDSCSet? _dscSet;
 
@@ -36,10 +38,12 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
         IConfigurationNavigationService navigationService,
         IDSC dsc,
         IUIFeedbackService ui,
-        IStringResource stringResource)
+        IStringResource stringResource,
+        ILogger<ApplyFileViewModel> logger)
     {
         _navigationService = navigationService;
         _dsc = dsc;
+        _logger = logger;
         _dq = DispatcherQueue.GetForCurrentThread();
         _stringResource = stringResource;
         _ui = ui;
@@ -52,7 +56,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
             _dscSet = dscSet;
             foreach (var unit in dscSet.Units)
             {
-                Units.Add(new(unit, _stringResource));
+                Units.Add(new(unit, _stringResource, _logger));
             }
         }
     }
