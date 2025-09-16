@@ -88,4 +88,10 @@
     </ItemGroup>
     <Copy SourceFiles="@(SourceIcon)" DestinationFiles="Assets\Icons\WinGetStudio.ico" />
   </Target>
+
+  <Target Name="GenerateDscResourceJsonFiles" AfterTargets="Build">
+    <Message Text="Generating DSC resource JSON file under $(TargetDir)" Importance="high" />
+    <Exec Command="dotnet &quot;$(TargetPath)&quot; dsc manifest --resource settings --outputDir &quot;$(TargetDir)\&quot;" />
+    <Error Condition="!Exists('$(TargetDir)$(GeneratedAtBuild)')" Text="Expected $(TargetDir)$(GeneratedAtBuild) not found." />
+  </Target>
 </Project>

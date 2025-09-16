@@ -5,10 +5,10 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
 using Windows.ApplicationModel;
 using Windows.Storage;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 
 namespace WinGetStudio.Services.Core.Helpers;
 
@@ -16,12 +16,8 @@ public static class RuntimeHelper
 {
     // Unique log path for each app instance
     private static readonly string _instanceLogPath = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff", CultureInfo.InvariantCulture);
-    private const string ApplicationDataFolder = "WinGetStudio/ApplicationData";
-
+    private const string WinGetStudio = nameof(WinGetStudio);
     public const string SettingsFile = "settings.json";
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int GetCurrentPackageFullName(ref int packageFullNameLength, StringBuilder packageFullName);
 
     /// <summary>
     /// Gets a value indicating whether the app is running as an MSIX package.
@@ -30,8 +26,9 @@ public static class RuntimeHelper
     {
         get
         {
-            var length = 0;
-            return GetCurrentPackageFullName(ref length, null) != 15700L;
+            uint length = 0;
+            var result = PInvoke.GetCurrentPackageFullName(ref length, null);
+            return result != WIN32_ERROR.APPMODEL_ERROR_NO_PACKAGE;
         }
     }
 
@@ -41,9 +38,12 @@ public static class RuntimeHelper
     /// <returns>The settings folder path.</returns>
     public static string GetSettingsDirectory()
     {
-        return IsMSIX
-             ? ApplicationData.Current.LocalFolder.Path
-             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ApplicationDataFolder);
+        if (IsMSIX)
+        {
+            return ApplicationData.Current.LocalFolder.Path;
+        }
+
+        return GetUnpackagedPath("LocalState");
     }
 
     /// <summary>
@@ -61,18 +61,13 @@ public static class RuntimeHelper
     /// <returns>The application version.</returns>
     public static Version GetAppVersion()
     {
-        Version version;
         if (IsMSIX)
         {
             var packageVersion = Package.Current.Id.Version;
-            version = new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
-        }
-        else
-        {
-            version = Assembly.GetExecutingAssembly().GetName().Version!;
+            return new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
         }
 
-        return version;
+        return Assembly.GetExecutingAssembly().GetName().Version!;
     }
 
     /// <summary>
@@ -81,7 +76,12 @@ public static class RuntimeHelper
     /// <returns>The application logs folder.</returns>
     public static string GetAppLogsPath()
     {
-        return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, "Logs");
+        if (IsMSIX)
+        {
+            return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, "Logs");
+        }
+
+        return GetUnpackagedPath("TempState", "Logs");
     }
 
     /// <summary>
@@ -91,5 +91,15 @@ public static class RuntimeHelper
     public static string GetAppInstanceLogPath()
     {
         return Path.Combine(GetAppLogsPath(), _instanceLogPath);
+    }
+
+    /// <summary>
+    /// Gets the unpackaged application data folder path.
+    /// </summary>
+    /// <param name="paths">The additional paths to combine.</param>
+    /// <returns>The unpackaged application data folder path.</returns>
+    private static string GetUnpackagedPath(params string[] paths)
+    {
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), WinGetStudio, Path.Combine(paths));
     }
 }
