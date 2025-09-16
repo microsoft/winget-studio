@@ -60,6 +60,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -70,7 +71,7 @@
             PrimaryButtonCommand="{Binding SaveCommand}"
             SecondaryButtonCommand="{Binding SaveAsCommand}"
             CloseButtonCommand="{Binding DiscardCommand}">
-            
+
         </ContentDialog>
 
         <ContentDialog
@@ -119,23 +120,6 @@
                 Command="{x:Bind ViewModel.BrowseCommand}"
                 Grid.Row="1"
                 Grid.Column="1"/>
-
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8"
-                        Grid.Row="1"
-                        Grid.Column="3"
-                        HorizontalAlignment="Left">
-                <TextBlock x:Uid="ManagePage_EditModeLabel" VerticalAlignment="Center"/>
-                <ToggleSwitch
-                    IsOn="{x:Bind ViewModel.IsInEditMode, Mode=OneWay}"
-                    OffContent=""
-                    OnContent=""
-                    MinWidth="0"
-                    VerticalAlignment="Center"
-                    Toggled="ShowSaveDialog">
-                </ToggleSwitch>
-
-            </StackPanel>
         </Grid>
 
         <Rectangle Height="1"
@@ -144,7 +128,47 @@
                    Margin="0,8"
                    Grid.Row="2"/>
 
-        <Grid Grid.Row="3" Visibility="{x:Bind ViewModel.IsInEditMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <controls:Segmented SelectedIndex="0"
+                                x:Name="SegmentedModeView"
+                                HorizontalAlignment="Stretch"
+                                Visibility="{x:Bind ViewModel.CanApply, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <controls:SegmentedItem x:Name="SummaryView"
+                                        x:Uid="ConfigurationFile_SummaryView"
+                                        AutomationProperties.PositionInSet="1"
+                                        AutomationProperties.SizeOfSet="2" />
+                <controls:SegmentedItem x:Name="CodeView"
+                                        x:Uid="ConfigurationFile_CodeView"
+                                        AutomationProperties.PositionInSet="2"
+                                        AutomationProperties.SizeOfSet="2" />
+            </controls:Segmented>
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8"
+                        Grid.Row="1"
+                        Grid.Column="3"
+                        HorizontalAlignment="Left"
+                        Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}">
+                <TextBlock x:Uid="ManagePage_EditModeLabel"
+                           VerticalAlignment="Center" />
+                <ToggleSwitch IsOn="{x:Bind ViewModel.IsInEditMode, Mode=OneWay}"
+                              OffContent=""
+                              OnContent=""
+                              MinWidth="0"
+                              VerticalAlignment="Center"
+                              Toggled="ShowSaveDialog">
+                </ToggleSwitch>
+
+            </StackPanel>
+        </Grid>
+
+        <!-- Summary mode -->
+        <Grid Grid.Row="4"
+              Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.LoadingUnits, Mode=OneWay}">
                 <StackPanel.Resources>
                     <Style TargetType="labs:Shimmer">
@@ -159,9 +183,11 @@
                 <labs:Shimmer />
             </StackPanel>
 
+
             <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits, Mode=OneWay}"
                       x:Name="ConfigurationUnitSections"
-                      Style="{StaticResource KeyValueList}">
+                      Style="{StaticResource KeyValueList}"
+                      Visibility="{x:Bind ViewModel.IsInEditMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Spacing="12" />
@@ -374,12 +400,12 @@
             </ListView>
         </Grid>
 
-        <Grid Grid.Row="3" Visibility="{x:Bind ViewModel.IsInEditMode, Mode=OneWay}">
+        <Grid Grid.Row="4" Visibility="{x:Bind ViewModel.IsInEditMode, Mode=OneWay}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            
+
             <ListView
                 ItemsSource="{x:Bind ViewModel.ConfigurationUnits}"
                 SelectedItem="{x:Bind ViewModel.SelectedUnit, Mode=TwoWay}"
@@ -447,7 +473,7 @@
             </ScrollView>
         </Grid>
 
-        <Grid Grid.Row="4">
+        <Grid Grid.Row="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
