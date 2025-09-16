@@ -43,22 +43,30 @@ internal sealed partial class SettingsResource : BaseResource
             return false;
         }
 
-        var data = new SettingsFunctionData(input);
-        await data.GetAsync();
-
-        // Capture the diff before updating the output
-        var diff = data.GetDiffJson();
-
-        // Only call Set if the desired state is different from the current state
-        if (!data.TestState())
+        try
         {
-            data.Output.Settings = data.Input.Settings;
-            await data.SetAsync();
-        }
+            var data = new SettingsFunctionData(input);
+            await data.GetAsync();
 
-        WriteJsonOutputLine(data.Output.ToJson());
-        WriteJsonOutputLine(diff);
-        return true;
+            // Capture the diff before updating the output
+            var diff = data.GetDiffJson();
+
+            // Only call Set if the desired state is different from the current state
+            if (!data.TestState())
+            {
+                data.Output.Settings = data.Input.Settings;
+                await data.SetAsync();
+            }
+
+            WriteJsonOutputLine(data.Output.ToJson());
+            WriteJsonOutputLine(diff);
+            return true;
+        }
+        catch (Exception e)
+        {
+            WriteMessageOutputLine(DscMessageLevel.Error, $"Failed to set settings: {e.Message}");
+            return false;
+        }
     }
 
     /// <inheritdoc/>
@@ -126,11 +134,11 @@ internal sealed partial class SettingsResource : BaseResource
         // manifest file will be part of the package
         return new DscManifest($"Settings", "0.1.0")
             .AddDescription($"Allows management of the settings state via the DSC v3 command line interface protocol.")
-            .AddStdinMethod("export", ["export", "--resource", "settings"])
-            .AddStdinMethod("get", ["get", "--resource", "settings"])
-            .AddJsonInputMethod("set", "--input", ["set", "--resource", "settings"], implementsPretest: true, stateAndDiff: true)
-            .AddJsonInputMethod("test", "--input", ["test", "--resource", "settings"], stateAndDiff: true)
-            .AddCommandMethod("schema", ["schema", "--resource", "settings"])
+            .AddStdinMethod("export", ["dsc", "export", "--resource", "settings"])
+            .AddStdinMethod("get", ["dsc", "get", "--resource", "settings"])
+            .AddJsonInputMethod("set", "--input", ["dsc", "set", "--resource", "settings"], implementsPretest: true, stateAndDiff: true)
+            .AddJsonInputMethod("test", "--input", ["dsc", "test", "--resource", "settings"], stateAndDiff: true)
+            .AddCommandMethod("schema", ["dsc", "schema", "--resource", "settings"])
             .ToJson();
     }
 }

@@ -12,7 +12,7 @@ namespace WinGetStudio.Services.Logging.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddCustomLogging(this IServiceCollection services)
+    public static IServiceCollection AddLogging(this IServiceCollection services, string appSettingsFileName)
     {
         services.AddCore();
         services.AddSerilog(loggerConfig =>
@@ -21,7 +21,7 @@ public static class ServiceExtensions
 
             var config = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile(appSettingsFileName, optional: false, reloadOnChange: true)
                 .Build();
 
             loggerConfig

@@ -28,6 +28,8 @@ namespace WinGetStudio;
 
 public partial class App : Application
 {
+    private const string AppSettingsFileName = "appsettings.json";
+
     public IHost Host { get; }
 
     private readonly DispatcherQueue _dispatcherQueue;
@@ -97,7 +99,7 @@ public partial class App : Application
                 services.AddWinGet();
                 services.AddSettings();
                 services.AddTelemetry();
-                services.AddCustomLogging();
+                services.AddLogging(AppSettingsFileName);
 
                 // Views and ViewModels
                 services.AddTransient<SettingsViewModel>();

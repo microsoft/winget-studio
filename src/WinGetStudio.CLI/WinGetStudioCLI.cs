@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Windows.Win32;
@@ -13,6 +14,7 @@ namespace WinGetStudio.CLI;
 
 public sealed class WinGetStudioCLI
 {
+    private const string AppSettingsFileName = "appsettings.cli.json";
     private const uint AttachParentProcess = uint.MaxValue;
     private readonly WinGetStudioCommand _command;
 
@@ -44,20 +46,23 @@ public sealed class WinGetStudioCLI
     /// </summary>
     private void AttachConsole()
     {
-        if (PInvoke.AttachConsole(AttachParentProcess))
+        // Attach to the parent process console if possible; if that fails,
+        // allocate a new console for this process.
+        if (!PInvoke.AttachConsole(AttachParentProcess))
         {
             PInvoke.AllocConsole();
         }
 
-        try
-        {
-            _ = Console.Out;
-            _ = Console.Error;
-        }
-        catch
-        {
-            // No-op
-        }
+        // Re-bind the managed Console output/error streams to the underlying
+        // OS console handles so Console.Write/WriteLine and other APIs
+        // write to the console we just attached/allocated.
+        var stdout = Console.OpenStandardOutput();
+        var stdoutWriter = new StreamWriter(stdout, Console.OutputEncoding) { AutoFlush = true };
+        Console.SetOut(stdoutWriter);
+
+        var stderr = Console.OpenStandardError();
+        var stderrWriter = new StreamWriter(stderr, Console.OutputEncoding) { AutoFlush = true };
+        Console.SetError(stderrWriter);
     }
 
     /// <summary>
@@ -75,7 +80,7 @@ public sealed class WinGetStudioCLI
             .ConfigureServices((context, services) =>
             {
                 services.AddSettings();
-                services.AddCustomLogging();
+                services.AddLogging(AppSettingsFileName);
             })
             .Build();
     }
