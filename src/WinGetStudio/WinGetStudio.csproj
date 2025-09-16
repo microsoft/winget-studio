@@ -14,8 +14,12 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <LangVersion>preview</LangVersion>
-    <AssemblyName>WingetStudio</AssemblyName>
+    <AssemblyName>WinGetStudio</AssemblyName>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <BaseOutputPath>$(SolutionDir)\..\bin\</BaseOutputPath>
+    <OutputPath>$(BaseOutputPath)$(Configuration)\$(Platform)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -45,21 +49,11 @@
     <PackageReference Include="Microsoft.Windows.CsWinRT" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" />
-    <PackageReference Include="Serilog" />
-    <PackageReference Include="Serilog.Enrichers.Environment" />
-    <PackageReference Include="Serilog.Enrichers.Thread" />
-    <PackageReference Include="Serilog.Extensions.Hosting" />
-    <PackageReference Include="Serilog.Extensions.Logging" />
-    <PackageReference Include="Serilog.Formatting.Compact" />
-    <PackageReference Include="Serilog.Settings.Configuration" />
-    <PackageReference Include="Serilog.Sinks.Async" />
-    <PackageReference Include="Serilog.Sinks.Console" />
-    <PackageReference Include="Serilog.Sinks.Debug" />
-    <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="WinUIEx" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\services\WinGetStudio.Services.Logging\WinGetStudio.Services.Logging.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Settings\WinGetStudio.Services.Settings.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Telemetry\WinGetStudio.Services.Telemetry.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.VisualFeedback\WinGetStudio.Services.VisualFeedback.csproj" />
