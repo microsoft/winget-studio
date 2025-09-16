@@ -19,4 +19,11 @@
     <ProjectReference Include="..\services\WinGetStudio.Services.Logging\WinGetStudio.Services.Logging.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Settings\WinGetStudio.Services.Settings.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets\DscResources\microsoft.wingetstudio.*.dsc.resource.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
 </Project>
