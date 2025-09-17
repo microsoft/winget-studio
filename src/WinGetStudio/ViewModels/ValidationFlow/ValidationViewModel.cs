@@ -4,8 +4,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Localization;
 using Windows.Foundation.Collections;
-using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -20,7 +20,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IDSC _dsc;
     private readonly IUIFeedbackService _ui;
-    private readonly IStringResource _stringResource;
+    private readonly IStringLocalizer<ValidationViewModel> _localizer;
 
     [ObservableProperty]
     public partial string ModuleName { get; set; } = string.Empty;
@@ -50,11 +50,11 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
 
-    public ValidationViewModel(IDSC dsc, IUIFeedbackService ui, IStringResource stringResource)
+    public ValidationViewModel(IDSC dsc, IUIFeedbackService ui, IStringLocalizer<ValidationViewModel> localizer)
     {
         _dsc = dsc;
         _ui = ui;
-        _stringResource = stringResource;
+        _localizer = localizer;
 
         Properties.CollectionChanged += (_, __) =>
         {
@@ -244,12 +244,12 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
             await _dsc.DscTest(unit);
             if (unit.TestResult)
             {
-                var message = _stringResource.GetLocalized("Notification_MachineInDesiredState");
+                var message = _localizer["Notification_MachineInDesiredState"];
                 _ui.ShowOutcomeNotification(null, message, NotificationMessageSeverity.Success);
             }
             else
             {
-                var message = _stringResource.GetLocalized("Notification_MachineNotInDesiredState");
+                var message = _localizer["Notification_MachineNotInDesiredState"];
                 _ui.ShowOutcomeNotification(null, message, NotificationMessageSeverity.Error);
             }
         });

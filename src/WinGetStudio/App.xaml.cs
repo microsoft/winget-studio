@@ -77,7 +77,6 @@ public partial class App : Application
                 // Services
                 services.AddSingleton<IThemeApplierService, ThemeApplierService>();
                 services.AddTransient<INavigationViewService, NavigationViewService>();
-                services.AddTransient<IStringResource, StringResource>();
                 services.AddSingleton<IActivationService, ActivationService>();
                 services.AddSingleton<IAppPageService, AppPageService>();
                 services.AddSingleton<IConfigurationPageService, ConfigurationPageService>();

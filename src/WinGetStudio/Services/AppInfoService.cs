@@ -1,21 +1,28 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Localization;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.Extensions;
 using WinGetStudio.Services.Core.Helpers;
 
 namespace WinGetStudio.Services;
 
 internal sealed class AppInfoService : IAppInfoService
 {
+    private readonly IStringLocalizer<AppInfoService> _localizer;
+
+    public AppInfoService(IStringLocalizer<AppInfoService> localizer)
+    {
+        _localizer = localizer;
+    }
+
     /// <inheritdoc/>
     public string GetAppNameLocalized()
     {
 #if STABLE_BUILD
-        return "AppDisplayNameStable".GetLocalized();
+        return _localizer["AppDisplayNameStable"];
 #else
-        return "AppDisplayNameDev".GetLocalized();
+        return _localizer["AppDisplayNameDev"];
 #endif
     }
 
