@@ -14,6 +14,7 @@ using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WingetStudio.Services.Localization.Extensions;
 using WinGetStudio.Services.Logging.Extensions;
 using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Extensions;
@@ -103,6 +104,7 @@ public partial class App : Application
                 services.AddTelemetry();
                 services.AddVisualFeedback();
                 services.AddLogging(AppSettingsFileName);
+                services.AddReswLocalization();
 
                 // Views and ViewModels
                 services.AddTransient<SettingsViewModel>();

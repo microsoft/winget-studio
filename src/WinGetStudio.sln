@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.Services.Telem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.Services.Logging", "services\WinGetStudio.Services.Logging\WinGetStudio.Services.Logging.csproj", "{87BBBC10-607A-4895-848B-6E829B9061D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinGetStudio.Services.Localization", "services\WinGetStudio.Services.Localization\WinGetStudio.Services.Localization.csproj", "{690A3438-5764-4175-A8BF-774D8D005E58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|arm64 = Debug|arm64
@@ -172,6 +174,18 @@ Global
 		{87BBBC10-607A-4895-848B-6E829B9061D1}.Release|x64.Build.0 = Release|x64
 		{87BBBC10-607A-4895-848B-6E829B9061D1}.Release|x86.ActiveCfg = Release|x86
 		{87BBBC10-607A-4895-848B-6E829B9061D1}.Release|x86.Build.0 = Release|x86
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Debug|arm64.ActiveCfg = Debug|ARM64
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Debug|arm64.Build.0 = Debug|ARM64
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Debug|x64.ActiveCfg = Debug|x64
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Debug|x64.Build.0 = Debug|x64
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Debug|x86.ActiveCfg = Debug|x86
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Debug|x86.Build.0 = Debug|x86
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Release|arm64.ActiveCfg = Release|ARM64
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Release|arm64.Build.0 = Release|ARM64
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Release|x64.ActiveCfg = Release|x64
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Release|x64.Build.0 = Release|x64
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Release|x86.ActiveCfg = Release|x86
+		{690A3438-5764-4175-A8BF-774D8D005E58}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -184,6 +198,7 @@ Global
 		{641D2F91-7644-4158-93B9-17FD470454B8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2D414AE2-A4D7-46A9-9ED4-917EE54BCCC0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{87BBBC10-607A-4895-848B-6E829B9061D1} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{690A3438-5764-4175-A8BF-774D8D005E58} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1B1B29AB-8EF8-44B2-9CE2-E58329CCC870}
