@@ -4,6 +4,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using Microsoft.UI.Dispatching;
@@ -17,7 +18,7 @@ namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
 public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
 {
-    private readonly IStringResource _stringResource;
+    private readonly IStringLocalizer<ApplyFileViewModel> _localizer;
     private readonly IConfigurationNavigationService _navigationService;
     private readonly IDSC _dsc;
     private readonly IUIFeedbackService _ui;
@@ -38,14 +39,14 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
         IConfigurationNavigationService navigationService,
         IDSC dsc,
         IUIFeedbackService ui,
-        IStringResource stringResource,
+        IStringLocalizer<ApplyFileViewModel> localizer,
         ILogger<ApplyFileViewModel> logger)
     {
         _navigationService = navigationService;
         _dsc = dsc;
         _logger = logger;
         _dq = DispatcherQueue.GetForCurrentThread();
-        _stringResource = stringResource;
+        _localizer = localizer;
         _ui = ui;
     }
 
@@ -56,7 +57,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
             _dscSet = dscSet;
             foreach (var unit in dscSet.Units)
             {
-                Units.Add(new(unit, _stringResource, _logger));
+                Units.Add(new(unit, _localizer, _logger));
             }
         }
     }

@@ -9,12 +9,13 @@ using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using WinGetStudio.Activation;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.Extensions;
 using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WingetStudio.Services.Localization.Extensions;
+using WinGetStudio.Services.Logging.Extensions;
 using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.Telemetry.Extensions;
@@ -30,6 +31,8 @@ namespace WinGetStudio;
 
 public partial class App : Application
 {
+    private const string AppSettingsFileName = "appsettings.json";
+
     public IHost Host { get; }
 
     private readonly DispatcherQueue _dispatcherQueue;
@@ -74,7 +77,6 @@ public partial class App : Application
                 // Services
                 services.AddSingleton<IThemeApplierService, ThemeApplierService>();
                 services.AddTransient<INavigationViewService, NavigationViewService>();
-                services.AddTransient<IStringResource, StringResource>();
                 services.AddSingleton<IActivationService, ActivationService>();
                 services.AddSingleton<IAppPageService, AppPageService>();
                 services.AddSingleton<IConfigurationPageService, ConfigurationPageService>();
@@ -100,6 +102,8 @@ public partial class App : Application
                 services.AddSettings();
                 services.AddTelemetry();
                 services.AddVisualFeedback();
+                services.AddLogging(AppSettingsFileName);
+                services.AddReswLocalization();
 
                 // Views and ViewModels
                 services.AddTransient<SettingsViewModel>();
@@ -127,7 +131,6 @@ public partial class App : Application
                 // Configuration
                 services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
             })
-            .UseLogger()
             .Build();
 
         UnhandledException += App_UnhandledException;
