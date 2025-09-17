@@ -136,6 +136,7 @@
             </Grid.ColumnDefinitions>
             <controls:Segmented SelectedIndex="0"
                                 x:Name="SegmentedModeView"
+                                Margin="2"
                                 HorizontalAlignment="Stretch"
                                 Visibility="{x:Bind ViewModel.CanApply, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <controls:SegmentedItem x:Name="SummaryView"
@@ -168,7 +169,7 @@
 
         <!-- Summary mode -->
         <Grid Grid.Row="4"
-              Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+              Visibility="{x:Bind SummaryView.IsSelected}">
             <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.LoadingUnits, Mode=OneWay}">
                 <StackPanel.Resources>
                     <Style TargetType="labs:Shimmer">
@@ -399,6 +400,17 @@
                 </ListView.ItemTemplate>
             </ListView>
         </Grid>
+
+         <!-- Code mode -->
+        <ScrollViewer Grid.Row="4"
+                      Visibility="{x:Bind CodeView.IsSelected, Mode=OneWay}"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+            <TextBlock FontSize="{ThemeResource CaptionTextBlockFontSize}"
+                       Padding="15"
+                       FontFamily="{StaticResource CascadiaMonoFontFamily}"
+                       Text="{x:Bind ViewModel.Content, Mode=OneWay}" />
+        </ScrollViewer>
 
         <Grid Grid.Row="4" Visibility="{x:Bind ViewModel.IsInEditMode, Mode=OneWay}">
             <Grid.ColumnDefinitions>

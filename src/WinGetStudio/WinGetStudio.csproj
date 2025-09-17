@@ -87,6 +87,12 @@
     </PRIResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Assets\Fonts\CascadiaMono.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <!-- Icon should be copied before the build starts -->
   <Target Name="PrepareAppIcon" BeforeTargets="BeforeBuild">
     <ItemGroup>
