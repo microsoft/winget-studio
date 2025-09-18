@@ -137,7 +137,7 @@
             <controls:Segmented SelectedIndex="0"
                                 x:Name="SegmentedModeView"
                                 HorizontalAlignment="Stretch"
-                                Visibility="{x:Bind ViewModel.CanApply, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                Visibility="{x:Bind ViewModel.IsConfigurationLoaded, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <controls:SegmentedItem x:Name="SummaryView"
                                         x:Uid="ConfigurationFile_SummaryView"
                                         AutomationProperties.PositionInSet="1"
@@ -485,16 +485,17 @@
 
         <Grid Grid.Row="5">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal" Spacing="8">
+            <StackPanel Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal" Spacing="8" Width="Auto">
                 <Button x:Uid="ManagePage_AddResourceButtonText"
                         Command="{x:Bind ViewModel.AddResourceCommand}"
                         Visibility="{x:Bind ViewModel.IsInEditMode, Mode=OneWay}"/>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
                 <Button x:Uid="ManagePage_SaveButtonText"
                         Command="{x:Bind ViewModel.SaveCommand}"
                         IsEnabled="True"

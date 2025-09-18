@@ -56,6 +56,8 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
 
     public string Content => DscFile == null ? string.Empty : DscFile.Content;
 
+    public bool IsConfigurationLoaded => ConfigurationUnits.Count > 0;
+
     partial void OnIsInEditModeChanging(bool value)
     {
         _ = UpdateUnits();
@@ -117,6 +119,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         ConfigurationUnits.CollectionChanged += (_, __) =>
         {
             OnPropertyChanged(nameof(CanApply));
+            OnPropertyChanged(nameof(IsConfigurationLoaded));
         };
     }
 
