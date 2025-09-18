@@ -136,7 +136,6 @@
             </Grid.ColumnDefinitions>
             <controls:Segmented SelectedIndex="0"
                                 x:Name="SegmentedModeView"
-                                Margin="2"
                                 HorizontalAlignment="Stretch"
                                 Visibility="{x:Bind ViewModel.CanApply, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <controls:SegmentedItem x:Name="SummaryView"
@@ -169,7 +168,7 @@
 
         <!-- Summary mode -->
         <Grid Grid.Row="4"
-              Visibility="{x:Bind SummaryView.IsSelected}">
+              Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}">
             <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.LoadingUnits, Mode=OneWay}">
                 <StackPanel.Resources>
                     <Style TargetType="labs:Shimmer">
@@ -399,6 +398,78 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+
+            <Grid Visibility="{x:Bind ViewModel.IsInEditMode, Mode=OneWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+
+                <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits}"
+                          SelectedItem="{x:Bind ViewModel.SelectedUnit, Mode=TwoWay}"
+                          Grid.Column="0"
+                          Margin="0">
+
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    CornerRadius="4"
+                                    Padding="4">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="8"
+                                                Grid.Column="0">
+                                        <TextBlock>
+                                <Run x:Uid="PreviewPage_Name" />
+                                <Run Text="{Binding Title}" />
+                                        </TextBlock>
+                                        <TextBlock>
+                                <Run x:Uid="PreviewPage_Description" />
+                                <Run Text="{Binding Description}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <Button Grid.Column="1"
+                                            Command="{Binding ElementName=RootPage, Path=ViewModel.RemoveResourceCommand, Mode=OneWay}"
+                                            CommandParameter="{Binding}">
+                                        <FontIcon Glyph="&#xE894;"
+                                                  FontSize="14" />
+                                    </Button>
+                                </Grid>
+                            </Border>
+
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <ScrollView Grid.Column="1"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{StaticResource CardBackgroundFillColorDefaultBrush}"
+                            Visibility="{x:Bind ViewModel.IsEditPanelVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Spacing="24"
+                                Padding="16">
+                        <TextBox x:Uid="PreviewPage_ModuleHeader"
+                                 Text="{x:Bind ViewModel.SelectedUnit.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="Auto" />
+
+                        <TextBox x:Uid="PreviewPage_DescriptionHeader"
+                                 Text="{x:Bind ViewModel.SelectedUnit.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="Auto" />
+
+                        <userControls:ConfigurationSettings Properties="{x:Bind ViewModel.SelectedUnit.Properties, Mode=OneWay}" />
+
+                    </StackPanel>
+                </ScrollView>
+            </Grid>
         </Grid>
 
          <!-- Code mode -->
@@ -411,79 +482,6 @@
                        FontFamily="{StaticResource CascadiaMonoFontFamily}"
                        Text="{x:Bind ViewModel.Content, Mode=OneWay}" />
         </ScrollViewer>
-
-        <Grid Grid.Row="4" Visibility="{x:Bind ViewModel.IsInEditMode, Mode=OneWay}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
-
-            <ListView
-                ItemsSource="{x:Bind ViewModel.ConfigurationUnits}"
-                SelectedItem="{x:Bind ViewModel.SelectedUnit, Mode=TwoWay}"
-                Grid.Column="0"
-                Margin="0">
-
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Spacing="12" />
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-
-                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                CornerRadius="4"
-                                Padding="4">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="8" Grid.Column="0">
-                                    <TextBlock>
-                                        <Run x:Uid="PreviewPage_Name"/>
-                                        <Run Text="{Binding Title}"/>
-                                    </TextBlock>
-                                    <TextBlock>
-                                        <Run x:Uid="PreviewPage_Description"/>
-                                        <Run Text="{Binding Description}"/>
-                                    </TextBlock>
-                                </StackPanel>
-                                <Button Grid.Column="1"
-                                        Command="{Binding ElementName=RootPage, Path=ViewModel.RemoveResourceCommand, Mode=OneWay}"
-                                        CommandParameter="{Binding}">
-                                    <FontIcon Glyph="&#xE894;" FontSize="14"/>
-                                </Button>
-                            </Grid>
-                        </Border>
-
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-
-            <ScrollView
-                Grid.Column="1"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Background="{StaticResource CardBackgroundFillColorDefaultBrush}"
-                Visibility="{x:Bind ViewModel.IsEditPanelVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <StackPanel Spacing="24" Padding="16">
-                    <TextBox
-                        x:Uid="PreviewPage_ModuleHeader"
-                        Text="{x:Bind ViewModel.SelectedUnit.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Height="Auto"/>
-
-                    <TextBox
-                        x:Uid="PreviewPage_DescriptionHeader"
-                        Text="{x:Bind ViewModel.SelectedUnit.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Height="Auto"/>
-
-                    <userControls:ConfigurationSettings Properties="{x:Bind ViewModel.SelectedUnit.Properties, Mode=OneWay}" />
-
-                </StackPanel>
-            </ScrollView>
-        </Grid>
 
         <Grid Grid.Row="5">
             <Grid.ColumnDefinitions>
