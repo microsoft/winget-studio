@@ -132,6 +132,9 @@
   <data name="Shell_Configuration.Content" xml:space="preserve">
     <value>Manage a configuration file</value>
   </data>
+  <data name="Shell_Notifications.Content" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
   <data name="Settings_Personalization.Text" xml:space="preserve">
     <value>Personalization</value>
   </data>
@@ -513,5 +516,20 @@
   </data>
   <data name="PreviewPage_ApplyDialog.Content" xml:space="preserve">
     <value>You are responsible for understanding the configuration settings you are choosing to execute. Microsoft is not responsible for the configuration file you have authored or imported. This configuration may change settings in Windows, install software, change software settings (including security settings), and accept user agreements to third-party packages and services on your behalf. By running this configuration file, you acknowledge that you understand and agree to these resources and settings. Any applications installed are licensed to you by their owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages or services.</value>
+  </data>
+  <data name="NotificationPane_Title.Text" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="NotificationPane_ShowAll.Content" xml:space="preserve">
+    <value>Show all notifications</value>
+  </data>
+  <data name="NotificationPane_Previous.Text" xml:space="preserve">
+    <value>Previous notifications</value>
+  </data>
+  <data name="Notification_MachineInDesiredState" xml:space="preserve">
+    <value>Machine is in the desired state</value>
+  </data>
+  <data name="Notification_MachineNotInDesiredState" xml:space="preserve">
+    <value>Machine is not in the desired state</value>
   </data>
 </root>

@@ -40,6 +40,7 @@
     <PackageReference Include="CommunityToolkit.Common" />
     <PackageReference Include="CommunityToolkit.Labs.WinUI.Shimmer" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="CommunityToolkit.WinUI.Behaviors" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" />
@@ -52,9 +53,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\services\WinGetStudio.Services.Localization\WinGetStudio.Services.Localization.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Logging\WinGetStudio.Services.Logging.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Settings\WinGetStudio.Services.Settings.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Telemetry\WinGetStudio.Services.Telemetry.csproj" />
+    <ProjectReference Include="..\services\WinGetStudio.Services.VisualFeedback\WinGetStudio.Services.VisualFeedback.csproj" />
     <ProjectReference Include="..\WinGetStudio.CLI\WinGetStudio.CLI.csproj" />
     <ProjectReference Include="..\WinGetStudio.Core\WinGetStudio.Common.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.DesiredStateConfiguration\WinGetStudio.Services.DesiredStateConfiguration.csproj" />

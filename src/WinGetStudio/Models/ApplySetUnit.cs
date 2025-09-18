@@ -2,8 +2,9 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
-using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.ViewModels;
@@ -12,7 +13,7 @@ namespace WinGetStudio.Models;
 
 public partial class ApplySetUnit : ObservableObject
 {
-    private readonly IStringResource _stringResource;
+    private readonly IStringLocalizer _localizer;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLoading))]
@@ -31,10 +32,10 @@ public partial class ApplySetUnit : ObservableObject
 
     public DSCConfigurationUnitViewModel Unit { get; }
 
-    public ApplySetUnit(IDSCUnit unit, IStringResource stringResource)
+    public ApplySetUnit(IDSCUnit unit, IStringLocalizer localizer, ILogger logger)
     {
-        Unit = new(unit);
-        _stringResource = stringResource;
+        Unit = new(unit, logger);
+        _localizer = localizer;
         Update(ApplySetUnitState.NotStarted);
     }
 
@@ -43,11 +44,11 @@ public partial class ApplySetUnit : ObservableObject
         State = state;
         if (State == ApplySetUnitState.Succeeded)
         {
-            Message = _stringResource.GetLocalized("ConfigurationUnitSuccess");
+            Message = _localizer["ConfigurationUnitSuccess"];
         }
         else if (State == ApplySetUnitState.NotStarted)
         {
-            Message = _stringResource.GetLocalized("ConfigurationUnitNotStarted");
+            Message = _localizer["ConfigurationUnitNotStarted"];
         }
         else if (State == ApplySetUnitState.Failed && resultInformation != null)
         {
@@ -67,15 +68,15 @@ public partial class ApplySetUnit : ObservableObject
         switch (hresult)
         {
             case ConfigurationException.WingetConfigErrorManuallySkipped:
-                return _stringResource.GetLocalized("ConfigurationUnitManuallySkipped");
+                return _localizer["ConfigurationUnitManuallySkipped"];
             case ConfigurationException.WingetConfigErrorDependencyUnsatisfied:
-                return _stringResource.GetLocalized("ConfigurationUnitNotRunDueToDependency");
+                return _localizer["ConfigurationUnitNotRunDueToDependency"];
             case ConfigurationException.WingetConfigErrorAssertionFailed:
-                return _stringResource.GetLocalized("ConfigurationUnitNotRunDueToFailedAssert");
+                return _localizer["ConfigurationUnitNotRunDueToFailedAssert"];
         }
 
         var resultCodeHex = $"0x{hresult:X}";
-        return _stringResource.GetLocalized("ConfigurationUnitSkipped", resultCodeHex);
+        return _localizer["ConfigurationUnitSkipped", resultCodeHex];
     }
 
     private string GetUnitErrorMessage(IDSCUnitResultInformation resultInformation)
@@ -84,55 +85,55 @@ public partial class ApplySetUnit : ObservableObject
         switch (hresult)
         {
             case ConfigurationException.WingetConfigErrorDuplicateIdentifier:
-                return _stringResource.GetLocalized("ConfigurationUnitHasDuplicateIdentifier", Unit.Id);
+                return _localizer["ConfigurationUnitHasDuplicateIdentifier", Unit.Id];
             case ConfigurationException.WingetConfigErrorMissingDependency:
-                return _stringResource.GetLocalized("ConfigurationUnitHasMissingDependency", resultInformation.Details);
+                return _localizer["ConfigurationUnitHasMissingDependency", resultInformation.Details];
             case ConfigurationException.WingetConfigErrorAssertionFailed:
-                return _stringResource.GetLocalized("ConfigurationUnitAssertHadNegativeResult");
+                return _localizer["ConfigurationUnitAssertHadNegativeResult"];
             case ConfigurationException.WinGetConfigUnitNotFound:
-                return _stringResource.GetLocalized("ConfigurationUnitNotFoundInModule");
+                return _localizer["ConfigurationUnitNotFoundInModule"];
             case ConfigurationException.WinGetConfigUnitNotFoundRepository:
-                return _stringResource.GetLocalized("ConfigurationUnitNotFound");
+                return _localizer["ConfigurationUnitNotFound"];
             case ConfigurationException.WinGetConfigUnitMultipleMatches:
-                return _stringResource.GetLocalized("ConfigurationUnitMultipleMatches");
+                return _localizer["ConfigurationUnitMultipleMatches"];
             case ConfigurationException.WinGetConfigUnitInvokeGet:
-                return _stringResource.GetLocalized("ConfigurationUnitFailedDuringGet");
+                return _localizer["ConfigurationUnitFailedDuringGet"];
             case ConfigurationException.WinGetConfigUnitInvokeTest:
-                return _stringResource.GetLocalized("ConfigurationUnitFailedDuringTest");
+                return _localizer["ConfigurationUnitFailedDuringTest"];
             case ConfigurationException.WinGetConfigUnitInvokeSet:
-                return _stringResource.GetLocalized("ConfigurationUnitFailedDuringSet");
+                return _localizer["ConfigurationUnitFailedDuringSet"];
             case ConfigurationException.WinGetConfigUnitModuleConflict:
-                return _stringResource.GetLocalized("ConfigurationUnitModuleConflict");
+                return _localizer["ConfigurationUnitModuleConflict"];
             case ConfigurationException.WinGetConfigUnitImportModule:
-                return _stringResource.GetLocalized("ConfigurationUnitModuleImportFailed");
+                return _localizer["ConfigurationUnitModuleImportFailed"];
             case ConfigurationException.WinGetConfigUnitInvokeInvalidResult:
-                return _stringResource.GetLocalized("ConfigurationUnitReturnedInvalidResult");
+                return _localizer["ConfigurationUnitReturnedInvalidResult"];
             case ConfigurationException.WingetConfigErrorManuallySkipped:
-                return _stringResource.GetLocalized("ConfigurationUnitManuallySkipped");
+                return _localizer["ConfigurationUnitManuallySkipped"];
             case ConfigurationException.WingetConfigErrorDependencyUnsatisfied:
-                return _stringResource.GetLocalized("ConfigurationUnitNotRunDueToDependency");
+                return _localizer["ConfigurationUnitNotRunDueToDependency"];
             case ConfigurationException.WinGetConfigUnitSettingConfigRoot:
-                return _stringResource.GetLocalized("WinGetConfigUnitSettingConfigRoot");
+                return _localizer["WinGetConfigUnitSettingConfigRoot"];
             case ConfigurationException.WinGetConfigUnitImportModuleAdmin:
-                return _stringResource.GetLocalized("WinGetConfigUnitImportModuleAdmin");
+                return _localizer["WinGetConfigUnitImportModuleAdmin"];
         }
 
         var resultCodeHex = $"0x{hresult:X}";
         switch (resultInformation.ResultSource)
         {
             case ConfigurationUnitResultSource.ConfigurationSet:
-                return _stringResource.GetLocalized("ConfigurationUnitFailedConfigSet", resultCodeHex);
+                return _localizer["ConfigurationUnitFailedConfigSet", resultCodeHex];
             case ConfigurationUnitResultSource.Internal:
-                return _stringResource.GetLocalized("ConfigurationUnitFailedInternal", resultCodeHex);
+                return _localizer["ConfigurationUnitFailedInternal", resultCodeHex];
             case ConfigurationUnitResultSource.Precondition:
-                return _stringResource.GetLocalized("ConfigurationUnitFailedPrecondition", resultCodeHex);
+                return _localizer["ConfigurationUnitFailedPrecondition", resultCodeHex];
             case ConfigurationUnitResultSource.SystemState:
-                return _stringResource.GetLocalized("ConfigurationUnitFailedSystemState", resultCodeHex);
+                return _localizer["ConfigurationUnitFailedSystemState", resultCodeHex];
             case ConfigurationUnitResultSource.UnitProcessing:
-                return _stringResource.GetLocalized("ConfigurationUnitFailedUnitProcessing", resultCodeHex);
+                return _localizer["ConfigurationUnitFailedUnitProcessing", resultCodeHex];
         }
 
-        return _stringResource.GetLocalized("ConfigurationUnitFailed", resultCodeHex);
+        return _localizer["ConfigurationUnitFailed", resultCodeHex];
     }
 
     private string GetErrorDescription(IDSCUnitResultInformation resultInformation)

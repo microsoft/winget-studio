@@ -4,6 +4,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -23,7 +24,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     private readonly IConfigurationNavigationService _navigationService;
     private readonly IDSC _dsc;
     private readonly IDSCSetBuilder _dscSetBuilder;
-    private readonly IStringResource _stringResource;
+    private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
     private readonly ILogger<PreviewFileViewModel> _logger;
     private IDSCSet? _dscSet;
     private string _yaml = string.Empty;
@@ -78,7 +79,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             var dscSet = await _dscSetBuilder.BuildAsync();
             foreach (var u in dscSet.Units)
             {
-                ConfigurationUnits.Add(new(u));
+                ConfigurationUnits.Add(new(u, _logger));
             }
 
             _dsc.GetConfigurationUnitDetails(dscSet);
@@ -88,7 +89,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             ConfigurationUnits.Clear();
             foreach (var u in _dscSetBuilder.Units)
             {
-                ConfigurationUnits.Add(new(u));
+                ConfigurationUnits.Add(new(u, _logger));
             }
         }
 
@@ -101,12 +102,17 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         IsStateChanged = true;
     }
 
-    public PreviewFileViewModel(IConfigurationNavigationService navigationService, IDSC dsc, IDSCSetBuilder setBuilder, IStringResource stringResource, ILogger<PreviewFileViewModel> logger)
+    public PreviewFileViewModel(
+        IConfigurationNavigationService navigationService,
+        IDSC dsc,
+        IDSCSetBuilder setBuilder,
+        IStringLocalizer<PreviewFileViewModel> localizer,
+        ILogger<PreviewFileViewModel> logger)
     {
         _navigationService = navigationService;
         _dsc = dsc;
         _dscSetBuilder = setBuilder;
-        _stringResource = stringResource;
+        _localizer = localizer;
         _logger = logger;
         ConfigurationUnits.CollectionChanged += (_, __) =>
         {
@@ -250,7 +256,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     {
         EditableDSCUnit u = new();
         _dscSetBuilder.AddUnit(u);
-        ConfigurationUnits.Add(new(u));
+        ConfigurationUnits.Add(new(u, _logger));
         await Task.CompletedTask;
     }
 
@@ -302,17 +308,17 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         switch (exception.ResultCode.HResult)
         {
             case ConfigurationException.WingetConfigErrorInvalidFieldType:
-                return _stringResource.GetLocalized("ConfigurationFieldInvalidType", exception.Field);
+                return _localizer["ConfigurationFieldInvalidType", exception.Field];
             case ConfigurationException.WingetConfigErrorInvalidFieldValue:
-                return _stringResource.GetLocalized("ConfigurationFieldInvalidValue", exception.Field, exception.Value);
+                return _localizer["ConfigurationFieldInvalidValue", exception.Field, exception.Value];
             case ConfigurationException.WingetConfigErrorMissingField:
-                return _stringResource.GetLocalized("ConfigurationFieldMissing", exception.Field);
+                return _localizer["ConfigurationFieldMissing", exception.Field];
             case ConfigurationException.WingetConfigErrorUnknownConfigurationFileVersion:
-                return _stringResource.GetLocalized("ConfigurationFileVersionUnknown", exception.Value);
+                return _localizer["ConfigurationFileVersionUnknown", exception.Value];
             case ConfigurationException.WingetConfigErrorInvalidConfigurationFile:
             case ConfigurationException.WingetConfigErrorInvalidYaml:
             default:
-                return _stringResource.GetLocalized("ConfigurationFileInvalid");
+                return _localizer["ConfigurationFileInvalid"];
         }
     }
 }

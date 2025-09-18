@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using CommunityToolkit.WinUI;
@@ -14,13 +14,16 @@ using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WingetStudio.Services.Localization.Extensions;
 using WinGetStudio.Services.Logging.Extensions;
 using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.Telemetry.Extensions;
+using WinGetStudio.Services.VisualFeedback.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
+using WinGetStudio.ViewModels.Controls;
 using WinGetStudio.Views;
 using WinGetStudio.Views.ConfigurationFlow;
 
@@ -74,7 +77,6 @@ public partial class App : Application
                 // Services
                 services.AddSingleton<IThemeApplierService, ThemeApplierService>();
                 services.AddTransient<INavigationViewService, NavigationViewService>();
-                services.AddTransient<IStringResource, StringResource>();
                 services.AddSingleton<IActivationService, ActivationService>();
                 services.AddSingleton<IAppPageService, AppPageService>();
                 services.AddSingleton<IConfigurationPageService, ConfigurationPageService>();
@@ -100,6 +102,8 @@ public partial class App : Application
                 services.AddSettings();
                 services.AddTelemetry();
                 services.AddLogging(AppSettingsFileName);
+                services.AddVisualFeedback();
+                services.AddReswLocalization();
 
                 // Views and ViewModels
                 services.AddTransient<SettingsViewModel>();
@@ -118,6 +122,8 @@ public partial class App : Application
                 services.AddTransient<PreviewFileViewModel>();
                 services.AddTransient<ApplyFilePage>();
                 services.AddTransient<ApplyFileViewModel>();
+                services.AddTransient<NotificationPaneViewModel>();
+                services.AddTransient<LoadingProgressBarViewModel>();
 
                 // Factories
                 services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));

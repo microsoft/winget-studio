@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Text;
 using Microsoft.UI.Xaml.Controls;
+using Windows.ApplicationModel.DataTransfer;
 using WinGetStudio.Contracts.Views;
+using WinGetStudio.Models;
 using WinGetStudio.ViewModels.ConfigurationFlow;
 
 namespace WinGetStudio.Views.ConfigurationFlow;
@@ -15,5 +18,27 @@ public sealed partial class ApplyFilePage : Page, IView<ApplyFileViewModel>
     {
         ViewModel = App.GetService<ApplyFileViewModel>();
         InitializeComponent();
+    }
+
+    private void CopyOutputMessage(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (sender is Button copyButton && copyButton.Tag is ApplySetUnit unit)
+        {
+            var outputText = new StringBuilder();
+
+            if (!string.IsNullOrEmpty(unit.Message))
+            {
+                outputText.AppendLine(unit.Message);
+            }
+
+            if (!string.IsNullOrEmpty(unit.Description))
+            {
+                outputText.AppendLine(unit.Description);
+            }
+
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(outputText.ToString());
+            Clipboard.SetContent(dataPackage);
+        }
     }
 }

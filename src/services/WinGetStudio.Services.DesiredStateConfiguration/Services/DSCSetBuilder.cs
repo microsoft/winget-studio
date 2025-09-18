@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using YamlDotNet.Serialization;
@@ -14,6 +16,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 internal sealed class DSCSetBuilder : IDSCSetBuilder
 {
     private readonly IDSCFactory _dscFactory;
+    private readonly ILogger _logger;
     private EditableDSCSet _dscSet = new();
     private const string DscSchemaUrl = "https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json";
     private const string DscVersionSrting = "dscv3";
@@ -22,9 +25,10 @@ internal sealed class DSCSetBuilder : IDSCSetBuilder
 
     public string TargetFilePath { get; set; } = string.Empty;
 
-    public DSCSetBuilder(IDSCFactory dscFactory)
+    public DSCSetBuilder(IDSCFactory dscFactory, ILogger<DSCSetBuilder> logger)
     {
         _dscFactory = dscFactory;
+        _logger = logger;
     }
 
     public void AddUnit(EditableDSCUnit unit)
@@ -114,10 +118,18 @@ internal sealed class DSCSetBuilder : IDSCSetBuilder
         var serializer = new SerializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
         .WithIndentedSequences()
+        .WithMaximumRecursion(100)
         .Build();
-
-        var yaml = serializer.Serialize(dscYaml);
-        return yaml;
+        try
+        {
+            var yaml = serializer.Serialize(dscYaml);
+            return yaml;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, $"Failed to serialize configuration set to YAML. Error: {e.Message}");
+            return string.Empty;
+        }
     }
 
     public async Task<bool> EqualsYamlAsync(string yaml)

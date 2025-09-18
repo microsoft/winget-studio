@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="WinGetStudio.Views.Controls.LoadingProgressBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WinGetStudio.Views.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    mc:Ignorable="d">
+
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+        <i:EventTriggerBehavior EventName="Unloaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.UnloadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+
+    <ProgressBar Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}"
+                 IsIndeterminate="{x:Bind ViewModel.IsProgressIndeterminate, Mode=OneWay}"
+                 Visibility="{x:Bind ViewModel.IsProgressVisible, Mode=OneWay}" />
+</UserControl>

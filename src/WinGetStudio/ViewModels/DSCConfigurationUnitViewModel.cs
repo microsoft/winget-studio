@@ -4,6 +4,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
@@ -17,6 +18,8 @@ namespace WinGetStudio.ViewModels;
 public partial class DSCConfigurationUnitViewModel : ObservableObject
 {
     private readonly IAppNavigationService _navigationService;
+
+    private readonly ILogger _logger;
 
     public IDSCUnit ConfigurationUnit { get; }
 
@@ -56,7 +59,7 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
     [ObservableProperty]
     public partial string SettingsString { get; set; }
 
-    public DSCConfigurationUnitViewModel(IDSCUnit configurationUnit)
+    public DSCConfigurationUnitViewModel(IDSCUnit configurationUnit, ILogger logger)
     {
         ConfigurationUnit = configurationUnit;
         _navigationService = App.GetService<IAppNavigationService>();
@@ -66,15 +69,23 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
         Intent = configurationUnit.Intent;
         ModuleName = configurationUnit.ModuleName;
         Settings = configurationUnit.Settings;
+        _logger = logger;
         ConvertKeyValueListToProperties(Properties, Settings);
 
         var dict = Settings.ToDictionary();
+        try
+        {
+            var serializer = new SerializerBuilder()
+             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+             .WithMaximumRecursion(100)
+             .Build();
 
-        var serializer = new SerializerBuilder()
-         .WithNamingConvention(CamelCaseNamingConvention.Instance)
-         .Build();
-
-        SettingsString = serializer.Serialize(dict).Trim();
+            SettingsString = serializer.Serialize(dict).Trim();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, $"Failed to serialize resource settings property. Error: {e.Message}");
+        }
     }
 
     partial void OnTypeChanged(string oldValue, string newValue)
