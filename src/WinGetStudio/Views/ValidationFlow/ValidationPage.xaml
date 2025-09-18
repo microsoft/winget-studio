@@ -117,8 +117,6 @@
                     <Button x:Uid="ValidationPage_GetButton" Command="{Binding GetCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
                     <Button x:Uid="ValidationPage_SetButton" Command="{Binding SetCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
                     <Button x:Uid="ValidationPage_TestButton" Command="{Binding TestCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
-                    <!-- Export is implemented but due to a bug (probably) in dsc only works around 50% of the time-->
-                    <!-- <Button x:Uid="ValidationPage_ExportButton" Command="{Binding ExportCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="3"/> -->
                 </Grid>
             </Grid>
         </Grid>

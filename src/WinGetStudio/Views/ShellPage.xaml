@@ -6,11 +6,29 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:WinGetStudio.ViewModels"
     xmlns:helpers="using:WinGetStudio.Helpers"
-    xmlns:behaviors="using:WinGetStudio.Behaviors"
+    xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors"
+    xmlns:localBehaviors="using:WinGetStudio.Behaviors"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
-    Loaded="OnLoaded">
+    xmlns:converters="using:CommunityToolkit.WinUI.Converters"
+    xmlns:controls="using:WinGetStudio.Views.Controls"
+    Loaded="OnLoaded"
+    Unloaded="OnUnloaded">
+
+    <Page.Resources>
+        <converters:DoubleToVisibilityConverter x:Key="CountToVisibilityConverter" GreaterThan="0" FalseValue="Collapsed" TrueValue="Visible" />
+    </Page.Resources>
+    
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+        <i:EventTriggerBehavior EventName="Unloaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.UnloadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
 
     <Grid>
+        <!-- Title bar -->
         <Grid x:Name="AppTitleBar"
               Canvas.ZIndex="1"
               Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
@@ -26,59 +44,132 @@
                        Style="{StaticResource CaptionTextBlockStyle}"
                        Margin="28,0,0,0"/>
         </Grid>
-        <NavigationView
-            x:Name="NavigationViewControl"
-            Canvas.ZIndex="0"
-            IsBackButtonVisible="Visible"
-            IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
-            SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}"
-            IsSettingsVisible="True"
-            ExpandedModeThresholdWidth="1280"
-            DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
-            Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
-            <NavigationView.MenuItems>
-                <NavigationViewItem x:Uid="Shell_Main" helpers:NavigationHelper.NavigateTo="viewmodels:MainViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE80F;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Uid="Shell_Configuration" helpers:NavigationHelper.NavigateTo="viewmodels:ConfigurationViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE8FF;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Uid="Shell_Validation" helpers:NavigationHelper.NavigateTo="viewmodels:ValidationFrameViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE762;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </NavigationView.MenuItems>
-            <NavigationView.HeaderTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <TextBlock
-                            Text="{Binding}"
-                            Style="{ThemeResource TitleTextBlockStyle}" />
+
+        <!-- Loading progress bar -->
+        <Grid VerticalAlignment="Top"
+              Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}">
+            <controls:LoadingProgressBar VerticalAlignment="Bottom" />
+        </Grid>
+
+        <!-- Notification split view -->
+        <SplitView x:Name="SplitView"
+                   DisplayMode="CompactInline"
+                   CompactPaneLength="0"
+                   IsPaneOpen="{x:Bind ViewModel.IsNotificationPaneOpen, Mode=OneWay}"
+                   PaneBackground="Transparent"
+                   PanePlacement="Right">
+            <SplitView.Pane>
+                <!-- Notification pane -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid x:Name="SplitViewPaneHeader"
+                          Margin="0,1,0,0"
+                          Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}">
                     </Grid>
-                </DataTemplate>
-            </NavigationView.HeaderTemplate>
-            <i:Interaction.Behaviors>
-                <behaviors:NavigationViewHeaderBehavior
-                    DefaultHeader="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
-                    <behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
+                    <Grid Grid.Row="1"
+                          x:Name="SplitViewPaneContent"
+                          Padding="12" Background="{ThemeResource SystemChromeMediumLowColor}">
+                        <controls:NotificationPane />
+                    </Grid>
+                </Grid>
+            </SplitView.Pane>
+
+            <!-- Split view main content -->
+            <Grid>
+                <!-- Navigation view -->
+                <NavigationView
+                    x:Name="NavigationViewControl"
+                    Canvas.ZIndex="0"
+                    IsBackButtonVisible="Visible"
+                    IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
+                    SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}"
+                    IsSettingsVisible="True"
+                    ExpandedModeThresholdWidth="1280"
+                    DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
+                    Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
+                    <NavigationView.MenuItems>
+                        <NavigationViewItem x:Uid="Shell_Main" helpers:NavigationHelper.NavigateTo="viewmodels:MainViewModel">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE80F;"/>
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Uid="Shell_Configuration" helpers:NavigationHelper.NavigateTo="viewmodels:ConfigurationViewModel">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE8FF;"/>
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Uid="Shell_Validation" helpers:NavigationHelper.NavigateTo="viewmodels:ValidationFrameViewModel">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE762;"/>
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationView.MenuItems>
+
+                    <NavigationView.HeaderTemplate>
                         <DataTemplate>
                             <Grid>
-                                <TextBlock
-                                    Text="{Binding}"
-                                    Style="{ThemeResource TitleTextBlockStyle}" />
+                                <TextBlock Text="{Binding}" Style="{ThemeResource TitleTextBlockStyle}" />
                             </Grid>
                         </DataTemplate>
-                    </behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
-                </behaviors:NavigationViewHeaderBehavior>
-            </i:Interaction.Behaviors>
-            <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
-                <Frame x:Name="NavigationFrame" />
+                    </NavigationView.HeaderTemplate>
+
+                    <NavigationView.FooterMenuItems>
+                        <NavigationViewItem SelectsOnInvoked="False" x:Uid="Shell_Notifications">
+                            <i:Interaction.Behaviors>
+                                <i:EventTriggerBehavior EventName="Tapped">
+                                    <i:InvokeCommandAction Command="{x:Bind ViewModel.ToggleNotificationPaneCommand}" />
+                                </i:EventTriggerBehavior>
+                            </i:Interaction.Behaviors>
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xEDAC;"/>
+                            </NavigationViewItem.Icon>
+                            <NavigationViewItem.InfoBadge>
+                                <InfoBadge Value="{x:Bind ViewModel.UnreadNotificationsCount, Mode=OneWay}"
+                                           Visibility="{x:Bind ViewModel.UnreadNotificationsCount, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"/>
+                            </NavigationViewItem.InfoBadge>
+                        </NavigationViewItem>
+                    </NavigationView.FooterMenuItems>
+
+                    <i:Interaction.Behaviors>
+                        <localBehaviors:NavigationViewHeaderBehavior DefaultHeader="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}">
+                            <localBehaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <TextBlock Text="{Binding}" Style="{ThemeResource TitleTextBlockStyle}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </localBehaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
+                        </localBehaviors:NavigationViewHeaderBehavior>
+                    </i:Interaction.Behaviors>
+
+                    <!-- Content -->
+                    <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
+                        <Frame x:Name="NavigationFrame" />
+                    </Grid>
+                </NavigationView>
+
+                <!-- Stacked notification -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"/>
+                    <InfoBar Grid.Row="1"
+                             VerticalAlignment="Top"
+                             HorizontalAlignment="Right"
+                             Style="{ThemeResource InAppNotification}"
+                             CloseButtonClick="NotificationRead"
+                             Margin="32">
+                        <i:Interaction.Behaviors>
+                            <behaviors:StackedNotificationsBehavior x:Name="NotificationQueue" />
+                        </i:Interaction.Behaviors>
+                    </InfoBar>
+                </Grid>
             </Grid>
-        </NavigationView>
+        </SplitView>
     </Grid>
 </Page>

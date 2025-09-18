@@ -10,6 +10,8 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
 using WinGetStudio.Services.Settings.Contracts;
+using WingetStudio.Services.VisualFeedback.Contracts;
+using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;
@@ -17,16 +19,15 @@ namespace WinGetStudio.Views;
 public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
     private readonly IAppInfoService _appInfoService;
+    private readonly IUIFeedbackService _uiFeedbackService;
     private readonly IUserSettings _userSettings;
 
-    public ShellViewModel ViewModel
-    {
-        get;
-    }
+    public ShellViewModel ViewModel { get; }
 
     public ShellPage(ShellViewModel viewModel)
     {
         _appInfoService = App.GetService<IAppInfoService>();
+        _uiFeedbackService = App.GetService<IUIFeedbackService>();
         _userSettings = App.GetService<IUserSettings>();
         ViewModel = viewModel;
         InitializeComponent();
@@ -50,6 +51,13 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
+
+        _uiFeedbackService.Notification.NotificationShown += OnNotificationShown;
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        _uiFeedbackService.Notification.NotificationShown -= OnNotificationShown;
     }
 
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -66,6 +74,8 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             Right = AppTitleBar.Margin.Right,
             Bottom = AppTitleBar.Margin.Bottom,
         };
+
+        SplitViewPaneHeader.Background = sender.DisplayMode == NavigationViewDisplayMode.Minimal ? SplitViewPaneContent.Background : null;
     }
 
     private static KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key, VirtualKeyModifiers? modifiers = null)
@@ -94,28 +104,58 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
     [Conditional("DEBUG")]
     private void AddDebugShortcuts()
     {
-        // Open logs folder button
-        var logsButton = new Button()
+        var logsItem = new NavigationViewItem()
         {
+            SelectsOnInvoked = false,
             Content = "Open Logs Folder",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Icon = new FontIcon() { Glyph = "\uEBE8" },
         };
-        logsButton.Click += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
+        logsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
 
-        // Open settings button
-        var settingsButton = new Button()
+        var settingsItem = new NavigationViewItem()
         {
+            SelectsOnInvoked = false,
             Content = "Open Settings",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Icon = new FontIcon() { Glyph = "\uEBE8" },
         };
-        settingsButton.Click += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_userSettings.FullPath));
+        settingsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_userSettings.FullPath));
+        NavigationViewControl.FooterMenuItems.Insert(0, new NavigationViewItemSeparator());
+        NavigationViewControl.FooterMenuItems.Insert(0, logsItem);
+        NavigationViewControl.FooterMenuItems.Insert(0, settingsItem);
+    }
 
-        // Add buttons to the NavigationView footer
-        NavigationViewControl.PaneFooter = new StackPanel()
+    private void OnNotificationShown(object? sender, NotificationMessage message)
+    {
+        if (message.ShownBehavior == NotificationShownBehavior.ClearOverlays)
         {
-            Orientation = Orientation.Vertical,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Children = { settingsButton, logsButton },
-        };
+            NotificationQueue.Clear();
+        }
+
+        if (message.Delivery.HasFlag(NotificationDelivery.Overlay))
+        {
+            TimeSpan? duration = null;
+            if (message.DismissBehavior == NotificationDismissBehavior.Timeout && message.Duration > TimeSpan.Zero)
+            {
+                duration = message.Duration;
+            }
+
+            NotificationQueue.Show(new()
+            {
+                Title = message.Title,
+                Message = message.Message,
+                Severity = NotificationHelper.GetInfoBarSeverity(message.Severity),
+                Content = message,
+                ContentTemplate = new DataTemplate(),
+                Duration = duration,
+            });
+        }
+    }
+
+    private void NotificationRead(InfoBar sender, object args)
+    {
+        if (sender?.Content is NotificationMessage message)
+        {
+            ViewModel.MarkAsRead(message);
+        }
     }
 }

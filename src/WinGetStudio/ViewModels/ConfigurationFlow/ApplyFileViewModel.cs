@@ -4,6 +4,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using Microsoft.UI.Dispatching;
@@ -11,15 +12,18 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WingetStudio.Services.VisualFeedback.Contracts;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
 public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
 {
-    private readonly IStringResource _stringResource;
+    private readonly IStringLocalizer<ApplyFileViewModel> _localizer;
     private readonly IConfigurationNavigationService _navigationService;
-    private readonly ILogger _logger;
     private readonly IDSC _dsc;
+    private readonly IUIFeedbackService _ui;
+
+    private readonly ILogger _logger;
     private readonly DispatcherQueue _dq;
     private IDSCSet? _dscSet;
 
@@ -34,14 +38,16 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
     public ApplyFileViewModel(
         IConfigurationNavigationService navigationService,
         IDSC dsc,
-        IStringResource stringResource,
+        IUIFeedbackService ui,
+        IStringLocalizer<ApplyFileViewModel> localizer,
         ILogger<ApplyFileViewModel> logger)
     {
         _navigationService = navigationService;
         _dsc = dsc;
         _logger = logger;
         _dq = DispatcherQueue.GetForCurrentThread();
-        _stringResource = stringResource;
+        _localizer = localizer;
+        _ui = ui;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -51,7 +57,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
             _dscSet = dscSet;
             foreach (var unit in dscSet.Units)
             {
-                Units.Add(new(unit, _stringResource, _logger));
+                Units.Add(new(unit, _localizer, _logger));
             }
         }
     }
@@ -66,9 +72,11 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
     {
         if (_dscSet != null)
         {
+            _ui.ShowTaskProgress();
             var task = _dsc.ApplySetAsync(_dscSet);
             task.Progress = (_, data) => OnDataChanged(data);
             await task;
+            _ui.HideTaskProgress();
         }
     }
 
