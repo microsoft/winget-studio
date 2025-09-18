@@ -22,9 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\DscResources\microsoft.wingetstudio.*.dsc.resource.json">
+    <Content Include="Assets\DscResources\microsoft.wingetstudio.*.dsc.resource.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
       <Link>%(Filename)%(Extension)</Link>
-    </None>
+      <PackagePath>%(Filename)%(Extension)</PackagePath>
+    </Content>
   </ItemGroup>
 </Project>
