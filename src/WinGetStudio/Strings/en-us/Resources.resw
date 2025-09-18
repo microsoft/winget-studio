@@ -559,7 +559,7 @@
     <value>Outputs schema of the resource</value>
   </data>
   <data name="DscManifest_HelpText" xml:space="preserve">
-    <value>Get the manifest of the dsc resource</value>
+    <value>Outputs manifest of the resource</value>
   </data>
   <data name="DscManifestFailed_Message" xml:space="preserve">
     <value>Failed to write manifest to {0}: {1}</value>
