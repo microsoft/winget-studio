@@ -27,6 +27,9 @@ internal sealed class ResourceProvider : IResourceProvider
     }
 
     /// <inheritdoc/>
+    public IEnumerable<string> ResourceNames => _resourceFactories.Keys;
+
+    /// <inheritdoc/>
     public bool IsResourceAvailable(string resourceName)
     {
         return _resourceFactories.ContainsKey(resourceName);

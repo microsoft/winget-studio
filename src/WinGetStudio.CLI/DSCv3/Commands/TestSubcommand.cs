@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 using WinGetStudio.CLI.Contracts;
 using WinGetStudio.CLI.DSCv3.Contracts;
 
@@ -10,8 +11,11 @@ namespace WinGetStudio.CLI.DSCv3.Commands;
 
 internal sealed partial class TestSubcommand : BaseDscSubcommand
 {
-    public TestSubcommand(IOptionFactory optionFactory, IResourceProvider resourceProvider)
-        : base("test", "Test DSC resources", optionFactory, resourceProvider)
+    public TestSubcommand(
+        IOptionFactory optionFactory,
+        IResourceProvider resourceProvider,
+        IStringLocalizer<TestSubcommand> localizer)
+        : base("test", localizer["DscTest_HelpText"], optionFactory, resourceProvider)
     {
     }
 

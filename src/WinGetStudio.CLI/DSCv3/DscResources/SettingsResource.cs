@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 using WinGetStudio.CLI.DSCv3.Models;
 using WinGetStudio.CLI.DSCv3.Models.FunctionData;
 using WinGetStudio.Services.Settings.Contracts;
@@ -14,12 +14,14 @@ namespace WinGetStudio.CLI.DSCv3.DscResources;
 internal sealed partial class SettingsResource : BaseResource
 {
     private readonly IUserSettings _userSettings;
+    private readonly IStringLocalizer<SettingsResource> _localizer;
     public const string ResourceName = "settings";
 
-    public SettingsResource(IUserSettings userSettings)
+    public SettingsResource(IUserSettings userSettings, IStringLocalizer<SettingsResource> localizer)
         : base(ResourceName)
     {
         _userSettings = userSettings;
+        _localizer = localizer;
     }
 
     /// <inheritdoc/>
@@ -42,7 +44,7 @@ internal sealed partial class SettingsResource : BaseResource
     {
         if (string.IsNullOrEmpty(input))
         {
-            WriteMessageOutputLine(DscMessageLevel.Error, "Input cannot be null or empty.");
+            WriteMessageOutputLine(DscMessageLevel.Error, _localizer["DscInputRequired_Message", "set"]);
             return false;
         }
 
@@ -67,7 +69,7 @@ internal sealed partial class SettingsResource : BaseResource
         }
         catch (Exception e)
         {
-            WriteMessageOutputLine(DscMessageLevel.Error, $"Failed to set settings: {e.Message}");
+            WriteMessageOutputLine(DscMessageLevel.Error, _localizer["DscSetFailed_Message", e.Message]);
             return false;
         }
     }
@@ -77,7 +79,7 @@ internal sealed partial class SettingsResource : BaseResource
     {
         if (string.IsNullOrEmpty(input))
         {
-            WriteMessageOutputLine(DscMessageLevel.Error, "Input cannot be null or empty.");
+            WriteMessageOutputLine(DscMessageLevel.Error, _localizer["DscInputRequired_Message", "test"]);
             return false;
         }
 
@@ -114,7 +116,7 @@ internal sealed partial class SettingsResource : BaseResource
             }
             catch (Exception ex)
             {
-                var errorMessage = string.Format(CultureInfo.InvariantCulture, "Failed to write manifest to {0}: {1}", outputDir, ex.Message);
+                var errorMessage = _localizer["DscManifestFailed_Message", outputDir, ex.Message];
                 WriteMessageOutputLine(DscMessageLevel.Error, errorMessage);
                 return false;
             }

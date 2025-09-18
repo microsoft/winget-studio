@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 using WinGetStudio.CLI.Contracts;
 using WinGetStudio.CLI.DSCv3.Contracts;
 using WinGetStudio.CLI.DSCv3.Options;
@@ -16,8 +17,11 @@ internal sealed partial class ManifestSubcommand : BaseDscSubcommand
     /// </summary>
     private readonly OutputDirectoryOption _outputDirectoryOption;
 
-    public ManifestSubcommand(IOptionFactory optionFactory, IResourceProvider resourceProvider)
-        : base("manifest", "Manifest description", optionFactory, resourceProvider)
+    public ManifestSubcommand(
+        IOptionFactory optionFactory,
+        IResourceProvider resourceProvider,
+        IStringLocalizer<ManifestSubcommand> localizer)
+        : base("manifest", localizer["DscManifest_HelpText"], optionFactory, resourceProvider)
     {
         _outputDirectoryOption = optionFactory.Create<OutputDirectoryOption>();
         Options.Add(_outputDirectoryOption);

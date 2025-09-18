@@ -3,20 +3,23 @@
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using Microsoft.Extensions.Localization;
 using WinGetStudio.CLI.DSCv3.Contracts;
 
 namespace WinGetStudio.CLI.DSCv3.Options;
 
 internal sealed class ResourceOption : Option<string>
 {
+    private readonly IStringLocalizer<ResourceOption> _localizer;
     private readonly IResourceProvider _resources;
 
-    public ResourceOption(IResourceProvider resources)
+    public ResourceOption(IResourceProvider resources, IStringLocalizer<ResourceOption> localizer)
         : base("--resource")
     {
         _resources = resources;
+        _localizer = localizer;
         Required = true;
-        Description = "The resource to manage.";
+        Description = localizer["DscResource_HelpText"];
         Validators.Add(OptionValidator);
     }
 
@@ -29,7 +32,7 @@ internal sealed class ResourceOption : Option<string>
         var value = result.GetValueOrDefault<string>() ?? string.Empty;
         if (!_resources.IsResourceAvailable(value))
         {
-            result.AddError($"Invalid resource name '{value}'. Valid resources are: {string.Join(", ", _resources)}");
+            result.AddError(_localizer["DscResourceNotValid_HelpText", value, string.Join(", ", _resources.ResourceNames)]);
         }
     }
 }

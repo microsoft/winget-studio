@@ -5,15 +5,19 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
+using Microsoft.Extensions.Localization;
 
 namespace WinGetStudio.CLI.DSCv3.Options;
 
 internal sealed class InputOption : Option<string>
 {
-    public InputOption()
+    private readonly IStringLocalizer<InputOption> _localizer;
+
+    public InputOption(IStringLocalizer<InputOption> localizer)
         : base("--input")
     {
-        Description = "Path to the input file.";
+        _localizer = localizer;
+        Description = _localizer["DscInput_HelpText"];
         Validators.Add(OptionValidator);
     }
 
@@ -26,7 +30,7 @@ internal sealed class InputOption : Option<string>
         var value = result.GetValueOrDefault<string>() ?? string.Empty;
         if (string.IsNullOrEmpty(value))
         {
-            result.AddError("Input cannot be null or empty");
+            result.AddError(_localizer["DscInputIsEmpty_Message"]);
         }
         else
         {
@@ -36,7 +40,7 @@ internal sealed class InputOption : Option<string>
             }
             catch (Exception e)
             {
-                result.AddError($"Input is not valid JSON: {e.Message}");
+                result.AddError(_localizer["DscInputNotValid_Message", e.Message]);
             }
         }
     }

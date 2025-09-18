@@ -4,15 +4,19 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
+using Microsoft.Extensions.Localization;
 
 namespace WinGetStudio.CLI.DSCv3.Options;
 
 internal sealed class OutputDirectoryOption : Option<string>
 {
-    public OutputDirectoryOption()
+    private readonly IStringLocalizer<OutputDirectoryOption> _localizer;
+
+    public OutputDirectoryOption(IStringLocalizer<OutputDirectoryOption> localizer)
         : base("--outputDir")
     {
-        Description = "Path to the output directory.";
+        _localizer = localizer;
+        Description = localizer["DscOutputDir_HelpText"];
         Validators.Add(OptionValidator);
     }
 
@@ -25,11 +29,11 @@ internal sealed class OutputDirectoryOption : Option<string>
         var value = result.GetValueOrDefault<string>() ?? string.Empty;
         if (string.IsNullOrEmpty(value))
         {
-            result.AddError("Output directory cannot be null or empty");
+            result.AddError(_localizer["DscOutputDirIsEmpty_HelpText"]);
         }
         else if (!Directory.Exists(value))
         {
-            result.AddError($"Output directory does not exist: {value}");
+            result.AddError(_localizer["DscOutputDirNotFound_HelpText", value]);
         }
     }
 }
