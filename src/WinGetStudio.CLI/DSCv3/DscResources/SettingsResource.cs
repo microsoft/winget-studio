@@ -7,22 +7,25 @@ using System.IO;
 using System.Threading.Tasks;
 using WinGetStudio.CLI.DSCv3.Models;
 using WinGetStudio.CLI.DSCv3.Models.FunctionData;
+using WinGetStudio.Services.Settings.Contracts;
 
 namespace WinGetStudio.CLI.DSCv3.DscResources;
 
 internal sealed partial class SettingsResource : BaseResource
 {
+    private readonly IUserSettings _userSettings;
     public const string ResourceName = "settings";
 
-    public SettingsResource()
+    public SettingsResource(IUserSettings userSettings)
         : base(ResourceName)
     {
+        _userSettings = userSettings;
     }
 
     /// <inheritdoc/>
     public async override Task<bool> ExportAsync(string input)
     {
-        var data = new SettingsFunctionData();
+        var data = CreateSettingsFunctionData();
         await data.GetAsync();
         WriteJsonOutputLine(data.Output.ToJson());
         return true;
@@ -45,7 +48,7 @@ internal sealed partial class SettingsResource : BaseResource
 
         try
         {
-            var data = new SettingsFunctionData(input);
+            var data = CreateSettingsFunctionData(input);
             await data.GetAsync();
 
             // Capture the diff before updating the output
@@ -78,7 +81,7 @@ internal sealed partial class SettingsResource : BaseResource
             return false;
         }
 
-        var data = new SettingsFunctionData(input);
+        var data = CreateSettingsFunctionData(input);
         await data.GetAsync();
         data.Output.InDesiredState = data.TestState();
 
@@ -90,7 +93,7 @@ internal sealed partial class SettingsResource : BaseResource
     /// <inheritdoc/>
     public override bool Schema()
     {
-        var data = new SettingsFunctionData();
+        var data = CreateSettingsFunctionData();
         WriteJsonOutputLine(data.Schema());
         return true;
     }
@@ -140,5 +143,15 @@ internal sealed partial class SettingsResource : BaseResource
             .AddJsonInputMethod("test", "--input", ["dsc", "test", "--resource", "settings"], stateAndDiff: true)
             .AddCommandMethod("schema", ["dsc", "schema", "--resource", "settings"])
             .ToJson();
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="SettingsFunctionData"/>.
+    /// </summary>
+    /// <param name="input">The input string, if any.</param>
+    /// <returns>A new instance of <see cref="SettingsFunctionData"/>.</returns>
+    private SettingsFunctionData CreateSettingsFunctionData(string input = null)
+    {
+        return new SettingsFunctionData(_userSettings, input);
     }
 }

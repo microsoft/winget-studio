@@ -6,18 +6,23 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using WinGetStudio.CLI.DSCv3.Models.ResourceObjects;
+using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Models;
 
 namespace WinGetStudio.CLI.DSCv3.Models.FunctionData;
 
 internal sealed partial class SettingsFunctionData : BaseFunctionData
 {
+    private readonly IUserSettings _userSettings;
+
     public SettingsResourceObject Input { get; set; }
 
     public SettingsResourceObject Output { get; set; }
 
-    public SettingsFunctionData(string input = null)
+    public SettingsFunctionData(IUserSettings userSettings, string input = null)
     {
+        _userSettings = userSettings;
+
         if (!string.IsNullOrWhiteSpace(input))
         {
             Input = JsonSerializer.Deserialize<SettingsResourceObject>(input);
@@ -83,17 +88,17 @@ internal sealed partial class SettingsFunctionData : BaseFunctionData
     /// Gets the settings configuration.
     /// </summary>
     /// <returns>The settings configuration.</returns>
-    private static Task<GeneralSettings> GetSettingsAsync()
+    private Task<GeneralSettings> GetSettingsAsync()
     {
-        return Task.FromResult(WinGetStudioCLI.UserSettings.Current);
+        return Task.FromResult(_userSettings.Current);
     }
 
     /// <summary>
-    /// Saves the settings configuration to the settings utils for a specific module.
+    /// Saves the settings configuration.
     /// </summary>
     /// <param name="settings">The settings configuration to save.</param>
-    private static Task SaveSettingsAsync(GeneralSettings settings)
+    private Task SaveSettingsAsync(GeneralSettings settings)
     {
-        return WinGetStudioCLI.UserSettings.SaveAsync(settings);
+        return _userSettings.SaveAsync(settings);
     }
 }

@@ -1,17 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using WinGetStudio.CLI.DSCv3.Contracts;
 
 namespace WinGetStudio.CLI.DSCv3.Options;
 
 internal sealed class ResourceOption : Option<string>
 {
-    private readonly List<string> _resources;
+    private readonly IResourceProvider _resources;
 
-    public ResourceOption(List<string> resources)
+    public ResourceOption(IResourceProvider resources)
         : base("--resource")
     {
         _resources = resources;
@@ -27,7 +27,7 @@ internal sealed class ResourceOption : Option<string>
     private void OptionValidator(OptionResult result)
     {
         var value = result.GetValueOrDefault<string>() ?? string.Empty;
-        if (!_resources.Contains(value))
+        if (!_resources.IsResourceAvailable(value))
         {
             result.AddError($"Invalid resource name '{value}'. Valid resources are: {string.Join(", ", _resources)}");
         }

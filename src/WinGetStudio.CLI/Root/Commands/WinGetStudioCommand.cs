@@ -3,26 +3,27 @@
 
 using System.CommandLine;
 using System.Linq;
-using WinGetStudio.CLI.Actions;
+using WinGetStudio.CLI.Contracts;
 using WinGetStudio.CLI.DSCv3.Commands;
-using WinGetStudio.CLI.Options;
+using WinGetStudio.CLI.Root.Actions;
+using WinGetStudio.CLI.Root.Options;
 using WinGetStudio.CLI.Settings.Commands;
 
-namespace WinGetStudio.CLI;
+namespace WinGetStudio.CLI.Root.Commands;
 
 internal sealed partial class WinGetStudioCommand : RootCommand
 {
-    public WinGetStudioCommand()
+    public WinGetStudioCommand(ICommandFactory commandFactory, IOptionFactory optionFactory)
         : base("WinGetStudio Command Line Interface")
     {
         // Configure version option
         Options.OfType<VersionOption>().Single().Action = new VersionOptionAction();
 
         // Commands
-        Subcommands.Add(new DscCommand());
-        Subcommands.Add(new SettingsCommand());
+        Subcommands.Add(commandFactory.Create<DscCommand>());
+        Subcommands.Add(commandFactory.Create<SettingsCommand>());
 
         // Options
-        Options.Add(new LogsOption());
+        Options.Add(optionFactory.Create<LogsOption>());
     }
 }

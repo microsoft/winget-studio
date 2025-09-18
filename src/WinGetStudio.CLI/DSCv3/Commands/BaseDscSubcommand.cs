@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.Threading.Tasks;
 using Windows.Win32.Foundation;
+using WinGetStudio.CLI.Contracts;
+using WinGetStudio.CLI.DSCv3.Contracts;
 using WinGetStudio.CLI.DSCv3.DscResources;
 using WinGetStudio.CLI.DSCv3.Options;
 
@@ -16,13 +16,9 @@ internal abstract class BaseDscSubcommand : Command
     private readonly InputOption _inputOption;
     private readonly ResourceOption _resourceOption;
 
-    // The dictionary of available resources and their factories.
-    private static readonly Dictionary<string, Func<BaseResource>> _resourceFactories = new()
-    {
-        { SettingsResource.ResourceName, () => new SettingsResource() },
+    protected IOptionFactory OptionFactory { get; }
 
-        // Add other resources here
-    };
+    protected IResourceProvider ResourceProvider { get; }
 
     /// <summary>
     /// Gets the DSC resource to be used by the command.
@@ -34,13 +30,20 @@ internal abstract class BaseDscSubcommand : Command
     /// </summary>
     protected string Input { get; private set; }
 
-    public BaseDscSubcommand(string name, string description)
+    public BaseDscSubcommand(
+        string name,
+        string description,
+        IOptionFactory optionFactory,
+        IResourceProvider resourceProvider)
         : base(name, description)
     {
-        _resourceOption = new ResourceOption([.. _resourceFactories.Keys]);
+        OptionFactory = optionFactory;
+        ResourceProvider = resourceProvider;
+
+        _resourceOption = OptionFactory.Create<ResourceOption>();
         Options.Add(_resourceOption);
 
-        _inputOption = new InputOption();
+        _inputOption = OptionFactory.Create<InputOption>();
         Options.Add(_inputOption);
 
         SetAction(CommandHandler);
@@ -55,7 +58,7 @@ internal abstract class BaseDscSubcommand : Command
     private async Task<int> CommandHandler(ParseResult parseResult)
     {
         // Resource option is validated prior the command handler being invoked.
-        Resource = _resourceFactories[parseResult.GetValue(_resourceOption)]();
+        Resource = ResourceProvider.GetResource(parseResult.GetValue(_resourceOption));
         Input = parseResult.GetValue(_inputOption);
 
         // Continue to the specific command handler.

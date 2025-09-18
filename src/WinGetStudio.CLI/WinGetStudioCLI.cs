@@ -6,8 +6,14 @@ using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Windows.Win32;
+using WinGetStudio.CLI.Contracts;
+using WinGetStudio.CLI.DSCv3.Extensions;
+using WinGetStudio.CLI.Root.Commands;
+using WinGetStudio.CLI.Root.Extensions;
+using WinGetStudio.CLI.Services;
+using WinGetStudio.CLI.Settings.Extensions;
+using WingetStudio.Services.Localization.Extensions;
 using WinGetStudio.Services.Logging.Extensions;
-using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Extensions;
 
 namespace WinGetStudio.CLI;
@@ -16,16 +22,11 @@ public sealed class WinGetStudioCLI
 {
     private const string AppSettingsFileName = "appsettings.cli.json";
     private const uint AttachParentProcess = uint.MaxValue;
-    private readonly WinGetStudioCommand _command;
-
-    internal static IHost Host { get; private set; }
-
-    internal static IUserSettings UserSettings => Host.Services.GetService<IUserSettings>();
+    private readonly IHost _host;
 
     public WinGetStudioCLI()
     {
-        _command = [];
-        BuildHost();
+        _host = BuildHost();
         AttachConsole();
     }
 
@@ -36,7 +37,9 @@ public sealed class WinGetStudioCLI
     /// <returns> The exit code.</returns>
     public int Invoke(string[] args)
     {
-        var parseResult = _command.Parse(args);
+        var commandFactory = _host.Services.GetService<ICommandFactory>();
+        var rootCommand = commandFactory.Create<WinGetStudioCommand>();
+        var parseResult = rootCommand.Parse(args);
         return parseResult.Invoke();
     }
 
@@ -68,9 +71,9 @@ public sealed class WinGetStudioCLI
     /// <summary>
     /// Build the host for dependency injection.
     /// </summary>
-    private void BuildHost()
+    private IHost BuildHost()
     {
-        Host = Microsoft.Extensions.Hosting.Host
+        return Host
             .CreateDefaultBuilder()
             .UseContentRoot(AppContext.BaseDirectory)
             .UseDefaultServiceProvider((context, options) =>
@@ -79,8 +82,19 @@ public sealed class WinGetStudioCLI
             })
             .ConfigureServices((context, services) =>
             {
+                // Services
                 services.AddSettings();
                 services.AddLogging(AppSettingsFileName);
+                services.AddReswLocalization();
+
+                // Command flows
+                services.AddRootCommandFlow();
+                services.AddDscCommandFlow();
+                services.AddSettingsCommandFlow();
+
+                // Factories
+                services.AddSingleton<ICommandFactory, CommandFactory>();
+                services.AddSingleton<IOptionFactory, OptionFactory>();
             })
             .Build();
     }

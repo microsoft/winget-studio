@@ -101,8 +101,8 @@ public partial class App : Application
                 services.AddWinGet();
                 services.AddSettings();
                 services.AddTelemetry();
-                services.AddLogging(AppSettingsFileName);
                 services.AddVisualFeedback();
+                services.AddLogging(AppSettingsFileName);
                 services.AddReswLocalization();
 
                 // Views and ViewModels

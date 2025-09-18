@@ -8,14 +8,15 @@ using Windows.System;
 using Windows.Win32.Foundation;
 using WinGetStudio.Services.Core.Helpers;
 
-namespace WinGetStudio.CLI.Actions;
+namespace WinGetStudio.CLI.Root.Actions;
 
 internal sealed class LogsOptionAction : SynchronousCommandLineAction
 {
     public override int Invoke(ParseResult parseResult)
     {
+        // Open the log folder in File Explorer
         var logPath = RuntimeHelper.GetAppLogsPath();
-        Launcher.LaunchUriAsync(new Uri(logPath)).Wait();
-        return HRESULT.S_OK;
+        var result = Launcher.LaunchUriAsync(new Uri(logPath)).GetResults();
+        return result ? HRESULT.S_OK : HRESULT.E_FAIL;
     }
 }

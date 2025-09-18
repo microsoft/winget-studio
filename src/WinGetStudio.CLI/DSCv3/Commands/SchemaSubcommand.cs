@@ -3,13 +3,15 @@
 
 using System.CommandLine;
 using System.Threading.Tasks;
+using WinGetStudio.CLI.Contracts;
+using WinGetStudio.CLI.DSCv3.Contracts;
 
 namespace WinGetStudio.CLI.DSCv3.Commands;
 
 internal sealed partial class SchemaSubcommand : BaseDscSubcommand
 {
-    public SchemaSubcommand()
-        : base("schema", "Schema description")
+    public SchemaSubcommand(IOptionFactory optionFactory, IResourceProvider resourceProvider)
+        : base("schema", "Schema description", optionFactory, resourceProvider)
     {
     }
 

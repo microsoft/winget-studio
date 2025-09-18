@@ -3,9 +3,9 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using WinGetStudio.CLI.Actions;
+using WinGetStudio.CLI.Root.Actions;
 
-namespace WinGetStudio.CLI.Options;
+namespace WinGetStudio.CLI.Root.Options;
 
 internal sealed class LogsOption : Option<bool>
 {

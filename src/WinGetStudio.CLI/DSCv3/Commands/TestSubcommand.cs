@@ -3,13 +3,15 @@
 
 using System.CommandLine;
 using System.Threading.Tasks;
+using WinGetStudio.CLI.Contracts;
+using WinGetStudio.CLI.DSCv3.Contracts;
 
 namespace WinGetStudio.CLI.DSCv3.Commands;
 
 internal sealed partial class TestSubcommand : BaseDscSubcommand
 {
-    public TestSubcommand()
-        : base("test", "Test DSC resources")
+    public TestSubcommand(IOptionFactory optionFactory, IResourceProvider resourceProvider)
+        : base("test", "Test DSC resources", optionFactory, resourceProvider)
     {
     }
 

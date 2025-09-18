@@ -3,6 +3,8 @@
 
 using System.CommandLine;
 using System.Threading.Tasks;
+using WinGetStudio.CLI.Contracts;
+using WinGetStudio.CLI.DSCv3.Contracts;
 using WinGetStudio.CLI.DSCv3.Options;
 
 namespace WinGetStudio.CLI.DSCv3.Commands;
@@ -14,10 +16,10 @@ internal sealed partial class ManifestSubcommand : BaseDscSubcommand
     /// </summary>
     private readonly OutputDirectoryOption _outputDirectoryOption;
 
-    public ManifestSubcommand()
-        : base("manifest", "Manifest description")
+    public ManifestSubcommand(IOptionFactory optionFactory, IResourceProvider resourceProvider)
+        : base("manifest", "Manifest description", optionFactory, resourceProvider)
     {
-        _outputDirectoryOption = new OutputDirectoryOption();
+        _outputDirectoryOption = optionFactory.Create<OutputDirectoryOption>();
         Options.Add(_outputDirectoryOption);
     }
 

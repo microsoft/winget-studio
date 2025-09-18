@@ -17,6 +17,6 @@ internal sealed class SettingsResourceObject : BaseResourceObject
     /// </summary>
     [JsonPropertyName(SettingsJsonPropertyName)]
     [Required]
-    [Description("The settings content for the module.")]
+    [Description("The settings content.")]
     public GeneralSettings Settings { get; set; } = new();
 }

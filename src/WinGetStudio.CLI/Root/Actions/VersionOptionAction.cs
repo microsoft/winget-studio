@@ -6,7 +6,7 @@ using System.CommandLine.Invocation;
 using Windows.Win32.Foundation;
 using WinGetStudio.Services.Core.Helpers;
 
-namespace WinGetStudio.CLI.Actions;
+namespace WinGetStudio.CLI.Root.Actions;
 
 internal sealed class VersionOptionAction : SynchronousCommandLineAction
 {
