@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="/Styles/FontSizes.xaml" />
                 <ResourceDictionary Source="/Styles/Thickness.xaml" />
                 <ResourceDictionary Source="/Styles/TextBlock.xaml" />
+                <ResourceDictionary Source="/Styles/FontFamilies.xaml" />
                 <ResourceDictionary Source="/Styles/InfoBar.xaml" />
 
                 <!-- Local controls -->

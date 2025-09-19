@@ -36,6 +36,10 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     public partial DSCConfigurationUnitViewModel? SelectedUnit { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Content))]
+    public partial IDSCFile? DscFile { get; set; }
+
+    [ObservableProperty]
     public partial bool LoadingUnits { get; set; } = true;
 
     [ObservableProperty]
@@ -50,6 +54,10 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     public bool CanApply => ConfigurationUnits.Count > 0 && !IsStateChanged;
 
     public bool IsEditPanelVisible => SelectedUnit != null;
+
+    public bool IsConfigurationLoaded => ConfigurationUnits.Count > 0;
+
+    public string Content => DscFile == null ? string.Empty : DscFile.Content;
 
     partial void OnIsInEditModeChanging(bool value)
     {
@@ -117,6 +125,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         ConfigurationUnits.CollectionChanged += (_, __) =>
         {
             OnPropertyChanged(nameof(CanApply));
+            OnPropertyChanged(nameof(IsConfigurationLoaded));
         };
     }
 
@@ -162,8 +171,8 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
 
     private async Task ImportDSCSetFromPathAsync(string path)
     {
-        var dscFile = await DSCFile.LoadAsync(path);
-        var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+        DscFile = await DSCFile.LoadAsync(path);
+        var dscSet = await _dsc.OpenConfigurationSetAsync(DscFile);
         FilePath = path;
         _dscSetBuilder.ImportSet(dscSet);
         _dscSet = dscSet;
