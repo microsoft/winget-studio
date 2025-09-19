@@ -53,6 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\services\WinGetStudio.Services.DesiredStateConfiguration.Explorer\WinGetStudio.Services.DesiredStateConfiguration.Explorer.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Localization\WinGetStudio.Services.Localization.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Logging\WinGetStudio.Services.Logging.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Settings\WinGetStudio.Services.Settings.csproj" />
