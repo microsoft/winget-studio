@@ -11,6 +11,8 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 internal sealed class DSCModule : IDSCModule
 {
+    private Dictionary<string, DSCResourceClassDefinition> _resourceDefinitions = [];
+
     public bool IsLocal { get; set; }
 
     public int DscVersion { get; set; }
@@ -23,24 +25,46 @@ internal sealed class DSCModule : IDSCModule
 
     public IModuleProvider Provider { get; set; }
 
-    public Dictionary<string, DSCResource> Resources { get; set; } = [];
+    public IReadOnlySet<string> Resources { get; set; }
 
-    public DSCModule(IModuleProvider provider, string id, string version, string tags)
+    public DSCModule(IModuleProvider provider)
     {
         Provider = provider;
-        Id = id;
-        Version = new NuGetVersion(version);
-        Tags = tags;
+        Resources = new HashSet<string>();
     }
 
     public async Task LoadDSCResourcesAsync()
     {
-        var resourceNames = await Provider.GetDscModuleResourcesAsync(this);
-        Resources = resourceNames.ToDictionary(name => name, name => new DSCResource() { Name = name });
+        Resources = await Provider.GetDscModuleResourcesAsync(this);
     }
 
-    public async Task LoadDSCResourcePropertiesAsync()
+    public async Task LoadDSCResourcesDefinitionAsync()
     {
-        await Task.CompletedTask;
+        if (_resourceDefinitions.Count == 0)
+        {
+            var definitions = await Provider.GetDSCModuleResourcesDefinitionAsync(this);
+            _resourceDefinitions = definitions.ToDictionary(def => def.ClassName, def => def);
+        }
+    }
+
+    public DSCResource GetResourceDetails(string resourceName)
+    {
+        var resource = new DSCResource() { Name = resourceName };
+        if (_resourceDefinitions.TryGetValue(resourceName, out var resourceDefinition))
+        {
+            var properties = resourceDefinition.Properties.ToDictionary(
+                prop => prop.Name,
+                prop => new DSCProperty
+                {
+                    Name = prop.Name,
+                    Type = prop.PropertyType.TypeName.Name,
+                    Syntax = prop.Extent.Text,
+                });
+
+            resource.Syntax = resourceDefinition.ClassAst.Extent.Text;
+            resource.Properties = properties;
+        }
+
+        return resource;
     }
 }

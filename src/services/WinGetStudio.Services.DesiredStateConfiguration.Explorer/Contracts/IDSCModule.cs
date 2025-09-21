@@ -1,14 +1,18 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NuGet.Versioning;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 
 public interface IDSCModule
 {
-    IModuleProvider Provider { get; }
+    bool IsLocal { get; }
+
+    int DscVersion { get; }
 
     string Id { get; }
 
@@ -16,5 +20,11 @@ public interface IDSCModule
 
     string Tags { get; }
 
+    IReadOnlySet<string> Resources { get; }
+
     Task LoadDSCResourcesAsync();
+
+    Task LoadDSCResourcesDefinitionAsync();
+
+    DSCResource GetResourceDetails(string resourceName);
 }

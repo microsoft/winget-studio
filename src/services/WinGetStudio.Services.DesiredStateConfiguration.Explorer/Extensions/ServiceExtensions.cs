@@ -18,10 +18,6 @@ public static class ServiceExtensions
         // Module providers
         services.AddSingleton<IModuleProvider, PowerShellGalleryModuleProvider>();
 
-        // Module analyzers
-        services.AddSingleton<IModuleAnalyzer, ModuleClassAnalyzer>();
-        services.AddSingleton<IModuleAnalyzer, ModuleMOFAnalyzer>();
-
         return services;
     }
 }

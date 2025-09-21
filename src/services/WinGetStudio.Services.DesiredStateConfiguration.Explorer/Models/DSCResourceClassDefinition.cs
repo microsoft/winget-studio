@@ -6,9 +6,11 @@ using System.Management.Automation.Language;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
-internal class DSCResourceClassSyntax
+public class DSCResourceClassDefinition
 {
-    public string ClassName { get; set; }
+    public string ClassName => ClassAst.Name;
 
-    public IReadOnlyList<PropertyMemberAst> Properties { get; set; }
+    public TypeDefinitionAst ClassAst { get; set; }
+
+    public List<PropertyMemberAst> Properties { get; set; }
 }

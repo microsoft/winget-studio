@@ -18,6 +18,7 @@ using NuGet.Common;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
@@ -72,7 +73,14 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
                         var id = props.Element(_dataServices + "Id").Value;
                         var version = props.Element(_dataServices + "Version").Value;
                         var tags = props.Element(_dataServices + "Tags").Value;
-                        modules.Add(new(this, id, version, tags));
+                        modules.Add(new(this)
+                        {
+                            Id = id,
+                            DscVersion = 2,
+                            Version = NuGetVersion.Parse(version),
+                            Tags = tags,
+                            IsLocal = false,
+                        });
                     }
                 }
                 else
@@ -90,14 +98,14 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     }
 
     /// <inheritdoc/>
-    public Task<IReadOnlyList<string>> GetDscModuleResourcesAsync(IDSCModule dscModule)
+    public Task<IReadOnlySet<string>> GetDscModuleResourcesAsync(IDSCModule dscModule)
     {
-        // For powershell gallery, modules, we extract resource names from tags
+        // For powershell gallery modules, we extract resource names from tags
         var dscResourcePrefix = "PSDscResource_";
         var tags = dscModule.Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var resourceTags = tags.Where(tag => tag.StartsWith(dscResourcePrefix, StringComparison.Ordinal));
         var resourceNames = resourceTags.Select(r => r[dscResourcePrefix.Length..]).ToList();
-        return Task.FromResult<IReadOnlyList<string>>(resourceNames);
+        return Task.FromResult<IReadOnlySet<string>>(resourceNames.ToHashSet());
     }
 
     /// <summary>
@@ -118,7 +126,7 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         return builder.ToString();
     }
 
-    public async Task GetDSCModuleResourcePropertiesAsync(IDSCModule dscModule, CancellationToken ct = default)
+    public async Task<List<DSCResourceClassDefinition>> GetDSCModuleResourcesDefinitionAsync(IDSCModule dscModule, CancellationToken ct = default)
     {
         var identity = new PackageIdentity(dscModule.Id, dscModule.Version);
         var tempPath = Path.GetTempPath();
@@ -130,13 +138,13 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         if (result.Status == DownloadResourceResultStatus.NotFound)
         {
             _logger.LogError($"Module {dscModule.Id} version {dscModule.Version} not found in PowerShell Gallery.");
-            return;
+            return [];
         }
 
         if (result.Status == DownloadResourceResultStatus.Cancelled)
         {
             _logger.LogWarning($"Download of module {dscModule.Id} version {dscModule.Version} was cancelled.");
-            return;
+            return [];
         }
 
         if (result.Status == DownloadResourceResultStatus.AvailableWithoutStream)
@@ -146,36 +154,44 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
 
         using var zip = new ZipArchive(result.PackageStream, ZipArchiveMode.Read, leaveOpen: true);
         var psm1Entries = zip.Entries.Where(e => e.FullName.EndsWith(".psm1", StringComparison.OrdinalIgnoreCase));
+
+        // TODO Add support for MOF entries as well handling CIM-based resources
+        List<DSCResourceClassDefinition> resources = [];
         foreach (var psm1Entry in psm1Entries)
         {
             using var sr = new StreamReader(psm1Entry.Open(), Encoding.UTF8);
             var psm1Content = await sr.ReadToEndAsync(ct);
-            ParseClass(psm1Content);
+            resources.AddRange(ParseClasses(psm1Content));
         }
+
+        return resources;
     }
 
-    private List<DSCResource> ParseClass(string psm1Content)
+    private List<DSCResourceClassDefinition> ParseClasses(string psm1Content)
     {
         var ast = Parser.ParseInput(psm1Content, out var tokens, out var errors);
 
         var classAsts = ast
             .FindAll(
                 x => x is TypeDefinitionAst t
-                && t.Attributes.Any(a => a.TypeName.Name.Equals("DscResource", StringComparison.Ordinal)),
+                && t.Attributes.Any(a => a.TypeName.Name.Equals("DscResource", StringComparison.OrdinalIgnoreCase)),
                 true);
 
+        List<DSCResourceClassDefinition> resources = [];
         foreach (var cls in classAsts.Cast<TypeDefinitionAst>())
         {
-            Console.WriteLine($"Resource: {cls.Name}");
-            foreach (var prop in cls.Members.OfType<PropertyMemberAst>())
+            var properties = cls.Members
+                .OfType<PropertyMemberAst>()
+                .Where(p => p.Attributes.Any(a => a.TypeName.Name.Equals("DscProperty", StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            resources.Add(new DSCResourceClassDefinition()
             {
-                var isDscProperty = prop.Attributes.Any(a => a.TypeName.Name.Equals("DscProperty", StringComparison.Ordinal));
-                if (isDscProperty)
-                {
-                    Console.WriteLine($"  {prop.Name} : {prop.PropertyType?.TypeName?.FullName ?? "object"}");
-                }
-            }
-            Console.WriteLine();
+                ClassAst = cls,
+                Properties = properties,
+            });
         }
+
+        return resources;
     }
 }

@@ -151,7 +151,11 @@ public partial class App : Application
         base.OnLaunched(args);
 
         var result = await GetService<IDSCExplorer>().GetDSCModulesAsync();
-        result.ToString();
+        var dev = result.First(r => r.Id == "Microsoft.Windows.Developer");
+        await dev.LoadDSCResourcesAsync();
+        await dev.LoadDSCResourcesDefinitionAsync();
+        var res = dev.GetResourceDetails("WindowsExplorer");
+        res.ToString();
 
         await App.GetService<IActivationService>().ActivateAsync(AppInstance.GetCurrent().GetActivatedEventArgs().Data);
 

@@ -9,7 +9,5 @@ public sealed class DSCProperty
 
     public string Type { get; set; }
 
-    public bool IsKey { get; set; }
-
-    public bool IsRequired { get; set; }
+    public string Syntax { get; set; }
 }
