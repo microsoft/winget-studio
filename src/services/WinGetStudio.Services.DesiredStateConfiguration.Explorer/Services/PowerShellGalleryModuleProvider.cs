@@ -30,6 +30,9 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     private const string BaseUrl = "https://www.powershellgallery.com/api/v2";
     private const string SearchUrl = $"{BaseUrl}/Search()";
 
+    // Page size for each API request. Maximum allowed is 100.
+    private const int PageSize = 100;
+
     private readonly ILogger<PowerShellGalleryModuleProvider> _logger;
     private readonly SourceRepository _repository;
 
@@ -37,8 +40,6 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     private readonly XNamespace _atom;
     private readonly XNamespace _metadata;
     private readonly XNamespace _dataServices;
-
-    private string DSCModulesUrl => BuildDscModuleUrl();
 
     public PowerShellGalleryModuleProvider(ILogger<PowerShellGalleryModuleProvider> logger)
     {
@@ -61,31 +62,34 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         {
             try
             {
-                var response = await client.GetAsync(DSCModulesUrl);
-                if (response.IsSuccessStatusCode)
+                var hasMore = true;
+                var skip = 0;
+                while (hasMore)
                 {
-                    var result = await response.Content.ReadAsStringAsync();
-                    var xml = XDocument.Parse(result);
-                    var entries = xml.Descendants(_atom + "entry");
-                    foreach (var entry in entries)
+                    var url = BuildDscModuleUrl(skip);
+                    var response = await client.GetAsync(url);
+                    var batchSize = 0;
+                    if (response.IsSuccessStatusCode)
                     {
-                        var props = entry.Descendants(_metadata + "properties").FirstOrDefault();
-                        var id = props.Element(_dataServices + "Id").Value;
-                        var version = props.Element(_dataServices + "Version").Value;
-                        var tags = props.Element(_dataServices + "Tags").Value;
-                        modules.Add(new(this)
-                        {
-                            Id = id,
-                            DscVersion = 2,
-                            Version = NuGetVersion.Parse(version),
-                            Tags = tags,
-                            IsLocal = false,
-                        });
+                        var result = await response.Content.ReadAsStringAsync();
+                        var xml = XDocument.Parse(result);
+                        var batch = ParseResponse(xml);
+                        batchSize = batch.Count;
+                        modules.AddRange(batch);
                     }
-                }
-                else
-                {
-                    _logger.LogError($"Failed to retrieve DSC modules from PowerShell Gallery. Status code: {response.StatusCode}");
+                    else
+                    {
+                        _logger.LogError($"Failed to retrieve DSC modules from PowerShell Gallery. Status code: {response.StatusCode}");
+                    }
+
+                    if (batchSize < PageSize)
+                    {
+                        hasMore = false;
+                    }
+                    else
+                    {
+                        skip += PageSize;
+                    }
                 }
             }
             catch (Exception e)
@@ -108,16 +112,41 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         return Task.FromResult<IReadOnlySet<string>>(resourceNames.ToHashSet());
     }
 
+    private List<DSCModule> ParseResponse(XDocument document)
+    {
+        List<DSCModule> modules = [];
+        var entries = document.Descendants(_atom + "entry");
+        foreach (var entry in entries)
+        {
+            var props = entry.Descendants(_metadata + "properties").FirstOrDefault();
+            var id = props.Element(_dataServices + "Id").Value;
+            var version = props.Element(_dataServices + "Version").Value;
+            var tags = props.Element(_dataServices + "Tags").Value;
+            modules.Add(new(this)
+            {
+                Id = id,
+                DscVersion = 2,
+                Version = NuGetVersion.Parse(version),
+                Tags = tags,
+                IsLocal = false,
+            });
+        }
+
+        return modules;
+    }
+
     /// <summary>
     /// Constructs a URL for querying DSC (Desired State Configuration) modules
     /// from the specified base URL.
     /// </summary>
     /// <returns>A string representing the URL for retrieving DSC modules.</returns>
-    private string BuildDscModuleUrl()
+    private string BuildDscModuleUrl(int skip)
     {
         var builder = new UriBuilder(SearchUrl);
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["includePrerelease"] = "true";
+        query["$skip"] = $"{skip}";
+        query["$top"] = $"{PageSize}";
         query["$filter"] = string.Join(" and ", [
             "IsAbsoluteLatestVersion eq true",
             "substringof('dscresource', tolower(Tags))",

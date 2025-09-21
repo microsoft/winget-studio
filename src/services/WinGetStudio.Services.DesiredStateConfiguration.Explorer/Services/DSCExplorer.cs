@@ -20,7 +20,7 @@ internal sealed class DSCExplorer : IDSCExplorer
 
     public async Task<IReadOnlyList<IDSCModule>> GetDSCModulesAsync()
     {
-        List<IDSCModule> allModules = new();
+        List<IDSCModule> allModules = [];
         foreach (var provider in _moduleProviders)
         {
             var modules = await provider.GetDSCModulesAsync();
