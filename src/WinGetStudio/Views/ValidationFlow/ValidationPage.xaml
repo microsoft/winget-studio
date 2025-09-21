@@ -11,6 +11,7 @@
     xmlns:selectors="using:WinGetStudio.Selectors"
     xmlns:usercontrols="using:WinGetStudio.Views.Controls"
     xmlns:localConverters="using:WinGetStudio.Converters"
+    xmlns:models="using:WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models"
     Loaded="Page_Loaded"
     mc:Ignorable="d">
 
@@ -38,13 +39,72 @@
                 </Hyperlink>
             </TextBlock>
             <TextBlock x:Uid="ValidationPage_ModuleInputHeader" Margin="0,0,0,8"/>
-            <TextBox x:Uid="ValidationPage_ModuleInput" Width="Auto" Text="{Binding Title, Mode=TwoWay}"/>
-            <AutoSuggestBox
-                x:Name="FullResourceName"
-                TextChanged="AutoSuggestBox_TextChanged"
-                SuggestionChosen="AutoSuggestBox_SuggestionChosen"/>
-            <Button Click="Button_Click">Explore</Button>
-            <TextBlock x:Name="Details"/>
+            <TextBox x:Uid="ValidationPage_ModuleInput" Width="Auto" Text="{Binding Title, Mode=TwoWay}">
+            </TextBox>
+            <Grid ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <AutoSuggestBox x:Name="FullResourceName"
+                                Grid.Column="0"
+                                TextChanged="AutoSuggestBox_TextChanged"
+                                SuggestionChosen="AutoSuggestBox_SuggestionChosen">
+                    <AutoSuggestBox.QueryIcon>
+                        <SymbolIcon Symbol="Find"/>
+                    </AutoSuggestBox.QueryIcon>
+                </AutoSuggestBox>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                    <Button Click="Button_Click" x:Name="PropertiesInfo">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE946;" />
+                            <TextBlock>Properties</TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Button>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xEBD3;" />
+                            <TextBlock>Download</TextBlock>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+            <TeachingTip x:Name="PropertiesInfoTeachingTip" Target="{x:Bind PropertiesInfo}">
+                <ListView ItemsSource="{x:Bind _properties}" Width="500" MinWidth="500">
+                    <ListView.Header>
+                        <Grid Padding="16,12" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Name" />
+                            <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Type" />
+                            <TextBlock Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Syntax" />
+                        </Grid>
+                    </ListView.Header>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:DSCProperty">
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{x:Bind Name}" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind Type}" />
+                                <TextBlock Grid.Column="2" Text="{x:Bind Syntax}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource DefaultListViewItemStyle}"
+                               TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+            </TeachingTip>
         </StackPanel>
 
         <Rectangle Height="1"

@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Common" />
+    <PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.DataTable" />
     <PackageReference Include="CommunityToolkit.Labs.WinUI.Shimmer" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="CommunityToolkit.WinUI.Behaviors" />

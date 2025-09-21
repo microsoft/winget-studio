@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
@@ -14,6 +16,7 @@ namespace WinGetStudio.Views;
 public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
 {
     private readonly List<string> _fullResourceNames = [];
+    private readonly ObservableCollection<DSCProperty> _properties = new();
     private IReadOnlyList<IDSCModule> _dscModules = [];
 
     public ValidationViewModel ViewModel { get; }
@@ -83,9 +86,13 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
 
     private async void Button_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        var ui = App.GetService<IUIFeedbackService>();
+        ui.ShowTaskProgress();
+
         var fullResourceName = FullResourceName.Text.Trim();
         if (!string.IsNullOrWhiteSpace(fullResourceName))
         {
+            ui.ShowOutcomeNotification(null, $"Loading DSC properties for {fullResourceName}...", NotificationMessageSeverity.Informational);
             var parts = fullResourceName.Split('/');
             if (parts.Length == 2)
             {
@@ -96,14 +103,18 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
                 {
                     await module.LoadDSCResourcesDefinitionAsync();
                     var resource = module?.GetResourceDetails(resourceName);
-                    Details.Text = string.Empty;
+                    _properties.Clear();
                     foreach (var prop in resource?.Properties.Values.ToList() ?? [])
                     {
-                        var syntaxOneLiner = prop.Syntax.Replace("\n", " ").Replace("\r", " ");
-                        Details.Text += $"{prop.Name} | {prop.Type} | Syntax: {syntaxOneLiner}\n";
+                        _properties.Add(prop);
                     }
+
+                    PropertiesInfoTeachingTip.IsOpen = true;
                 }
             }
         }
+
+        ui.HideTaskProgress();
+        ui.ShowOutcomeNotification(null, "DSC properties loaded", NotificationMessageSeverity.Success);
     }
 }

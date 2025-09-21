@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Testing -->
+    <PackageVersion Include="CommunityToolkit.Labs.WinUI.Controls.DataTable" Version="0.1.230830" />
     <PackageVersion Include="CommunityToolkit.WinUI.Behaviors" Version="8.2.250402" />
     <PackageVersion Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.250402" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
