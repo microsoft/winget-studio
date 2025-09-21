@@ -13,8 +13,14 @@ public static class ServiceExtensions
     public static IServiceCollection AddDSCExplorer(this IServiceCollection services)
     {
         services.AddCore();
-        services.AddSingleton<IModuleProvider, PowerShellGalleryModuleProvider>();
         services.AddSingleton<IDSCExplorer, DSCExplorer>();
+
+        // Module providers
+        services.AddSingleton<IModuleProvider, PowerShellGalleryModuleProvider>();
+
+        // Module analyzers
+        services.AddSingleton<IModuleAnalyzer, ModuleClassAnalyzer>();
+        services.AddSingleton<IModuleAnalyzer, ModuleMOFAnalyzer>();
 
         return services;
     }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using NuGet.Versioning;
 
@@ -11,11 +10,11 @@ public interface IDSCModule
 {
     IModuleProvider Provider { get; }
 
-    string Name { get; }
+    string Id { get; }
 
     NuGetVersion Version { get; }
 
     string Tags { get; }
 
-    Task<IReadOnlyList<string>> GetDSCResourcesAsync();
+    Task LoadDSCResourcesAsync();
 }

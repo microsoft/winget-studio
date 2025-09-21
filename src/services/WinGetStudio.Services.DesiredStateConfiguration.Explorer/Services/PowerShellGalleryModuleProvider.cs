@@ -3,12 +3,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Management.Automation.Language;
 using System.Net.Http;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
+using NuGet.Common;
+using NuGet.Packaging.Core;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
@@ -17,9 +26,11 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
 {
     // Base URL for PowerShell Gallery search API
-    private const string BaseUrl = "https://www.powershellgallery.com/api/v2/Search()";
+    private const string BaseUrl = "https://www.powershellgallery.com/api/v2";
+    private const string SearchUrl = $"{BaseUrl}/Search()";
 
     private readonly ILogger<PowerShellGalleryModuleProvider> _logger;
+    private readonly SourceRepository _repository;
 
     // Namespaces for parsing the PowerShell Gallery XML response
     private readonly XNamespace _atom;
@@ -31,6 +42,8 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     public PowerShellGalleryModuleProvider(ILogger<PowerShellGalleryModuleProvider> logger)
     {
         _logger = logger;
+
+        _repository = Repository.Factory.GetCoreV3("https://www.powershellgallery.com/api/v2");
         _atom = XNamespace.Get("http://www.w3.org/2005/Atom");
         _metadata = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices/metadata");
         _dataServices = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices");
@@ -79,9 +92,10 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     /// <inheritdoc/>
     public Task<IReadOnlyList<string>> GetDscModuleResourcesAsync(IDSCModule dscModule)
     {
+        // For powershell gallery, modules, we extract resource names from tags
         var dscResourcePrefix = "PSDscResource_";
         var tags = dscModule.Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var resourceTags = tags.Where(tag => tag.StartsWith(dscResourcePrefix, StringComparison.InvariantCulture));
+        var resourceTags = tags.Where(tag => tag.StartsWith(dscResourcePrefix, StringComparison.Ordinal));
         var resourceNames = resourceTags.Select(r => r[dscResourcePrefix.Length..]).ToList();
         return Task.FromResult<IReadOnlyList<string>>(resourceNames);
     }
@@ -93,7 +107,7 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     /// <returns>A string representing the URL for retrieving DSC modules.</returns>
     private string BuildDscModuleUrl()
     {
-        var builder = new UriBuilder(BaseUrl);
+        var builder = new UriBuilder(SearchUrl);
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["includePrerelease"] = "true";
         query["$filter"] = string.Join(" and ", [
@@ -102,5 +116,66 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         ]);
         builder.Query = query.ToString();
         return builder.ToString();
+    }
+
+    public async Task GetDSCModuleResourcePropertiesAsync(IDSCModule dscModule, CancellationToken ct = default)
+    {
+        var identity = new PackageIdentity(dscModule.Id, dscModule.Version);
+        var tempPath = Path.GetTempPath();
+        using var cache = new SourceCacheContext();
+        var downloadContext = new PackageDownloadContext(cache);
+
+        var download = await _repository.GetResourceAsync<DownloadResource>(ct);
+        using var result = await download.GetDownloadResourceResultAsync(identity, downloadContext, tempPath, NullLogger.Instance, ct);
+        if (result.Status == DownloadResourceResultStatus.NotFound)
+        {
+            _logger.LogError($"Module {dscModule.Id} version {dscModule.Version} not found in PowerShell Gallery.");
+            return;
+        }
+
+        if (result.Status == DownloadResourceResultStatus.Cancelled)
+        {
+            _logger.LogWarning($"Download of module {dscModule.Id} version {dscModule.Version} was cancelled.");
+            return;
+        }
+
+        if (result.Status == DownloadResourceResultStatus.AvailableWithoutStream)
+        {
+            _logger.LogDebug($"Module {dscModule.Id} version {dscModule.Version} is available without stream.");
+        }
+
+        using var zip = new ZipArchive(result.PackageStream, ZipArchiveMode.Read, leaveOpen: true);
+        var psm1Entries = zip.Entries.Where(e => e.FullName.EndsWith(".psm1", StringComparison.OrdinalIgnoreCase));
+        foreach (var psm1Entry in psm1Entries)
+        {
+            using var sr = new StreamReader(psm1Entry.Open(), Encoding.UTF8);
+            var psm1Content = await sr.ReadToEndAsync(ct);
+            ParseClass(psm1Content);
+        }
+    }
+
+    private List<DSCResource> ParseClass(string psm1Content)
+    {
+        var ast = Parser.ParseInput(psm1Content, out var tokens, out var errors);
+
+        var classAsts = ast
+            .FindAll(
+                x => x is TypeDefinitionAst t
+                && t.Attributes.Any(a => a.TypeName.Name.Equals("DscResource", StringComparison.Ordinal)),
+                true);
+
+        foreach (var cls in classAsts.Cast<TypeDefinitionAst>())
+        {
+            Console.WriteLine($"Resource: {cls.Name}");
+            foreach (var prop in cls.Members.OfType<PropertyMemberAst>())
+            {
+                var isDscProperty = prop.Attributes.Any(a => a.TypeName.Name.Equals("DscProperty", StringComparison.Ordinal));
+                if (isDscProperty)
+                {
+                    Console.WriteLine($"  {prop.Name} : {prop.PropertyType?.TypeName?.FullName ?? "object"}");
+                }
+            }
+            Console.WriteLine();
+        }
     }
 }

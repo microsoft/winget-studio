@@ -13,6 +13,7 @@ using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WingetStudio.Services.Localization.Extensions;
@@ -148,6 +149,9 @@ public partial class App : Application
     protected async override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
+
+        var result = await GetService<IDSCExplorer>().GetDSCModulesAsync();
+        result.ToString();
 
         await App.GetService<IActivationService>().ActivateAsync(AppInstance.GetCurrent().GetActivatedEventArgs().Data);
 

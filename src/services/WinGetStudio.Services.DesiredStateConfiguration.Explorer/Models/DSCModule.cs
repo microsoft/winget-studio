@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using NuGet.Versioning;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -10,24 +11,36 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 internal sealed class DSCModule : IDSCModule
 {
-    public string Name { get; }
+    public bool IsLocal { get; set; }
 
-    public NuGetVersion Version { get; }
+    public int DscVersion { get; set; }
 
-    public string Tags { get; }
+    public string Id { get; set; }
 
-    public IModuleProvider Provider { get; }
+    public NuGetVersion Version { get; set; }
 
-    public DSCModule(IModuleProvider provider, string name, string version, string tags)
+    public string Tags { get; set; }
+
+    public IModuleProvider Provider { get; set; }
+
+    public Dictionary<string, DSCResource> Resources { get; set; } = [];
+
+    public DSCModule(IModuleProvider provider, string id, string version, string tags)
     {
         Provider = provider;
-        Name = name;
+        Id = id;
         Version = new NuGetVersion(version);
         Tags = tags;
     }
 
-    public Task<IReadOnlyList<string>> GetDSCResourcesAsync()
+    public async Task LoadDSCResourcesAsync()
     {
-        return Provider.GetDscModuleResourcesAsync(this);
+        var resourceNames = await Provider.GetDscModuleResourcesAsync(this);
+        Resources = resourceNames.ToDictionary(name => name, name => new DSCResource() { Name = name });
+    }
+
+    public async Task LoadDSCResourcePropertiesAsync()
+    {
+        await Task.CompletedTask;
     }
 }
