@@ -11,6 +11,7 @@
     xmlns:selectors="using:WinGetStudio.Selectors"
     xmlns:usercontrols="using:WinGetStudio.Views.Controls"
     xmlns:localConverters="using:WinGetStudio.Converters"
+    Loaded="Page_Loaded"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -38,6 +39,12 @@
             </TextBlock>
             <TextBlock x:Uid="ValidationPage_ModuleInputHeader" Margin="0,0,0,8"/>
             <TextBox x:Uid="ValidationPage_ModuleInput" Width="Auto" Text="{Binding Title, Mode=TwoWay}"/>
+            <AutoSuggestBox
+                x:Name="FullResourceName"
+                TextChanged="AutoSuggestBox_TextChanged"
+                SuggestionChosen="AutoSuggestBox_SuggestionChosen"/>
+            <Button Click="Button_Click">Explore</Button>
+            <TextBlock x:Name="Details"/>
         </StackPanel>
 
         <Rectangle Height="1"

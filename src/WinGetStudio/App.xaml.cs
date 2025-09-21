@@ -13,7 +13,6 @@ using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WingetStudio.Services.Localization.Extensions;
