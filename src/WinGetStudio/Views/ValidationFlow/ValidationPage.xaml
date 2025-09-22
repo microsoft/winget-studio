@@ -69,42 +69,6 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            <TeachingTip x:Name="PropertiesInfoTeachingTip" Target="{x:Bind PropertiesInfo}">
-                <ListView ItemsSource="{x:Bind _properties}" Width="500" MinWidth="500">
-                    <ListView.Header>
-                        <Grid Padding="16,12" ColumnSpacing="16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100" />
-                                <ColumnDefinition Width="100" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Name" />
-                            <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Type" />
-                            <TextBlock Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Syntax" />
-                        </Grid>
-                    </ListView.Header>
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="models:DSCProperty">
-                            <Grid ColumnSpacing="16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100" />
-                                    <ColumnDefinition Width="100" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="{x:Bind Name}" />
-                                <TextBlock Grid.Column="1" Text="{x:Bind Type}" />
-                                <TextBlock Grid.Column="2" Text="{x:Bind Syntax}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                    <ListView.ItemContainerStyle>
-                        <Style BasedOn="{StaticResource DefaultListViewItemStyle}"
-                               TargetType="ListViewItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                </ListView>
-            </TeachingTip>
         </StackPanel>
 
         <Rectangle Height="1"

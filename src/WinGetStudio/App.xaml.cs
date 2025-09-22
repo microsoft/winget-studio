@@ -126,6 +126,7 @@ public partial class App : Application
                 services.AddTransient<ApplyFileViewModel>();
                 services.AddTransient<NotificationPaneViewModel>();
                 services.AddTransient<LoadingProgressBarViewModel>();
+                services.AddTransient<ResourceExplorerViewModel>();
 
                 // Factories
                 services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));

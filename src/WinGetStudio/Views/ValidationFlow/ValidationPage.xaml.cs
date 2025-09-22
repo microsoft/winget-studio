@@ -1,22 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.ObjectModel;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
+using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.Views;
 
 public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
 {
     private readonly List<string> _fullResourceNames = [];
-    private readonly ObservableCollection<DSCProperty> _properties = new();
     private IReadOnlyList<IDSCModule> _dscModules = [];
 
     public ValidationViewModel ViewModel { get; }
@@ -103,18 +102,23 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
                 {
                     await module.LoadDSCResourcesDefinitionAsync();
                     var resource = module?.GetResourceDetails(resourceName);
-                    _properties.Clear();
-                    foreach (var prop in resource?.Properties.Values.ToList() ?? [])
-                    {
-                        _properties.Add(prop);
-                    }
 
-                    PropertiesInfoTeachingTip.IsOpen = true;
+                    if (resource != null)
+                    {
+                        ResourceExplorer dialog = new(resource)
+                        {
+                            XamlRoot = XamlRoot,
+                        };
+
+                        ui.HideTaskProgress();
+                        await dialog.ShowAsync();
+                        return;
+                    }
                 }
             }
         }
 
         ui.HideTaskProgress();
-        ui.ShowOutcomeNotification(null, "DSC properties loaded", NotificationMessageSeverity.Success);
+        ui.ShowOutcomeNotification(null, "Unable to load DSC properties", NotificationMessageSeverity.Error);
     }
 }
