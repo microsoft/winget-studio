@@ -14,103 +14,109 @@
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMinWidth">800</x:Double>
         <x:Double x:Key="ContentDialogMaxWidth">800</x:Double>
+        <Thickness x:Key="ContentDialogPadding">0</Thickness>
     </ContentDialog.Resources>
 
-    <Grid RowSpacing="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Grid>
+        <Button Style="{ThemeResource AlternateCloseButtonStyle}" Click="OnClose" />
 
-        <!-- Presentation Mode Selector -->
-        <controls:Segmented SelectedIndex="0" x:Name="SegmentedModeView" HorizontalAlignment="Stretch">
-            <controls:SegmentedItem x:Name="SummaryView"
-                                    Content="Summary"
-                                    AutomationProperties.PositionInSet="1"
-                                    AutomationProperties.SizeOfSet="2" />
-            <controls:SegmentedItem x:Name="CodeView"
-                                    Content="Code"
-                                    AutomationProperties.PositionInSet="2"
-                                    AutomationProperties.SizeOfSet="2" />
-        </controls:Segmented>
-        
-        <!-- Summary view -->
-        <ListView Grid.Row="1"
-                  ItemsSource="{x:Bind ViewModel.Properties, Mode=OneWay}"
-                  SelectionMode="None"
-                  Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}"> 
-            <ListView.Header>
-                <Grid Padding="16,12" ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200" />
-                        <ColumnDefinition Width="150" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Name" />
-                    <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Type" />
-                    <TextBlock Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Syntax" />
-                </Grid>
-            </ListView.Header>
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:DSCProperty">
-                    <Grid ColumnSpacing="16">
+        <Grid RowSpacing="8" Padding="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+
+            <!-- Presentation Mode Selector -->
+            <controls:Segmented SelectedIndex="0" x:Name="SegmentedModeView" HorizontalAlignment="Center">
+                <controls:SegmentedItem x:Name="SummaryView"
+                                        Content="Summary"
+                                        AutomationProperties.PositionInSet="1"
+                                        AutomationProperties.SizeOfSet="2" />
+                <controls:SegmentedItem x:Name="CodeView"
+                                        Content="Code"
+                                        AutomationProperties.PositionInSet="2"
+                                        AutomationProperties.SizeOfSet="2" />
+            </controls:Segmented>
+            
+            <!-- Summary view -->
+            <ListView Grid.Row="1"
+                      ItemsSource="{x:Bind ViewModel.Properties, Mode=OneWay}"
+                      SelectionMode="None"
+                      Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}"> 
+                <ListView.Header>
+                    <Grid Padding="16,12" ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200" />
                             <ColumnDefinition Width="150" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{x:Bind Name}"
-                                       VerticalAlignment="Center"
-                                       IsTextSelectionEnabled="True"
-                                       Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                       TextTrimming="CharacterEllipsis" />
-                            <localControls:CopyButton Grid.Column="1"
-                                                      Background="Transparent"
-                                                      BorderThickness="0"
-                                                      Tag="{x:Bind Name}"
-                                                      Click="CopyPropertyName"
-                                                      Content="&#xE8C8;"/>
-                        </Grid>
-                        <TextBlock Grid.Column="1"
-                                   Text="{x:Bind Type}"
-                                   IsTextSelectionEnabled="True"
-                                   VerticalAlignment="Center"
-                                   TextTrimming="CharacterEllipsis" />
-                        <ScrollViewer Grid.Column="2"
-                                      HorizontalScrollBarVisibility="Auto"
-                                      HorizontalScrollMode="Auto">
-                            <TextBlock IsTextSelectionEnabled="True"
-                                       VerticalAlignment="Center"
-                                       FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                                       Text="{x:Bind GetOneLinerSyntax()}"/>
-                        </ScrollViewer>
-                            
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Name" />
+                        <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Type" />
+                        <TextBlock Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Syntax" />
                     </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-            <ListView.ItemContainerStyle>
-                <Style BasedOn="{StaticResource DefaultListViewItemStyle}"
-                       TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListView.ItemContainerStyle>
-        </ListView>
+                </ListView.Header>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:DSCProperty">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{x:Bind Name}"
+                                           VerticalAlignment="Center"
+                                           IsTextSelectionEnabled="True"
+                                           Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <localControls:CopyButton Grid.Column="1"
+                                                          Background="Transparent"
+                                                          BorderThickness="0"
+                                                          Tag="{x:Bind Name}"
+                                                          Click="OnCopyPropertyName"
+                                                          Content="&#xE8C8;"/>
+                            </Grid>
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Bind Type}"
+                                       IsTextSelectionEnabled="True"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                            <ScrollViewer Grid.Column="2"
+                                          HorizontalScrollBarVisibility="Auto"
+                                          HorizontalScrollMode="Auto">
+                                <TextBlock IsTextSelectionEnabled="True"
+                                           VerticalAlignment="Center"
+                                           FontFamily="{StaticResource CascadiaMonoFontFamily}"
+                                           Text="{x:Bind GetOneLinerSyntax()}"/>
+                            </ScrollViewer>
+                                
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <ListView.ItemContainerStyle>
+                    <Style BasedOn="{StaticResource DefaultListViewItemStyle}"
+                           TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
 
-        <!-- Code view -->
-        <ScrollViewer Grid.Row="1"
-                      Visibility="{x:Bind CodeView.IsSelected, Mode=OneWay}"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Auto">
-            <TextBlock FontSize="{ThemeResource CaptionTextBlockFontSize}"
-                       Padding="15"
-                       IsTextSelectionEnabled="True"
-                       FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                       Text="{x:Bind ViewModel.ResourceSyntax, Mode=OneWay}" />
-        </ScrollViewer>
+            <!-- Code view -->
+            <ScrollViewer Grid.Row="1"
+                          Visibility="{x:Bind CodeView.IsSelected, Mode=OneWay}"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto">
+                <TextBlock FontSize="{ThemeResource CaptionTextBlockFontSize}"
+                           Padding="15"
+                           IsTextSelectionEnabled="True"
+                           FontFamily="{StaticResource CascadiaMonoFontFamily}"
+                           Text="{x:Bind ViewModel.ResourceSyntax, Mode=OneWay}" />
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </ContentDialog>

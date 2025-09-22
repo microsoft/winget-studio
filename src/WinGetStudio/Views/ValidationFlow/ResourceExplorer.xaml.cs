@@ -20,7 +20,7 @@ public sealed partial class ResourceExplorer : ContentDialog
         InitializeComponent();
     }
 
-    private void CopyPropertyName(object sender, RoutedEventArgs e)
+    private void OnCopyPropertyName(object sender, RoutedEventArgs e)
     {
         if (sender is Button button && button.Tag is string propertyName)
         {
@@ -28,5 +28,10 @@ public sealed partial class ResourceExplorer : ContentDialog
             dataPackage.SetText(propertyName);
             Clipboard.SetContent(dataPackage);
         }
+    }
+
+    private void OnClose(object sender, RoutedEventArgs e)
+    {
+        Hide();
     }
 }
