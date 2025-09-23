@@ -30,17 +30,17 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-
-        <StackPanel Spacing="8" HorizontalAlignment="Left" Grid.Row="0">
-            <TextBlock Margin="0,0,0,8">
+        <StackPanel Spacing="8" Grid.Row="0">
+            <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left">
                 <Run x:Uid="ValidationPage_Description"/>
                 <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/powershell/dsc/concepts/resources/operations?view=dsc-3.0">
                     <Run x:Uid="ValidationPage_LearnMoreLink"/>
                 </Hyperlink>
             </TextBlock>
             <TextBlock x:Uid="ValidationPage_ModuleInputHeader" Margin="0,0,0,8"/>
-            <TextBox x:Uid="ValidationPage_ModuleInput" Width="Auto" Text="{Binding Title, Mode=TwoWay}">
-            </TextBox>
+
+            <TextBox x:Uid="ValidationPage_ModuleInput" Width="Auto" Text="{Binding Title, Mode=TwoWay}"/>
+
             <Grid ColumnSpacing="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -49,10 +49,48 @@
                 <AutoSuggestBox x:Name="FullResourceName"
                                 Grid.Column="0"
                                 TextChanged="AutoSuggestBox_TextChanged"
+                                IsSuggestionListOpen="True"
                                 SuggestionChosen="AutoSuggestBox_SuggestionChosen">
                     <AutoSuggestBox.QueryIcon>
                         <SymbolIcon Symbol="Find"/>
                     </AutoSuggestBox.QueryIcon>
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock VerticalAlignment="Center"
+                                               Style="{ThemeResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="v1.2.3"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                    <Grid BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
+                                          BorderThickness="1"
+                                          Padding="1"
+                                          CornerRadius="{ThemeResource ControlCornerRadius}">
+                                        <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Style="{ThemeResource CaptionTextBlockStyle}">Remote</TextBlock>
+                                    </Grid>
+                                    <Grid BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                                          BorderThickness="1"
+                                          Padding="1"
+                                          CornerRadius="{ThemeResource ControlCornerRadius}">
+                                        <TextBlock Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
                 </AutoSuggestBox>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
                     <Button Click="Button_Click" x:Name="PropertiesInfo">
