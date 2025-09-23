@@ -4,7 +4,6 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
-using Polly.Extensions.Http;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.Core.Helpers;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -19,6 +18,8 @@ public static class ServiceExtensions
         services.AddCore();
         services.AddSingleton<IDSCExplorer, DSCExplorer>();
         services.AddSingleton<INuGetV2Parser, NuGetV2Parser>();
+        services.AddSingleton<INuGetDownloader, NuGetDownloader>();
+        services.AddSingleton<IPsm1Parser, Psm1Parser>();
 
         // HTTP clients
         services

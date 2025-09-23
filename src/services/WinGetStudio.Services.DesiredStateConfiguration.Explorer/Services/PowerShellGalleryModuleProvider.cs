@@ -7,15 +7,10 @@ using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Management.Automation.Language;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Extensions.Logging;
-using NuGet.Common;
-using NuGet.Packaging.Core;
-using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -32,14 +27,22 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     private const int PageSize = 100;
 
     private readonly INuGetV2Client _client;
+    private readonly INuGetDownloader _downloader;
+    private readonly IPsm1Parser _psm1Parser;
     private readonly ILogger<PowerShellGalleryModuleProvider> _logger;
     private readonly SourceRepository _repository;
 
-    public PowerShellGalleryModuleProvider(ILogger<PowerShellGalleryModuleProvider> logger, INuGetV2Client client)
+    public PowerShellGalleryModuleProvider(
+        ILogger<PowerShellGalleryModuleProvider> logger,
+        INuGetV2Client client,
+        INuGetDownloader downloader,
+        IPsm1Parser psm1Parser)
     {
         _logger = logger;
-        _repository = Repository.Factory.GetCoreV3(BaseUrl);
         _client = client;
+        _downloader = downloader;
+        _psm1Parser = psm1Parser;
+        _repository = _downloader.CreateRepositoryCoreV2(BaseUrl);
     }
 
     /// <inheritdoc/>
@@ -96,6 +99,28 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         return Task.FromResult<IReadOnlySet<string>>(resourceNames.ToHashSet());
     }
 
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<DSCResourceClassDefinition>> GetResourceDefinitionsAsync(DSCModule dscModule)
+    {
+        List<DSCResourceClassDefinition> resources = [];
+        var openResult = await _downloader.OpenPackageAsync(_repository, dscModule.Id, NuGetVersion.Parse(dscModule.Version));
+        if (openResult.Success)
+        {
+            using var stream = openResult.PackageStream;
+            using var zip = new ZipArchive(stream, ZipArchiveMode.Read);
+            var psm1Entries = zip.Entries.Where(e => e.FullName.EndsWith(".psm1", StringComparison.OrdinalIgnoreCase));
+            foreach (var psm1Entry in psm1Entries)
+            {
+                using var sr = new StreamReader(psm1Entry.Open(), Encoding.UTF8);
+                var psm1Content = await sr.ReadToEndAsync();
+                var dscResources = _psm1Parser.ParseDscResources(psm1Content);
+                resources.AddRange(dscResources);
+            }
+        }
+
+        return resources;
+    }
+
     /// <summary>
     /// Builds the query part of the URL for searching DSC modules.
     /// </summary>
@@ -112,75 +137,5 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
             "substringof('dscresource', tolower(Tags))",
         ]);
         return query;
-    }
-
-    /// <inheritdoc/>
-    public async Task<IReadOnlyList<DSCResourceClassDefinition>> GetResourceDefinitionsAsync(DSCModule dscModule)
-    {
-        var identity = new PackageIdentity(dscModule.Id, NuGetVersion.Parse(dscModule.Version));
-        var tempPath = Path.GetTempPath();
-        using var cache = new SourceCacheContext();
-        var downloadContext = new PackageDownloadContext(cache);
-
-        var download = await _repository.GetResourceAsync<DownloadResource>();
-        using var result = await download.GetDownloadResourceResultAsync(identity, downloadContext, tempPath, NullLogger.Instance, CancellationToken.None);
-        if (result.Status == DownloadResourceResultStatus.NotFound)
-        {
-            _logger.LogError($"Module {dscModule.Id} version {dscModule.Version} not found in PowerShell Gallery.");
-            return [];
-        }
-
-        if (result.Status == DownloadResourceResultStatus.Cancelled)
-        {
-            _logger.LogWarning($"Download of module {dscModule.Id} version {dscModule.Version} was cancelled.");
-            return [];
-        }
-
-        if (result.Status == DownloadResourceResultStatus.AvailableWithoutStream)
-        {
-            _logger.LogDebug($"Module {dscModule.Id} version {dscModule.Version} is available without stream.");
-        }
-
-        using var zip = new ZipArchive(result.PackageStream, ZipArchiveMode.Read, leaveOpen: true);
-        var psm1Entries = zip.Entries.Where(e => e.FullName.EndsWith(".psm1", StringComparison.OrdinalIgnoreCase));
-
-        // TODO Add support for MOF entries as well handling CIM-based resources
-        List<DSCResourceClassDefinition> resources = [];
-        foreach (var psm1Entry in psm1Entries)
-        {
-            using var sr = new StreamReader(psm1Entry.Open(), Encoding.UTF8);
-            var psm1Content = await sr.ReadToEndAsync();
-            resources.AddRange(ParseClasses(psm1Content));
-        }
-
-        return resources;
-    }
-
-    private List<DSCResourceClassDefinition> ParseClasses(string psm1Content)
-    {
-        var ast = Parser.ParseInput(psm1Content, out var tokens, out var errors);
-
-        var classAsts = ast
-            .FindAll(
-                x => x is TypeDefinitionAst t
-                && t.Attributes.Any(a => a.TypeName.Name.Equals("DscResource", StringComparison.OrdinalIgnoreCase)),
-                true);
-
-        List<DSCResourceClassDefinition> resources = [];
-        foreach (var cls in classAsts.Cast<TypeDefinitionAst>())
-        {
-            var properties = cls.Members
-                .OfType<PropertyMemberAst>()
-                .Where(p => p.Attributes.Any(a => a.TypeName.Name.Equals("DscProperty", StringComparison.OrdinalIgnoreCase)))
-                .ToList();
-
-            resources.Add(new DSCResourceClassDefinition()
-            {
-                ClassAst = cls,
-                Properties = properties,
-            });
-        }
-
-        return resources;
     }
 }
