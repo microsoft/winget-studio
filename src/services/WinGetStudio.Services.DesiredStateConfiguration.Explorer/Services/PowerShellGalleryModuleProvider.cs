@@ -20,15 +20,13 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 
 internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
 {
-    // Base URL for PowerShell Gallery search API
     private const string BaseUrl = "https://www.powershellgallery.com/api/v2";
-
-    // Page size for each API request. Maximum allowed is 100.
     private const int PageSize = 100;
+    private const string DscResourceTagPrefix = "PSDscResource_";
 
     private readonly INuGetV2Client _client;
     private readonly INuGetDownloader _downloader;
-    private readonly IPsm1Parser _psm1Parser;
+    private readonly IEnumerable<IDSCResourceParser> _parsers;
     private readonly ILogger<PowerShellGalleryModuleProvider> _logger;
     private readonly SourceRepository _repository;
 
@@ -36,12 +34,12 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         ILogger<PowerShellGalleryModuleProvider> logger,
         INuGetV2Client client,
         INuGetDownloader downloader,
-        IPsm1Parser psm1Parser)
+        IEnumerable<IDSCResourceParser> parsers)
     {
         _logger = logger;
         _client = client;
         _downloader = downloader;
-        _psm1Parser = psm1Parser;
+        _parsers = parsers;
         _repository = _downloader.CreateRepositoryCoreV2(BaseUrl);
     }
 
@@ -51,16 +49,14 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     /// <inheritdoc />
     public async Task<DSCModuleCatalog> GetModuleCatalogAsync()
     {
-        var catalog = new DSCModuleCatalog() { Name = Name };
+        var catalog = new DSCModuleCatalog { Name = Name };
         try
         {
-            List<DSCModule> modules = [];
-            var hasMore = true;
-            var skip = 0;
-            while (hasMore)
+            var modules = new List<DSCModule>();
+            for (var skip = 0; ; skip += PageSize)
             {
-                var batch = await _client.SearchAsync(BaseUrl, BuildQuery(skip));
-                var batchSize = batch.Count;
+                var query = BuildQuery(skip);
+                var batch = await _client.SearchAsync(BaseUrl, query);
                 modules.AddRange(batch.Select(metadata => new DSCModule(this)
                 {
                     Id = metadata.Id,
@@ -68,13 +64,9 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
                     Tags = metadata.Tags,
                 }));
 
-                if (batchSize < PageSize)
+                if (batch.Count < PageSize)
                 {
-                    hasMore = false;
-                }
-                else
-                {
-                    skip += PageSize;
+                    break;
                 }
             }
 
@@ -92,10 +84,9 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     public Task<IReadOnlySet<string>> GetResourceNamesAsync(DSCModule dscModule)
     {
         // For powershell gallery modules, we extract resource names from tags
-        var dscResourcePrefix = "PSDscResource_";
         var tags = dscModule.Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var resourceTags = tags.Where(tag => tag.StartsWith(dscResourcePrefix, StringComparison.Ordinal));
-        var resourceNames = resourceTags.Select(r => r[dscResourcePrefix.Length..]).ToList();
+        var resourceTags = tags.Where(tag => tag.StartsWith(DscResourceTagPrefix, StringComparison.Ordinal));
+        var resourceNames = resourceTags.Select(r => r[DscResourceTagPrefix.Length..]).ToList();
         return Task.FromResult<IReadOnlySet<string>>(resourceNames.ToHashSet());
     }
 
@@ -108,13 +99,18 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         {
             using var stream = openResult.PackageStream;
             using var zip = new ZipArchive(stream, ZipArchiveMode.Read);
-            var psm1Entries = zip.Entries.Where(e => e.FullName.EndsWith(".psm1", StringComparison.OrdinalIgnoreCase));
-            foreach (var psm1Entry in psm1Entries)
+            foreach (var entry in zip.Entries)
             {
-                using var sr = new StreamReader(psm1Entry.Open(), Encoding.UTF8);
-                var psm1Content = await sr.ReadToEndAsync();
-                var dscResources = _psm1Parser.ParseDscResources(psm1Content);
-                resources.AddRange(dscResources);
+                var parsers = _parsers.Where(p => p.CanParse(entry.FullName));
+                if (parsers.Any())
+                {
+                    using var sr = new StreamReader(entry.Open(), Encoding.UTF8);
+                    foreach (var parser in parsers)
+                    {
+                        var parsedResources = await parser.ParseAsync(sr);
+                        resources.AddRange(parsedResources);
+                    }
+                }
             }
         }
 

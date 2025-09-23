@@ -19,7 +19,6 @@ public static class ServiceExtensions
         services.AddSingleton<IDSCExplorer, DSCExplorer>();
         services.AddSingleton<INuGetV2Parser, NuGetV2Parser>();
         services.AddSingleton<INuGetDownloader, NuGetDownloader>();
-        services.AddSingleton<IPsm1Parser, Psm1Parser>();
 
         // HTTP clients
         services
@@ -37,6 +36,9 @@ public static class ServiceExtensions
 
         // Module providers
         services.AddSingleton<IModuleProvider, PowerShellGalleryModuleProvider>();
+
+        // Parsers
+        services.AddSingleton<IDSCResourceParser, Psm1Parser>();
 
         return services;
     }

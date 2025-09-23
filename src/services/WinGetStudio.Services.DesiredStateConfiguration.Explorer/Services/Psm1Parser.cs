@@ -3,21 +3,27 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management.Automation.Language;
+using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 
-public sealed partial class Psm1Parser : IPsm1Parser
+public sealed partial class Psm1Parser : IDSCResourceParser
 {
     private const string DscResourceAttributeName = "DscResource";
     private const string DscPropertyAttributeName = "DscProperty";
 
     /// <inheritdoc/>
-    public IReadOnlyList<DSCResourceClassDefinition> ParseDscResources(string psm1Content)
+    public bool CanParse(string fileName) => fileName.EndsWith(".psm1", StringComparison.OrdinalIgnoreCase);
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<DSCResourceClassDefinition>> ParseAsync(StreamReader streamReader)
     {
+        var psm1Content = await streamReader.ReadToEndAsync();
         var ast = Parser.ParseInput(psm1Content, out var tokens, out var errors);
         return [.. ast
             .FindAll(IsDscResource, searchNestedScriptBlocks: true)
