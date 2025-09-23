@@ -3,16 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Management.Automation.Language;
-using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 using NuGet.Common;
 using NuGet.Packaging.Core;
@@ -28,81 +27,66 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
 {
     // Base URL for PowerShell Gallery search API
     private const string BaseUrl = "https://www.powershellgallery.com/api/v2";
-    private const string SearchUrl = $"{BaseUrl}/Search()";
 
     // Page size for each API request. Maximum allowed is 100.
     private const int PageSize = 100;
 
+    private readonly INuGetV2Client _client;
     private readonly ILogger<PowerShellGalleryModuleProvider> _logger;
     private readonly SourceRepository _repository;
 
-    // Namespaces for parsing the PowerShell Gallery XML response
-    private readonly XNamespace _atom;
-    private readonly XNamespace _metadata;
-    private readonly XNamespace _dataServices;
-
-    public PowerShellGalleryModuleProvider(ILogger<PowerShellGalleryModuleProvider> logger)
+    public PowerShellGalleryModuleProvider(ILogger<PowerShellGalleryModuleProvider> logger, INuGetV2Client client)
     {
         _logger = logger;
-
-        _repository = Repository.Factory.GetCoreV3("https://www.powershellgallery.com/api/v2");
-        _atom = XNamespace.Get("http://www.w3.org/2005/Atom");
-        _metadata = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices/metadata");
-        _dataServices = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices");
+        _repository = Repository.Factory.GetCoreV3(BaseUrl);
+        _client = client;
     }
 
     /// <inheritdoc/>
-    public string Name => "PowerShell Gallery";
+    public string Name => "PSGallery";
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<IDSCModule>> GetDSCModulesAsync()
+    public async Task<DSCModuleCatalog> GetModuleCatalogAsync()
     {
-        List<DSCModule> modules = [];
-        using (var client = new HttpClient())
+        var catalog = new DSCModuleCatalog() { Name = Name };
+        try
         {
-            try
+            List<DSCModule> modules = [];
+            var hasMore = true;
+            var skip = 0;
+            while (hasMore)
             {
-                var hasMore = true;
-                var skip = 0;
-                while (hasMore)
+                var batch = await _client.SearchAsync(BaseUrl, BuildQuery(skip));
+                var batchSize = batch.Count;
+                modules.AddRange(batch.Select(metadata => new DSCModule(this)
                 {
-                    var url = BuildDscModuleUrl(skip);
-                    var response = await client.GetAsync(url);
-                    var batchSize = 0;
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var result = await response.Content.ReadAsStringAsync();
-                        var xml = XDocument.Parse(result);
-                        var batch = ParseResponse(xml);
-                        batchSize = batch.Count;
-                        modules.AddRange(batch);
-                    }
-                    else
-                    {
-                        _logger.LogError($"Failed to retrieve DSC modules from PowerShell Gallery. Status code: {response.StatusCode}");
-                    }
+                    Id = metadata.Id,
+                    Version = metadata.Version,
+                    Tags = metadata.Tags,
+                }));
 
-                    if (batchSize < PageSize)
-                    {
-                        hasMore = false;
-                    }
-                    else
-                    {
-                        skip += PageSize;
-                    }
+                if (batchSize < PageSize)
+                {
+                    hasMore = false;
+                }
+                else
+                {
+                    skip += PageSize;
                 }
             }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Exception occurred while retrieving DSC modules from PowerShell Gallery.");
-            }
+
+            catalog.Modules = modules;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Exception occurred while retrieving DSC modules from PowerShell Gallery.");
         }
 
-        return modules;
+        return catalog;
     }
 
     /// <inheritdoc/>
-    public Task<IReadOnlySet<string>> GetDscModuleResourcesAsync(IDSCModule dscModule)
+    public Task<IReadOnlySet<string>> GetResourceNamesAsync(DSCModule dscModule)
     {
         // For powershell gallery modules, we extract resource names from tags
         var dscResourcePrefix = "PSDscResource_";
@@ -112,37 +96,13 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         return Task.FromResult<IReadOnlySet<string>>(resourceNames.ToHashSet());
     }
 
-    private List<DSCModule> ParseResponse(XDocument document)
-    {
-        List<DSCModule> modules = [];
-        var entries = document.Descendants(_atom + "entry");
-        foreach (var entry in entries)
-        {
-            var props = entry.Descendants(_metadata + "properties").FirstOrDefault();
-            var id = props.Element(_dataServices + "Id").Value;
-            var version = props.Element(_dataServices + "Version").Value;
-            var tags = props.Element(_dataServices + "Tags").Value;
-            modules.Add(new(this)
-            {
-                Id = id,
-                DscVersion = 2,
-                Version = NuGetVersion.Parse(version),
-                Tags = tags,
-                IsLocal = false,
-            });
-        }
-
-        return modules;
-    }
-
     /// <summary>
-    /// Constructs a URL for querying DSC (Desired State Configuration) modules
-    /// from the specified base URL.
+    /// Builds the query part of the URL for searching DSC modules.
     /// </summary>
-    /// <returns>A string representing the URL for retrieving DSC modules.</returns>
-    private string BuildDscModuleUrl(int skip)
+    /// <param name="skip">Number of records to skip for pagination.</param>
+    /// <returns>The query part of the URL.</returns>
+    private NameValueCollection BuildQuery(int skip)
     {
-        var builder = new UriBuilder(SearchUrl);
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["includePrerelease"] = "true";
         query["$skip"] = $"{skip}";
@@ -151,19 +111,19 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
             "IsAbsoluteLatestVersion eq true",
             "substringof('dscresource', tolower(Tags))",
         ]);
-        builder.Query = query.ToString();
-        return builder.ToString();
+        return query;
     }
 
-    public async Task<List<DSCResourceClassDefinition>> GetDSCModuleResourcesDefinitionAsync(IDSCModule dscModule, CancellationToken ct = default)
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<DSCResourceClassDefinition>> GetResourceDefinitionsAsync(DSCModule dscModule)
     {
-        var identity = new PackageIdentity(dscModule.Id, dscModule.Version);
+        var identity = new PackageIdentity(dscModule.Id, NuGetVersion.Parse(dscModule.Version));
         var tempPath = Path.GetTempPath();
         using var cache = new SourceCacheContext();
         var downloadContext = new PackageDownloadContext(cache);
 
-        var download = await _repository.GetResourceAsync<DownloadResource>(ct);
-        using var result = await download.GetDownloadResourceResultAsync(identity, downloadContext, tempPath, NullLogger.Instance, ct);
+        var download = await _repository.GetResourceAsync<DownloadResource>();
+        using var result = await download.GetDownloadResourceResultAsync(identity, downloadContext, tempPath, NullLogger.Instance, CancellationToken.None);
         if (result.Status == DownloadResourceResultStatus.NotFound)
         {
             _logger.LogError($"Module {dscModule.Id} version {dscModule.Version} not found in PowerShell Gallery.");
@@ -189,7 +149,7 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         foreach (var psm1Entry in psm1Entries)
         {
             using var sr = new StreamReader(psm1Entry.Open(), Encoding.UTF8);
-            var psm1Content = await sr.ReadToEndAsync(ct);
+            var psm1Content = await sr.ReadToEndAsync();
             resources.AddRange(ParseClasses(psm1Content));
         }
 

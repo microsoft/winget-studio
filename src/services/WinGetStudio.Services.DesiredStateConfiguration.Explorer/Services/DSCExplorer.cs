@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 
@@ -18,23 +19,23 @@ internal sealed class DSCExplorer : IDSCExplorer
         _moduleProviders = moduleProviders;
     }
 
-    public async Task<IReadOnlyList<IDSCModule>> GetDSCModulesAsync()
-    {
-        List<IDSCModule> allModules = [];
-        foreach (var provider in _moduleProviders)
-        {
-            var modules = await provider.GetDSCModulesAsync();
-            allModules.AddRange(modules);
-        }
-
-        return allModules;
-    }
-
-    public Task<IReadOnlyList<IDSCModule>> GetDSCModulesAsync<TModuleProvider>()
+    /// <inheritdoc/>
+    public async Task<DSCModuleCatalog> GetCatalogAsync<TModuleProvider>()
         where TModuleProvider : IModuleProvider
     {
-        Debug.Assert(_moduleProviders.OfType<TModuleProvider>().Any(), $"No module providers of type {typeof(TModuleProvider).FullName} are registered.");
-        var provider = _moduleProviders.OfType<TModuleProvider>().FirstOrDefault();
-        return provider.GetDSCModulesAsync();
+        Debug.Assert(_moduleProviders.OfType<TModuleProvider>().Any(), $"No module provider of type {typeof(TModuleProvider).FullName} is registered.");
+        return await _moduleProviders.OfType<TModuleProvider>().First().GetModuleCatalogAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<DSCModuleCatalog>> GetCatalogsAsync()
+    {
+        List<DSCModuleCatalog> catalogs = [];
+        foreach (var provider in _moduleProviders)
+        {
+            catalogs.Add(await provider.GetModuleCatalogAsync());
+        }
+
+        return catalogs;
     }
 }

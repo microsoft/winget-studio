@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
@@ -19,20 +18,19 @@ public interface IModuleProvider
     /// Gets the list of DSC modules from the provider.
     /// </summary>
     /// <returns>A list of DSC module identities.</returns>
-    Task<IReadOnlyList<IDSCModule>> GetDSCModulesAsync();
+    Task<DSCModuleCatalog> GetModuleCatalogAsync();
 
     /// <summary>
-    /// Gets the list of DSC resources for a specific module.
+    /// Gets the list of resource names in a specific DSC module.
     /// </summary>
-    /// <param name="dscModule">The DSC module to get resources for.</param>
-    /// <returns>A list of DSC resource names.</returns>
-    Task<IReadOnlySet<string>> GetDscModuleResourcesAsync(IDSCModule dscModule);
+    /// <param name="dscModule">The DSC module to get resource names for.</param>
+    /// <returns>A set of resource names.</returns>
+    Task<IReadOnlySet<string>> GetResourceNamesAsync(DSCModule dscModule);
 
     /// <summary>
-    /// Gets the resource definitions for a specific DSC module.
+    /// Gets the definition of all resources in a specific DSC module.
     /// </summary>
-    /// <param name="dscModule">The DSC module to get resource properties for.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="dscModule">The DSC module to get definitions for.</param>
     /// <returns>The list of DSC resource definitions.</returns>
-    Task<List<DSCResourceClassDefinition>> GetDSCModuleResourcesDefinitionAsync(IDSCModule dscModule, CancellationToken ct = default);
+    Task<IReadOnlyList<DSCResourceClassDefinition>> GetResourceDefinitionsAsync(DSCModule dscModule);
 }

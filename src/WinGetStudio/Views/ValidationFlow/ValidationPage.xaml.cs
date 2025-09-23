@@ -1,22 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
-using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.Views;
 
 public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
 {
     private readonly List<string> _fullResourceNames = [];
-    private IReadOnlyList<IDSCModule> _dscModules = [];
+    private IReadOnlyList<DSCModule> _dscModules = [];
 
     public ValidationViewModel ViewModel { get; }
 
@@ -69,11 +68,11 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
         ui.ShowOutcomeNotification(null, "Loading DSC modules...", NotificationMessageSeverity.Informational);
 
         var dscExplorer = App.GetService<IDSCExplorer>();
-        _dscModules = await dscExplorer.GetDSCModulesAsync();
+        var catalogs = await dscExplorer.GetCatalogsAsync();
+        _dscModules = catalogs.SelectMany(cat => cat.Modules).ToList();
         foreach (var module in _dscModules)
         {
-            await module.LoadDSCResourcesAsync();
-            foreach (var resource in module.Resources)
+            foreach (var resource in await module.GetResourceNamesAsync())
             {
                 _fullResourceNames.Add($"{module.Id}/{resource}");
             }
@@ -100,8 +99,7 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
                 var module = _dscModules.FirstOrDefault(m => m.Id.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
                 if (module != null)
                 {
-                    await module.LoadDSCResourcesDefinitionAsync();
-                    var resource = module?.GetResourceDetails(resourceName);
+                    var resource = await module.GetResourceAsync(resourceName);
 
                     if (resource != null)
                     {

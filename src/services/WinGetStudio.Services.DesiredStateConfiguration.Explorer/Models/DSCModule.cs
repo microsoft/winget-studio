@@ -1,70 +1,113 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Versioning;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
-internal sealed class DSCModule : IDSCModule
+public sealed partial class DSCModule : IDisposable
 {
-    private Dictionary<string, DSCResourceClassDefinition> _resourceDefinitions = [];
+    private readonly IModuleProvider _provider;
+    private readonly Lazy<Task<IReadOnlySet<string>>> _resourceNamesLazy;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
+    private Dictionary<string, DSCResourceClassDefinition> _resourceDefinitions;
+    private bool _disposedValue;
 
-    public bool IsLocal { get; set; }
-
-    public int DscVersion { get; set; }
-
+    /// <summary>
+    /// Gets or sets the module identifier.
+    /// </summary>
     public string Id { get; set; }
 
-    public NuGetVersion Version { get; set; }
+    /// <summary>
+    /// Gets or sets the module version.
+    /// </summary>
+    public string Version { get; set; }
 
+    /// <summary>
+    /// Gets or sets the module description.
+    /// </summary>
     public string Tags { get; set; }
-
-    public IModuleProvider Provider { get; set; }
-
-    public IReadOnlySet<string> Resources { get; set; }
 
     public DSCModule(IModuleProvider provider)
     {
-        Provider = provider;
-        Resources = new HashSet<string>();
+        _provider = provider;
+        _resourceNamesLazy = new(() => provider.GetResourceNamesAsync(this));
     }
 
-    public async Task LoadDSCResourcesAsync()
+    /// <summary>
+    /// Gets the list of dsc resource names in the module.
+    /// </summary>
+    /// <returns>A set of resource names.</returns>
+    public async Task<IReadOnlySet<string>> GetResourceNamesAsync()
     {
-        Resources = await Provider.GetDscModuleResourcesAsync(this);
+        return await _resourceNamesLazy.Value;
     }
 
-    public async Task LoadDSCResourcesDefinitionAsync()
+    /// <summary>
+    /// Gets the details of a specific DSC resource in the module.
+    /// </summary>
+    /// <param name="resourceName">The name of the DSC resource.</param>
+    /// <returns>The DSC resource details.</returns>
+    public async Task<DSCResource> GetResourceAsync(string resourceName)
     {
-        if (_resourceDefinitions.Count == 0)
+        await _semaphore.WaitAsync();
+
+        try
         {
-            var definitions = await Provider.GetDSCModuleResourcesDefinitionAsync(this);
-            _resourceDefinitions = definitions.ToDictionary(def => def.ClassName, def => def);
-        }
-    }
+            // First time we need to load all resource definitions
+            if (_resourceDefinitions == null)
+            {
+                var definitions = await _provider.GetResourceDefinitionsAsync(this);
+                _resourceDefinitions = definitions.ToDictionary(def => def.ClassName, def => def);
+            }
 
-    public DSCResource GetResourceDetails(string resourceName)
-    {
-        var resource = new DSCResource() { Name = resourceName };
-        if (_resourceDefinitions.TryGetValue(resourceName, out var resourceDefinition))
-        {
-            var properties = resourceDefinition.Properties.ToDictionary(
-                prop => prop.Name,
-                prop => new DSCProperty
+            // Now try to get the specific resource
+            var resource = new DSCResource() { Name = resourceName };
+            if (_resourceDefinitions.TryGetValue(resourceName, out var resourceDefinition))
+            {
+                // Map properties
+                var properties = resourceDefinition.Properties.Select(prop => new DSCProperty
                 {
                     Name = prop.Name,
                     Type = prop.PropertyType.TypeName.Name,
                     Syntax = prop.Extent.Text,
                 });
 
-            resource.Syntax = resourceDefinition.ClassAst.Extent.Text;
-            resource.Properties = properties;
-        }
+                resource.Syntax = resourceDefinition.ClassAst.Extent.Text;
+                resource.Properties = [..properties];
+            }
 
-        return resource;
+            return resource;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _semaphore.Dispose();
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Extensions.Http;
 using WinGetStudio.Services.Core.Extensions;
+using WinGetStudio.Services.Core.Helpers;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 
@@ -14,6 +18,21 @@ public static class ServiceExtensions
     {
         services.AddCore();
         services.AddSingleton<IDSCExplorer, DSCExplorer>();
+        services.AddSingleton<INuGetV2Parser, NuGetV2Parser>();
+
+        // HTTP clients
+        services
+            .AddHttpClient<INuGetV2Client, NuGetV2Client>(http =>
+            {
+                http.Timeout = TimeSpan.FromSeconds(30);
+                http.DefaultRequestHeaders.UserAgent.ParseAdd($"WinGetStudio/{RuntimeHelper.GetAppVersion()}");
+            })
+            .AddStandardResilienceHandler(options =>
+            {
+                options.Retry.MaxRetryAttempts = 3;
+                options.Retry.Delay = TimeSpan.FromMilliseconds(250);
+                options.Retry.BackoffType = DelayBackoffType.Exponential;
+            });
 
         // Module providers
         services.AddSingleton<IModuleProvider, PowerShellGalleryModuleProvider>();

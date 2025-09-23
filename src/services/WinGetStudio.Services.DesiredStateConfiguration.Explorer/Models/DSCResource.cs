@@ -11,5 +11,5 @@ public sealed class DSCResource
 
     public string Syntax { get; set; }
 
-    public Dictionary<string, DSCProperty> Properties { get; set; } = [];
+    public IReadOnlyList<DSCProperty> Properties { get; set; } = [];
 }
