@@ -44,7 +44,7 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     }
 
     /// <inheritdoc/>
-    public string Name => "PSGallery";
+    public string Name => nameof(DSCModuleSource.PSGallery);
 
     /// <inheritdoc />
     public async Task<DSCModuleCatalog> GetModuleCatalogAsync()
@@ -52,17 +52,28 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         var catalog = new DSCModuleCatalog { Name = Name };
         try
         {
-            var modules = new List<DSCModule>();
+            var dscModules = new Dictionary<string, DSCModule>();
             for (var skip = 0; ; skip += PageSize)
             {
                 var query = BuildQuery(skip);
                 var batch = await _client.SearchAsync(BaseUrl, query);
-                modules.AddRange(batch.Select(metadata => new DSCModule(this)
+                foreach (var moduleMetadata in batch)
                 {
-                    Id = metadata.Id,
-                    Version = metadata.Version,
-                    Tags = metadata.Tags,
-                }));
+                    // Prepare the module entry
+                    var dscModule = new DSCModule
+                    {
+                        Id = moduleMetadata.Id,
+                        Version = moduleMetadata.Version,
+                        Source = DSCModuleSource.PSGallery,
+                    };
+
+                    // Populate resources
+                    var resourceNames = GetResourceNamesFromTags(moduleMetadata);
+                    dscModule.PopulateResources(resourceNames);
+
+                    // Add the module to the list
+                    dscModules.TryAdd(dscModule.Id, dscModule);
+                }
 
                 if (batch.Count < PageSize)
                 {
@@ -70,7 +81,7 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
                 }
             }
 
-            catalog.Modules = modules;
+            catalog.Modules = dscModules;
         }
         catch (Exception e)
         {
@@ -81,17 +92,26 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     }
 
     /// <inheritdoc/>
-    public Task<IReadOnlySet<string>> GetResourceNamesAsync(DSCModule dscModule)
+    public async Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule)
     {
-        // For powershell gallery modules, we extract resource names from tags
-        var tags = dscModule.Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var resourceTags = tags.Where(tag => tag.StartsWith(DscResourceTagPrefix, StringComparison.Ordinal));
-        var resourceNames = resourceTags.Select(r => r[DscResourceTagPrefix.Length..]).ToList();
-        return Task.FromResult<IReadOnlySet<string>>(resourceNames.ToHashSet());
+        // We already populated resource names from tags during catalog
+        // retrieval so we can skip this step.
+        await Task.CompletedTask;
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<DSCResourceClassDefinition>> GetResourceDefinitionsAsync(DSCModule dscModule)
+    public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
+    {
+        var definitions = await GetResourceDefinitionsAsync(dscModule);
+        dscModule.PopulateResources(definitions);
+    }
+
+    /// <summary>
+    /// Gets the resource definitions for the specified DSC module.
+    /// </summary>
+    /// <param name="dscModule">The DSC module to get resource definitions for.</param>
+    /// <returns>>A list of DSC resource definitions.</returns>
+    private async Task<IReadOnlyList<DSCResourceClassDefinition>> GetResourceDefinitionsAsync(DSCModule dscModule)
     {
         List<DSCResourceClassDefinition> resources = [];
         var openResult = await _downloader.OpenPackageAsync(_repository, dscModule.Id, NuGetVersion.Parse(dscModule.Version));
@@ -133,5 +153,18 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
             "substringof('dscresource', tolower(Tags))",
         ]);
         return query;
+    }
+
+    /// <summary>
+    /// Gets resource names from module tags.
+    /// </summary>
+    /// <param name="moduleMetadata">The module metadata.</param>
+    /// <returns>A set of resource names.</returns>
+    private HashSet<string> GetResourceNamesFromTags(ModuleMetadata moduleMetadata)
+    {
+        // For powershell gallery modules, we extract resource names from tags
+        var tags = moduleMetadata.Tags.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var resourceTags = tags.Where(tag => tag.StartsWith(DscResourceTagPrefix, StringComparison.Ordinal));
+        return [.. resourceTags.Select(r => r[DscResourceTagPrefix.Length..])];
     }
 }

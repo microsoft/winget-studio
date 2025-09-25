@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -20,22 +21,56 @@ internal sealed class DSCExplorer : IDSCExplorer
     }
 
     /// <inheritdoc/>
-    public async Task<DSCModuleCatalog> GetCatalogAsync<TModuleProvider>()
-        where TModuleProvider : IModuleProvider
-    {
-        Debug.Assert(_moduleProviders.OfType<TModuleProvider>().Any(), $"No module provider of type {typeof(TModuleProvider).FullName} is registered.");
-        return await _moduleProviders.OfType<TModuleProvider>().First().GetModuleCatalogAsync();
-    }
-
-    /// <inheritdoc/>
-    public async Task<IReadOnlyList<DSCModuleCatalog>> GetCatalogsAsync()
+    public async Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync()
     {
         List<DSCModuleCatalog> catalogs = [];
         foreach (var provider in _moduleProviders)
         {
-            catalogs.Add(await provider.GetModuleCatalogAsync());
+            var providerCatalog = await provider.GetModuleCatalogAsync();
+            catalogs.Add(providerCatalog);
         }
 
         return catalogs;
+    }
+
+    /// <inheritdoc/>
+    public async Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule)
+    {
+        var provider = GetModuleProvider(dscModule);
+        await provider.EnrichModuleWithResourceNamesAsync(dscModule);
+    }
+
+    /// <inheritdoc/>
+    public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
+    {
+        var provider = GetModuleProvider(dscModule);
+        await provider.EnrichModuleWithResourceNamesAsync(dscModule);
+    }
+
+    /// <summary>
+    /// Gets the appropriate module provider for the specified DSC module.
+    /// </summary>
+    /// <param name="dscModule">The DSC module to get the provider for.</param>
+    /// <returns>>The module provider instance.</returns>
+    private IModuleProvider GetModuleProvider(DSCModule dscModule)
+    {
+        if (dscModule.Source == DSCModuleSource.PSGallery)
+        {
+            return GetModuleProvider<PowerShellGalleryModuleProvider>();
+        }
+
+        throw new InvalidOperationException($"No module provider is registered for source {dscModule.Source}.");
+    }
+
+    /// <summary>
+    /// Gets the module provider of the specified type.
+    /// </summary>
+    /// <typeparam name="TModuleProvider">The type of the module provider to get.</typeparam>
+    /// <returns>The module provider instance.</returns>
+    private IModuleProvider GetModuleProvider<TModuleProvider>()
+        where TModuleProvider : IModuleProvider
+    {
+        Debug.Assert(_moduleProviders.OfType<TModuleProvider>().Any(), $"No module provider of type {typeof(TModuleProvider).FullName} is registered.");
+        return _moduleProviders.OfType<TModuleProvider>().First();
     }
 }

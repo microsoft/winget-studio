@@ -68,13 +68,14 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
         ui.ShowOutcomeNotification(null, "Loading DSC modules...", NotificationMessageSeverity.Informational);
 
         var dscExplorer = App.GetService<IDSCExplorer>();
-        var catalogs = await dscExplorer.GetCatalogsAsync();
-        _dscModules = catalogs.SelectMany(cat => cat.Modules).ToList();
+        var catalogs = await dscExplorer.GetModuleCatalogsAsync();
+        _dscModules = [..catalogs.SelectMany(c => c.Modules.Values)];
         foreach (var module in _dscModules)
         {
-            foreach (var resource in await module.GetResourceNamesAsync())
+            await dscExplorer.EnrichModuleWithResourceNamesAsync(module);
+            foreach (var resource in module.Resources.Values)
             {
-                _fullResourceNames.Add($"{module.Id}/{resource}");
+                _fullResourceNames.Add($"{module.Id}/{resource.Name}");
             }
         }
 
@@ -84,6 +85,7 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
 
     private async void Button_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        var dscExplorer = App.GetService<IDSCExplorer>();
         var ui = App.GetService<IUIFeedbackService>();
         ui.ShowTaskProgress();
 
@@ -99,9 +101,8 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
                 var module = _dscModules.FirstOrDefault(m => m.Id.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
                 if (module != null)
                 {
-                    var resource = await module.GetResourceAsync(resourceName);
-
-                    if (resource != null)
+                    await dscExplorer.EnrichModuleWithResourceDetailsAsync(module);
+                    if (module.Resources.TryGetValue(resourceName, out var resource))
                     {
                         ResourceExplorer dialog = new(resource)
                         {

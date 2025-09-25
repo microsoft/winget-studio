@@ -21,16 +21,14 @@ public interface IModuleProvider
     Task<DSCModuleCatalog> GetModuleCatalogAsync();
 
     /// <summary>
-    /// Gets the list of resource names in a specific DSC module.
+    /// Enriches the given DSC module with resource names.
     /// </summary>
-    /// <param name="dscModule">The DSC module to get resource names for.</param>
-    /// <returns>A set of resource names.</returns>
-    Task<IReadOnlySet<string>> GetResourceNamesAsync(DSCModule dscModule);
+    /// <param name="dscModule">The DSC module to enrich.</param>
+    Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule);
 
     /// <summary>
-    /// Gets the definition of all resources in a specific DSC module.
+    /// Enriches the given DSC module with detailed resource information.
     /// </summary>
-    /// <param name="dscModule">The DSC module to get definitions for.</param>
-    /// <returns>The list of DSC resource definitions.</returns>
-    Task<IReadOnlyList<DSCResourceClassDefinition>> GetResourceDefinitionsAsync(DSCModule dscModule);
+    /// <param name="dscModule">The DSC module to enrich.</param>
+    Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
 }

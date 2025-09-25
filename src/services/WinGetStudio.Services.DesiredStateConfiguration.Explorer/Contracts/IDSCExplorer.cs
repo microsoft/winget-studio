@@ -10,16 +10,14 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 public interface IDSCExplorer
 {
     /// <summary>
-    /// Gets the list of DSC modules from all registered module providers.
+    /// Gets the list of DSC module catalogs from all registered providers.
     /// </summary>
-    /// <returns>>A list of DSC module catalogs.</returns>
-    Task<IReadOnlyList<DSCModuleCatalog>> GetCatalogsAsync();
+    /// <returns>A list of DSC module catalogs.</returns>
+    Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync();
 
-    /// <summary>
-    /// Gets a DSC module catalog from a specific module provider.
-    /// </summary>
-    /// <typeparam name="TModuleProvider">The type of the module provider.</typeparam>
-    /// <returns>>The DSC module catalog.</returns>
-    Task<DSCModuleCatalog> GetCatalogAsync<TModuleProvider>()
-        where TModuleProvider : IModuleProvider;
+    /// <inheritdoc cref="IModuleProvider.EnrichModuleWithResourceNamesAsync(DSCModule)"/>
+    Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule);
+
+    /// <inheritdoc cref="IModuleProvider.EnrichModuleWithResourceDetailsAsync(DSCModule)"/>
+    Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
 }
