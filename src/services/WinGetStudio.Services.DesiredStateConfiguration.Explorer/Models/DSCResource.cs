@@ -15,6 +15,12 @@ public sealed class DSCResource
     public string Name { get; set; }
 
     /// <summary>
+    /// Gets or sets the version of the resource.
+    /// </summary>
+    [JsonPropertyName("version")]
+    public string Version { get; set; }
+
+    /// <summary>
     /// Gets or sets the syntax of the resource.
     /// </summary>
     [JsonPropertyName("syntax")]

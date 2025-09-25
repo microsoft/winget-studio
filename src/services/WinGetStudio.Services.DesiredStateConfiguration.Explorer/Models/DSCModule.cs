@@ -34,10 +34,16 @@ public sealed partial class DSCModule
     public Dictionary<string, DSCResource> Resources { get; set; } = [];
 
     /// <summary>
+    /// Gets or sets a value indicating whether this module is virtual.
+    /// </summary>
+    [JsonPropertyName("resources")]
+    public bool IsVirtual { get; set; }
+
+    /// <summary>
     /// Populates the resources dictionary with the given resource names.
     /// </summary>
     /// <param name="resourceNames">The resource names.</param>
-    public void PopulateResources(IEnumerable<string> resourceNames)
+    public void PopulateResources(IEnumerable<string> resourceNames, DSCVersion dscVersion)
     {
         lock (Resources)
         {
@@ -46,7 +52,7 @@ public sealed partial class DSCModule
             {
                 if (!Resources.ContainsKey(name))
                 {
-                    Resources[name] = new DSCResource() { Name = name };
+                    Resources[name] = CreateResource(name, dscVersion);
                 }
             }
         }
@@ -56,7 +62,7 @@ public sealed partial class DSCModule
     /// Populates the resources dictionary with the given resource class definitions.
     /// </summary>
     /// <param name="classDefinitions">The resource class definitions.</param>
-    public void PopulateResources(IEnumerable<DSCResourceClassDefinition> classDefinitions)
+    public void PopulateResources(IEnumerable<DSCResourceClassDefinition> classDefinitions, DSCVersion dscVersion)
     {
         lock (Resources)
         {
@@ -65,7 +71,7 @@ public sealed partial class DSCModule
             {
                 if (!Resources.TryGetValue(definition.ClassName, out var resource))
                 {
-                    resource = new DSCResource() { Name = definition.ClassName };
+                    resource = CreateResource(definition.ClassName, dscVersion);
                     Resources[definition.ClassName] = resource;
                 }
 
@@ -78,5 +84,20 @@ public sealed partial class DSCModule
             })];
             }
         }
+    }
+
+    /// <summary>
+    /// Creates a new DSCResource.
+    /// </summary>
+    /// <param name="name">The name of the resource.</param>
+    /// <returns>The created DSCResource.</returns>
+    private DSCResource CreateResource(string name, DSCVersion dscVersion)
+    {
+        return new DSCResource()
+        {
+            Name = name,
+            Version = Version,
+            DSCVersion = dscVersion,
+        };
     }
 }

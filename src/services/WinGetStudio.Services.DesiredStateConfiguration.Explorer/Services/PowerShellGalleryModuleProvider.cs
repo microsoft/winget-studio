@@ -65,11 +65,12 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
                         Id = moduleMetadata.Id,
                         Version = moduleMetadata.Version,
                         Source = DSCModuleSource.PSGallery,
+                        IsVirtual = false,
                     };
 
                     // Populate resources
                     var resourceNames = GetResourceNamesFromTags(moduleMetadata);
-                    dscModule.PopulateResources(resourceNames);
+                    dscModule.PopulateResources(resourceNames, DSCVersion.Unknown);
 
                     // Add the module to the list
                     dscModules.TryAdd(dscModule.Id, dscModule);
@@ -103,7 +104,7 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
         var definitions = await GetResourceDefinitionsAsync(dscModule);
-        dscModule.PopulateResources(definitions);
+        dscModule.PopulateResources(definitions, DSCVersion.Unknown);
     }
 
     /// <summary>

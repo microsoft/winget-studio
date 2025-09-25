@@ -75,7 +75,14 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
             await dscExplorer.EnrichModuleWithResourceNamesAsync(module);
             foreach (var resource in module.Resources.Values)
             {
-                _fullResourceNames.Add($"{module.Id}/{resource.Name}");
+                if (module.IsVirtual)
+                {
+                    _fullResourceNames.Add($"{resource.Name}");
+                }
+                else
+                {
+                    _fullResourceNames.Add($"{module.Id}/{resource.Name}");
+                }
             }
         }
 

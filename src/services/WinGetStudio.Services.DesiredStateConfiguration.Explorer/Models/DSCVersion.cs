@@ -11,11 +11,6 @@ public enum DSCVersion
     Unknown = 0,
 
     /// <summary>
-    /// DSC v1.
-    /// </summary>
-    V1,
-
-    /// <summary>
     /// DSC v2.
     /// </summary>
     V2,

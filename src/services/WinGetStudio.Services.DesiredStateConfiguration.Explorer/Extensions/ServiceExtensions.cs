@@ -8,6 +8,7 @@ using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.Core.Helpers;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
+using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Extensions;
 
@@ -16,6 +17,7 @@ public static class ServiceExtensions
     public static IServiceCollection AddDSCExplorer(this IServiceCollection services)
     {
         services.AddCore();
+        services.AddDSC();
         services.AddSingleton<IDSCExplorer, DSCExplorer>();
         services.AddSingleton<INuGetV2Parser, NuGetV2Parser>();
         services.AddSingleton<INuGetDownloader, NuGetDownloader>();
@@ -36,6 +38,7 @@ public static class ServiceExtensions
 
         // Module providers
         services.AddSingleton<IModuleProvider, PowerShellGalleryModuleProvider>();
+        services.AddSingleton<IModuleProvider, LocalDscV3ModuleProvider>();
 
         // Parsers
         services.AddSingleton<IDSCResourceParser, Psm1Parser>();

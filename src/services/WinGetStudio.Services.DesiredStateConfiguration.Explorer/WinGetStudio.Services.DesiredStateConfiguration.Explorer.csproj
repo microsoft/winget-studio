@@ -13,5 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WinGetStudio.Services.Core\WinGetStudio.Services.Core.csproj" />
+    <ProjectReference Include="..\WinGetStudio.Services.DesiredStateConfiguration\WinGetStudio.Services.DesiredStateConfiguration.csproj" />
   </ItemGroup>
 </Project>

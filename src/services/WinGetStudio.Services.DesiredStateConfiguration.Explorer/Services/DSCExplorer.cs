@@ -44,7 +44,7 @@ internal sealed class DSCExplorer : IDSCExplorer
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
         var provider = GetModuleProvider(dscModule);
-        await provider.EnrichModuleWithResourceNamesAsync(dscModule);
+        await provider.EnrichModuleWithResourceDetailsAsync(dscModule);
     }
 
     /// <summary>
@@ -57,6 +57,11 @@ internal sealed class DSCExplorer : IDSCExplorer
         if (dscModule.Source == DSCModuleSource.PSGallery)
         {
             return GetModuleProvider<PowerShellGalleryModuleProvider>();
+        }
+
+        if (dscModule.Source == DSCModuleSource.LocalDscV3)
+        {
+            return GetModuleProvider<LocalDscV3ModuleProvider>();
         }
 
         throw new InvalidOperationException($"No module provider is registered for source {dscModule.Source}.");
