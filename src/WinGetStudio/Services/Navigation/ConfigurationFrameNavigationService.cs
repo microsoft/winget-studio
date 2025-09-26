@@ -4,11 +4,11 @@
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.ViewModels.ConfigurationFlow;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Navigation;
 
-internal sealed class ConfigurationNavigationService : NavigationService, IConfigurationNavigationService
+internal sealed class ConfigurationFrameNavigationService : FrameNavigationService, IConfigurationFrameNavigationService
 {
-    public ConfigurationNavigationService(IConfigurationPageService pageService)
+    public ConfigurationFrameNavigationService(IConfigurationPageService pageService)
         : base(pageService)
     {
     }

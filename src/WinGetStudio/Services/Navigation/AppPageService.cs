@@ -5,7 +5,7 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.ViewModels;
 using WinGetStudio.Views;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Navigation;
 
 internal sealed class AppPageService : PageService, IAppPageService
 {
@@ -13,7 +13,7 @@ internal sealed class AppPageService : PageService, IAppPageService
     {
         Configure<MainViewModel, MainPage>();
         Configure<ConfigurationViewModel, ConfigurationPage>();
-        Configure<ValidationFrameViewModel, ValidationFramePage>();
+        Configure<ValidationViewModel, ValidationPage>();
         Configure<SettingsViewModel, SettingsPage>();
     }
 }

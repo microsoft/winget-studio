@@ -5,7 +5,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using WinGetStudio.Contracts.Services;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Settings;
 
 public class AppSettingsService : IAppSettingsService
 {

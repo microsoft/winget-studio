@@ -6,7 +6,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace WinGetStudio.Contracts.Services;
 
-public interface INavigationService
+public interface IFrameNavigationService
 {
     event NavigatedEventHandler Navigated;
 

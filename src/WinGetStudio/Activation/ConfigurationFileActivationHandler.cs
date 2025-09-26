@@ -10,9 +10,9 @@ namespace WinGetStudio.Activation;
 
 internal sealed class ConfigurationFileActivationHandler : ActivationHandler<ProtocolActivatedEventArgs>
 {
-    private readonly IAppNavigationService _navigationService;
+    private readonly IAppFrameNavigationService _navigationService;
 
-    public ConfigurationFileActivationHandler(IAppNavigationService navigationService)
+    public ConfigurationFileActivationHandler(IAppFrameNavigationService navigationService)
     {
         _navigationService = navigationService;
     }

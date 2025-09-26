@@ -101,7 +101,7 @@
                                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE8FF;"/>
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Uid="Shell_Validation" helpers:NavigationHelper.NavigateTo="viewmodels:ValidationFrameViewModel">
+                        <NavigationViewItem x:Uid="Shell_Validation" helpers:NavigationHelper.NavigateTo="viewmodels:ValidationViewModel">
                             <NavigationViewItem.Icon>
                                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE762;"/>
                             </NavigationViewItem.Icon>

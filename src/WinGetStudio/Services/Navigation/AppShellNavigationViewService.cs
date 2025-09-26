@@ -7,11 +7,11 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Helpers;
 using WinGetStudio.ViewModels;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Navigation;
 
-public class NavigationViewService : INavigationViewService
+public class AppShellNavigationViewService : IAppShellNavigationViewService
 {
-    private readonly IAppNavigationService _navigationService;
+    private readonly IAppFrameNavigationService _navigationService;
 
     private readonly IAppPageService _pageService;
 
@@ -21,7 +21,7 @@ public class NavigationViewService : INavigationViewService
 
     public object? SettingsItem => _navigationView?.SettingsItem;
 
-    public NavigationViewService(IAppNavigationService navigationService, IAppPageService pageService)
+    public AppShellNavigationViewService(IAppFrameNavigationService navigationService, IAppPageService pageService)
     {
         _navigationService = navigationService;
         _pageService = pageService;

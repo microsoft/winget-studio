@@ -11,9 +11,9 @@ namespace WinGetStudio.ViewModels;
 
 public partial class MainViewModel : ObservableRecipient
 {
-    private readonly IAppNavigationService _navigationService;
+    private readonly IAppFrameNavigationService _navigationService;
 
-    public MainViewModel(IAppNavigationService navigationService)
+    public MainViewModel(IAppFrameNavigationService navigationService)
     {
         _navigationService = navigationService;
     }
@@ -34,7 +34,7 @@ public partial class MainViewModel : ObservableRecipient
     [RelayCommand]
     private async Task OnNavigateToValidationAsync()
     {
-        _navigationService.NavigateTo<ValidationFrameViewModel>();
+        _navigationService.NavigateTo<ValidationViewModel>();
         await Task.CompletedTask;
     }
 }
