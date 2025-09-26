@@ -19,17 +19,41 @@ public interface IUIFeedbackService
     INotificationService Notification { get; }
 
     /// <summary>
-    /// Shows an outcome notification.
+    /// Shows a timed notification.
     /// </summary>
-    /// <param name="title">The title of the notification.</param>
-    /// <param name="message">The message of the notification.</param>
-    /// <param name="severity">The severity of the notification.</param>
-    void ShowOutcomeNotification(string title, string message, NotificationMessageSeverity severity);
+    /// <param name="message">Optional message.</param>
+    /// <param name="severity">Severity of the message.</param>
+    /// <param name="duration">Duration to show the message.</param>
+    void ShowTimedNotification(string message, NotificationMessageSeverity severity, TimeSpan duration = default);
 
     /// <summary>
-    /// Clears all overlay notifications.
+    /// Shows a timed notification.
     /// </summary>
-    void ClearOverlayNotifications();
+    /// <param name="title">Optional title.</param>
+    /// <param name="message">Optional message.</param>
+    /// <param name="severity">Severity of the message.</param>
+    /// <param name="duration">Duration to show the message.</param>
+    void ShowTimedNotification(string title, string message, NotificationMessageSeverity severity, TimeSpan duration = default);
+
+    /// <summary>
+    /// Shows a persistent notification.
+    /// </summary>
+    /// <param name="message">Optional message.</param>
+    /// <param name="severity">Severity of the message.</param>
+    void ShowPersistentNotification(string message, NotificationMessageSeverity severity);
+
+    /// <summary>
+    /// Shows a persistent notification.
+    /// </summary>
+    /// <param name="title">Optional title.</param>
+    /// <param name="message">Optional message.</param>
+    /// <param name="severity">Severity of the message.</param>
+    void ShowPersistentNotification(string title, string message, NotificationMessageSeverity severity);
+
+    /// <summary>
+    /// Clears all notifications.
+    /// </summary>
+    void ClearNotifications();
 
     /// <summary>
     /// Shows task progress.
