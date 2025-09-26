@@ -256,10 +256,7 @@
     <value>Validate a resource</value>
   </data>
   <data name="ValidationPage_ModuleInput.PlaceholderText" xml:space="preserve">
-    <value>Module.Name/Resource.Name</value>
-  </data>
-  <data name="ValidationPage_ModuleInputHeader.Text" xml:space="preserve">
-    <value>Enter Module</value>
+    <value>Search DSC resources ...</value>
   </data>
   <data name="ConfigurationUnitSuccess" xml:space="preserve">
     <value>Configuration successfully applied</value>

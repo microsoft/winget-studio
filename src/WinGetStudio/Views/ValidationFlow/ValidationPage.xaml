@@ -12,8 +12,14 @@
     xmlns:usercontrols="using:WinGetStudio.Views.Controls"
     xmlns:localConverters="using:WinGetStudio.Converters"
     xmlns:models="using:WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models"
-    Loaded="Page_Loaded"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d">
+
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
 
     <Page.Resources>
         <converters:BoolNegationConverter x:Key="BoolNegationConverter" />
@@ -31,29 +37,41 @@
         </Grid.RowDefinitions>
 
         <StackPanel Spacing="8" Grid.Row="0">
+            <!-- Description -->
             <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left">
                 <Run x:Uid="ValidationPage_Description"/>
                 <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/powershell/dsc/concepts/resources/operations?view=dsc-3.0">
                     <Run x:Uid="ValidationPage_LearnMoreLink"/>
                 </Hyperlink>
             </TextBlock>
-            <TextBlock x:Uid="ValidationPage_ModuleInputHeader" Margin="0,0,0,8"/>
 
-            <TextBox x:Uid="ValidationPage_ModuleInput" Width="Auto" Text="{Binding Title, Mode=TwoWay}"/>
-
+            <!-- Search form -->
             <Grid ColumnSpacing="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <AutoSuggestBox x:Name="FullResourceName"
-                                Grid.Column="0"
-                                TextChanged="AutoSuggestBox_TextChanged"
+                <!-- Search input -->
+                <AutoSuggestBox x:Uid="ValidationPage_ModuleInput"
                                 IsSuggestionListOpen="True"
-                                SuggestionChosen="AutoSuggestBox_SuggestionChosen">
+                                Text="{x:Bind ViewModel.Title, Mode=TwoWay}"
+                                ItemsSource="{x:Bind ViewModel.Suggestions}">
+                    <!-- Search commands -->
+                    <i:Interaction.Behaviors>
+                        <i:EventTriggerBehavior EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{x:Bind ViewModel.SearchTextChangedCommand}" />
+                        </i:EventTriggerBehavior>
+                        <i:EventTriggerBehavior EventName="SuggestionChosen">
+                            <i:InvokeCommandAction Command="{x:Bind ViewModel.SuggestionChosenCommand}" />
+                        </i:EventTriggerBehavior>
+                    </i:Interaction.Behaviors>
+
+                    <!-- Search icon -->
                     <AutoSuggestBox.QueryIcon>
-                        <SymbolIcon Symbol="Find"/>
+                        <FontIcon Glyph="&#xE7B8;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
                     </AutoSuggestBox.QueryIcon>
+
+                    <!-- Search result template -->
                     <AutoSuggestBox.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -63,7 +81,14 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <!-- Icon -->
+                                    <FontIcon Glyph="&#xE73E;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
+                                    <FontIcon Glyph="&#xE7B8;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
+
+                                    <!-- Title -->
                                     <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+
+                                    <!-- Version -->
                                     <TextBlock VerticalAlignment="Center"
                                                Style="{ThemeResource CaptionTextBlockStyle}"
                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -71,39 +96,28 @@
                                                TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                                    <Grid BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
-                                          BorderThickness="1"
-                                          Padding="1"
-                                          CornerRadius="{ThemeResource ControlCornerRadius}">
-                                        <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                                                   VerticalAlignment="Center"
-                                                   Style="{ThemeResource CaptionTextBlockStyle}">Remote</TextBlock>
-                                    </Grid>
-                                    <Grid BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
-                                          BorderThickness="1"
-                                          Padding="1"
-                                          CornerRadius="{ThemeResource ControlCornerRadius}">
-                                        <TextBlock Foreground="{ThemeResource AccentFillColorDefaultBrush}"
-                                                   VerticalAlignment="Center"
-                                                   Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>
-                                    </Grid>
+                                    <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" Padding="6,2" CornerRadius="10">
+                                        <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>
+                                    </Border>
+                                    <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" CornerRadius="10">
+                                        <TextBlock Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">DSCv3</TextBlock>
+                                    </Border>
+                                    <Border Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" Padding="6,2" CornerRadius="10">
+                                        <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">Unkown</TextBlock>
+                                    </Border>
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>
                     </AutoSuggestBox.ItemTemplate>
                 </AutoSuggestBox>
+
+                <!-- Action buttons-->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                    <Button Click="Button_Click" x:Name="PropertiesInfo">
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <FontIcon Glyph="&#xE946;" />
-                            <TextBlock>Properties</TextBlock>
-                        </StackPanel>
+                    <Button VerticalAlignment="Stretch" Command="{x:Bind ViewModel.ExploreCommand}">
+                        <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE946;" />
                     </Button>
-                    <Button>
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <FontIcon Glyph="&#xEBD3;" />
-                            <TextBlock>Download</TextBlock>
-                        </StackPanel>
+                    <Button VerticalAlignment="Stretch" Command="{x:Bind ViewModel.ReloadCommand}">
+                        <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE72C;" />
                     </Button>
                 </StackPanel>
             </Grid>
@@ -136,7 +150,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock x:Uid="ValidationPage_ResultsText" FontWeight="Bold" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center"/>
-                <Button Command="{Binding ConvertYamlToUICommand}" Grid.Column="1" Grid.Row="0">
+                <Button Command="{x:Bind ViewModel.ConvertYamlToUICommand}" Grid.Column="1" Grid.Row="0">
                     <TextBlock x:Uid="ValidationPage_ResultsToUIText"/>
                 </Button>
                 <Button Click="{x:Bind CopyResultsToClipboard}" Grid.Column="2" Grid.Row="0">
@@ -144,7 +158,7 @@
                 </Button>
 
                 <TextBox Width="Auto"
-                         Text="{Binding RawData, Mode=TwoWay}"
+                         Text="{x:Bind ViewModel.RawData, Mode=TwoWay}"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalAlignment="Stretch"
@@ -169,7 +183,7 @@
                                                 HorizontalAlignment="Stretch"/>
 
                 <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
-                       Visibility="{Binding IsPropertiesEmpty}"
+                       Visibility="{x:Bind ViewModel.IsPropertiesEmpty}"
                        Grid.Row="1"
                        Grid.Column="0"
                        HorizontalAlignment="Center"
@@ -183,31 +197,11 @@
                         <ColumnDefinition Width="*"/>
                         <!-- <ColumnDefinition Width="*"/> -->
                     </Grid.ColumnDefinitions>
-                    <Button x:Uid="ValidationPage_GetButton" Command="{Binding GetCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button x:Uid="ValidationPage_SetButton" Command="{Binding SetCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
-                    <Button x:Uid="ValidationPage_TestButton" Command="{Binding TestCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
+                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
+                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
                 </Grid>
             </Grid>
         </Grid>
-        
-        
-
-        <Rectangle Height="1"
-                   Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                   HorizontalAlignment="Stretch"
-                   Margin="0,8"
-                   Grid.Row="3"/>
-
-        <TeachingTip
-                     IsLightDismissEnabled="False"
-                     Visibility="{Binding TestBannerVisible}"
-                     IsOpen="{Binding TestBannerVisible, Mode=TwoWay}">
-            <StackPanel>
-                <TextBlock x:Uid="ValidationPage_TestResultHeader"/>
-                <TextBlock Text="{Binding TestBannerText}"/>
-            </StackPanel>
-        </TeachingTip>
-
-
     </Grid>
 </Page>

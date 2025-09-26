@@ -9,6 +9,7 @@ using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 
@@ -19,6 +20,7 @@ public delegate ValidationViewModel ValidationViewModelFactory();
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IDSC _dsc;
+    private readonly IDSCExplorer _dscExplorer;
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
 
@@ -46,13 +48,24 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     public partial string TestBannerText { get; set; } = string.Empty;
 
+    public List<string> Suggestions { get; } = [
+        "Microsoft.Windows.Settings/WindowsSettings",
+        "Microsoft.Windows.Developer/DeveloperMode",
+        "Microsoft.Windows.Developer/OsVersion",
+    ];
+
     public bool IsPropertiesEmpty => Properties.Count == 0;
 
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
 
-    public ValidationViewModel(IDSC dsc, IUIFeedbackService ui, IStringLocalizer<ValidationViewModel> localizer)
+    public ValidationViewModel(
+        IDSC dsc,
+        IDSCExplorer dscExplorer,
+        IUIFeedbackService ui,
+        IStringLocalizer<ValidationViewModel> localizer)
     {
         _dsc = dsc;
+        _dscExplorer = dscExplorer;
         _ui = ui;
         _localizer = localizer;
 
@@ -267,5 +280,42 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         await action();
         _ui.HideTaskProgress();
         ActionsEnabled = true;
+    }
+
+    [RelayCommand]
+    private async Task OnLoadedAsync()
+    {
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task OnExploreAsync()
+    {
+        _ui.ShowTaskProgress();
+
+        if (!string.IsNullOrWhiteSpace(Title))
+        {
+            await Task.CompletedTask;
+        }
+
+        _ui.HideTaskProgress();
+    }
+
+    [RelayCommand]
+    private async Task OnReloadAsync()
+    {
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task OnSearchTextChangedAsync()
+    {
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task OnSuggestionChosenAsync()
+    {
+        await Task.CompletedTask;
     }
 }
