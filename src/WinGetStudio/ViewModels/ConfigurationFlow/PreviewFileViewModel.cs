@@ -21,7 +21,7 @@ namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
 public partial class PreviewFileViewModel : ObservableRecipient, INavigationAware
 {
-    private readonly IConfigurationNavigationService _navigationService;
+    private readonly IConfigurationFrameNavigationService _navigationService;
     private readonly IDSC _dsc;
     private readonly IDSCSetBuilder _dscSetBuilder;
     private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
@@ -111,7 +111,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     }
 
     public PreviewFileViewModel(
-        IConfigurationNavigationService navigationService,
+        IConfigurationFrameNavigationService navigationService,
         IDSC dsc,
         IDSCSetBuilder setBuilder,
         IStringLocalizer<PreviewFileViewModel> localizer,

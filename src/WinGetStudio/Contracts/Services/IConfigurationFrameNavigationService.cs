@@ -3,6 +3,6 @@
 
 namespace WinGetStudio.Contracts.Services;
 
-public interface IAppNavigationService : INavigationService
+public interface IConfigurationFrameNavigationService : IFrameNavigationService
 {
 }

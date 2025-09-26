@@ -4,7 +4,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Navigation;
 
 internal abstract class PageService
 {

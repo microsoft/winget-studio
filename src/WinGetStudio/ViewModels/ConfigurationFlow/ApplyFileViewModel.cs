@@ -19,7 +19,7 @@ namespace WinGetStudio.ViewModels.ConfigurationFlow;
 public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IStringLocalizer<ApplyFileViewModel> _localizer;
-    private readonly IConfigurationNavigationService _navigationService;
+    private readonly IConfigurationFrameNavigationService _navigationService;
     private readonly IDSC _dsc;
     private readonly IUIFeedbackService _ui;
 
@@ -36,7 +36,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
     public ObservableCollection<ApplySetUnit> Units { get; } = [];
 
     public ApplyFileViewModel(
-        IConfigurationNavigationService navigationService,
+        IConfigurationFrameNavigationService navigationService,
         IDSC dsc,
         IUIFeedbackService ui,
         IStringLocalizer<ApplyFileViewModel> localizer,

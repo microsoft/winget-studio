@@ -5,7 +5,7 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.ViewModels.ConfigurationFlow;
 using WinGetStudio.Views.ConfigurationFlow;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Navigation;
 
 internal sealed class ConfigurationPageService : PageService, IConfigurationPageService
 {

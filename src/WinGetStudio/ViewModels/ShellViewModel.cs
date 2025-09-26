@@ -30,13 +30,13 @@ public partial class ShellViewModel : ObservableRecipient
     [ObservableProperty]
     public partial int UnreadNotificationsCount { get; set; }
 
-    public IAppNavigationService NavigationService { get; }
+    public IAppFrameNavigationService NavigationService { get; }
 
-    public INavigationViewService NavigationViewService { get; }
+    public IAppShellNavigationViewService NavigationViewService { get; }
 
     public ShellViewModel(
-        IAppNavigationService navigationService,
-        INavigationViewService navigationViewService,
+        IAppFrameNavigationService navigationService,
+        IAppShellNavigationViewService navigationViewService,
         IUIFeedbackService uiFeedbackService)
     {
         NavigationService = navigationService;

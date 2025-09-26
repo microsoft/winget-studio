@@ -8,9 +8,9 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Extensions;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Navigation;
 
-internal class NavigationService
+internal class FrameNavigationService
 {
     private readonly IPageService _pageService;
     private object? _lastParameterUsed;
@@ -18,7 +18,7 @@ internal class NavigationService
 
     public event NavigatedEventHandler? Navigated;
 
-    public NavigationService(IPageService pageService)
+    public FrameNavigationService(IPageService pageService)
     {
         _pageService = pageService;
     }

@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace WinGetStudio.Contracts.Services;
 
-public interface INavigationViewService
+public interface IAppShellNavigationViewService
 {
     IList<object>? MenuItems
     {
