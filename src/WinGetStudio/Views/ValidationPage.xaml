@@ -27,6 +27,7 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible" />
         <converters:BoolToObjectConverter x:Key="BoolToIntConverter" TrueValue="1" FalseValue="0"/>
         <converters:BoolToObjectConverter x:Key="BoolToIntNegationConverter" TrueValue="0" FalseValue="1"/>
+        <localConverters:BoldMatchConverter x:Key="BoldMatchConverter"/>
     </Page.Resources>
 
     <Grid x:Name="ContentArea" Padding="0" ColumnSpacing="32" RowSpacing="12">
@@ -55,15 +56,15 @@
                 <!-- Search input -->
                 <AutoSuggestBox x:Uid="ValidationPage_ModuleInput"
                                 Text="{x:Bind ViewModel.SearchResourceText, Mode=TwoWay}"
-                                IsSuggestionListOpen="True"
+                                TextMemberPath="SearchText"
                                 ItemsSource="{x:Bind ViewModel.SelectedSuggestions, Mode=OneWay}">
                     <!-- Search commands -->
                     <i:Interaction.Behaviors>
                         <i:EventTriggerBehavior EventName="TextChanged">
                             <i:InvokeCommandAction Command="{x:Bind ViewModel.SearchTextChangedCommand}" />
                         </i:EventTriggerBehavior>
-                        <i:EventTriggerBehavior EventName="SuggestionChosen">
-                            <i:InvokeCommandAction Command="{x:Bind ViewModel.SuggestionChosenCommand}" />
+                        <i:EventTriggerBehavior EventName="QuerySubmitted">
+                            <i:InvokeCommandAction Command="{x:Bind ViewModel.QuerySubmittedCommand}" />
                         </i:EventTriggerBehavior>
                     </i:Interaction.Behaviors>
 
@@ -95,10 +96,11 @@
                                     <!-- Title -->
                                     <controls:SwitchPresenter Value="{x:Bind IsResult}" TargetType="x:Boolean">
                                         <controls:Case Value="True">
-                                            <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" TextTrimming="CharacterEllipsis"/>
+                                            <ContentControl Content="{x:Bind Converter={StaticResource BoldMatchConverter}}" />
                                         </controls:Case>
                                         <controls:Case Value="False">
-                                            <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" TextTrimming="CharacterEllipsis" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                                            <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
+                                                       TextTrimming="CharacterEllipsis" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
                                         </controls:Case>
                                     </controls:SwitchPresenter>
 
@@ -111,17 +113,21 @@
                                 </StackPanel>
 
                                 <!-- Tags -->
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                                    <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" Padding="6,2" CornerRadius="10">
-                                        <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>
-                                    </Border>
-                                    <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" CornerRadius="10">
-                                        <TextBlock Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">DSCv3</TextBlock>
-                                    </Border>
-                                    <Border Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" Padding="6,2" CornerRadius="10">
-                                        <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">Unkown</TextBlock>
-                                    </Border>
-                                </StackPanel>
+                                <controls:SwitchPresenter Value="{x:Bind IsResult}" TargetType="x:Boolean">
+                                    <controls:Case Value="True">
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" Padding="6,2" CornerRadius="10">
+                                                <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>
+                                            </Border>
+                                            <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" CornerRadius="10">
+                                                <TextBlock Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">DSCv3</TextBlock>
+                                            </Border>
+                                            <Border Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" Padding="6,2" CornerRadius="10">
+                                                <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">Unkown</TextBlock>
+                                            </Border>
+                                        </StackPanel>
+                                    </controls:Case>
+                                </controls:SwitchPresenter>
                             </Grid>
                         </DataTemplate>
                     </AutoSuggestBox.ItemTemplate>

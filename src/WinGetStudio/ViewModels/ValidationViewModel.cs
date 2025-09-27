@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
+using Microsoft.UI.Xaml.Controls;
 using NuGet.Packaging;
 using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.ViewModels;
@@ -25,15 +26,16 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
     private readonly ResourceSuggestionViewModel _noResultsSuggestion;
-
     private readonly List<ResourceSuggestionViewModel> _allSuggestions = [];
+
+    private bool _isSearchTextSubmitted;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ReloadCommand))]
     public partial bool AreSuggestionsLoaded { get; set; }
 
     [ObservableProperty]
-    public partial string SearchResourceText { get; set; } = string.Empty;
+    public partial string? SearchResourceText { get; set; }
 
     [ObservableProperty]
     public partial string RawData { get; set; } = string.Empty;
@@ -292,7 +294,27 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private async Task OnSearchTextChangedAsync()
     {
-        _noResultsSuggestion.DisplayName = SearchResourceText;
+        if (_isSearchTextSubmitted)
+        {
+            SelectedSuggestions.Clear();
+            _isSearchTextSubmitted = false;
+            return;
+        }
+
+        _noResultsSuggestion.DisplayName = SearchResourceText ?? string.Empty;
+        _noResultsSuggestion.SearchText = SearchResourceText ?? string.Empty;
+
+        if (SelectedSuggestions.Count == 0)
+        {
+            SelectedSuggestions.Add(_noResultsSuggestion);
+        }
+
+        // Remove all elements in the selected suggestions except the first one
+        for (var i = SelectedSuggestions.Count - 1; i >= 1; i--)
+        {
+            SelectedSuggestions.RemoveAt(i);
+        }
+
         if (string.IsNullOrWhiteSpace(SearchResourceText) || _allSuggestions.Count == 0)
         {
             return;
@@ -301,20 +323,27 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         var suggestionsResult = await Task.Run(() => _allSuggestions
             .Where(s => s.DisplayName.Contains(SearchResourceText, StringComparison.OrdinalIgnoreCase))
             .Take(10)
-            .ToList());
-
-        // Remove all elements in the selected suggestions except the first one
-        for (var i = SelectedSuggestions.Count - 1; i >= 1; i--)
-        {
-            SelectedSuggestions.RemoveAt(i);
-        }
+            .ToList()
+            .Select(s =>
+            {
+                s.SearchText = SearchResourceText;
+                return s;
+            }));
 
         SelectedSuggestions.AddRange(suggestionsResult);
     }
 
     [RelayCommand]
-    private async Task OnSuggestionChosenAsync()
+    private async Task OnQuerySubmittedAsync(AutoSuggestBoxQuerySubmittedEventArgs arg)
     {
+        if (arg.ChosenSuggestion is ResourceSuggestionViewModel suggestion
+            && suggestion != _noResultsSuggestion
+            && SearchResourceText != suggestion.DisplayName)
+        {
+            _isSearchTextSubmitted = true;
+            SearchResourceText = suggestion.DisplayName;
+        }
+
         await Task.CompletedTask;
     }
 

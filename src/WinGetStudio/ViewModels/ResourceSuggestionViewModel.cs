@@ -14,6 +14,9 @@ public sealed partial class ResourceSuggestionViewModel : ObservableObject
     [ObservableProperty]
     public partial string DisplayName { get; set; }
 
+    [ObservableProperty]
+    public partial string? SearchText { get; set; }
+
     public List<string> Tags { get; set; }
 
     public string Version => _resourceSuggestion?.Version ?? string.Empty;
