@@ -93,14 +93,6 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     }
 
     /// <inheritdoc/>
-    public async Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule)
-    {
-        // We already populated resource names from tags during catalog
-        // retrieval so we can skip this step.
-        await Task.CompletedTask;
-    }
-
-    /// <inheritdoc/>
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
         var definitions = await GetResourceDefinitionsAsync(dscModule);

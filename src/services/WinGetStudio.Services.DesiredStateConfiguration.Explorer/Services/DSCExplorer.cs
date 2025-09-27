@@ -24,20 +24,13 @@ internal sealed class DSCExplorer : IDSCExplorer
     public async Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync()
     {
         List<DSCModuleCatalog> catalogs = [];
-        foreach (var provider in _moduleProviders)
+        await Parallel.ForEachAsync(_moduleProviders, async (provider, _) =>
         {
             var providerCatalog = await provider.GetModuleCatalogAsync();
             catalogs.Add(providerCatalog);
-        }
+        });
 
         return catalogs;
-    }
-
-    /// <inheritdoc/>
-    public async Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule)
-    {
-        var provider = GetModuleProvider(dscModule);
-        await provider.EnrichModuleWithResourceNamesAsync(dscModule);
     }
 
     /// <inheritdoc/>

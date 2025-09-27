@@ -25,12 +25,6 @@ public sealed class LocalDscV3ModuleProvider : IModuleProvider
         await Task.CompletedTask;
     }
 
-    public async Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule)
-    {
-        // No additional details to enrich for local DSC v3 resources.
-        await Task.CompletedTask;
-    }
-
     public async Task<DSCModuleCatalog> GetModuleCatalogAsync()
     {
         var catalog = new DSCModuleCatalog { Name = Name };

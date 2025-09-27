@@ -15,9 +15,6 @@ public interface IDSCExplorer
     /// <returns>A list of DSC module catalogs.</returns>
     Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync();
 
-    /// <inheritdoc cref="IModuleProvider.EnrichModuleWithResourceNamesAsync(DSCModule)"/>
-    Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule);
-
     /// <inheritdoc cref="IModuleProvider.EnrichModuleWithResourceDetailsAsync(DSCModule)"/>
     Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
 }

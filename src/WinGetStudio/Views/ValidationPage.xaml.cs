@@ -4,7 +4,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
 using WinGetStudio.Contracts.Views;
-using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;

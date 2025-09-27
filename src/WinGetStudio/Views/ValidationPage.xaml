@@ -12,6 +12,7 @@
     xmlns:usercontrols="using:WinGetStudio.Views.Controls"
     xmlns:localConverters="using:WinGetStudio.Converters"
     xmlns:models="using:WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models"
+    xmlns:vm="using:WinGetStudio.ViewModels"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d">
 
@@ -53,9 +54,9 @@
                 </Grid.ColumnDefinitions>
                 <!-- Search input -->
                 <AutoSuggestBox x:Uid="ValidationPage_ModuleInput"
+                                Text="{x:Bind ViewModel.SearchResourceText, Mode=TwoWay}"
                                 IsSuggestionListOpen="True"
-                                Text="{x:Bind ViewModel.Title, Mode=TwoWay}"
-                                ItemsSource="{x:Bind ViewModel.Suggestions}">
+                                ItemsSource="{x:Bind ViewModel.SelectedSuggestions, Mode=OneWay}">
                     <!-- Search commands -->
                     <i:Interaction.Behaviors>
                         <i:EventTriggerBehavior EventName="TextChanged">
@@ -73,28 +74,43 @@
 
                     <!-- Search result template -->
                     <AutoSuggestBox.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:ResourceSuggestionViewModel">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
                                     <!-- Icon -->
-                                    <FontIcon Glyph="&#xE73E;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
-                                    <FontIcon Glyph="&#xE7B8;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
+                                    <controls:SwitchPresenter Value="{x:Bind IsResult}" TargetType="x:Boolean">
+                                        <controls:Case Value="True">
+                                            <FontIcon Glyph="&#xE7B8;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
+                                        </controls:Case>
+                                        <controls:Case Value="False">
+                                            <FontIcon Glyph="&#xE70F;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
+                                        </controls:Case>
+                                    </controls:SwitchPresenter>
 
                                     <!-- Title -->
-                                    <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+                                    <controls:SwitchPresenter Value="{x:Bind IsResult}" TargetType="x:Boolean">
+                                        <controls:Case Value="True">
+                                            <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" TextTrimming="CharacterEllipsis"/>
+                                        </controls:Case>
+                                        <controls:Case Value="False">
+                                            <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" TextTrimming="CharacterEllipsis" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                                        </controls:Case>
+                                    </controls:SwitchPresenter>
 
                                     <!-- Version -->
                                     <TextBlock VerticalAlignment="Center"
                                                Style="{ThemeResource CaptionTextBlockStyle}"
                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               Text="v1.2.3"
+                                               Text="{x:Bind Version}"
                                                TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
+
+                                <!-- Tags -->
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
                                     <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" Padding="6,2" CornerRadius="10">
                                         <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>

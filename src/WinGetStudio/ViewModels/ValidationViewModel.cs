@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
+using NuGet.Packaging;
 using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
@@ -23,36 +24,24 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private readonly IDSCExplorer _dscExplorer;
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
+    private readonly ResourceSuggestionViewModel _noResultsSuggestion;
+
+    private readonly List<ResourceSuggestionViewModel> _allSuggestions = [];
 
     [ObservableProperty]
-    public partial string ModuleName { get; set; } = string.Empty;
+    [NotifyCanExecuteChangedFor(nameof(ReloadCommand))]
+    public partial bool AreSuggestionsLoaded { get; set; }
 
     [ObservableProperty]
-    public partial string Type { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial string Title { get; set; } = string.Empty;
+    public partial string SearchResourceText { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string RawData { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string TabHeader { get; set; } = "New Tab";
-
-    [ObservableProperty]
     public partial bool ActionsEnabled { get; set; } = true;
 
-    [ObservableProperty]
-    public partial bool TestBannerVisible { get; set; } = false;
-
-    [ObservableProperty]
-    public partial string TestBannerText { get; set; } = string.Empty;
-
-    public List<string> Suggestions { get; } = [
-        "Microsoft.Windows.Settings/WindowsSettings",
-        "Microsoft.Windows.Developer/DeveloperMode",
-        "Microsoft.Windows.Developer/OsVersion",
-    ];
+    public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
 
     public bool IsPropertiesEmpty => Properties.Count == 0;
 
@@ -68,6 +57,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         _dscExplorer = dscExplorer;
         _ui = ui;
         _localizer = localizer;
+        _noResultsSuggestion = new();
+        SelectedSuggestions = [_noResultsSuggestion];
 
         Properties.CollectionChanged += (_, __) =>
         {
@@ -79,9 +70,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         if (parameter is IDSCUnit u)
         {
-            ModuleName = u.ModuleName;
-            Type = u.Type;
-            Title = ModuleName == string.Empty ? Type : $"{ModuleName}/{Type}";
+            var moduleName = u.ModuleName;
+            var type = u.Type;
+            SearchResourceText = moduleName == string.Empty ? type : $"{moduleName}/{type}";
 
             foreach (var kvp in u.Settings)
             {
@@ -119,7 +110,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private ConfigurationUnitModel CreateConfigurationUnitModel()
     {
         ConfigurationUnitModel unit = new();
-        unit.Type = Title;
+        unit.Type = SearchResourceText;
         ConfigurationPropertiesToValueSet(unit.Settings, Properties);
         return unit;
     }
@@ -149,11 +140,6 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         }
     }
 
-    partial void OnModuleNameChanged(string oldValue, string newValue)
-    {
-        TabHeader = newValue;
-    }
-
     /// <summary>
     /// Converts YAML data into a user interface representation asynchronously.
     /// </summary>
@@ -165,12 +151,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         var unit = CreateConfigurationUnitModel();
         if (unit.TryLoad(RawData))
         {
-            Title = unit.Type;
-            ModuleName = Title.Split("/").First();
-            Type = Title.Split("/").Last();
-
+            SearchResourceText = unit.Type;
             Properties.Clear();
-
             ConvertYamlToUIHelper(Properties, unit.Settings);
         }
         else
@@ -285,7 +267,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private async Task OnLoadedAsync()
     {
-        await Task.CompletedTask;
+        await LoadSuggestionsAsync();
     }
 
     [RelayCommand]
@@ -293,7 +275,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         _ui.ShowTaskProgress();
 
-        if (!string.IsNullOrWhiteSpace(Title))
+        if (!string.IsNullOrWhiteSpace(SearchResourceText))
         {
             await Task.CompletedTask;
         }
@@ -301,21 +283,64 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         _ui.HideTaskProgress();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(AreSuggestionsLoaded))]
     private async Task OnReloadAsync()
     {
-        await Task.CompletedTask;
+        await LoadSuggestionsAsync();
     }
 
     [RelayCommand]
     private async Task OnSearchTextChangedAsync()
     {
-        await Task.CompletedTask;
+        _noResultsSuggestion.DisplayName = SearchResourceText;
+        if (string.IsNullOrWhiteSpace(SearchResourceText) || _allSuggestions.Count == 0)
+        {
+            return;
+        }
+
+        var suggestionsResult = await Task.Run(() => _allSuggestions
+            .Where(s => s.DisplayName.Contains(SearchResourceText, StringComparison.OrdinalIgnoreCase))
+            .Take(10)
+            .ToList());
+
+        // Remove all elements in the selected suggestions except the first one
+        for (var i = SelectedSuggestions.Count - 1; i >= 1; i--)
+        {
+            SelectedSuggestions.RemoveAt(i);
+        }
+
+        SelectedSuggestions.AddRange(suggestionsResult);
     }
 
     [RelayCommand]
     private async Task OnSuggestionChosenAsync()
     {
         await Task.CompletedTask;
+    }
+
+    private async Task LoadSuggestionsAsync()
+    {
+        AreSuggestionsLoaded = false;
+        _allSuggestions.Clear();
+        _ui.ShowTaskProgress();
+        _ui.ShowTimedNotification("Loading DSC resources ...", NotificationMessageSeverity.Informational);
+
+        var catalogs = await _dscExplorer.GetModuleCatalogsAsync();
+        foreach (var catalog in catalogs)
+        {
+            foreach (var module in catalog.Modules.Values)
+            {
+                foreach (var resource in module.Resources.Values)
+                {
+                    var suggestion = new ResourceSuggestion(module, resource);
+                    var viewModel = new ResourceSuggestionViewModel(suggestion);
+                    _allSuggestions.Add(viewModel);
+                }
+            }
+        }
+
+        _ui.ShowTimedNotification("Completed loading DSC resources.", NotificationMessageSeverity.Informational);
+        _ui.HideTaskProgress();
+        AreSuggestionsLoaded = true;
     }
 }

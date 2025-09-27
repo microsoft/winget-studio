@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
@@ -19,12 +18,6 @@ public interface IModuleProvider
     /// </summary>
     /// <returns>A list of DSC module identities.</returns>
     Task<DSCModuleCatalog> GetModuleCatalogAsync();
-
-    /// <summary>
-    /// Enriches the given DSC module with resource names.
-    /// </summary>
-    /// <param name="dscModule">The DSC module to enrich.</param>
-    Task EnrichModuleWithResourceNamesAsync(DSCModule dscModule);
 
     /// <summary>
     /// Enriches the given DSC module with detailed resource information.
