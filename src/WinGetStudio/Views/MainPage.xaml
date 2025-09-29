@@ -8,22 +8,124 @@
     xmlns:helpers="using:WinGetStudio.Helpers"
     mc:Ignorable="d">
 
-    <Grid x:Name="ContentArea" VerticalAlignment="Top">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <ct:SettingsCard
-            Command="{x:Bind ViewModel.NavigateToConfigurationCommand}"
-            x:Uid="MainPage_ManageCard"
-            IsClickEnabled="True"
-            Grid.Column="0"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="24" Margin="24">
+            <TextBlock x:Uid="MainPage_Content"
+                       Style="{ThemeResource HeaderTextBlockStyle}" />
+            <!-- Main Actions -->
+            <Grid x:Name="ContentArea">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ct:SettingsCard
+                    Command="{x:Bind ViewModel.NavigateToConfigurationCommand}"
+                    x:Uid="MainPage_ManageCard"
+                    IsClickEnabled="True"
+                    Grid.Column="0"/>
 
-        <ct:SettingsCard
-            Command="{x:Bind ViewModel.NavigateToValidationCommand}"
-            x:Uid="MainPage_ValidateCard"
-            IsClickEnabled="True"
-            Grid.Column="1"/>
-    </Grid>
+                <ct:SettingsCard
+                    Command="{x:Bind ViewModel.NavigateToValidationCommand}"
+                    x:Uid="MainPage_ValidateCard"
+                    IsClickEnabled="True"
+                    Grid.Column="1"/>
+            </Grid>
+
+            <!-- DSC Definitions Section -->
+            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <Expander x:Uid="MainPage_Definitions"
+                          IsExpanded="False"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Stretch">
+                    <Expander.HeaderTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon Grid.Column="0" 
+                                          FontFamily="{StaticResource SymbolThemeFontFamily}" 
+                                          Glyph="&#xE946;" 
+                                          Margin="0,0,12,0"
+                                          VerticalAlignment="Center"
+                                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Grid.Column="1" 
+                                           Text="{Binding}" 
+                                           Style="{ThemeResource BaseTextBlockStyle}"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </Expander.HeaderTemplate>
+                    <StackPanel Spacing="16" Padding="16">
+                        
+                        <!-- Configuration File Definition -->
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="6"
+                                Padding="16">
+                            <StackPanel Spacing="8">
+                                <TextBlock x:Uid="MainPage_DSCDefinitions_ConfigurationFile" 
+                                           Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Uid="MainPage_DSCDefinitions_ConfigurationFileDesc"
+                                           TextWrapping="Wrap"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Style="{ThemeResource BodyTextBlockStyle}" />
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Resource Definition -->
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="6"
+                                Padding="16">
+                            <StackPanel Spacing="8">
+                                <TextBlock x:Uid="MainPage_DSCDefinitions_Resource" 
+                                           Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Uid="MainPage_DSCDefinitions_ResourceDesc"
+                                           TextWrapping="Wrap"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Style="{ThemeResource BodyTextBlockStyle}" />
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Property Definition -->
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="6"
+                                Padding="16">
+                            <StackPanel Spacing="8">
+                                <TextBlock x:Uid="MainPage_DSCDefinitions_Property" 
+                                           Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Uid="MainPage_DSCDefinitions_PropertyDesc"
+                                           TextWrapping="Wrap"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Style="{ThemeResource BodyTextBlockStyle}" />
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Module Definition -->
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="6"
+                                Padding="16">
+                            <StackPanel Spacing="8">
+                                <TextBlock x:Uid="MainPage_DSCDefinitions_Module" 
+                                           Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Uid="MainPage_DSCDefinitions_ModuleDesc"
+                                           TextWrapping="Wrap"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Style="{ThemeResource BodyTextBlockStyle}" />
+                            </StackPanel>
+                        </Border>
+                        
+                    </StackPanel>
+                </Expander>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

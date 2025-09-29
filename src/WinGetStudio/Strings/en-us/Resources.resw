@@ -540,4 +540,34 @@
   <data name="Notification_MachineNotInDesiredState" xml:space="preserve">
     <value>Machine is not in the desired state</value>
   </data>
+  <data name="MainPage_Definitions.Header" xml:space="preserve">
+    <value>WinGet &amp; DSC Definitions</value>
+  </data>
+  <data name="MainPage_Content.Text" xml:space="preserve">
+    <value>Get Started with Winget Studio</value>
+  </data>
+  <data name="MainPage_DSCDefinitions_ConfigurationFile.Text" xml:space="preserve">
+    <value>What is a "configuration file"?</value>
+  </data>
+  <data name="MainPage_DSCDefinitions_ConfigurationFileDesc.Text" xml:space="preserve">
+    <value>A configuration file is a YAML document that describes the desired state of a system. It contains one or more resources that define how applications, settings, and system components should be configured.</value>
+  </data>
+  <data name="MainPage_DSCDefinitions_Resource.Text" xml:space="preserve">
+    <value>What is a "resource"?</value>
+  </data>
+  <data name="MainPage_DSCDefinitions_ResourceDesc.Text" xml:space="preserve">
+    <value>A resource represents a single unit of configuration, such as installing an application, creating a registry key, or configuring a system setting. Each resource specifies what should be configured and how.</value>
+  </data>
+  <data name="MainPage_DSCDefinitions_Property.Text" xml:space="preserve">
+    <value>What is a "property"?</value>
+  </data>
+  <data name="MainPage_DSCDefinitions_PropertyDesc.Text" xml:space="preserve">
+    <value>A property is a specific setting or parameter within a resource that defines how that resource should behave. Properties include values like file paths, registry values, application IDs, and other configuration details.</value>
+  </data>
+  <data name="MainPage_DSCDefinitions_Module.Text" xml:space="preserve">
+    <value>What is a "module"?</value>
+  </data>
+  <data name="MainPage_DSCDefinitions_ModuleDesc.Text" xml:space="preserve">
+    <value>A module is a PowerShell module that contains the implementation for one or more DSC resources. Modules provide the actual functionality to apply configurations, such as the Microsoft.WinGet.DSC module for package management.</value>
+  </data>
 </root>
