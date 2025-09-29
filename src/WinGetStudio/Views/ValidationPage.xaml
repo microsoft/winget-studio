@@ -113,21 +113,22 @@
                                 </StackPanel>
 
                                 <!-- Tags -->
-                                <controls:SwitchPresenter Value="{x:Bind IsResult}" TargetType="x:Boolean">
-                                    <controls:Case Value="True">
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                                            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" Padding="6,2" CornerRadius="10">
-                                                <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>
+                                <ItemsRepeater ItemsSource="{x:Bind Tags}">
+                                    <ItemsRepeater.Layout>
+                                        <StackLayout Orientation="Horizontal" Spacing="4" />
+                                    </ItemsRepeater.Layout>
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    Padding="6,2"
+                                                    CornerRadius="10">
+                                                <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                           Text="{x:Bind}"
+                                                           VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>
                                             </Border>
-                                            <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" CornerRadius="10">
-                                                <TextBlock Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">DSCv3</TextBlock>
-                                            </Border>
-                                            <Border Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" Padding="6,2" CornerRadius="10">
-                                                <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">Unkown</TextBlock>
-                                            </Border>
-                                        </StackPanel>
-                                    </controls:Case>
-                                </controls:SwitchPresenter>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
                             </Grid>
                         </DataTemplate>
                     </AutoSuggestBox.ItemTemplate>
