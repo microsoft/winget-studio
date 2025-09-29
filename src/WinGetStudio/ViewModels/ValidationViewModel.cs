@@ -12,6 +12,7 @@ using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 
@@ -272,17 +273,33 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         await LoadSuggestionsAsync();
     }
 
-    [RelayCommand]
-    private async Task OnExploreAsync()
+    public async Task<DSCResource?> OnExploreAsync()
     {
-        _ui.ShowTaskProgress();
-
-        if (!string.IsNullOrWhiteSpace(SearchResourceText))
+        try
         {
-            await Task.CompletedTask;
-        }
+            _ui.ShowTaskProgress();
+            if (!string.IsNullOrWhiteSpace(SearchResourceText))
+            {
+                var selectedSuggestion = _allSuggestions.FirstOrDefault(s => s.DisplayName.Equals(SearchResourceText, StringComparison.OrdinalIgnoreCase));
+                if (selectedSuggestion != null
+                    && selectedSuggestion.Module != null
+                    && selectedSuggestion.Resource != null)
+                {
+                    await _dscExplorer.EnrichModuleWithResourceDetailsAsync(selectedSuggestion.Module);
+                    return selectedSuggestion.Resource;
+                }
+                else
+                {
+                    _ui.ShowTimedNotification("Unable to find information for the specified resource.", NotificationMessageSeverity.Warning);
+                }
+            }
 
-        _ui.HideTaskProgress();
+            return null;
+        }
+        finally
+        {
+            _ui.HideTaskProgress();
+        }
     }
 
     [RelayCommand(CanExecute = nameof(AreSuggestionsLoaded))]

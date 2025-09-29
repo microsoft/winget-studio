@@ -24,4 +24,18 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
         dataPackage.SetText(ViewModel.RawData);
         Clipboard.SetContent(dataPackage);
     }
+
+    private async void ExploreResource_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        var resource = await ViewModel.OnExploreAsync();
+        if (resource != null)
+        {
+            ResourceExplorer dialog = new(resource)
+            {
+                XamlRoot = XamlRoot,
+            };
+
+            await dialog.ShowAsync();
+        }
+    }
 }

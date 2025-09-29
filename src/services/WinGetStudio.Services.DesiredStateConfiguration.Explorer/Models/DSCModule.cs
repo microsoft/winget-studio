@@ -30,7 +30,7 @@ public sealed partial class DSCModule
     /// <summary>
     /// Gets or sets the module provider.
     /// </summary>
-    [JsonPropertyName("dsc_resources")]
+    [JsonPropertyName("resources")]
     public Dictionary<string, DSCResource> Resources { get; set; } = [];
 
     /// <summary>
@@ -42,7 +42,7 @@ public sealed partial class DSCModule
     /// <summary>
     /// Gets or sets a value indicating whether this module is virtual.
     /// </summary>
-    [JsonPropertyName("resources")]
+    [JsonPropertyName("is_virtual")]
     public bool IsVirtual { get; set; }
 
     /// <summary>

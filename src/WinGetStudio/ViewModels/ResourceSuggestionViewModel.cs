@@ -23,6 +23,10 @@ public sealed partial class ResourceSuggestionViewModel : ObservableObject
 
     public bool IsResult => _resourceSuggestion != null;
 
+    public DSCModule? Module => _resourceSuggestion?.Module;
+
+    public DSCResource? Resource => _resourceSuggestion?.Resource;
+
     public ResourceSuggestionViewModel(ResourceSuggestion? resourceSuggestion = null)
     {
         _resourceSuggestion = resourceSuggestion;

@@ -7,25 +7,25 @@ namespace WinGetStudio.Models;
 
 public sealed partial class ResourceSuggestion
 {
-    public string ModuleId { get; }
+    public DSCModule Module { get; }
 
-    public string ResourceName { get; }
+    public DSCResource Resource { get; }
 
-    public string Version { get; }
+    public string ModuleId => Module.Id;
 
-    public DSCVersion DSCVersion { get; }
+    public string ResourceName => Resource.Name;
 
-    public string Source { get; }
+    public string Version => Resource.Version;
 
-    public bool IsModuleVirtual { get; }
+    public DSCVersion DSCVersion => Resource.DSCVersion;
+
+    public string Source => Module.Source.ToString();
+
+    public bool IsModuleVirtual => Module.IsVirtual;
 
     public ResourceSuggestion(DSCModule module, DSCResource resource)
     {
-        ModuleId = module.Id;
-        ResourceName = resource.Name;
-        Version = resource.Version;
-        DSCVersion = resource.DSCVersion;
-        Source = module.Source.ToString();
-        IsModuleVirtual = module.IsVirtual;
+        Module = module;
+        Resource = resource;
     }
 }

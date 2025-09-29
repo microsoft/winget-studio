@@ -49,14 +49,10 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     {
         var provider = GetModuleProvider(dscModule);
         await provider.EnrichModuleWithResourceDetailsAsync(dscModule);
-        if (provider.UseCache)
+        if (provider.UseCache && _memoryCacheProvider.TryGet(provider.Name, out var inMemory))
         {
-            var cachedCatalog = await _jsonCacheProvider.GetModuleCatalogAsync(provider.Name);
-            if (cachedCatalog != null)
-            {
-                _logger.LogInformation($"Updating cached module catalog for '{provider.Name}' after enriching module '{dscModule.Id}'.");
-                await _jsonCacheProvider.SaveCacheAsync(cachedCatalog);
-            }
+            _logger.LogInformation($"Updating cached module catalog for '{provider.Name}' after enriching module '{dscModule.Id}'.");
+            await _jsonCacheProvider.SaveCacheAsync(inMemory);
         }
     }
 

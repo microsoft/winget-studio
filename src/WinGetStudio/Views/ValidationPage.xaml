@@ -136,7 +136,7 @@
 
                 <!-- Action buttons-->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                    <Button VerticalAlignment="Stretch" Command="{x:Bind ViewModel.ExploreCommand}">
+                    <Button VerticalAlignment="Stretch" Click="ExploreResource_Click">
                         <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE946;" />
                     </Button>
                     <Button VerticalAlignment="Stretch" Command="{x:Bind ViewModel.ReloadCommand}">
