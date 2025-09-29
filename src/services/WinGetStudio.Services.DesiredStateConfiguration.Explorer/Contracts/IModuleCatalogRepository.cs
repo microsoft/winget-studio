@@ -22,8 +22,7 @@ internal interface IModuleCatalogRepository
     Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
 
     /// <summary>
-    /// Clears the cache for the specified catalog if caching is enabled.
+    /// Clears the cache for all module catalogs.
     /// </summary>
-    /// <param name="catalogName">The name of the catalog to clear the cache for.</param>
-    Task ClearCacheAsync(string catalogName);
+    Task ClearCacheAsync();
 }

@@ -31,4 +31,10 @@ internal sealed class DSCExplorer : IDSCExplorer
     {
         await _repository.EnrichModuleWithResourceDetailsAsync(dscModule);
     }
+
+    /// <inheritdoc/>
+    public async Task ClearCacheAsync()
+    {
+        await _repository.ClearCacheAsync();
+    }
 }

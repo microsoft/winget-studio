@@ -5,9 +5,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using WinGetStudio.Contracts.Services;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Models;
+using WingetStudio.Services.VisualFeedback.Contracts;
 
 namespace WinGetStudio.ViewModels;
 
@@ -17,6 +19,8 @@ public partial class SettingsViewModel : ObservableRecipient
     private readonly IUserSettings _userSettings;
     private readonly IAppSettingsService _appSettings;
     private readonly IUIDispatcher _dispatcher;
+    private readonly IDSCExplorer _dscExplorer;
+    private readonly IUIFeedbackService _ui;
 
     [ObservableProperty]
     public partial ElementTheme ElementTheme { get; set; }
@@ -31,12 +35,16 @@ public partial class SettingsViewModel : ObservableRecipient
         IAppInfoService appInfoService,
         IUserSettings userSettings,
         IAppSettingsService appSettings,
-        IUIDispatcher dispatcher)
+        IUIDispatcher dispatcher,
+        IDSCExplorer dscExplorer,
+        IUIFeedbackService ui)
     {
         _appInfoService = appInfoService;
         _userSettings = userSettings;
         _appSettings = appSettings;
         _dispatcher = dispatcher;
+        _dscExplorer = dscExplorer;
+        _ui = ui;
 
         // Initialize settings
         VersionDescription = GetVersionDescription();
@@ -62,6 +70,14 @@ public partial class SettingsViewModel : ObservableRecipient
     private async Task ToggleTelemetryAsync()
     {
         await _userSettings.SaveAsync(settings => settings.Telemetry.Disable = DisableTelemetry);
+    }
+
+    [RelayCommand]
+    private async Task ClearModuleCatalogsCacheAsync()
+    {
+        _ui.ShowTaskProgress();
+        await _dscExplorer.ClearCacheAsync();
+        _ui.HideTaskProgress();
     }
 
     [RelayCommand]

@@ -206,7 +206,7 @@
                                                 HorizontalAlignment="Stretch"/>
 
                 <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
-                       Visibility="{x:Bind ViewModel.IsPropertiesEmpty}"
+                       Visibility="{x:Bind ViewModel.IsPropertiesEmpty, Mode=OneWay}"
                        Grid.Row="1"
                        Grid.Column="0"
                        HorizontalAlignment="Center"

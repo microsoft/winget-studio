@@ -281,9 +281,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
             if (!string.IsNullOrWhiteSpace(SearchResourceText))
             {
                 var selectedSuggestion = _allSuggestions.FirstOrDefault(s => s.DisplayName.Equals(SearchResourceText, StringComparison.OrdinalIgnoreCase));
-                if (selectedSuggestion != null
-                    && selectedSuggestion.Module != null
-                    && selectedSuggestion.Resource != null)
+                if (selectedSuggestion?.Module != null
+                    && selectedSuggestion.Module.IsEnriched
+                    && selectedSuggestion?.Resource != null)
                 {
                     await _dscExplorer.EnrichModuleWithResourceDetailsAsync(selectedSuggestion.Module);
                     return selectedSuggestion.Resource;

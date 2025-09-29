@@ -57,13 +57,21 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     }
 
     /// <inheritdoc/>
-    public async Task ClearCacheAsync(string catalogName)
+    public async Task ClearCacheAsync()
     {
-        var moduleProvider = GetModuleProvider(catalogName);
+        await Parallel.ForEachAsync(_moduleProviders, async (provider, _) =>
+        {
+            await ClearCacheAsync(provider);
+        });
+    }
+
+    private async Task ClearCacheAsync(IModuleProvider moduleProvider)
+    {
         if (moduleProvider.UseCache)
         {
-            _logger.LogInformation($"Clearing cache for module catalog '{catalogName}'.");
-            await _jsonCacheProvider.ClearCacheAsync(catalogName);
+            _logger.LogInformation($"Clearing cache for module catalog '{moduleProvider.Name}'.");
+            _memoryCacheProvider.Remove(moduleProvider.Name);
+            await _jsonCacheProvider.ClearCacheAsync(moduleProvider.Name);
         }
     }
 
