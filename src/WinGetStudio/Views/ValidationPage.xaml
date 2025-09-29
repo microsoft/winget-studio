@@ -113,7 +113,7 @@
                                 </StackPanel>
 
                                 <!-- Tags -->
-                                <ItemsRepeater ItemsSource="{x:Bind Tags}">
+                                <ItemsRepeater ItemsSource="{x:Bind Tags}" Grid.Column="1">
                                     <ItemsRepeater.Layout>
                                         <StackLayout Orientation="Horizontal" Spacing="4" />
                                     </ItemsRepeater.Layout>

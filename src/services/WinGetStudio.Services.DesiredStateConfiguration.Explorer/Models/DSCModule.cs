@@ -30,7 +30,7 @@ public sealed partial class DSCModule
     /// <summary>
     /// Gets or sets the module provider.
     /// </summary>
-    [JsonPropertyName("resources")]
+    [JsonPropertyName("dsc_resources")]
     public Dictionary<string, DSCResource> Resources { get; set; } = [];
 
     /// <summary>

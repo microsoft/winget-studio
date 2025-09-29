@@ -17,6 +17,8 @@ public static class RuntimeHelper
     // Unique log path for each app instance
     private static readonly string _instanceLogPath = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff", CultureInfo.InvariantCulture);
     private const string WinGetStudio = nameof(WinGetStudio);
+    private const string TempState = "TempState";
+    private const string LocalState = "LocalState";
     public const string SettingsFile = "settings.json";
 
     /// <summary>
@@ -43,7 +45,7 @@ public static class RuntimeHelper
             return ApplicationData.Current.LocalFolder.Path;
         }
 
-        return GetUnpackagedPath("LocalState");
+        return GetUnpackagedPath(LocalState);
     }
 
     /// <summary>
@@ -76,12 +78,13 @@ public static class RuntimeHelper
     /// <returns>The application logs folder.</returns>
     public static string GetAppLogsPath()
     {
+        var directory = "Logs";
         if (IsMSIX)
         {
-            return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, "Logs");
+            return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, directory);
         }
 
-        return GetUnpackagedPath("TempState", "Logs");
+        return GetUnpackagedPath(TempState, directory);
     }
 
     /// <summary>
@@ -91,6 +94,21 @@ public static class RuntimeHelper
     public static string GetAppInstanceLogPath()
     {
         return Path.Combine(GetAppLogsPath(), _instanceLogPath);
+    }
+
+    /// <summary>
+    /// Gets the module catalog cache path.
+    /// </summary>
+    /// <returns>The module catalog cache path.</returns>
+    public static string GetModuleCatalogCachePath()
+    {
+        var directory = "ModuleCatalogs";
+        if (IsMSIX)
+        {
+            return Path.Combine(ApplicationData.Current.LocalFolder.Path, directory);
+        }
+
+        return Path.Combine(GetUnpackagedPath(LocalState), directory);
     }
 
     /// <summary>
