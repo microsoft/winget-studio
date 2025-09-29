@@ -7,14 +7,23 @@ using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 
-public interface IDSCExplorer
+internal interface IModuleCatalogRepository
 {
     /// <summary>
-    /// Gets the list of DSC module catalogs from all registered providers.
+    /// Gets the list of available DSC module catalogs.
     /// </summary>
     /// <returns>A list of DSC module catalogs.</returns>
     Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync();
 
-    /// <inheritdoc cref="IModuleCatalogRepository.EnrichModuleWithResourceDetailsAsync(DSCModule)"/>
+    /// <summary>
+    /// Enriches the given DSC module with detailed resource information.
+    /// </summary>
+    /// <param name="dscModule">The DSC module to enrich.</param>
     Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
+
+    /// <summary>
+    /// Clears the cache for the specified catalog if caching is enabled.
+    /// </summary>
+    /// <param name="catalogName">The name of the catalog to clear the cache for.</param>
+    Task ClearCacheAsync(string catalogName);
 }

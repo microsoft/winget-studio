@@ -13,62 +13,22 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 
 internal sealed class DSCExplorer : IDSCExplorer
 {
-    private readonly IEnumerable<IModuleProvider> _moduleProviders;
+    private readonly IModuleCatalogRepository _repository;
 
-    public DSCExplorer(IEnumerable<IModuleProvider> moduleProviders)
+    public DSCExplorer(IModuleCatalogRepository repository)
     {
-        _moduleProviders = moduleProviders;
+        _repository = repository;
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync()
     {
-        List<DSCModuleCatalog> catalogs = [];
-        await Parallel.ForEachAsync(_moduleProviders, async (provider, _) =>
-        {
-            var providerCatalog = await provider.GetModuleCatalogAsync();
-            catalogs.Add(providerCatalog);
-        });
-
-        return catalogs;
+        return await _repository.GetModuleCatalogsAsync();
     }
 
     /// <inheritdoc/>
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
-        var provider = GetModuleProvider(dscModule);
-        await provider.EnrichModuleWithResourceDetailsAsync(dscModule);
-    }
-
-    /// <summary>
-    /// Gets the appropriate module provider for the specified DSC module.
-    /// </summary>
-    /// <param name="dscModule">The DSC module to get the provider for.</param>
-    /// <returns>>The module provider instance.</returns>
-    private IModuleProvider GetModuleProvider(DSCModule dscModule)
-    {
-        if (dscModule.Source == DSCModuleSource.PSGallery)
-        {
-            return GetModuleProvider<PowerShellGalleryModuleProvider>();
-        }
-
-        if (dscModule.Source == DSCModuleSource.LocalDscV3)
-        {
-            return GetModuleProvider<LocalDscV3ModuleProvider>();
-        }
-
-        throw new InvalidOperationException($"No module provider is registered for source {dscModule.Source}.");
-    }
-
-    /// <summary>
-    /// Gets the module provider of the specified type.
-    /// </summary>
-    /// <typeparam name="TModuleProvider">The type of the module provider to get.</typeparam>
-    /// <returns>The module provider instance.</returns>
-    private IModuleProvider GetModuleProvider<TModuleProvider>()
-        where TModuleProvider : IModuleProvider
-    {
-        Debug.Assert(_moduleProviders.OfType<TModuleProvider>().Any(), $"No module provider of type {typeof(TModuleProvider).FullName} is registered.");
-        return _moduleProviders.OfType<TModuleProvider>().First();
+        await _repository.EnrichModuleWithResourceDetailsAsync(dscModule);
     }
 }

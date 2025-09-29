@@ -12,19 +12,25 @@ public sealed class LocalDscV3ModuleProvider : IModuleProvider
 {
     private readonly IDSC _dsc;
 
+    /// <inheritdoc/>
     public string Name => nameof(DSCModuleSource.LocalDscV3);
+
+    /// <inheritdoc/>
+    public bool UseCache => false;
 
     public LocalDscV3ModuleProvider(IDSC dsc)
     {
         _dsc = dsc;
     }
 
+    /// <inheritdoc/>
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
         // No additional details to enrich for local DSC v3 resources.
         await Task.CompletedTask;
     }
 
+    /// <inheritdoc/>
     public async Task<DSCModuleCatalog> GetModuleCatalogAsync()
     {
         var catalog = new DSCModuleCatalog { Name = Name };

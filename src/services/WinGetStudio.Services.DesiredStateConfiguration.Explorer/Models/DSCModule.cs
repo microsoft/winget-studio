@@ -34,6 +34,12 @@ public sealed partial class DSCModule
     public Dictionary<string, DSCResource> Resources { get; set; } = [];
 
     /// <summary>
+    /// Gets or sets a value indicating whether this module has been enriched with resource details.
+    /// </summary>
+    [JsonPropertyName("is_enriched")]
+    public bool IsEnriched { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether this module is virtual.
     /// </summary>
     [JsonPropertyName("resources")]

@@ -30,6 +30,12 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     private readonly ILogger<PowerShellGalleryModuleProvider> _logger;
     private readonly SourceRepository _repository;
 
+    /// <inheritdoc/>
+    public string Name => nameof(DSCModuleSource.PSGallery);
+
+    /// <inheritdoc/>
+    public bool UseCache => true;
+
     public PowerShellGalleryModuleProvider(
         ILogger<PowerShellGalleryModuleProvider> logger,
         INuGetV2Client client,
@@ -42,9 +48,6 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         _parsers = parsers;
         _repository = _downloader.CreateRepositoryCoreV2(BaseUrl);
     }
-
-    /// <inheritdoc/>
-    public string Name => nameof(DSCModuleSource.PSGallery);
 
     /// <inheritdoc />
     public async Task<DSCModuleCatalog> GetModuleCatalogAsync()
@@ -95,8 +98,12 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     /// <inheritdoc/>
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
-        var definitions = await GetResourceDefinitionsAsync(dscModule);
-        dscModule.PopulateResources(definitions, DSCVersion.Unknown);
+        if (!dscModule.IsEnriched)
+        {
+            var definitions = await GetResourceDefinitionsAsync(dscModule);
+            dscModule.PopulateResources(definitions, DSCVersion.Unknown);
+            dscModule.IsEnriched = true;
+        }
     }
 
     /// <summary>
