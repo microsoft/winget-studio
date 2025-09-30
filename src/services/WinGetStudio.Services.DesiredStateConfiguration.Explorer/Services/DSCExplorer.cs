@@ -21,9 +21,9 @@ internal sealed class DSCExplorer : IDSCExplorer
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync()
+    public IAsyncEnumerable<DSCModuleCatalog> GetModuleCatalogsAsync()
     {
-        return await _repository.GetModuleCatalogsAsync();
+        return _repository.GetModuleCatalogsAsync();
     }
 
     /// <inheritdoc/>

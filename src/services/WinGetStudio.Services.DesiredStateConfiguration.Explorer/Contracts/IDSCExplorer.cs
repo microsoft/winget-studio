@@ -13,7 +13,7 @@ public interface IDSCExplorer
     /// Gets the list of DSC module catalogs from all registered providers.
     /// </summary>
     /// <returns>A list of DSC module catalogs.</returns>
-    Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync();
+    IAsyncEnumerable<DSCModuleCatalog> GetModuleCatalogsAsync();
 
     /// <inheritdoc cref="IModuleCatalogRepository.EnrichModuleWithResourceDetailsAsync(DSCModule)"/>
     Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);

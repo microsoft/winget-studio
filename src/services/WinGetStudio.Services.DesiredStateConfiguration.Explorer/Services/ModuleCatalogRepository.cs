@@ -32,16 +32,13 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync()
+    public async IAsyncEnumerable<DSCModuleCatalog> GetModuleCatalogsAsync()
     {
-        List<DSCModuleCatalog> catalogs = [];
-        await Parallel.ForEachAsync(_moduleProviders, async (provider, _) =>
+        var tasks = _moduleProviders.Select(async provider => await GetModuleCatalogAsync(provider.Name));
+        foreach (var task in tasks)
         {
-            var providerCatalog = await GetModuleCatalogAsync(provider.Name);
-            catalogs.Add(providerCatalog);
-        });
-
-        return catalogs;
+            yield return await task;
+        }
     }
 
     /// <inheritdoc/>

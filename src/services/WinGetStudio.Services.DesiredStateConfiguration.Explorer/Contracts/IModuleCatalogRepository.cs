@@ -13,7 +13,7 @@ internal interface IModuleCatalogRepository
     /// Gets the list of available DSC module catalogs.
     /// </summary>
     /// <returns>A list of DSC module catalogs.</returns>
-    Task<IReadOnlyList<DSCModuleCatalog>> GetModuleCatalogsAsync();
+    IAsyncEnumerable<DSCModuleCatalog> GetModuleCatalogsAsync();
 
     /// <summary>
     /// Enriches the given DSC module with detailed resource information.
