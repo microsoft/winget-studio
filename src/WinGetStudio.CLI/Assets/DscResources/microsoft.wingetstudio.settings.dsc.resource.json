@@ -1,0 +1,69 @@
+{
+  "$schema": "https://aka.ms/dsc/schemas/v3/bundled/resource/manifest.vscode.json",
+  "type": "Microsoft.WinGetStudio/Settings",
+  "version": "0.1.0",
+  "tags": [
+    "WinGetStudio"
+  ],
+  "description": "Allows management of the settings state via the DSC v3 command line interface protocol.",
+  "export": {
+    "executable": "WinGetStudio.exe",
+    "args": [
+      "dsc",
+      "export",
+      "--resource",
+      "settings"
+    ],
+    "input": "stdin"
+  },
+  "get": {
+    "executable": "WinGetStudio.exe",
+    "args": [
+      "dsc",
+      "get",
+      "--resource",
+      "settings"
+    ],
+    "input": "stdin"
+  },
+  "set": {
+    "executable": "WinGetStudio.exe",
+    "args": [
+      "dsc",
+      "set",
+      "--resource",
+      "settings",
+      {
+        "jsonInputArg": "--input",
+        "mandatory": true
+      }
+    ],
+    "implementsPretest": true,
+    "return": "stateAndDiff"
+  },
+  "test": {
+    "executable": "WinGetStudio.exe",
+    "args": [
+      "dsc",
+      "test",
+      "--resource",
+      "settings",
+      {
+        "jsonInputArg": "--input",
+        "mandatory": true
+      }
+    ],
+    "return": "stateAndDiff"
+  },
+  "schema": {
+    "command": {
+      "executable": "WinGetStudio.exe",
+      "args": [
+        "dsc",
+        "schema",
+        "--resource",
+        "settings"
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+﻿AttachConsole
+AllocConsole
+FreeConsole
+S_OK
+E_FAIL

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.UI.Dispatching;
+using WinGetStudio.CLI;
 
 namespace WinGetStudio;
 
@@ -10,6 +11,15 @@ public static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // If arguments are provided, run in CLI mode
+        if (args.Length > 0)
+        {
+            var cli = new WinGetStudioCLI();
+            var result = cli.Invoke(args);
+            Environment.Exit(result);
+        }
+
+        // Only initialize WinRT if we're starting the GUI
         WinRT.ComWrappersSupport.InitializeComWrappers();
 
         var isRedirect = DecideRedirection().GetAwaiter().GetResult();

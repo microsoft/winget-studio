@@ -60,6 +60,7 @@
     <ProjectReference Include="..\services\WinGetStudio.Services.Settings\WinGetStudio.Services.Settings.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.Telemetry\WinGetStudio.Services.Telemetry.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.VisualFeedback\WinGetStudio.Services.VisualFeedback.csproj" />
+    <ProjectReference Include="..\WinGetStudio.CLI\WinGetStudio.CLI.csproj" />
     <ProjectReference Include="..\WinGetStudio.Core\WinGetStudio.Common.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.DesiredStateConfiguration\WinGetStudio.Services.DesiredStateConfiguration.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.WindowsPackageManager\WinGetStudio.Services.WindowsPackageManager.csproj" />
@@ -67,6 +68,9 @@
 
   <ItemGroup>
     <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.cli.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

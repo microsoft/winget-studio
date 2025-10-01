@@ -537,6 +537,76 @@
   <data name="Notification_MachineNotInDesiredState" xml:space="preserve">
     <value>Machine is not in the desired state</value>
   </data>
+  <data name="WinGetStudioCli_Description" xml:space="preserve">
+    <value>WinGetStudio command line interface - v{0}</value>
+    <comment>{Locked="{0}"} {0} is replaced by the application version</comment>
+  </data>
+  <data name="DscCommand_HelpText" xml:space="preserve">
+    <value>DSC v3 resource commands</value>
+  </data>
+  <data name="DscGet_HelpText" xml:space="preserve">
+    <value>Get the resource state</value>
+  </data>
+  <data name="DscSet_HelpText" xml:space="preserve">
+    <value>Set the resource state</value>
+  </data>
+  <data name="DscSetFailed_Message" xml:space="preserve">
+    <value>Failed to update settings: {0}</value>
+    <comment>{Locked="{0}"} {0} is replaced by the error message</comment>
+  </data>
+  <data name="DscTest_HelpText" xml:space="preserve">
+    <value>Test the resource state</value>
+  </data>
+  <data name="DscExport_HelpText" xml:space="preserve">
+    <value>Get all state instances</value>
+  </data>
+  <data name="DscSchema_HelpText" xml:space="preserve">
+    <value>Outputs schema of the resource</value>
+  </data>
+  <data name="DscManifest_HelpText" xml:space="preserve">
+    <value>Outputs manifest of the resource</value>
+  </data>
+  <data name="DscManifestFailed_Message" xml:space="preserve">
+    <value>Failed to write manifest to {0}: {1}</value>
+    <comment>{Locked="{0}","{1}"} {0} is replaced by a path. {1} is replaced by an error message</comment>
+  </data>
+  <data name="DscResource_HelpText" xml:space="preserve">
+    <value>The name of the DSC resource to manage</value>
+  </data>
+  <data name="DscResourceNotValid_HelpText" xml:space="preserve">
+    <value>Invalid resource name '{0}'. Valid resources are: {1}</value>
+    <comment>{Locked="{0}","{1}"} {0} is replaced by a resource name. {1} is replaced by a list of resource names</comment>
+  </data>
+  <data name="DscOutputDir_HelpText" xml:space="preserve">
+    <value>The path to the output directory</value>
+  </data>
+  <data name="DscOutputDirIsEmpty_HelpText" xml:space="preserve">
+    <value>The output directory cannot be null or empty</value>
+  </data>
+  <data name="DscOutputDirNotFound_HelpText" xml:space="preserve">
+    <value>The output directory does not exist: {0}</value>
+    <comment>{Locked="{0}"} {0} is replaced by a path</comment>
+  </data>
+  <data name="DscInput_HelpText" xml:space="preserve">
+    <value>The input for the DSC resource</value>
+  </data>
+  <data name="DscInputIsEmpty_Message" xml:space="preserve">
+    <value>The input cannot be null or empty</value>
+  </data>
+  <data name="DscInputNotValid_Message" xml:space="preserve">
+    <value>The input is not a valid JSON: {0}</value>
+    <comment>{Locked="{0}"} {0} is replaced by an error message</comment>
+  </data>
+  <data name="DscInputRequired_Message" xml:space="preserve">
+    <value>The input for the {0} DSC operation is required</value>
+    <comment>{Locked="{0}"} {0} is replaced by the DSC operation name</comment>
+  </data>
+  <data name="Logs_HelpText" xml:space="preserve">
+    <value>Opens the logs folder</value>
+  </data>
+  <data name="Settings_HelpText" xml:space="preserve">
+    <value>Opens the settings file</value>
+  </data>
   <data name="MainPage_Definitions.Header" xml:space="preserve">
     <value>WinGet &amp; DSC Definitions</value>
   </data>
