@@ -83,11 +83,11 @@ public sealed partial class DSCModule
 
                 resource.Syntax = definition.ClassAst.Extent.Text;
                 resource.Properties = [.. definition.Properties.Select(prop => new DSCProperty
-            {
-                Name = prop.Name,
-                Type = prop.PropertyType.TypeName.Name,
-                Syntax = prop.Extent.Text,
-            })];
+                {
+                    Name = prop.Name,
+                    Type = prop.PropertyType.TypeName.Name,
+                    Syntax = prop.Extent.Text,
+                })];
             }
         }
     }

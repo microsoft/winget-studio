@@ -42,7 +42,7 @@ internal interface IDSCOperations
     /// Set the machine state to the specified configuration unit.
     /// </summary>
     /// <param name="unit">Unit to set</param>
-    /// <returns>result of Set</returns>
+    /// <returns></returns>
     public Task SetUnit(ConfigurationUnitModel unit);
 
     /// <summary>

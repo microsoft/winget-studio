@@ -22,6 +22,7 @@ internal sealed partial class NuGetV2Client : INuGetV2Client
         _parser = parser;
     }
 
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<ModuleMetadata>> SearchAsync(string baseUrl, NameValueCollection query)
     {
         var urlBuilder = new UriBuilder($"{baseUrl.TrimEnd('/')}/Search()");

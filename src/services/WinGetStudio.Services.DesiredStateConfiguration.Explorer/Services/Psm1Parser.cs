@@ -38,11 +38,21 @@ public sealed partial class Psm1Parser : IDSCResourceParser
             })];
     }
 
+    /// <summary>
+    /// Checks if the given AST node represents a DSC Resource.
+    /// </summary>
+    /// <param name="ast">The AST node to check.</param>
+    /// <returns>True if the AST node is a DSC Resource; otherwise, false.</returns>
     private bool IsDscResource(Ast ast)
     {
         return ast is TypeDefinitionAst t && t.Attributes.Any(a => a.TypeName.Name.Equals(DscResourceAttributeName, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// Checks if the given property AST node is marked as a DSC Property.
+    /// </summary>
+    /// <param name="ast">The property AST node to check.</param>
+    /// <returns>True if the property is a DSC Property; otherwise, false.</returns>
     private bool IsDscProperty(PropertyMemberAst ast)
     {
         return ast.Attributes.Any(a => a.TypeName.Name.Equals(DscPropertyAttributeName, StringComparison.OrdinalIgnoreCase));

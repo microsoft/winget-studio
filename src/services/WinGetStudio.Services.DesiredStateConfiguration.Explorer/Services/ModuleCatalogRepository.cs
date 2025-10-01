@@ -62,6 +62,10 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
         });
     }
 
+    /// <summary>
+    /// Clears the cache for a specific module provider.
+    /// </summary>
+    /// <param name="moduleProvider">The module provider to clear the cache for.</param>
     private async Task ClearCacheAsync(IModuleProvider moduleProvider)
     {
         if (moduleProvider.UseCache)
@@ -72,6 +76,11 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
         }
     }
 
+    /// <summary>
+    /// Gets the module catalog for the specified catalog name, utilizing caching if enabled.
+    /// </summary>
+    /// <param name="catalogName">The name of the catalog to retrieve.</param>
+    /// <returns>>The DSC module catalog.</returns>
     private async Task<DSCModuleCatalog> GetModuleCatalogAsync(string catalogName)
     {
         var moduleProvider = GetModuleProvider(catalogName);
@@ -110,6 +119,11 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
         return catalog;
     }
 
+    /// <summary>
+    /// Gets the module provider with the specified catalog name.
+    /// </summary>
+    /// <param name="catalogName">The name of the catalog.</param>
+    /// <returns>>The module provider instance.</returns>
     private IModuleProvider GetModuleProvider(string catalogName)
     {
         Debug.Assert(_moduleProviders.Any(p => p.Name == catalogName), "No module provider is registered with the specified catalog name.");

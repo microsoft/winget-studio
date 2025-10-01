@@ -17,9 +17,11 @@ public static class RuntimeHelper
     // Unique log path for each app instance
     private static readonly string _instanceLogPath = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff", CultureInfo.InvariantCulture);
     private const string WinGetStudio = nameof(WinGetStudio);
-    private const string TempState = "TempState";
-    private const string LocalState = "LocalState";
     public const string SettingsFile = "settings.json";
+    private const string TempStateDir = "TempState";
+    private const string LocalStateDir = "LocalState";
+    private const string LogsDir = "Logs";
+    private const string ModuleCatalogsDir = "ModuleCatalogs";
 
     /// <summary>
     /// Gets a value indicating whether the app is running as an MSIX package.
@@ -45,7 +47,7 @@ public static class RuntimeHelper
             return ApplicationData.Current.LocalFolder.Path;
         }
 
-        return GetUnpackagedPath(LocalState);
+        return GetUnpackagedPath(LocalStateDir);
     }
 
     /// <summary>
@@ -78,13 +80,12 @@ public static class RuntimeHelper
     /// <returns>The application logs folder.</returns>
     public static string GetAppLogsPath()
     {
-        var directory = "Logs";
         if (IsMSIX)
         {
-            return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, directory);
+            return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, LogsDir);
         }
 
-        return GetUnpackagedPath(TempState, directory);
+        return GetUnpackagedPath(TempStateDir, LogsDir);
     }
 
     /// <summary>
@@ -102,13 +103,12 @@ public static class RuntimeHelper
     /// <returns>The module catalog cache path.</returns>
     public static string GetModuleCatalogCachePath()
     {
-        var directory = "ModuleCatalogs";
         if (IsMSIX)
         {
-            return Path.Combine(ApplicationData.Current.LocalFolder.Path, directory);
+            return Path.Combine(ApplicationData.Current.LocalFolder.Path, ModuleCatalogsDir);
         }
 
-        return Path.Combine(GetUnpackagedPath(LocalState), directory);
+        return Path.Combine(GetUnpackagedPath(LocalStateDir), ModuleCatalogsDir);
     }
 
     /// <summary>
