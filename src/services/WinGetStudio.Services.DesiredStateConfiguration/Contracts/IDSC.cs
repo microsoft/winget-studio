@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using WinGetStudio.Models;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -35,4 +37,7 @@ public interface IDSC
 
     /// <inheritdoc cref="IDSCOperations.Export"/>
     public Task DscExport(ConfigurationUnitModel unit);
+
+    /// <inheritdoc cref="IDSCOperations.GetDscV3ResourcesAsync"/>
+    public Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
 }

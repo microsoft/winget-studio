@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 
@@ -45,4 +47,7 @@ internal sealed class DSC : IDSC
 
     /// <inheritdoc/>
     public async Task DscExport(ConfigurationUnitModel unit) => await _dscOperations.ExportUnit(unit);
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync() => await _dscOperations.GetDscV3ResourcesAsync();
 }

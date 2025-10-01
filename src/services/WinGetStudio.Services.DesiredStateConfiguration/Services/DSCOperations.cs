@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
@@ -143,6 +144,51 @@ internal sealed class DSCOperations : IDSCOperations
             System.Diagnostics.Debug.WriteLine(result.Units);
             unit.Settings = result.Units[0].Settings;
         }
+    }
+
+    public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()
+    {
+        List<ResourceMetada> resources = [];
+        try
+        {
+            ConfigurationStaticFunctions config = new();
+            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+            var options = config.CreateFindUnitProcessorsOptions();
+            options.UnitDetailFlags = ConfigurationUnitDetailFlags.Local;
+
+            // Retry a few times to workaround this issue:
+            // https://github.com/PowerShell/DSC/issues/786
+            // ---------------------------------------------
+            // Find unit processors will call dsc.exe under the hood. This has
+            // a known bug that makes it fail fairly often. To work around
+            // this, we retry a few times. This is not a an ideal solution, but
+            // it will allow us for now to get the resources most of the time.
+            // Another downside of this approach is that if no resources are
+            // actually present the code will always attempt 10 times before
+            // giving up.
+            var maxRetries = 10;
+            IList<IConfigurationUnitProcessorDetails> units = [];
+            while (units.Count == 0 && maxRetries > 0)
+            {
+                units = await processor.FindUnitProcessorsAsync(options);
+                maxRetries--;
+            }
+
+            foreach (var unit in units)
+            {
+                resources.Add(new()
+                {
+                    Name = unit.UnitType,
+                    Version = unit.Version,
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get DSC v3 resources");
+        }
+
+        return resources;
     }
 
     /// <summary>

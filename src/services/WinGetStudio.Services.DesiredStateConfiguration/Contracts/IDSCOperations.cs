@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using WinGetStudio.Models;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -56,4 +58,10 @@ internal interface IDSCOperations
     /// <param name="unit">Unit to export</param>
     /// <returns>All settings for specified unit</returns>
     public Task ExportUnit(ConfigurationUnitModel unit);
+
+    /// <summary>
+    /// Gets the list of available DSC v3 resources on the system.
+    /// </summary>
+    /// <returns>List of available DSC v3 resources.</returns>
+    public Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
 }

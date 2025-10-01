@@ -11,13 +11,23 @@
     xmlns:selectors="using:WinGetStudio.Selectors"
     xmlns:usercontrols="using:WinGetStudio.Views.Controls"
     xmlns:localConverters="using:WinGetStudio.Converters"
+    xmlns:models="using:WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models"
+    xmlns:vm="using:WinGetStudio.ViewModels"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d">
+
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
 
     <Page.Resources>
         <converters:BoolNegationConverter x:Key="BoolNegationConverter" />
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible" />
         <converters:BoolToObjectConverter x:Key="BoolToIntConverter" TrueValue="1" FalseValue="0"/>
         <converters:BoolToObjectConverter x:Key="BoolToIntNegationConverter" TrueValue="0" FalseValue="1"/>
+        <localConverters:ResourceSuggestionMatchConverter x:Key="ResourceSuggestionMatchConverter"/>
     </Page.Resources>
 
     <Grid x:Name="ContentArea" Padding="0" ColumnSpacing="32" RowSpacing="12">
@@ -28,16 +38,113 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-
-        <StackPanel Spacing="8" HorizontalAlignment="Left" Grid.Row="0">
-            <TextBlock Margin="0,0,0,8">
+        <StackPanel Spacing="8" Grid.Row="0">
+            <!-- Description -->
+            <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left">
                 <Run x:Uid="ValidationPage_Description"/>
                 <Hyperlink NavigateUri="https://learn.microsoft.com/en-us/powershell/dsc/concepts/resources/operations?view=dsc-3.0">
                     <Run x:Uid="ValidationPage_LearnMoreLink"/>
                 </Hyperlink>
             </TextBlock>
-            <TextBlock x:Uid="ValidationPage_ModuleInputHeader" Margin="0,0,0,8"/>
-            <TextBox x:Uid="ValidationPage_ModuleInput" Width="Auto" Text="{Binding Title, Mode=TwoWay}"/>
+
+            <!-- Search form -->
+            <Grid ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <!-- Search input -->
+                <AutoSuggestBox x:Uid="ValidationPage_ModuleInput"
+                                Text="{x:Bind ViewModel.SearchResourceText, Mode=TwoWay}"
+                                TextMemberPath="SearchText"
+                                ItemsSource="{x:Bind ViewModel.SelectedSuggestions, Mode=OneWay}">
+                    <!-- Search commands -->
+                    <i:Interaction.Behaviors>
+                        <i:EventTriggerBehavior EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{x:Bind ViewModel.SearchTextChangedCommand}" />
+                        </i:EventTriggerBehavior>
+                        <i:EventTriggerBehavior EventName="QuerySubmitted">
+                            <i:InvokeCommandAction Command="{x:Bind ViewModel.QuerySubmittedCommand}" />
+                        </i:EventTriggerBehavior>
+                    </i:Interaction.Behaviors>
+
+                    <!-- Search icon -->
+                    <AutoSuggestBox.QueryIcon>
+                        <FontIcon Glyph="&#xE7B8;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
+                    </AutoSuggestBox.QueryIcon>
+
+                    <!-- Search result template -->
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ResourceSuggestionViewModel">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <!-- Icon -->
+                                    <controls:SwitchPresenter Value="{x:Bind IsResult}" TargetType="x:Boolean">
+                                        <controls:Case Value="True">
+                                            <FontIcon Glyph="&#xE7B8;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
+                                        </controls:Case>
+                                        <controls:Case Value="False">
+                                            <FontIcon Glyph="&#xE70F;" FontSize="{ThemeResource CaptionTextBlockFontSize}" />
+                                        </controls:Case>
+                                    </controls:SwitchPresenter>
+
+                                    <!-- Title -->
+                                    <controls:SwitchPresenter Value="{x:Bind IsResult}" TargetType="x:Boolean">
+                                        <controls:Case Value="True">
+                                            <ContentControl Content="{x:Bind Converter={StaticResource ResourceSuggestionMatchConverter}}" />
+                                        </controls:Case>
+                                        <controls:Case Value="False">
+                                            <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                                        </controls:Case>
+                                    </controls:SwitchPresenter>
+
+                                    <!-- Version -->
+                                    <TextBlock VerticalAlignment="Center"
+                                               Style="{ThemeResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind Version}"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+
+                                <!-- Tags -->
+                                <ItemsRepeater ItemsSource="{x:Bind Tags}" Grid.Column="1">
+                                    <ItemsRepeater.Layout>
+                                        <StackLayout Orientation="Horizontal" Spacing="4" />
+                                    </ItemsRepeater.Layout>
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    Padding="6,2"
+                                                    CornerRadius="10">
+                                                <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                           Text="{x:Bind}"
+                                                           VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+                            </Grid>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
+                </AutoSuggestBox>
+
+                <!-- Action buttons-->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                    <Button VerticalAlignment="Stretch" Click="ExploreResource_Click">
+                        <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE946;" />
+                    </Button>
+                    <Button VerticalAlignment="Stretch" Command="{x:Bind ViewModel.ReloadCommand}">
+                        <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE72C;" />
+                    </Button>
+                </StackPanel>
+            </Grid>
         </StackPanel>
 
         <Rectangle Height="1"
@@ -45,7 +152,6 @@
                    HorizontalAlignment="Stretch"
                    Margin="0,8"
                    Grid.Row="1"/>
-
 
         <Grid Grid.Row="2" ColumnSpacing="8" x:Name="MainGrid">
             <Grid.ColumnDefinitions>
@@ -67,7 +173,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock x:Uid="ValidationPage_ResultsText" FontWeight="Bold" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center"/>
-                <Button Command="{Binding ConvertYamlToUICommand}" Grid.Column="1" Grid.Row="0">
+                <Button Command="{x:Bind ViewModel.ConvertYamlToUICommand}" Grid.Column="1" Grid.Row="0">
                     <TextBlock x:Uid="ValidationPage_ResultsToUIText"/>
                 </Button>
                 <Button Click="{x:Bind CopyResultsToClipboard}" Grid.Column="2" Grid.Row="0">
@@ -75,7 +181,7 @@
                 </Button>
 
                 <TextBox Width="Auto"
-                         Text="{Binding RawData, Mode=TwoWay}"
+                         Text="{x:Bind ViewModel.RawData, Mode=TwoWay}"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalAlignment="Stretch"
@@ -100,7 +206,7 @@
                                                 HorizontalAlignment="Stretch"/>
 
                 <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
-                       Visibility="{Binding IsPropertiesEmpty}"
+                       Visibility="{x:Bind ViewModel.IsPropertiesEmpty, Mode=OneWay}"
                        Grid.Row="1"
                        Grid.Column="0"
                        HorizontalAlignment="Center"
@@ -114,31 +220,11 @@
                         <ColumnDefinition Width="*"/>
                         <!-- <ColumnDefinition Width="*"/> -->
                     </Grid.ColumnDefinitions>
-                    <Button x:Uid="ValidationPage_GetButton" Command="{Binding GetCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button x:Uid="ValidationPage_SetButton" Command="{Binding SetCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
-                    <Button x:Uid="ValidationPage_TestButton" Command="{Binding TestCommand}" IsEnabled="{Binding ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
+                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
+                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
                 </Grid>
             </Grid>
         </Grid>
-        
-        
-
-        <Rectangle Height="1"
-                   Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                   HorizontalAlignment="Stretch"
-                   Margin="0,8"
-                   Grid.Row="3"/>
-
-        <TeachingTip
-                     IsLightDismissEnabled="False"
-                     Visibility="{Binding TestBannerVisible}"
-                     IsOpen="{Binding TestBannerVisible, Mode=TwoWay}">
-            <StackPanel>
-                <TextBlock x:Uid="ValidationPage_TestResultHeader"/>
-                <TextBlock Text="{Binding TestBannerText}"/>
-            </StackPanel>
-        </TeachingTip>
-
-
     </Grid>
 </Page>

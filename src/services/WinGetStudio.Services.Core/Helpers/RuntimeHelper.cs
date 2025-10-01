@@ -18,6 +18,10 @@ public static class RuntimeHelper
     private static readonly string _instanceLogPath = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff", CultureInfo.InvariantCulture);
     private const string WinGetStudio = nameof(WinGetStudio);
     public const string SettingsFile = "settings.json";
+    private const string TempStateDir = "TempState";
+    private const string LocalStateDir = "LocalState";
+    private const string LogsDir = "Logs";
+    private const string ModuleCatalogsDir = "ModuleCatalogs";
 
     /// <summary>
     /// Gets a value indicating whether the app is running as an MSIX package.
@@ -43,7 +47,7 @@ public static class RuntimeHelper
             return ApplicationData.Current.LocalFolder.Path;
         }
 
-        return GetUnpackagedPath("LocalState");
+        return GetUnpackagedPath(LocalStateDir);
     }
 
     /// <summary>
@@ -78,10 +82,10 @@ public static class RuntimeHelper
     {
         if (IsMSIX)
         {
-            return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, "Logs");
+            return Path.Combine(ApplicationData.Current.TemporaryFolder.Path, LogsDir);
         }
 
-        return GetUnpackagedPath("TempState", "Logs");
+        return GetUnpackagedPath(TempStateDir, LogsDir);
     }
 
     /// <summary>
@@ -91,6 +95,20 @@ public static class RuntimeHelper
     public static string GetAppInstanceLogPath()
     {
         return Path.Combine(GetAppLogsPath(), _instanceLogPath);
+    }
+
+    /// <summary>
+    /// Gets the module catalog cache path.
+    /// </summary>
+    /// <returns>The module catalog cache path.</returns>
+    public static string GetModuleCatalogCachePath()
+    {
+        if (IsMSIX)
+        {
+            return Path.Combine(ApplicationData.Current.LocalFolder.Path, ModuleCatalogsDir);
+        }
+
+        return Path.Combine(GetUnpackagedPath(LocalStateDir), ModuleCatalogsDir);
     }
 
     /// <summary>

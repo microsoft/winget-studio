@@ -126,13 +126,14 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         await _lock.WaitAsync();
         try
         {
-            if (await _fileService.TrySaveJsonAsync(FullPath, newSettings, _serializerOptions))
+            var saveResult = await _fileService.TrySaveJsonAsync(FullPath, newSettings, _serializerOptions);
+            if (saveResult.Success)
             {
                 _logger.LogInformation("Settings saved successfully.");
             }
             else
             {
-                _logger.LogWarning("Failed to save settings. Falling back to default settings.");
+                _logger.LogWarning(saveResult.Error, $"Failed to save settings. Falling back to default settings.");
             }
         }
         finally

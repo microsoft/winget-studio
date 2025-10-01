@@ -13,6 +13,7 @@ using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WingetStudio.Services.Localization.Extensions;
 using WinGetStudio.Services.Logging.Extensions;
@@ -97,6 +98,7 @@ public partial class App : Application
                 // Core Services
                 services.AddCore();
                 services.AddDSC();
+                services.AddDSCExplorer();
                 services.AddWinGet();
                 services.AddSettings();
                 services.AddTelemetry();
@@ -121,6 +123,7 @@ public partial class App : Application
                 services.AddTransient<ApplyFileViewModel>();
                 services.AddTransient<NotificationPaneViewModel>();
                 services.AddTransient<LoadingProgressBarViewModel>();
+                services.AddTransient<ResourceExplorerViewModel>();
 
                 // Factories
                 services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));

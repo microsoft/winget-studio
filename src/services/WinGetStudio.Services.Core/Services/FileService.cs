@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -12,42 +13,42 @@ namespace WinGetStudio.Services.Core.Services;
 public class FileService : IFileService
 {
     /// <inheritdoc/>
-    public async Task<(bool, T)> TryReadJsonAsync<T>(string filePath, JsonSerializerOptions options = null)
+    public async Task<ReadJsonResult<T>> TryReadJsonAsync<T>(string filePath, JsonSerializerOptions options = null)
     {
         try
         {
             if (!File.Exists(filePath))
             {
-                return (false, default);
+                return new(false, default, new FileNotFoundException(null, filePath));
             }
 
             var fileContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
             var result = JsonSerializer.Deserialize<T>(fileContent, options);
-            return (true, result);
+            return new(true, result);
         }
-        catch
+        catch (Exception ex)
         {
-            return (false, default);
+            return new(false, default, ex);
         }
     }
 
     /// <inheritdoc/>
-    public async Task<bool> TrySaveJsonAsync<T>(string filePath, T content, JsonSerializerOptions options = null)
+    public async Task<SaveJsonResult> TrySaveJsonAsync<T>(string filePath, T content, JsonSerializerOptions options = null)
     {
         try
         {
             var fileContent = JsonSerializer.Serialize(content, options);
             await File.WriteAllTextAsync(filePath, fileContent, Encoding.UTF8);
-            return true;
+            return new(true);
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return new(false, ex);
         }
     }
 
     /// <inheritdoc/>
-    public async Task<bool> TryDeleteAsync(string filePath)
+    public async Task<DeleteFileResult> TryDeleteAsync(string filePath)
     {
         try
         {
@@ -56,30 +57,30 @@ public class FileService : IFileService
                 await Task.Run(() => File.Delete(filePath));
             }
 
-            return true;
+            return new(true);
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return new(false, ex);
         }
     }
 
     /// <inheritdoc/>
-    public async Task<bool> TryCopyAsync(string sourceFilePath, string destinationFilePath, bool overwrite = false)
+    public async Task<CopyFileResult> TryCopyAsync(string sourceFilePath, string destinationFilePath, bool overwrite = false)
     {
         try
         {
             if (File.Exists(sourceFilePath))
             {
                 await Task.Run(() => File.Copy(sourceFilePath, destinationFilePath, overwrite));
-                return true;
+                return new(true);
             }
 
-            return false;
+            return new(false, new FileNotFoundException(null, sourceFilePath));
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return new(false, ex);
         }
     }
 }
