@@ -12,24 +12,28 @@
     mc:Ignorable="d">
 
     <ContentDialog.Resources>
+        <!-- Configure the dialog size and layout -->
         <x:Double x:Key="ContentDialogMinWidth">800</x:Double>
         <x:Double x:Key="ContentDialogMaxWidth">800</x:Double>
         <Thickness x:Key="ContentDialogPadding">0</Thickness>
+
+        <!-- Configure the table column widths -->
         <GridLength x:Key="NameColumnWidth">200</GridLength>
         <GridLength x:Key="TypeColumnWidth">150</GridLength>
     </ContentDialog.Resources>
 
     <Grid>
+        <!-- Close button -->
         <Button Style="{ThemeResource AlternateCloseButtonStyle}" Click="OnClose" />
 
+        <!-- Main content -->
         <Grid RowSpacing="8" Padding="24">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-
-            <!-- Presentation Mode Selector -->
+            <!-- Presentation mode selector -->
             <controls:Segmented SelectedIndex="0" x:Name="SegmentedModeView" HorizontalAlignment="Center">
                 <controls:SegmentedItem x:Name="SummaryView"
                                         x:Uid="ResourceExplorer_SummaryView"
@@ -47,12 +51,14 @@
                       SelectionMode="None"
                       Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}"> 
                 <ListView.Header>
-                    <Grid Padding="16,12" ColumnSpacing="16">
+                    <Grid Padding="{ThemeResource SectionPadding}" ColumnSpacing="{ThemeResource SectionSpacing}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="{StaticResource NameColumnWidth}" />
                             <ColumnDefinition Width="{StaticResource TypeColumnWidth}" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
+
+                        <!-- Name | Type | Syntax-->
                         <TextBlock x:Uid="ResourceExplorer_Name"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock x:Uid="ResourceExplorer_Type"
@@ -71,16 +77,21 @@
                                 <ColumnDefinition Width="{StaticResource TypeColumnWidth}" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
+
+                            <!-- Propety name -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
+                                <!-- Name -->
                                 <TextBlock Text="{x:Bind Name}"
                                            VerticalAlignment="Center"
                                            IsTextSelectionEnabled="True"
                                            Style="{ThemeResource BodyStrongTextBlockStyle}"
                                            TextTrimming="CharacterEllipsis" />
+
+                                <!-- Copy button -->
                                 <localControls:CopyButton Grid.Column="1"
                                                           Background="Transparent"
                                                           BorderThickness="0"
@@ -88,11 +99,15 @@
                                                           Click="OnCopyPropertyName"
                                                           Content="&#xE8C8;"/>
                             </Grid>
+
+                            <!-- Property type -->
                             <TextBlock Grid.Column="1"
                                        Text="{x:Bind Type}"
                                        IsTextSelectionEnabled="True"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis" />
+
+                            <!-- Property syntax -->
                             <ScrollViewer Grid.Column="2"
                                           HorizontalScrollBarVisibility="Auto"
                                           HorizontalScrollMode="Auto">
@@ -105,12 +120,6 @@
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-                <ListView.ItemContainerStyle>
-                    <Style BasedOn="{StaticResource DefaultListViewItemStyle}"
-                           TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListView.ItemContainerStyle>
             </ListView>
 
             <!-- Code view -->

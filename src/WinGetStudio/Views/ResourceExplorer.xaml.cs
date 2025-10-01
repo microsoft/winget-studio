@@ -20,6 +20,11 @@ public sealed partial class ResourceExplorer : ContentDialog
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Copies the property name to the clipboard when the copy button is clicked.
+    /// </summary>
+    /// <param name="sender">The button that was clicked.</param>
+    /// <param name="e">The event data.</param>
     private void OnCopyPropertyName(object sender, RoutedEventArgs e)
     {
         if (sender is Button button && button.Tag is string propertyName)
@@ -30,8 +35,10 @@ public sealed partial class ResourceExplorer : ContentDialog
         }
     }
 
-    private void OnClose(object sender, RoutedEventArgs e)
-    {
-        Hide();
-    }
+    /// <summary>
+    /// Closes the dialog when the close button is clicked.
+    /// </summary>
+    /// <param name="sender">The button that was clicked.</param>
+    /// <param name="e">>The event data.</param>
+    private void OnClose(object sender, RoutedEventArgs e) => Hide();
 }

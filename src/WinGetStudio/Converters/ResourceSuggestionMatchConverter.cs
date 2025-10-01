@@ -10,6 +10,9 @@ using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Converters;
 
+/// <summary>
+/// Converter to highlight the matching part of a resource suggestion.
+/// </summary>
 public sealed partial class ResourceSuggestionMatchConverter : IValueConverter
 {
     public object? Convert(object value, Type targetType, object parameter, string language)
@@ -21,6 +24,8 @@ public sealed partial class ResourceSuggestionMatchConverter : IValueConverter
             var query = suggestion.SearchText ?? string.Empty;
             var index = fullText.IndexOf(query, StringComparison.OrdinalIgnoreCase);
 
+            // If there's a match, split the text and apply bold formatting to
+            // the matching part.
             if (index >= 0)
             {
                 var before = fullText[..index];
