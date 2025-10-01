@@ -93,6 +93,7 @@ internal sealed class DSCOperations : IDSCOperations
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
         var input = config.CreateConfigurationUnit();
+        input.Settings = unit.Settings;
         input.Type = unit.Type;
 
         var result = await Task.Run(() => processor.GetUnitSettings(input));
