@@ -10,9 +10,9 @@ namespace WinGetStudio.ViewModels;
 
 public partial class ConfigurationViewModel : ObservableRecipient, INavigationAware
 {
-    public IConfigurationNavigationService NavigationService { get; }
+    public IConfigurationFrameNavigationService NavigationService { get; }
 
-    public ConfigurationViewModel(IConfigurationNavigationService navigationService)
+    public ConfigurationViewModel(IConfigurationFrameNavigationService navigationService)
     {
         NavigationService = navigationService;
     }

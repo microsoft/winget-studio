@@ -17,7 +17,7 @@ namespace WinGetStudio.ViewModels;
 
 public partial class DSCConfigurationUnitViewModel : ObservableObject
 {
-    private readonly IAppNavigationService _navigationService;
+    private readonly IAppFrameNavigationService _navigationService;
 
     private readonly ILogger _logger;
 
@@ -62,7 +62,7 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
     public DSCConfigurationUnitViewModel(IDSCUnit configurationUnit, ILogger logger)
     {
         ConfigurationUnit = configurationUnit;
-        _navigationService = App.GetService<IAppNavigationService>();
+        _navigationService = App.GetService<IAppFrameNavigationService>();
         Type = configurationUnit.Type;
         Description = configurationUnit.Description;
         RequiresElevation = configurationUnit.RequiresElevation;
@@ -177,7 +177,7 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
     [RelayCommand]
     private async Task OnValidateAsync()
     {
-        _navigationService.NavigateTo<ValidationFrameViewModel>(ConfigurationUnit);
+        _navigationService.NavigateTo<ValidationViewModel>(ConfigurationUnit);
         await Task.CompletedTask;
     }
 }

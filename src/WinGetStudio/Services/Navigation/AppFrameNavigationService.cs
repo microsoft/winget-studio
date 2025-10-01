@@ -7,13 +7,13 @@ using WinGetStudio.Events;
 using WinGetStudio.Services.Telemetry.Contracts;
 using WinGetStudio.ViewModels;
 
-namespace WinGetStudio.Services;
+namespace WinGetStudio.Services.Navigation;
 
-internal sealed class AppNavigationService : NavigationService, IAppNavigationService
+internal sealed class AppFrameNavigationService : FrameNavigationService, IAppFrameNavigationService
 {
     private readonly ITelemetryService _telemetryService;
 
-    public AppNavigationService(IAppPageService pageService, ITelemetryService telemetryService)
+    public AppFrameNavigationService(IAppPageService pageService, ITelemetryService telemetryService)
         : base(pageService)
     {
         _telemetryService = telemetryService;

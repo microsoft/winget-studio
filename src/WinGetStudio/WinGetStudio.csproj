@@ -42,6 +42,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="CommunityToolkit.WinUI.Behaviors" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" />
     <PackageReference Include="CommunityToolkit.WinUI.Converters" />
@@ -85,6 +86,12 @@
     <PRIResource Update="Strings\en-us\Resources.resw">
       <Generator>PublicResXFileCodeGenerator</Generator>
     </PRIResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Fonts\CascadiaMono.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <!-- Icon should be copied before the build starts -->

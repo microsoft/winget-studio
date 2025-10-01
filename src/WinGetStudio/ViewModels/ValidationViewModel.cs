@@ -245,12 +245,12 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
             if (unit.TestResult)
             {
                 var message = _localizer["Notification_MachineInDesiredState"];
-                _ui.ShowOutcomeNotification(null, message, NotificationMessageSeverity.Success);
+                _ui.ShowTimedNotification(message, NotificationMessageSeverity.Success);
             }
             else
             {
                 var message = _localizer["Notification_MachineNotInDesiredState"];
-                _ui.ShowOutcomeNotification(null, message, NotificationMessageSeverity.Error);
+                _ui.ShowTimedNotification(message, NotificationMessageSeverity.Error);
             }
         });
     }
