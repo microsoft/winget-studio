@@ -68,9 +68,9 @@
             </StackPanel>
 
             <!-- Cache -->
-            <TextBlock Text="Storage settings" Style="{ThemeResource SubtitleTextBlockStyle}" />
+            <TextBlock x:Uid="Settings_Resources" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
-                <Button Command="{x:Bind ViewModel.ClearModuleCatalogsCacheCommand}">Clear module catalogs cache</Button>
+                <Button x:Uid="Settings_ClearResourcesCache" Command="{x:Bind ViewModel.ClearModuleCatalogsCacheCommand}"/>
             </StackPanel>
 
             <!-- About -->

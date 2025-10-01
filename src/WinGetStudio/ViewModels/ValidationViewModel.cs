@@ -292,7 +292,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
                 }
                 else
                 {
-                    _ui.ShowTimedNotification("Unable to find information for the specified resource.", NotificationMessageSeverity.Warning);
+                    _ui.ShowTimedNotification(_localizer["ResourceInfoNotFoundMessage"], NotificationMessageSeverity.Warning);
                 }
             }
 
@@ -371,7 +371,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         AreSuggestionsLoaded = false;
         _allSuggestions.Clear();
         _ui.ShowTaskProgress();
-        _ui.ShowTimedNotification("Loading DSC resources ...", NotificationMessageSeverity.Informational);
+        _ui.ShowTimedNotification(_localizer["LoadingDSCResourcesMessage"], NotificationMessageSeverity.Informational);
 
         await foreach (var catalog in _dscExplorer.GetModuleCatalogsAsync())
         {
@@ -386,7 +386,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
             }
         }
 
-        _ui.ShowTimedNotification("Completed loading DSC resources.", NotificationMessageSeverity.Informational);
+        _ui.ShowTimedNotification(_localizer["CompletedLoadingDSCResourcesMessage"], NotificationMessageSeverity.Informational);
         _ui.HideTaskProgress();
         AreSuggestionsLoaded = true;
     }

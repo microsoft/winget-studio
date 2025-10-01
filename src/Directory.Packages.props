@@ -10,7 +10,6 @@
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
     <PackageVersion Include="Microsoft.CorrelationVector" Version="1.0.42" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
     <PackageVersion Include="Microsoft.Extensions.Localization" Version="9.0.9" />
     <PackageVersion Include="MSTest.TestAdapter" Version="2.2.10" />

@@ -10,7 +10,7 @@ using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Converters;
 
-public sealed partial class BoldMatchConverter : IValueConverter
+public sealed partial class ResourceSuggestionMatchConverter : IValueConverter
 {
     public object? Convert(object value, Type targetType, object parameter, string language)
     {

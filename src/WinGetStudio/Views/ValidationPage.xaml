@@ -27,7 +27,7 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible" />
         <converters:BoolToObjectConverter x:Key="BoolToIntConverter" TrueValue="1" FalseValue="0"/>
         <converters:BoolToObjectConverter x:Key="BoolToIntNegationConverter" TrueValue="0" FalseValue="1"/>
-        <localConverters:BoldMatchConverter x:Key="BoldMatchConverter"/>
+        <localConverters:ResourceSuggestionMatchConverter x:Key="ResourceSuggestionMatchConverter"/>
     </Page.Resources>
 
     <Grid x:Name="ContentArea" Padding="0" ColumnSpacing="32" RowSpacing="12">
@@ -96,11 +96,12 @@
                                     <!-- Title -->
                                     <controls:SwitchPresenter Value="{x:Bind IsResult}" TargetType="x:Boolean">
                                         <controls:Case Value="True">
-                                            <ContentControl Content="{x:Bind Converter={StaticResource BoldMatchConverter}}" />
+                                            <ContentControl Content="{x:Bind Converter={StaticResource ResourceSuggestionMatchConverter}}" />
                                         </controls:Case>
                                         <controls:Case Value="False">
                                             <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
-                                                       TextTrimming="CharacterEllipsis" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Style="{ThemeResource BodyStrongTextBlockStyle}"/>
                                         </controls:Case>
                                     </controls:SwitchPresenter>
 
@@ -124,7 +125,7 @@
                                                     CornerRadius="10">
                                                 <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
                                                            Text="{x:Bind}"
-                                                           VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">PSGallery</TextBlock>
+                                                           VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}"/>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsRepeater.ItemTemplate>
@@ -151,7 +152,6 @@
                    HorizontalAlignment="Stretch"
                    Margin="0,8"
                    Grid.Row="1"/>
-
 
         <Grid Grid.Row="2" ColumnSpacing="8" x:Name="MainGrid">
             <Grid.ColumnDefinitions>

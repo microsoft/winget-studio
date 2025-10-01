@@ -567,4 +567,37 @@
   <data name="MainPage_DSCDefinitions_ModuleDesc.Text" xml:space="preserve">
     <value>A module is a PowerShell module that contains the implementation for one or more DSC resources. Modules provide the actual functionality to apply configurations, such as the Microsoft.WinGet.DSC module for package management.</value>
   </data>
+  <data name="CacheClearedMessage" xml:space="preserve">
+    <value>Cache cleared</value>
+  </data>
+  <data name="ResourceInfoNotFoundMessage" xml:space="preserve">
+    <value>Unable to find information for the specified resource</value>
+  </data>
+  <data name="LoadingDSCResourcesMessage" xml:space="preserve">
+    <value>Loading DSC resources ...</value>
+  </data>
+  <data name="CompletedLoadingDSCResourcesMessage" xml:space="preserve">
+    <value>Completed loading DSC resources</value>
+  </data>
+  <data name="ResourceExplorer_SummaryView.Content" xml:space="preserve">
+    <value>Summary view</value>
+  </data>
+  <data name="ResourceExplorer_CodeView.Content" xml:space="preserve">
+    <value>Code view</value>
+  </data>
+  <data name="ResourceExplorer_Name.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="ResourceExplorer_Type.Text" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="ResourceExplorer_Syntax.Text" xml:space="preserve">
+    <value>Syntax</value>
+  </data>
+  <data name="Settings_Resources.Text" xml:space="preserve">
+    <value>Resources</value>
+  </data>
+  <data name="Settings_ClearResourcesCache.Content" xml:space="preserve">
+    <value>Clear resources cache</value>
+  </data>
 </root>
