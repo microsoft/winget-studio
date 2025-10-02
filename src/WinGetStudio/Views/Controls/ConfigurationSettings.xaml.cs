@@ -12,12 +12,6 @@ namespace WinGetStudio.Views.Controls;
 
 public sealed partial class ConfigurationSettings : UserControl
 {
-    public static readonly DependencyProperty PropertiesProperty = DependencyProperty.Register(
-        nameof(Properties),
-        typeof(ObservableCollection<ConfigurationProperty>),
-        typeof(ConfigurationSettings),
-        new PropertyMetadata(null));
-
     public ObservableCollection<ConfigurationProperty> Properties
     {
         get => (ObservableCollection<ConfigurationProperty>)GetValue(PropertiesProperty);
@@ -32,16 +26,14 @@ public sealed partial class ConfigurationSettings : UserControl
     private void NewValidationPropertyDefault(SplitButton sender, SplitButtonClickEventArgs e)
     {
         ObservableCollection<ConfigurationProperty>? listToUpdate = null;
-        if (sender.DataContext is ConfigurationProperty property && property.Value.Value is ObservableCollection<ConfigurationProperty> nestedList)
+        if (sender.DataContext is ConfigurationProperty property
+            && property.Value.Value is ObservableCollection<ConfigurationProperty> nestedList)
         {
             listToUpdate = nestedList;
         }
 
         listToUpdate ??= Properties;
-        if (listToUpdate != null)
-        {
-            listToUpdate.Add(new(string.Empty, new StringValue(string.Empty)));
-        }
+        listToUpdate?.Add(new(string.Empty, new StringValue(string.Empty)));
     }
 
     private void NewValidationProperty(object sender, RoutedEventArgs e)
@@ -185,4 +177,6 @@ public sealed partial class ConfigurationSettings : UserControl
             }
         }
     }
+
+    public static readonly DependencyProperty PropertiesProperty = DependencyProperty.Register(nameof(Properties), typeof(ObservableCollection<ConfigurationProperty>), typeof(ConfigurationSettings), new PropertyMetadata(null));
 }

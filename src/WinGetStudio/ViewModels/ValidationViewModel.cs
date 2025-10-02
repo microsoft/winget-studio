@@ -43,6 +43,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     public partial string RawData { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GetCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SetCommand))]
+    [NotifyCanExecuteChangedFor(nameof(TestCommand))]
     public partial bool ActionsEnabled { get; set; } = true;
 
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
@@ -203,16 +206,14 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// Retrieves the current configuration unit from the system asynchronously.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(ActionsEnabled))]
     private async Task OnGetAsync()
     {
         await RunDscOperationAsync(async () =>
         {
-            ActionsEnabled = false;
             var unit = CreateConfigurationUnitModel();
             await _dsc.DscGet(unit);
             RawData = unit.ToYaml();
-            ActionsEnabled = true;
         });
     }
 
@@ -224,10 +225,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async () =>
         {
-            ActionsEnabled = false;
             var unit = CreateConfigurationUnitModel();
             await _dsc.DscSet(unit);
-            ActionsEnabled = true;
         });
     }
 
