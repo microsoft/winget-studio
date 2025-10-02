@@ -1,0 +1,74 @@
+# Default to CRLF line endings for Windows
+*                text=auto        eol=crlf
+
+# Source code files
+*.cs             text             eol=crlf
+*.xaml           text             eol=crlf
+*.xml            text             eol=crlf
+*.resw           text             eol=crlf
+
+# Project and build files
+*.sln            text             eol=crlf
+*.csproj         text             eol=crlf
+*.proj           text             eol=crlf
+*.props          text             eol=crlf
+*.targets        text             eol=crlf
+*.config         text             eol=crlf
+*.nuspec         text             eol=crlf
+
+# Scripts and configuration
+*.ps1            text             eol=crlf
+*.psm1           text             eol=crlf
+*.psd1           text             eol=crlf
+*.json           text             eol=crlf
+*.yml            text             eol=crlf
+*.yaml           text             eol=crlf
+
+# Documentation
+*.md             text             eol=crlf
+*.txt            text             eol=crlf
+*.dic            text             eol=crlf
+
+# Manifest files
+*.appxmanifest   text             eol=crlf
+
+# Binary files (explicitly mark as binary to prevent text processing)
+*.msix           binary
+*.msixbundle     binary
+*.appx           binary
+*.appxbundle     binary
+*.exe            binary
+*.dll            binary
+*.pdb            binary
+*.lib            binary
+*.winmd          binary
+
+# Images
+*.png            binary
+*.jpg            binary
+*.jpeg           binary
+*.gif            binary
+*.ico            binary
+*.svg            text             eol=crlf
+*.bmp            binary
+*.tiff           binary
+
+# Fonts
+*.ttf            binary
+*.otf            binary
+*.woff           binary
+*.woff2          binary
+*.eot            binary
+
+# Certificates and keys
+*.pfx            binary
+*.cer            binary
+*.crt            binary
+*.key            binary
+*.p12            binary
+
+# Archive files
+*.zip            binary
+*.7z             binary
+*.tar            binary
+*.gz             binary
