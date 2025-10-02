@@ -4,6 +4,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WinGetStudio.Models;
+using WinGetStudio.Models.ResourceProperties;
 
 namespace WinGetStudio.Selectors;
 

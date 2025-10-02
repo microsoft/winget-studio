@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
+using WinGetStudio.Models.ResourceProperties;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using YamlDotNet.Serialization;

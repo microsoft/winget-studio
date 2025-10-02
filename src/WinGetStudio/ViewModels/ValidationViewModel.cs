@@ -11,6 +11,7 @@ using NuGet.Packaging;
 using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
+using WinGetStudio.Models.ResourceProperties;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;

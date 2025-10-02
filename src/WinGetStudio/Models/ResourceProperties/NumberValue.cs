@@ -3,7 +3,7 @@
 
 using System.Globalization;
 
-namespace WinGetStudio.Models;
+namespace WinGetStudio.Models.ResourceProperties;
 
 public class NumberValue : ConfigurationPropertyValueBase
 {

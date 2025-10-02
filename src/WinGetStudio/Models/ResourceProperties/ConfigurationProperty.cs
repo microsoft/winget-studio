@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using WinGetStudio.Models.ResourceProperties;
 
 namespace WinGetStudio.Models;
 
