@@ -37,6 +37,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Header -->
         <StackPanel Spacing="8">
             <!-- Description -->
             <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left">
@@ -152,6 +153,7 @@
                    Margin="0,8"
                    Grid.Row="1"/>
 
+        <!-- Main content -->
         <Grid Grid.Row="2" ColumnSpacing="8" x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="100" />
@@ -165,16 +167,15 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
+                <!-- Properties control -->
                 <usercontrols:ConfigurationSettings Properties="{x:Bind ViewModel.Properties, Mode=OneWay}"
-                                                Grid.Column="0"
-                                                HorizontalAlignment="Stretch"/>
+                                                    HorizontalAlignment="Stretch"/>
 
+                <!-- Empty properties message -->
                 <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
-                       Visibility="{Binding IsPropertiesEmpty}"
-                       Grid.Column="0"
+                       Visibility="{x:Bind ViewModel.IsPropertiesEmpty, Mode=OneWay}"
                        HorizontalAlignment="Center"
-                       Margin="0,50,0,0"
-                       TextAlignment="Center"/>
+                       VerticalAlignment="Center"/>
 
                 <!-- DSC buttons -->
                 <controls:UniformGrid Rows="1" Columns="3" Grid.Row="1" ColumnSpacing="8">
@@ -183,9 +184,9 @@
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         </Style>
                     </controls:UniformGrid.Resources>
-                    <Button x:Uid="ValidationPage_GetButton" Command="{Binding GetCommand}"/>
-                    <Button x:Uid="ValidationPage_SetButton" Command="{Binding SetCommand}" />
-                    <Button x:Uid="ValidationPage_TestButton" Command="{Binding TestCommand}" />
+                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}"/>
+                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" />
+                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" />
                 </controls:UniformGrid>
             </Grid>
             
@@ -211,12 +212,12 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Uid="ValidationPage_ResultsText" FontWeight="Bold" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center"/>
                     <StackPanel HorizontalAlignment="Right" Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                        <Button x:Uid="ValidationPage_ResultsToUIText" Command="{Binding ConvertYamlToUICommand}" />
+                        <Button x:Uid="ValidationPage_ResultsToUIText" Command="{x:Bind ViewModel.ConvertYamlToUICommand}" />
                         <Button x:Uid="ValidationPage_CopyToClipboard" Click="{x:Bind CopyResultsToClipboard}" />
                     </StackPanel>
                 </Grid>
 
-                <TextBox Text="{Binding RawData, Mode=TwoWay}"
+                <TextBox Text="{x:Bind ViewModel.RawData, Mode=TwoWay}"
                          Grid.Row="1"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
