@@ -385,10 +385,10 @@
   <data name="ValidationPage_TestResultHeader.Text" xml:space="preserve">
     <value>Test Result</value>
   </data>
-  <data name="ValidationPage_ResultsToUIText.Text" xml:space="preserve">
+  <data name="ValidationPage_ResultsToUIText.Content" xml:space="preserve">
     <value>Apply results to properties</value>
   </data>
-  <data name="ValidationPage_CopyToClipboard.Text" xml:space="preserve">
+  <data name="ValidationPage_CopyToClipboard.Content" xml:space="preserve">
     <value>Copy results to clipboard</value>
   </data>
   <data name="SettingsControl_AddPropertyText.Text" xml:space="preserve">
