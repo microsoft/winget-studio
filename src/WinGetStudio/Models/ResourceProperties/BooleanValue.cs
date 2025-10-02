@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace WinGetStudio.Models;
+namespace WinGetStudio.Models.ResourceProperties;
 
 public class BooleanValue : ConfigurationPropertyValueBase
 {

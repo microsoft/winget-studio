@@ -3,7 +3,7 @@
 
 using System.Collections.ObjectModel;
 
-namespace WinGetStudio.Models;
+namespace WinGetStudio.Models.ResourceProperties;
 
 public class ObjectValue : ConfigurationPropertyValueBase
 {

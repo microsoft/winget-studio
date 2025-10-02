@@ -3,7 +3,7 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace WinGetStudio.Models;
+namespace WinGetStudio.Models.ResourceProperties;
 
 public abstract class ConfigurationPropertyValueBase(PropertyType type) : ObservableObject
 {
