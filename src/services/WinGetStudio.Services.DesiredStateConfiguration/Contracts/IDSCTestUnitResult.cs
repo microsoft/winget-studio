@@ -1,19 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
+using Microsoft.Management.Configuration;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
-public interface IDSCGetUnitResult
+public interface IDSCTestUnitResult
 {
+    /// <summary>
+    /// Gets the configuration unit that was tested.
+    /// </summary>
+    IDSCUnit Unit { get; }
+
     /// <summary>
     /// Gets the result information for the operation.
     /// </summary>
     IDSCUnitResultInformation ResultInformation { get; }
 
     /// <summary>
-    /// Gets the settings for the configuration unit.
+    /// Gets the result of the test operation.
     /// </summary>
-    IReadOnlyDictionary<string, object> Settings { get; }
+    ConfigurationTestResult TestResult { get; }
 }

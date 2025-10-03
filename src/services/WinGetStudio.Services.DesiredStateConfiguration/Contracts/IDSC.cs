@@ -30,13 +30,13 @@ public interface IDSC
     public Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit);
 
     /// <inheritdoc cref="IDSCOperations.SetUnitAsync"/>
-    public Task SetUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit);
 
     /// <inheritdoc cref="IDSCOperations.TestUnitAsync"/>
-    public Task TestUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit);
 
     /// <inheritdoc cref="IDSCOperations.ExportUnitAsync"/>
-    public Task ExportUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit);
 
     /// <inheritdoc cref="IDSCOperations.GetDscV3ResourcesAsync"/>
     public Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();

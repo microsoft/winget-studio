@@ -5,15 +5,15 @@ using System.Collections.Generic;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
-public interface IDSCGetUnitResult
+public interface IDSCGetAllUnitsResult
 {
     /// <summary>
-    /// Gets the result information for the operation.
+    /// Gets the list of configuration units.
     /// </summary>
-    IDSCUnitResultInformation ResultInformation { get; }
+    IReadOnlyList<IDSCUnit> Units { get; }
 
     /// <summary>
-    /// Gets the settings for the configuration unit.
+    /// Gets result information about the operation.
     /// </summary>
-    IReadOnlyDictionary<string, object> Settings { get; }
+    IDSCUnitResultInformation ResultInformation { get; }
 }

@@ -43,21 +43,21 @@ internal interface IDSCOperations
     /// </summary>
     /// <param name="unit">Unit to set</param>
     /// <returns></returns>
-    public Task SetUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit);
 
     /// <summary>
     /// Test whether the current machine state is the same as the configuration unit.
     /// </summary>
     /// <param name="unit">Unit to test</param>
     /// <returns>Whether the machine state matches the configuration unit.</returns>
-    public Task TestUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit);
 
     /// <summary>
     /// Exports the specified configuration unit.
     /// </summary>
     /// <param name="unit">Unit to export</param>
     /// <returns>All settings for specified unit</returns>
-    public Task ExportUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit);
 
     /// <summary>
     /// Gets the list of available DSC v3 resources on the system.

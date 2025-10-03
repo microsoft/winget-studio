@@ -102,7 +102,7 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public async Task SetUnitAsync(ConfigurationUnitModel unit)
+    public async Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -111,11 +111,11 @@ internal sealed class DSCOperations : IDSCOperations
         input.Type = unit.Type;
 
         var result = await Task.Run(() => processor.ApplyUnit(input));
-        System.Diagnostics.Debug.WriteLine($"SetUnit result: {result.PreviouslyInDesiredState}");
+        return new DSCApplyUnitResult(result);
     }
 
     /// <inheritdoc />
-    public async Task TestUnitAsync(ConfigurationUnitModel unit)
+    public async Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -123,14 +123,14 @@ internal sealed class DSCOperations : IDSCOperations
         input.Settings = unit.Settings;
         input.Type = unit.Type;
         var result = await Task.Run(() => processor.TestUnit(input));
-        System.Diagnostics.Debug.WriteLine($"TestUnit result: {result.TestResult}");
         unit.TestResult = result.TestResult == ConfigurationTestResult.Positive;
+        return new DSCTestUnitResult(result);
     }
 
     /// <inheritdoc />
     /// Currently broken due to bug in DSC
     /// https://github.com/PowerShell/DSC/issues/786
-    public async Task ExportUnitAsync(ConfigurationUnitModel unit)
+    public async Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -145,6 +145,8 @@ internal sealed class DSCOperations : IDSCOperations
             System.Diagnostics.Debug.WriteLine(result.Units);
             unit.Settings = result.Units[0].Settings;
         }
+
+        return new DSCGetAllUnitsResult(result);
     }
 
     public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()

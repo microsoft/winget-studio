@@ -40,13 +40,13 @@ internal sealed class DSC : IDSC
     public async Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.GetUnitAsync(unit);
 
     /// <inheritdoc/>
-    public async Task SetUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.SetUnitAsync(unit);
+    public async Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.SetUnitAsync(unit);
 
     /// <inheritdoc/>
-    public async Task TestUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.TestUnitAsync(unit);
+    public async Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.TestUnitAsync(unit);
 
     /// <inheritdoc/>
-    public async Task ExportUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.ExportUnitAsync(unit);
+    public async Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.ExportUnitAsync(unit);
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync() => await _dscOperations.GetDscV3ResourcesAsync();
