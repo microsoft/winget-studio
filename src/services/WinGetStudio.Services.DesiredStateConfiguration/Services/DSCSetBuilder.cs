@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Management.Configuration;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using YamlDotNet.Serialization;
@@ -19,7 +19,7 @@ internal sealed class DSCSetBuilder : IDSCSetBuilder
     private readonly ILogger _logger;
     private EditableDSCSet _dscSet = new();
     private const string DscSchemaUrl = "https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json";
-    private const string DscVersionSrting = "dscv3";
+    private const string DscVersionString = "dscv3";
 
     public IReadOnlyList<IDSCUnit> Units => _dscSet.Units;
 
@@ -36,29 +36,24 @@ internal sealed class DSCSetBuilder : IDSCSetBuilder
         _dscSet.AddUnit(unit);
     }
 
-    public async Task<IDSCSet> BuildAsync()
+    public IDSCSet Build()
     {
-        return await _dscFactory.CreateSetAsync(_dscSet);
+        return _dscFactory.CreateSet(_dscSet);
     }
 
     public void ClearUnits()
     {
-        _dscSet.InternalUnits.Clear();
+        _dscSet.ClearUnits();
     }
 
     public void RemoveUnit(EditableDSCUnit unit)
     {
-        _dscSet.InternalUnits.Remove(unit);
+        _dscSet.RemoveUnit(unit);
     }
 
     public void UpdateUnit(EditableDSCUnit unit)
     {
-        var existingUnit = _dscSet.InternalUnits.FirstOrDefault(u => u.InstanceId == unit.InstanceId);
-        if (existingUnit != null)
-        {
-            var i = _dscSet.InternalUnits.FindIndex(u => u.InstanceId == unit.InstanceId);
-            _dscSet.InternalUnits[i] = unit;
-        }
+        _dscSet.UpdateUnit(unit);
     }
 
     public void ImportSet(IDSCSet set)
@@ -75,16 +70,16 @@ internal sealed class DSCSetBuilder : IDSCSetBuilder
             foreach (var unit in dscSet.UnitsInternal)
             {
                 var u = new EditableDSCUnit(unit);
-                _dscSet.InternalUnits.Add(u);
+                _dscSet.AddUnit(u);
             }
         }
     }
 
     public bool IsEmpty() => Units.Count == 0;
 
-    public async Task<string> ConvertToYamlAsync()
+    public string ConvertToYaml()
     {
-        var dscSet = await BuildAsync();
+        var dscSet = Build();
         var dscYaml = new Dictionary<string, object>
         {
             ["$schema"] = DscSchemaUrl,
@@ -92,7 +87,7 @@ internal sealed class DSCSetBuilder : IDSCSetBuilder
             {
                 ["winget"] = new Dictionary<string, object>
                 {
-                    ["processor"] = DscVersionSrting,
+                    ["processor"] = DscVersionString,
                 },
             },
             ["resources"] = new List<Dictionary<string, object>>(),
@@ -101,7 +96,7 @@ internal sealed class DSCSetBuilder : IDSCSetBuilder
         foreach (var unit in dscSet.Units)
         {
             var metadata = unit.Metadata.ToDictionary(kv => kv.Key, kv => kv.Value);
-            if (unit.RequiresElevation)
+            if (unit.SecurityContext == SecurityContext.Elevated)
             {
                 metadata.Add("securityContext", "elevated");
             }
@@ -132,8 +127,8 @@ internal sealed class DSCSetBuilder : IDSCSetBuilder
         }
     }
 
-    public async Task<bool> EqualsYamlAsync(string yaml)
+    public bool EqualsYaml(string yaml)
     {
-        return await ConvertToYamlAsync() == yaml;
+        return ConvertToYaml() == yaml;
     }
 }

@@ -84,13 +84,13 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
             }
 
             ConfigurationUnits.Clear();
-            var dscSet = await _dscSetBuilder.BuildAsync();
+            var dscSet = _dscSetBuilder.Build();
             foreach (var u in dscSet.Units)
             {
                 ConfigurationUnits.Add(new(u, _logger));
             }
 
-            _dsc.GetConfigurationUnitDetails(dscSet);
+            await _dsc.GetConfigurationUnitDetailsAsync(dscSet);
         }
         else
         {
@@ -135,7 +135,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
         {
             if (configParameter.DSCSet != null)
             {
-                _dsc.GetConfigurationUnitDetails(configParameter.DSCSet);
+                _ = _dsc.GetConfigurationUnitDetailsAsync(configParameter.DSCSet);
                 _dscSetBuilder.ImportSet(configParameter.DSCSet);
                 _dscSet = configParameter.DSCSet;
             }
@@ -184,7 +184,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     public async Task<bool> IsSaveRequiredAsync()
     {
         await UpdateUnits();
-        if (_yaml == await _dscSetBuilder.ConvertToYamlAsync())
+        if (_yaml == _dscSetBuilder.ConvertToYaml())
         {
             return false;
         }
@@ -193,18 +193,18 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     }
 
     [RelayCommand]
-    private async Task OnStoreYamlStateAsync()
+    private void OnStoreYamlState()
     {
-        _dscSet = await _dscSetBuilder.BuildAsync();
-        _yaml = await _dscSetBuilder.ConvertToYamlAsync();
+        _dscSet = _dscSetBuilder.Build();
+        _yaml = _dscSetBuilder.ConvertToYaml();
     }
 
     [RelayCommand]
-    private async Task OnApplyAsync()
+    private void OnApply()
     {
         if (!_dscSetBuilder.IsEmpty())
         {
-            _navigationService.NavigateTo<ApplyFileViewModel>(await _dscSetBuilder.BuildAsync());
+            _navigationService.NavigateTo<ApplyFileViewModel>(_dscSetBuilder.Build());
         }
     }
 
@@ -212,7 +212,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     private async Task OnSaveAsync()
     {
         await UpdateUnits();
-        var yaml = await _dscSetBuilder.ConvertToYamlAsync();
+        var yaml = _dscSetBuilder.ConvertToYaml();
         if (FilePath == string.Empty)
         {
             await SaveAsCommand.ExecuteAsync(null);
@@ -230,7 +230,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     private async Task OnSaveAsAsync()
     {
         await UpdateUnits();
-        var yaml = await _dscSetBuilder.ConvertToYamlAsync();
+        var yaml = _dscSetBuilder.ConvertToYaml();
 
         var picker = new FileSavePicker();
 

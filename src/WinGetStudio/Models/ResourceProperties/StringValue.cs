@@ -3,7 +3,7 @@
 
 namespace WinGetStudio.Models.ResourceProperties;
 
-public class StringValue : ConfigurationPropertyValueBase
+public sealed partial class StringValue : ConfigurationPropertyValueBase
 {
     private string _value = string.Empty;
 

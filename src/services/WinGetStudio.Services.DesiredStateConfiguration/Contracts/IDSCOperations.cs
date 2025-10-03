@@ -29,7 +29,7 @@ internal interface IDSCOperations
     /// Get details of configuration units in a set
     /// </summary>
     /// <param name="set">Configuration set to get details for</param>
-    public void GetConfigurationUnitDetails(IDSCSet set);
+    public Task GetConfigurationUnitDetailsAsync(IDSCSet set);
 
     /// <summary>
     /// Get details for the specified configuration unit.
@@ -63,5 +63,5 @@ internal interface IDSCOperations
     /// Gets the list of available DSC v3 resources on the system.
     /// </summary>
     /// <returns>List of available DSC v3 resources.</returns>
-    public Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
+    public Task<IReadOnlyList<ResourceMetadata>> GetDscV3ResourcesAsync();
 }

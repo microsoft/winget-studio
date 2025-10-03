@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Microsoft.Management.Configuration;
 using Windows.Foundation.Collections;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
@@ -33,6 +34,8 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
 
     public string Title => GetTitle();
 
+    public SecurityContext SecurityContext { get; set; }
+
     [ObservableProperty]
     public partial string Type { get; set; }
 
@@ -53,12 +56,12 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
     [ObservableProperty]
     public partial IList<KeyValuePair<string, object>> Settings { get; set; }
 
-    public IList<KeyValuePair<string, string>> Metadata => ConfigurationUnit.Metadata;
+    public IList<KeyValuePair<string, object>> Metadata => ConfigurationUnit.Metadata;
 
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
 
     [ObservableProperty]
-    public partial string SettingsString { get; set; }
+    public partial string? SettingsString { get; set; }
 
     public DSCConfigurationUnitViewModel(IDSCUnit configurationUnit, ILogger logger)
     {
@@ -66,8 +69,9 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
         _navigationService = App.GetService<IAppFrameNavigationService>();
         Type = configurationUnit.Type;
         Description = configurationUnit.Description;
-        RequiresElevation = configurationUnit.RequiresElevation;
-        Intent = configurationUnit.Intent;
+        SecurityContext = configurationUnit.SecurityContext;
+        RequiresElevation = SecurityContext == SecurityContext.Elevated;
+        Intent = configurationUnit.Intent.ToString();
         ModuleName = configurationUnit.ModuleName;
         Settings = configurationUnit.Settings;
         _logger = logger;
@@ -128,7 +132,7 @@ public partial class DSCConfigurationUnitViewModel : ObservableObject
     {
         if (ConfigurationUnit is EditableDSCUnit e)
         {
-            e.RequiresElevation = RequiresElevation;
+            e.SecurityContext = SecurityContext;
             e.Description = Description;
             e.ModuleName = ModuleName;
             e.Type = Type;

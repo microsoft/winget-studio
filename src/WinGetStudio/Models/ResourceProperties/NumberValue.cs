@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace WinGetStudio.Models.ResourceProperties;
 
-public class NumberValue : ConfigurationPropertyValueBase
+public sealed partial class NumberValue : ConfigurationPropertyValueBase
 {
     private double _value;
 

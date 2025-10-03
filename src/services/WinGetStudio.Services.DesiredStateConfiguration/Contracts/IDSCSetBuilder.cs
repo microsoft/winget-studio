@@ -57,7 +57,7 @@ public interface IDSCSetBuilder
     /// Creates a new DSCSet object from the current state of this class
     /// </summary>
     /// <returns>The created DSCSet</returns>
-    public Task<IDSCSet> BuildAsync();
+    public IDSCSet Build();
 
     /// <summary>
     /// Checks if the current state matches that of the DSC Configuration file passed in
@@ -65,11 +65,11 @@ public interface IDSCSetBuilder
     /// <remarks><paramref name="yaml"/> must be valid yaml and a valid DSC Configuration file</remarks>
     /// <param name="yaml">The string to compare to</param>
     /// <returns>True if the current state matches that of the input string, False otherwise</returns>
-    public Task<bool> EqualsYamlAsync(string yaml);
+    public bool EqualsYaml(string yaml);
 
     /// <summary>
     /// Generates a string containing the DSC Configuration file corresponding to the current state
     /// </summary>
     /// <returns>A string containing the current state of this object converted into yaml</returns>
-    public Task<string> ConvertToYamlAsync();
+    public string ConvertToYaml();
 }

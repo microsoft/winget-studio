@@ -34,7 +34,7 @@ internal sealed class DSC : IDSC
     public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet set) => _dscOperations.ApplySetAsync(set);
 
     /// <inheritdoc/>
-    public void GetConfigurationUnitDetails(IDSCSet set) => _dscOperations.GetConfigurationUnitDetails(set);
+    public Task GetConfigurationUnitDetailsAsync(IDSCSet set) => _dscOperations.GetConfigurationUnitDetailsAsync(set);
 
     /// <inheritdoc/>
     public async Task DscGet(ConfigurationUnitModel unit) => await _dscOperations.GetUnit(unit);
@@ -49,5 +49,5 @@ internal sealed class DSC : IDSC
     public async Task DscExport(ConfigurationUnitModel unit) => await _dscOperations.ExportUnit(unit);
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync() => await _dscOperations.GetDscV3ResourcesAsync();
+    public async Task<IReadOnlyList<ResourceMetadata>> GetDscV3ResourcesAsync() => await _dscOperations.GetDscV3ResourcesAsync();
 }

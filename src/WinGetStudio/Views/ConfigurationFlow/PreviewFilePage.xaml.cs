@@ -46,7 +46,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         if (!ViewModel.IsInEditMode)
         {
             ViewModel.IsInEditMode = !ViewModel.IsInEditMode;
-            await ViewModel.StoreYamlStateCommand.ExecuteAsync(null);
+            ViewModel.StoreYamlStateCommand.Execute(null);
             return;
         }
 

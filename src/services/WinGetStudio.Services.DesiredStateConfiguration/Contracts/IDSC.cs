@@ -24,7 +24,7 @@ public interface IDSC
     public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet dscSet);
 
     /// <inheritdoc cref="IDSCOperations.GetConfigurationUnitDetails" />
-    public void GetConfigurationUnitDetails(IDSCSet dscSet);
+    public Task GetConfigurationUnitDetailsAsync(IDSCSet dscSet);
 
     /// <inheritdoc cref="IDSCOperations.Get" />
     public Task DscGet(ConfigurationUnitModel unit);
@@ -39,5 +39,5 @@ public interface IDSC
     public Task DscExport(ConfigurationUnitModel unit);
 
     /// <inheritdoc cref="IDSCOperations.GetDscV3ResourcesAsync"/>
-    public Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
+    public Task<IReadOnlyList<ResourceMetadata>> GetDscV3ResourcesAsync();
 }

@@ -3,7 +3,7 @@
 
 namespace WinGetStudio.Models.ResourceProperties;
 
-public class BooleanValue : ConfigurationPropertyValueBase
+public sealed partial class BooleanValue : ConfigurationPropertyValueBase
 {
     private bool _value;
 

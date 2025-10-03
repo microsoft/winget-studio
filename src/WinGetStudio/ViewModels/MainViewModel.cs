@@ -4,7 +4,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Windows.Storage;
-using Windows.System;
 using WinGetStudio.Contracts.Services;
 
 namespace WinGetStudio.ViewModels;

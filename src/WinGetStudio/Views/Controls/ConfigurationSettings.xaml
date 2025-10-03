@@ -145,12 +145,64 @@
 
         <!-- Content -->
         <ScrollViewer Grid.Row="1"
-                      Margin="10"
                       HorizontalScrollBarVisibility="Auto"
                       HorizontalScrollMode="Auto">
+            <TreeView ItemsSource="{x:Bind Properties, Mode=TwoWay}" SelectionMode="None">
+                <TreeView.Resources>
+                    <Brush x:Key="TreeViewItemBackgroundSelectedPressed">Transparent</Brush>
+                    <Brush x:Key="TreeViewItemBackgroundPointerOver">Transparent</Brush>
+                    <Brush x:Key="TreeViewItemBackgroundPressed">Transparent</Brush>
+                    <x:Double x:Key="TreeViewItemMinHeight">0</x:Double>
+                    <x:Double x:Key="TreeViewItemContentHeight">0</x:Double>
+                    <Thickness x:Key="TreeViewItemPresenterPadding">0</Thickness>
+                    <Thickness x:Key="TreeViewItemPresenterMargin">0</Thickness>
+                </TreeView.Resources>
+                <TreeView.ItemTemplate>
+                    <DataTemplate>
+                        <TreeViewItem>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+                                <TreeViewItem />
+
+                                <Grid ColumnSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox VerticalAlignment="Center"
+                                              HorizontalAlignment="Stretch"
+                                              FontFamily="{StaticResource CascadiaMonoFontFamily}">
+                                        <ComboBoxItem>
+                                            <TextBlock>abc</TextBlock>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem>
+                                            <TextBlock>123</TextBlock>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem>
+                                            <TextBlock>{ }</TextBlock>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem>
+                                            <TextBlock>bool</TextBlock>
+                                        </ComboBoxItem>
+                                    </ComboBox>
+                                    <TextBox Grid.Column="1" VerticalAlignment="Center" PlaceholderText="Name"/>
+                                    <TextBox Grid.Column="2" VerticalAlignment="Center" PlaceholderText="Value"/>
+                                </Grid>
+                                <Button Grid.Column="1" Style="{ThemeResource AlternateCloseButtonStyle}" />
+                            </Grid>
+                        </TreeViewItem>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+            <!--
             <ListView ItemsSource="{x:Bind Properties, Mode=TwoWay}"
                       SelectionMode="None"
                       ItemTemplateSelector="{StaticResource PropertyTemplateSelector}"/>
+            -->
         </ScrollViewer>
     </Grid>
 </UserControl>

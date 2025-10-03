@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using Windows.Foundation.Collections;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -13,35 +14,28 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 
 internal sealed class DSCFactory : IDSCFactory
 {
-    private ConfigurationProcessor _configurationProcessor;
+    private readonly ILogger<DSCFactory> _logger;
     private const string DSCv3DynamicRuntimeHandlerIdentifier = "{5f83e564-ca26-41ca-89db-36f5f0517ffd}";
 
-    public DSCFactory()
+    public DSCFactory(ILogger<DSCFactory> logger)
     {
-        _configurationProcessor = null;
+        _logger = logger;
     }
 
-    public async Task<IDSCSet> CreateSetAsync(IDSCSet set)
+    public IDSCSet CreateSet(IDSCSet set)
     {
-        if (_configurationProcessor == null)
-        {
-            await CreateProcessorAsync();
-        }
-
         if (set is EditableDSCSet editableDSCSet)
         {
             ConfigurationStaticFunctions config = new();
             var configSet = config.CreateConfigurationSet();
             configSet.Name = editableDSCSet.Name;
-            DSCSet newDSCSet = new(_configurationProcessor, configSet);
-            foreach (var unit in editableDSCSet.InternalUnits)
+            foreach (var unit in editableDSCSet.Units)
             {
-                var u = CreateUnit(unit);
-                newDSCSet.UnitsInternal.Add(u as DSCUnit);
-                newDSCSet.ConfigSet.Units.Add((u as DSCUnit).ConfigUnit);
+                var configUnit = CreateConfigurationUnit(unit);
+                configSet.Units.Add(configUnit);
             }
 
-            return newDSCSet;
+            return new DSCSet(configSet);
         }
 
         return set;
@@ -49,52 +43,13 @@ internal sealed class DSCFactory : IDSCFactory
 
     public IDSCUnit CreateUnit(IDSCUnit unit)
     {
-        if (unit is DSCUnit u)
+        if (unit is EditableDSCUnit editableUnit)
         {
-            return u;
+            var configUnit = CreateConfigurationUnit(editableUnit);
+            return new DSCUnit(configUnit);
         }
-        else if (unit is EditableDSCUnit editableUnit)
-        {
-            ConfigurationStaticFunctions config = new();
-            var configUnit = config.CreateConfigurationUnit();
-            configUnit.Type = editableUnit.Type;
-            configUnit.Identifier = editableUnit.Id;
 
-            configUnit.Intent = Enum.Parse<ConfigurationUnitIntent>(editableUnit.Intent);
-            configUnit.Environment.Context = editableUnit.RequiresElevation ? SecurityContext.Elevated : SecurityContext.Current;
-
-            configUnit.Metadata = new ValueSet();
-            foreach (var metadata in editableUnit.Metadata)
-            {
-                configUnit.Metadata.Add(metadata.Key, metadata.Value);
-            }
-
-            if (editableUnit.ModuleName != string.Empty)
-            {
-                configUnit.Metadata["module"] = editableUnit.ModuleName;
-            }
-
-            if (editableUnit.Description != string.Empty)
-            {
-                configUnit.Metadata["description"] = editableUnit.Description;
-            }
-
-            configUnit.Settings.Clear();
-            ConvertKeyValuePairListToValueSet(configUnit.Settings, editableUnit.Settings);
-
-            configUnit.Dependencies.Clear();
-            foreach (var dependency in editableUnit.Dependencies)
-            {
-                configUnit.Dependencies.Add(dependency);
-            }
-
-            DSCUnit dscUnit = new(configUnit);
-            return dscUnit;
-        }
-        else
-        {
-            throw new ArgumentException("Unsupported unit type", nameof(unit));
-        }
+        return unit;
     }
 
     private void ConvertKeyValuePairListToValueSet(ValueSet valueSet, IList<KeyValuePair<string, object>> settings)
@@ -114,14 +69,83 @@ internal sealed class DSCFactory : IDSCFactory
         }
     }
 
-    private async Task CreateProcessorAsync()
+    /// <inheritdoc/>
+    public async Task<ConfigurationProcessor> CreateProcessorAsync()
     {
         ConfigurationStaticFunctions config = new();
         var factory = await config.CreateConfigurationSetProcessorFactoryAsync(DSCv3DynamicRuntimeHandlerIdentifier);
 
         // Create and configure the configuration processor.
-        _configurationProcessor = config.CreateConfigurationProcessor(factory);
-        _configurationProcessor.Caller = nameof(WinGetStudio);
-        _configurationProcessor.MinimumLevel = DiagnosticLevel.Verbose;
+        var processor = config.CreateConfigurationProcessor(factory);
+        processor.Caller = nameof(WinGetStudio);
+        processor.Diagnostics += LogConfigurationDiagnostics;
+        processor.MinimumLevel = DiagnosticLevel.Verbose;
+        return processor;
+    }
+
+    private ConfigurationUnit CreateConfigurationUnit(IDSCUnit unit)
+    {
+        ConfigurationStaticFunctions config = new();
+        var configUnit = config.CreateConfigurationUnit();
+        configUnit.Type = unit.Type;
+        configUnit.Identifier = unit.Id;
+
+        configUnit.Intent = unit.Intent;
+        configUnit.Environment.Context = unit.SecurityContext;
+
+        configUnit.Metadata = new ValueSet();
+        foreach (var metadata in unit.Metadata)
+        {
+            configUnit.Metadata.Add(metadata.Key, metadata.Value);
+        }
+
+        if (unit.ModuleName != string.Empty)
+        {
+            configUnit.Metadata["module"] = unit.ModuleName;
+        }
+
+        if (unit.Description != string.Empty)
+        {
+            configUnit.Metadata["description"] = unit.Description;
+        }
+
+        configUnit.Settings.Clear();
+        ConvertKeyValuePairListToValueSet(configUnit.Settings, unit.Settings);
+
+        configUnit.Dependencies.Clear();
+        foreach (var dependency in unit.Dependencies)
+        {
+            configUnit.Dependencies.Add(dependency);
+        }
+
+        return configUnit;
+    }
+
+    /// <summary>
+    /// Map configuration diagnostics to logger
+    /// </summary>
+    /// <param name="sender">The event sender</param>
+    /// <param name="diagnosticInformation">Diagnostic information</param>
+    private void LogConfigurationDiagnostics(object sender, IDiagnosticInformation diagnosticInformation)
+    {
+        switch (diagnosticInformation.Level)
+        {
+            case DiagnosticLevel.Warning:
+                _logger.LogWarning(diagnosticInformation.Message);
+                return;
+            case DiagnosticLevel.Error:
+                _logger.LogError(diagnosticInformation.Message);
+                return;
+            case DiagnosticLevel.Critical:
+                _logger.LogCritical(diagnosticInformation.Message);
+                return;
+            case DiagnosticLevel.Verbose:
+                _logger.LogInformation(diagnosticInformation.Message);
+                return;
+            case DiagnosticLevel.Informational:
+            default:
+                _logger.LogInformation(diagnosticInformation.Message);
+                return;
+        }
     }
 }

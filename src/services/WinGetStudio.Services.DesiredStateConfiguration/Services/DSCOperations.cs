@@ -20,18 +20,19 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Services;
 internal sealed class DSCOperations : IDSCOperations
 {
     private readonly ILogger _logger;
-    private const string DSCv3DynamicRuntimeHandlerIdentifier = "{5f83e564-ca26-41ca-89db-36f5f0517ffd}";
+    private readonly IDSCFactory _factory;
 
-    public DSCOperations(ILogger<DSCOperations> logger)
+    public DSCOperations(IDSCFactory factory, ILogger<DSCOperations> logger)
     {
+        _factory = factory;
         _logger = logger;
     }
 
     public async Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file)
     {
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var processor = await _factory.CreateProcessorAsync();
         var outOfProcResult = await OpenConfigurationSetAsync(file, processor);
-        return new DSCSet(processor, outOfProcResult);
+        return new DSCSet(outOfProcResult);
     }
 
     /// <inheritdoc />
@@ -45,7 +46,8 @@ internal sealed class DSCOperations : IDSCOperations
         return AsyncInfo.Run<IDSCApplySetResult, IDSCSetChangeData>(async (cancellationToken, progress) =>
         {
             _logger.LogInformation("Starting to apply configuration set");
-            var task = dscSet.Processor.ApplySetAsync(dscSet.ConfigSet, ApplyConfigurationSetFlags.None);
+            var processor = await _factory.CreateProcessorAsync();
+            var task = processor.ApplySetAsync(dscSet.ConfigSet, ApplyConfigurationSetFlags.None);
             task.Progress += (sender, args) => progress.Report(new DSCSetChangeData(args));
             var outOfProcResult = await task;
             var inProcResult = new DSCApplySetResult(inputSet, outOfProcResult);
@@ -55,7 +57,7 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public void GetConfigurationUnitDetails(IDSCSet inputSet)
+    public async Task GetConfigurationUnitDetailsAsync(IDSCSet inputSet)
     {
         if (inputSet is not DSCSet dscSet)
         {
@@ -63,7 +65,8 @@ internal sealed class DSCOperations : IDSCOperations
         }
 
         _logger.LogInformation("Getting configuration unit details");
-        var detailsOperation = dscSet.Processor.GetSetDetailsAsync(dscSet.ConfigSet, ConfigurationUnitDetailFlags.ReadOnly);
+        var processor = await _factory.CreateProcessorAsync();
+        var detailsOperation = processor.GetSetDetailsAsync(dscSet.ConfigSet, ConfigurationUnitDetailFlags.ReadOnly);
         var detailsOperationTask = detailsOperation.AsTask();
 
         // For each DSC unit, create a task to get the details asynchronously
@@ -91,7 +94,7 @@ internal sealed class DSCOperations : IDSCOperations
     public async Task GetUnit(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var processor = await _factory.CreateProcessorAsync();
         var input = config.CreateConfigurationUnit();
         input.Settings = unit.Settings;
         input.Type = unit.Type;
@@ -104,7 +107,7 @@ internal sealed class DSCOperations : IDSCOperations
     public async Task SetUnit(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var processor = await _factory.CreateProcessorAsync();
         var input = config.CreateConfigurationUnit();
         input.Settings = unit.Settings;
         input.Type = unit.Type;
@@ -117,7 +120,7 @@ internal sealed class DSCOperations : IDSCOperations
     public async Task TestUnit(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var processor = await _factory.CreateProcessorAsync();
         var input = config.CreateConfigurationUnit();
         input.Settings = unit.Settings;
         input.Type = unit.Type;
@@ -132,7 +135,7 @@ internal sealed class DSCOperations : IDSCOperations
     public async Task ExportUnit(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var processor = await _factory.CreateProcessorAsync();
         var input = config.CreateConfigurationUnit();
         input.Type = unit.Type;
         input.Intent = ConfigurationUnitIntent.Inform;
@@ -146,13 +149,13 @@ internal sealed class DSCOperations : IDSCOperations
         }
     }
 
-    public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()
+    public async Task<IReadOnlyList<ResourceMetadata>> GetDscV3ResourcesAsync()
     {
-        List<ResourceMetada> resources = [];
+        List<ResourceMetadata> resources = [];
         try
         {
             ConfigurationStaticFunctions config = new();
-            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+            var processor = await _factory.CreateProcessorAsync();
             var options = config.CreateFindUnitProcessorsOptions();
             options.UnitDetailFlags = ConfigurationUnitDetailFlags.Local;
 
@@ -192,23 +195,6 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <summary>
-    /// Create a configuration processor using DSC configuration API
-    /// </summary>
-    /// <returns>Configuration processor</returns>
-    private async Task<ConfigurationProcessor> CreateConfigurationProcessorAsync(string handler)
-    {
-        ConfigurationStaticFunctions config = new();
-        var factory = await config.CreateConfigurationSetProcessorFactoryAsync(handler);
-
-        // Create and configure the configuration processor.
-        var processor = config.CreateConfigurationProcessor(factory);
-        processor.Caller = nameof(WinGetStudio);
-        processor.Diagnostics += LogConfigurationDiagnostics;
-        processor.MinimumLevel = DiagnosticLevel.Verbose;
-        return processor;
-    }
-
-    /// <summary>
     /// Open a configuration set using DSC configuration API
     /// </summary>
     /// <param name="file">Configuration file</param>
@@ -227,34 +213,6 @@ internal sealed class DSCOperations : IDSCOperations
         configSet.Origin = file.DirectoryPath;
         configSet.Path = file.Path;
         return configSet;
-    }
-
-    /// <summary>
-    /// Map configuration diagnostics to logger
-    /// </summary>
-    /// <param name="sender">The event sender</param>
-    /// <param name="diagnosticInformation">Diagnostic information</param>
-    private void LogConfigurationDiagnostics(object sender, IDiagnosticInformation diagnosticInformation)
-    {
-        switch (diagnosticInformation.Level)
-        {
-            case DiagnosticLevel.Warning:
-                _logger.LogWarning(diagnosticInformation.Message);
-                return;
-            case DiagnosticLevel.Error:
-                _logger.LogError(diagnosticInformation.Message);
-                return;
-            case DiagnosticLevel.Critical:
-                _logger.LogCritical(diagnosticInformation.Message);
-                return;
-            case DiagnosticLevel.Verbose:
-                _logger.LogInformation(diagnosticInformation.Message);
-                return;
-            case DiagnosticLevel.Informational:
-            default:
-                _logger.LogInformation(diagnosticInformation.Message);
-                return;
-        }
     }
 
     /// <summary>

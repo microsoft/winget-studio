@@ -3,7 +3,7 @@
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
-public class ResourceMetada
+public class ResourceMetadata
 {
     /// <summary>
     /// Gets or sets the resource type.

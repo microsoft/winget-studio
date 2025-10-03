@@ -5,9 +5,9 @@ using System.Collections.ObjectModel;
 
 namespace WinGetStudio.Models.ResourceProperties;
 
-public class ObjectValue : ConfigurationPropertyValueBase
+public sealed partial class ObjectValue : ConfigurationPropertyValueBase
 {
-    private ObservableCollection<ConfigurationProperty> _value = new();
+    private ObservableCollection<ConfigurationProperty> _value = [];
 
     public override object Value
     {

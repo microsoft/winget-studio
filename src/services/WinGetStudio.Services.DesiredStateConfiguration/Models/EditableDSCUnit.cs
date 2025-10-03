@@ -4,29 +4,42 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Management.Configuration;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 public class EditableDSCUnit : IDSCUnit
 {
-    public string Type { get; set; } = string.Empty;
+    /// <inheritdoc/>
+    public string Type { get; set; }
 
-    public string Id { get; set; } = string.Empty;
+    /// <inheritdoc/>
+    public string Id { get; set; }
 
+    /// <inheritdoc/>
     public Guid InstanceId { get; } = Guid.NewGuid();
 
-    public string Description { get; set; } = string.Empty;
+    /// <inheritdoc/>
+    public string Description { get; set; }
 
-    public string Intent { get; set; } = "Apply";
+    /// <inheritdoc/>
+    public ConfigurationUnitIntent Intent { get; set; }
 
-    public string ModuleName { get; set; } = string.Empty;
+    /// <inheritdoc/>
+    public string ModuleName { get; set; }
 
-    public IList<string> Dependencies { get; set; } = new List<string>();
+    /// <inheritdoc/>
+    public IList<string> Dependencies { get; set; } = [];
 
-    public IList<KeyValuePair<string, object>> Settings { get; set; } = new List<KeyValuePair<string, object>>();
+    /// <inheritdoc/>
+    public IList<KeyValuePair<string, object>> Settings { get; set; } = [];
 
-    public IList<KeyValuePair<string, string>> Metadata { get; set; } = new List<KeyValuePair<string, string>>();
+    /// <inheritdoc/>
+    public IList<KeyValuePair<string, object>> Metadata { get; set; } = [];
+
+    /// <inheritdoc/>
+    public SecurityContext SecurityContext { get; set; }
 
     public EditableDSCUnit(IDSCUnit unit)
     {
@@ -38,15 +51,14 @@ public class EditableDSCUnit : IDSCUnit
         Settings = unit.Settings;
         Dependencies = unit.Dependencies;
         Description = unit.Description;
-        RequiresElevation = unit.RequiresElevation;
+        SecurityContext = unit.SecurityContext;
     }
 
     public EditableDSCUnit()
     {
     }
 
-    public bool RequiresElevation { get; set; }
-
+    /// <inheritdoc/>
     public Task<IDSCUnitDetails> GetDetailsAsync()
     {
         return Task.FromResult<IDSCUnitDetails>(new DSCUnitDetails(ModuleName));
