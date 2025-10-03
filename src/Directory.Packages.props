@@ -28,6 +28,7 @@
     <PackageVersion Include="Microsoft.WindowsPackageManager.Configuration.OutOfProc" Version="1.11.430" />
     <!-- WinUI and related -->
     <PackageVersion Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
+    <PackageVersion Include="NSwag.MSBuild" Version="14.6.1" />
     <PackageVersion Include="NuGet.Protocol" Version="6.14.0" />
     <PackageVersion Include="NJsonSchema" Version="11.4.0" />
     <PackageVersion Include="Serilog" Version="4.3.0" />
