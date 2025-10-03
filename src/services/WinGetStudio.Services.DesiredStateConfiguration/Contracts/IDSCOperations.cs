@@ -36,28 +36,28 @@ internal interface IDSCOperations
     /// </summary>
     /// <param name="unit">Unit to get details for</param>
     /// <returns>result of Get</returns>
-    public Task GetUnit(ConfigurationUnitModel unit);
+    public Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit);
 
     /// <summary>
     /// Set the machine state to the specified configuration unit.
     /// </summary>
     /// <param name="unit">Unit to set</param>
     /// <returns></returns>
-    public Task SetUnit(ConfigurationUnitModel unit);
+    public Task SetUnitAsync(ConfigurationUnitModel unit);
 
     /// <summary>
     /// Test whether the current machine state is the same as the configuration unit.
     /// </summary>
     /// <param name="unit">Unit to test</param>
     /// <returns>Whether the machine state matches the configuration unit.</returns>
-    public Task TestUnit(ConfigurationUnitModel unit);
+    public Task TestUnitAsync(ConfigurationUnitModel unit);
 
     /// <summary>
     /// Exports the specified configuration unit.
     /// </summary>
     /// <param name="unit">Unit to export</param>
     /// <returns>All settings for specified unit</returns>
-    public Task ExportUnit(ConfigurationUnitModel unit);
+    public Task ExportUnitAsync(ConfigurationUnitModel unit);
 
     /// <summary>
     /// Gets the list of available DSC v3 resources on the system.

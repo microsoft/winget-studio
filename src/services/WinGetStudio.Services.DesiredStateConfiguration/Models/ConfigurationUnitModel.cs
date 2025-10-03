@@ -63,7 +63,10 @@ public class ConfigurationUnitModel
     /// otherwise, <see langword="false"/> if an error occurred during parsing or the YAML structure was invalid.</returns>
     public bool TryLoad(string yaml)
     {
+        // TODO: WIth WithAttemptingUnquotedStringTypeDeserialization, we can simplify this.
+        // And potentially remove the need for a type associated with each proerpty (?)
         var deserializer = new DeserializerBuilder()
+            .WithAttemptingUnquotedStringTypeDeserialization()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
         var resource = deserializer.Deserialize<Dictionary<string, object>>(yaml);

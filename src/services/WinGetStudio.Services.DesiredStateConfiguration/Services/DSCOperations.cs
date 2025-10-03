@@ -88,7 +88,7 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public async Task GetUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -98,10 +98,11 @@ internal sealed class DSCOperations : IDSCOperations
 
         var result = await Task.Run(() => processor.GetUnitSettings(input));
         unit.Settings = result.Settings;
+        return new DSCGetUnitResult(result);
     }
 
     /// <inheritdoc />
-    public async Task SetUnit(ConfigurationUnitModel unit)
+    public async Task SetUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -114,7 +115,7 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public async Task TestUnit(ConfigurationUnitModel unit)
+    public async Task TestUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -129,7 +130,7 @@ internal sealed class DSCOperations : IDSCOperations
     /// <inheritdoc />
     /// Currently broken due to bug in DSC
     /// https://github.com/PowerShell/DSC/issues/786
-    public async Task ExportUnit(ConfigurationUnitModel unit)
+    public async Task ExportUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);

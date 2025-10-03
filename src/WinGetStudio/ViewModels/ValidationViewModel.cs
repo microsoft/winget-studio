@@ -210,7 +210,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         {
             ActionsEnabled = false;
             var unit = CreateConfigurationUnitModel();
-            await _dsc.DscGet(unit);
+            await _dsc.GetUnitAsync(unit);
             RawData = unit.ToYaml();
             ActionsEnabled = true;
         });
@@ -226,7 +226,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         {
             ActionsEnabled = false;
             var unit = CreateConfigurationUnitModel();
-            await _dsc.DscSet(unit);
+            await _dsc.SetUnitAsync(unit);
             ActionsEnabled = true;
         });
     }
@@ -240,7 +240,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         await RunDscOperationAsync(async () =>
         {
             var unit = CreateConfigurationUnitModel();
-            await _dsc.DscTest(unit);
+            await _dsc.TestUnitAsync(unit);
             if (unit.TestResult)
             {
                 var message = _localizer["Notification_MachineInDesiredState"];

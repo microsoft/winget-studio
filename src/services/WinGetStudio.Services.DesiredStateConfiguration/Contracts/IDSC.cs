@@ -26,17 +26,17 @@ public interface IDSC
     /// <inheritdoc cref="IDSCOperations.GetConfigurationUnitDetails" />
     public void GetConfigurationUnitDetails(IDSCSet dscSet);
 
-    /// <inheritdoc cref="IDSCOperations.Get" />
-    public Task DscGet(ConfigurationUnitModel unit);
+    /// <inheritdoc cref="IDSCOperations.GetUnitAsync" />
+    public Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit);
 
-    /// <inheritdoc cref="IDSCOperations.Set"/>
-    public Task DscSet(ConfigurationUnitModel unit);
+    /// <inheritdoc cref="IDSCOperations.SetUnitAsync"/>
+    public Task SetUnitAsync(ConfigurationUnitModel unit);
 
-    /// <inheritdoc cref="IDSCOperations.Test"/>
-    public Task DscTest(ConfigurationUnitModel unit);
+    /// <inheritdoc cref="IDSCOperations.TestUnitAsync"/>
+    public Task TestUnitAsync(ConfigurationUnitModel unit);
 
-    /// <inheritdoc cref="IDSCOperations.Export"/>
-    public Task DscExport(ConfigurationUnitModel unit);
+    /// <inheritdoc cref="IDSCOperations.ExportUnitAsync"/>
+    public Task ExportUnitAsync(ConfigurationUnitModel unit);
 
     /// <inheritdoc cref="IDSCOperations.GetDscV3ResourcesAsync"/>
     public Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
