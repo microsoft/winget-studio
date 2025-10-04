@@ -30,6 +30,7 @@
   <ItemGroup>
     <WinGetConfigSchema Include="$(ProjectDir)\Schemas\configuration.schema.0.1.json" ClassName="DSCWinGetConfigurationV0_1"/>
     <WinGetConfigSchema Include="$(ProjectDir)\Schemas\configuration.schema.0.2.json" ClassName="DSCWinGetConfigurationV0_2"/>
+    <WinGetConfigSchema Include="$(ProjectDir)\Schemas\configuration.schema.0.3.json" ClassName="DSCWinGetConfigurationV0_3"/>
   </ItemGroup>
 
   <Target Name="CopyWinmdToTargetDir" BeforeTargets="BeforeBuild">
@@ -37,7 +38,7 @@
     <Copy SourceFiles="$(PkgMicrosoft_WindowsPackageManager_Configuration_OutOfProc)\runtimes\win-$(Platform)\native\Microsoft.Management.Configuration.winmd" DestinationFolder="$(TargetDir)" />
   </Target>
 
-  <Target Name="GenerateWinGetConfiguration" BeforeTargets="BeforeBuild" Inputs="@(WinGetConfigSchema)" Outputs="@(WinGetConfigSchema -> '$(ProjectDir)Models\%(ClassName).cs')">
-    <Exec Command="$(NSwagExe) jsonschema2csclient /JsonLibrary:SystemTextJson /name:%(WinGetConfigSchema.ClassName) /namespace:WinGetStudio.Services.DesiredStateConfiguration.Models.%(WinGetConfigSchema.ClassName) /input:%(WinGetConfigSchema.FullPath) /output:$(ProjectDir)Models\%(WinGetConfigSchema.ClassName).cs /InlineNamedArrays:true /RequiredPropertiesMustBeDefined:false /ArrayType:System.Collections.Generic.List /ArrayInstanceType:System.Collections.Generic.List" />
+  <Target Name="GenerateWinGetConfiguration" BeforeTargets="CoreCompile" Inputs="@(WinGetConfigSchema)" Outputs="@(WinGetConfigSchema -> '$(ProjectDir)Models\%(ClassName).cs')">
+    <Exec Command="$(NSwagExe) jsonschema2csclient /JsonLibrary:SystemTextJson /name:%(WinGetConfigSchema.ClassName) /namespace:WinGetStudio.Services.DesiredStateConfiguration.Models.%(WinGetConfigSchema.ClassName) /input:%(WinGetConfigSchema.FullPath) /output:$(ProjectDir)Models\%(WinGetConfigSchema.ClassName).cs /InlineNamedArrays:true /ArrayType:System.Collections.Generic.List /ArrayInstanceType:System.Collections.Generic.List /GenerateOptionalPropertiesAsNullable:true /GenerateNullableReferenceTypes:true" />
   </Target>
 </Project>

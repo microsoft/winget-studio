@@ -5,6 +5,9 @@
 //----------------------
 
 
+#nullable enable
+
+
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfigurationV0_2
 {
     #pragma warning disable // Disable all warnings
@@ -20,9 +23,9 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfig
         /// The properties of the configuration.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
-        public Properties Properties { get; set; }
+        public Properties? Properties { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
@@ -41,19 +44,19 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfig
         /// The preconditions required to run the configuration.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("assertions")]
-        public System.Collections.Generic.List<Assertions> Assertions { get; set; }
+        public System.Collections.Generic.List<Assertions>? Assertions { get; set; } = default!;
 
         /// <summary>
         /// A list of resources (software, tools, packages, settings, etc.) to be included in the configuration.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("resources")]
-        public System.Collections.Generic.List<Assertions> Resources { get; set; }
+        public System.Collections.Generic.List<Assertions>? Resources { get; set; } = default!;
 
         /// <summary>
         /// Resources that retrieve information via a 'get' operation.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("parameters")]
-        public System.Collections.Generic.List<Assertions> Parameters { get; set; }
+        public System.Collections.Generic.List<Assertions>? Parameters { get; set; } = default!;
 
         /// <summary>
         /// The configuration syntax version.
@@ -64,7 +67,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfig
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$")]
         public string ConfigurationVersion { get; set; } = "0.2.0";
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
@@ -85,34 +88,34 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfig
         [System.Text.Json.Serialization.JsonPropertyName("resource")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
-        public string Resource { get; set; }
+        public string Resource { get; set; } = default!;
 
         /// <summary>
         /// A unique identifier for this resource.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("id")]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
-        public string Id { get; set; }
+        public string? Id { get; set; } = default!;
 
         /// <summary>
         /// The list of resource ids identifying dependencies.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("dependsOn")]
-        public System.Collections.Generic.List<string> DependsOn { get; set; }
+        public System.Collections.Generic.List<string>? DependsOn { get; set; } = default!;
 
         /// <summary>
         /// Information about the module and/or resource.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("directives")]
-        public Directives Directives { get; set; }
+        public Directives? Directives { get; set; } = default!;
 
         /// <summary>
         /// Parameters as key-value pairs to be passed to the resource.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("settings")]
-        public object Settings { get; set; }
+        public object? Settings { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
@@ -132,29 +135,29 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfig
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("module")]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
-        public string Module { get; set; }
+        public string? Module { get; set; } = default!;
 
         /// <summary>
         /// The description of the desired state.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("description")]
         [System.ComponentModel.DataAnnotations.StringLength(512)]
-        public string Description { get; set; }
+        public string? Description { get; set; } = default!;
 
         /// <summary>
         /// Enable using prerelease modules.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("allowPrerelease")]
-        public bool AllowPrerelease { get; set; }
+        public bool? AllowPrerelease { get; set; } = default!;
 
         /// <summary>
         /// Provides an indication of the security context in which the configuration unit should be run.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("securityContext")]
         [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DirectivesSecurityContext>))]
-        public DirectivesSecurityContext SecurityContext { get; set; }
+        public DirectivesSecurityContext? SecurityContext { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties

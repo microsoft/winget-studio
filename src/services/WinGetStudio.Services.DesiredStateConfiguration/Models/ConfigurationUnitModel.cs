@@ -2,22 +2,35 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Globalization;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Windows.Foundation.Collections;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using V0_1 = WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfigurationV0_1;
+using V0_2 = WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfigurationV0_2;
+using V0_3 = WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfigurationV0_3;
 
-namespace WinGetStudio.Models;
+namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 public class ConfigurationUnitModel
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
     public string Type { get; set; } = string.Empty;
 
+    // TODO Deep copy of settings
     public ValueSet Settings { get; set; } = new();
 
     public bool ElevatedRequired { get; set; }
 
     public bool TestResult { get; set; }
+
+    public string ToJson()
+    {
+        var config = ToWinGetConfigurationV0_1();
+        return JsonSerializer.Serialize(config, _jsonOptions);
+    }
 
     /// <summary>
     /// Converts the current object to its YAML representation.
@@ -28,27 +41,15 @@ public class ConfigurationUnitModel
     /// <returns>A YAML-formatted string representing the current object.</returns>
     public string ToYaml()
     {
-        var resource = new Dictionary<string, object>
-        {
-            ["properties"] = new Dictionary<string, object>
-            {
-                ["resources"] = new List<Dictionary<string, object>>
-                 {
-                     new()
-                     {
-                        ["resource"] = Type,
-                        ["settings"] = Settings,
-                     },
-                 },
-            },
-        };
+        // Parse to JSON
+        var json = ToJson();
+        using var reader = new StringReader(json);
+        var deserializer = new DeserializerBuilder().Build();
+        var obj = deserializer.Deserialize(reader);
 
-        var serializer = new SerializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-
-        string yaml = serializer.Serialize(resource);
-        return yaml;
+        // Serialize to YAML
+        var serializer = new SerializerBuilder().Build();
+        return serializer.Serialize(obj);
     }
 
     /// <summary>
@@ -65,64 +66,75 @@ public class ConfigurationUnitModel
     {
         // TODO: WIth WithAttemptingUnquotedStringTypeDeserialization, we can simplify this.
         // And potentially remove the need for a type associated with each proerpty (?)
-        var deserializer = new DeserializerBuilder()
-            .WithAttemptingUnquotedStringTypeDeserialization()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-        var resource = deserializer.Deserialize<Dictionary<string, object>>(yaml);
-        if (resource != null
-            && resource.TryGetValue("properties", out var properties)
-            && properties is List<object> resourceList
-            && resourceList.Count > 0
-            && resourceList[0] is Dictionary<object, object> dict)
-        {
-            Type = dict["resource"] as string;
-
-            Settings = new ValueSet();
-
-            TryLoadHelper(Settings, dict["settings"] as Dictionary<object, object>);
-            return true;
-        }
-
+        // var deserializer = new DeserializerBuilder()
+        //    .WithAttemptingUnquotedStringTypeDeserialization()
+        //    .Build();
+        // var resource = deserializer.Deserialize<Dictionary<string, object>>(yaml);
         return false;
     }
 
-    /// <summary>
-    /// Helper method to recursively load settings from a dictionary into a ValueSet.
-    /// <summary>
-    /// Recursively populates a <see cref="ValueSet"/> with key-value pairs from a deserialized YAML dictionary.
-    /// </summary>
-    /// <param name="settings">The <see cref="ValueSet"/> to populate with values from the dictionary.</param>
-    /// <param name="dict">The dictionary containing key-value pairs parsed from YAML.</param>
-    private void TryLoadHelper(ValueSet settings, Dictionary<object, object> dict)
+    private V0_1.DSCWinGetConfigurationV0_1 ToWinGetConfigurationV0_1()
     {
-        foreach (var kvp in dict)
+        return new()
         {
-            if (kvp.Key is string)
+            Properties = new()
             {
-                if (kvp.Value is string)
-                {
-                    // COM API returns strings for all values, so we need to convert them to appropriate types
-                    // Types will always be string, bool, number, or nested dictionary
-                    object result = kvp.Value as string;
-                    if (bool.TryParse(kvp.Value as string, out bool b))
+                Resources =
+                [
+                    new()
                     {
-                        result = b;
-                    }
-                    else if (double.TryParse(kvp.Value as string, NumberStyles.Float, CultureInfo.InvariantCulture, out double d))
-                    {
-                        result = d;
-                    }
+                        Resource = Type,
+                        Settings = new Dictionary<string, object>(Settings),
+                    },
+                ],
+            },
+        };
+    }
 
-                    settings[kvp.Key as string] = result;
-                }
-                else if (kvp.Value is Dictionary<object, object> subDict)
+    private V0_2.DSCWinGetConfigurationV0_2 ToWinGetConfigurationV0_2()
+    {
+        return new()
+        {
+            Properties = new()
+            {
+                Resources =
+                [
+                    new()
+                    {
+                        Resource = Type,
+                        Settings = new Dictionary<string, object>(Settings),
+                    },
+                ],
+            },
+        };
+    }
+
+    private V0_3.DSCWinGetConfigurationV0_3 ToWinGetConfigurationV0_3()
+    {
+        return new()
+        {
+            Metadata = new Dictionary<string, object>()
+            {
                 {
-                    var subSettings = new ValueSet();
-                    TryLoadHelper(subSettings, subDict);
-                    settings[kvp.Key as string] = subSettings;
-                }
-            }
-        }
+                    "winget", new Dictionary<string, object>()
+                    {
+                        {
+                            "processor", new Dictionary<string, object>()
+                            {
+                                { "identifier", "dscv3" },
+                            }
+                        },
+                    }
+                },
+            },
+            Resources =
+            [
+                new()
+                {
+                    Name = $"{Type}-0",
+                    Type = Type,
+                },
+            ],
+        };
     }
 }

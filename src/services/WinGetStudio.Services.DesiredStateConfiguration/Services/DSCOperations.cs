@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using Windows.Foundation;
 using Windows.Storage.Streams;
-using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
