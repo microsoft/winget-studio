@@ -35,7 +35,13 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ReloadCommand))]
-    public partial bool AreSuggestionsLoaded { get; set; }
+    public partial bool CanReload { get; set; }
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GetCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SetCommand))]
+    [NotifyCanExecuteChangedFor(nameof(TestCommand))]
+    public partial bool CanExecuteDSCOperation { get; set; } = true;
 
     [ObservableProperty]
     public partial string? SearchResourceText { get; set; }
@@ -43,12 +49,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     public partial string RawData { get; set; } = string.Empty;
 
-    [ObservableProperty]
-    public partial bool ActionsEnabled { get; set; } = true;
-
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
-
-    public bool IsPropertiesEmpty => Properties.Count == 0;
 
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
 
@@ -64,11 +65,6 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         _localizer = localizer;
         _noResultsSuggestion = new();
         SelectedSuggestions = [_noResultsSuggestion];
-
-        Properties.CollectionChanged += (_, __) =>
-        {
-            OnPropertyChanged(nameof(IsPropertiesEmpty));
-        };
     }
 
     public void OnNavigatedTo(object parameter)
@@ -204,38 +200,34 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// Retrieves the current configuration unit from the system asynchronously.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnGetAsync()
     {
         await RunDscOperationAsync(async () =>
         {
-            ActionsEnabled = false;
             var unit = CreateConfigurationUnitModel();
             await _dsc.GetUnitAsync(unit);
             RawData = unit.ToYaml();
-            ActionsEnabled = true;
         });
     }
 
     /// <summary>
     /// Sets the current machine state to the specified configuration unit asynchronously.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnSetAsync()
     {
         await RunDscOperationAsync(async () =>
         {
-            ActionsEnabled = false;
             var unit = CreateConfigurationUnitModel();
             await _dsc.SetUnitAsync(unit);
-            ActionsEnabled = true;
         });
     }
 
     /// <summary>
     /// Tests whether the current machine state matches the specified configuration unit asynchronously.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnTestAsync()
     {
         await RunDscOperationAsync(async () =>
@@ -262,11 +254,11 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <returns>A task representing the asynchronous operation.</returns>
     private async Task RunDscOperationAsync(Func<Task> action)
     {
-        ActionsEnabled = false;
+        CanExecuteDSCOperation = false;
         _ui.ShowTaskProgress();
         await action();
         _ui.HideTaskProgress();
-        ActionsEnabled = true;
+        CanExecuteDSCOperation = true;
     }
 
     [RelayCommand]
@@ -319,7 +311,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         }
     }
 
-    [RelayCommand(CanExecute = nameof(AreSuggestionsLoaded))]
+    [RelayCommand(CanExecute = nameof(CanReload))]
     private async Task OnReloadAsync()
     {
         await LoadSuggestionsAsync();
@@ -391,7 +383,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     private async Task LoadSuggestionsAsync()
     {
-        AreSuggestionsLoaded = false;
+        CanReload = false;
         _allSuggestions.Clear();
         _ui.ShowTaskProgress();
         _ui.ShowTimedNotification(_localizer["LoadingDSCResourcesMessage"], NotificationMessageSeverity.Informational);
@@ -411,6 +403,6 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
         _ui.ShowTimedNotification(_localizer["CompletedLoadingDSCResourcesMessage"], NotificationMessageSeverity.Informational);
         _ui.HideTaskProgress();
-        AreSuggestionsLoaded = true;
+        CanReload = true;
     }
 }
