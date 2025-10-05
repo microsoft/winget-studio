@@ -22,6 +22,6 @@ internal sealed class DSCGetUnitResult : IDSCGetUnitResult
         // information available even if the out-of-proc COM objects are no
         // longer available (e.g. AppInstaller service is no longer running).
         ResultInformation = new DSCUnitResultInformation(settingsResult.ResultInformation);
-        Settings = new Dictionary<string, object>(settingsResult.Settings);
+        Settings = settingsResult.Settings == null ? [] : new Dictionary<string, object>(settingsResult.Settings);
     }
 }

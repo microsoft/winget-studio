@@ -10,4 +10,6 @@ public abstract class ConfigurationPropertyValueBase(PropertyType type) : Observ
     public PropertyType Type { get; set; } = type;
 
     public abstract object Value { get; set; }
+
+    public virtual object ToObject() => Value;
 }

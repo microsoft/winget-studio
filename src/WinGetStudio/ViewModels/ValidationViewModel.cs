@@ -112,33 +112,13 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         ConfigurationUnitModel unit = new();
         unit.Type = SearchResourceText;
-        ConfigurationPropertiesToValueSet(unit.Settings, Properties);
-        return unit;
-    }
-
-    private void ConfigurationPropertiesToValueSet(ValueSet settings, ObservableCollection<ConfigurationProperty> properties)
-    {
-        foreach (var property in properties)
+        foreach (var property in Properties)
         {
-            if (property.Value.Value is string s)
-            {
-                settings.Add(new(property.Name, s));
-            }
-            else if (property.Value.Value is bool b)
-            {
-                settings.Add(new(property.Name, b));
-            }
-            else if (property.Value.Value is double d)
-            {
-                settings.Add(new(property.Name, d));
-            }
-            else if (property.Value.Value is ObservableCollection<ConfigurationProperty> nestedProperties)
-            {
-                ValueSet nestedSettings = new();
-                ConfigurationPropertiesToValueSet(nestedSettings, nestedProperties);
-                settings.Add(new(property.Name, nestedSettings));
-            }
+            var keyValue = property.ToKeyValuePair();
+            unit.Settings.TryAdd(keyValue.Key, keyValue.Value);
         }
+
+        return unit;
     }
 
     /// <summary>

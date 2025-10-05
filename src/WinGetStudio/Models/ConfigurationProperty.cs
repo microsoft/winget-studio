@@ -12,4 +12,9 @@ public partial class ConfigurationProperty(string name, ConfigurationPropertyVal
 
     [ObservableProperty]
     public partial ConfigurationPropertyValueBase Value { get; set; } = value;
+
+    public KeyValuePair<string, object> ToKeyValuePair()
+    {
+        return new KeyValuePair<string, object>(Name, Value.ToObject());
+    }
 }
