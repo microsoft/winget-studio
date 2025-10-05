@@ -19,6 +19,6 @@ internal sealed class DSCGetAllUnitsResult : IDSCGetAllUnitsResult
     public DSCGetAllUnitsResult(GetAllConfigurationUnitsResult unitsResult)
     {
         Units = [..unitsResult.Units.Select(unit => new DSCUnit(unit))];
-        ResultInformation = new DSCUnitResultInformation(unitsResult.ResultInformation);
+        ResultInformation = unitsResult.ResultInformation == null ? null : new DSCUnitResultInformation(unitsResult.ResultInformation);
     }
 }

@@ -24,7 +24,7 @@ internal sealed class DSCTestUnitResult : IDSCTestUnitResult
         // information available even if the out-of-proc COM objects are no
         // longer available (e.g. AppInstaller service is no longer running).
         Unit = new DSCUnit(unitResult.Unit);
-        ResultInformation = new DSCUnitResultInformation(unitResult.ResultInformation);
         TestResult = unitResult.TestResult;
+        ResultInformation = unitResult.ResultInformation == null ? null : new DSCUnitResultInformation(unitResult.ResultInformation);
     }
 }

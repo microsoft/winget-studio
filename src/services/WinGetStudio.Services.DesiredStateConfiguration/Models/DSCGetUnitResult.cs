@@ -22,7 +22,7 @@ internal sealed class DSCGetUnitResult : IDSCGetUnitResult
         // objects over to the current process. This ensures that we have this
         // information available even if the out-of-proc COM objects are no
         // longer available (e.g. AppInstaller service is no longer running).
-        ResultInformation = new DSCUnitResultInformation(settingsResult.ResultInformation);
         Settings = settingsResult.Settings == null ? [] : settingsResult.Settings.DeepCopyViaYaml();
+        ResultInformation = settingsResult.ResultInformation == null ? null : new DSCUnitResultInformation(settingsResult.ResultInformation);
     }
 }

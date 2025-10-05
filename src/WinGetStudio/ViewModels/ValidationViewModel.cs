@@ -236,7 +236,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         {
             var unit = CreateConfigurationUnitModel();
             var result = await _dsc.TestUnitAsync(unit);
-            if (result.ResultInformation.IsOk)
+            if (result.ResultInformation == null || result.ResultInformation.IsOk)
             {
                 if (unit.TestResult)
                 {
@@ -259,7 +259,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     /// <param name="action">The DSC operation to execute.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task RunDscOperationAsync(Func<Task<IDSCUnitResultInformation>> action)
+    private async Task RunDscOperationAsync(Func<Task<IDSCUnitResultInformation?>> action)
     {
         try
         {
