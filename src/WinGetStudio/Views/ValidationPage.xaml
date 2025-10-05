@@ -184,18 +184,21 @@
 
                 <!-- Result options -->
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4">
-                    <ComboBox SelectedIndex="0">
-                        <ComboBox.Items>
-                            <ComboBoxItem>YAML</ComboBoxItem>
-                            <ComboBoxItem>JSON</ComboBoxItem>
-                        </ComboBox.Items>
+                    <ComboBox ItemsSource="{x:Bind ViewModel.ResultLanguageModes}"
+                              SelectedItem="{x:Bind ViewModel.SelectedResultLanguageMode, Mode=TwoWay}">
+                        <i:Interaction.Behaviors>
+                            <i:EventTriggerBehavior EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{x:Bind ViewModel.ResultModeChangedCommand}"/>
+                            </i:EventTriggerBehavior>
+                        </i:Interaction.Behaviors>
                     </ComboBox>
-                    <ComboBox SelectedIndex="0">
-                        <ComboBox.Items>
-                            <ComboBoxItem>Schema v0.1</ComboBoxItem>
-                            <ComboBoxItem>Schema v0.2</ComboBoxItem>
-                            <ComboBoxItem>Schema v0.3</ComboBoxItem>
-                        </ComboBox.Items>
+                    <ComboBox ItemsSource="{x:Bind ViewModel.ResultSchemaVersions}"
+                              SelectedItem="{x:Bind ViewModel.SelectedResultSchemaVersion, Mode=TwoWay}">
+                        <i:Interaction.Behaviors>
+                            <i:EventTriggerBehavior EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{x:Bind ViewModel.ResultModeChangedCommand}"/>
+                            </i:EventTriggerBehavior>
+                        </i:Interaction.Behaviors>
                     </ComboBox>
                 </StackPanel>
 

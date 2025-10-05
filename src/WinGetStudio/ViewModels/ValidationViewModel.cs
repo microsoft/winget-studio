@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using NuGet.Packaging;
 using Windows.Foundation.Collections;
@@ -32,6 +33,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private readonly ConcurrentDictionary<string, ResourceSuggestionViewModel> _allSuggestions = [];
 
     private bool _isSearchTextSubmitted;
+    private ConfigurationUnitModel? _currentUnit;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ReloadCommand))]
@@ -49,9 +51,19 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     public partial string RawData { get; set; } = string.Empty;
 
+    [ObservableProperty]
+    public partial ResultLanguageMode SelectedResultLanguageMode { get; set; }
+
+    [ObservableProperty]
+    public partial ResultSchemaVersion SelectedResultSchemaVersion { get; set; }
+
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
 
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
+
+    public List<ResultLanguageMode> ResultLanguageModes { get; } = [..Enum.GetValues<ResultLanguageMode>()];
+
+    public List<ResultSchemaVersion> ResultSchemaVersions { get; } = [..Enum.GetValues<ResultSchemaVersion>()];
 
     public ValidationViewModel(
         IDSC dsc,
@@ -185,9 +197,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async () =>
         {
-            var unit = CreateConfigurationUnitModel();
-            await _dsc.GetUnitAsync(unit);
-            RawData = unit.ToYaml();
+            _currentUnit = CreateConfigurationUnitModel();
+            await _dsc.GetUnitAsync(_currentUnit);
+            await OnResultModeChangedAsync();
         });
     }
 
@@ -384,5 +396,23 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         _ui.ShowTimedNotification(_localizer["CompletedLoadingDSCResourcesMessage"], NotificationMessageSeverity.Informational);
         _ui.HideTaskProgress();
         CanReload = true;
+    }
+
+    [RelayCommand]
+    private async Task OnResultModeChangedAsync()
+    {
+        if (_currentUnit != null)
+        {
+            if (SelectedResultLanguageMode == ResultLanguageMode.JSON)
+            {
+                RawData = _currentUnit.ToJson();
+            }
+            else
+            {
+                RawData = _currentUnit.ToYaml();
+            }
+        }
+
+        await Task.CompletedTask;
     }
 }

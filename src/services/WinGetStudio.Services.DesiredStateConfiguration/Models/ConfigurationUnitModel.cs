@@ -19,7 +19,7 @@ public class ConfigurationUnitModel
 
     public string Type { get; set; } = string.Empty;
 
-    // TODO Deep copy of settings
+    // TODO Deep copy of settings to prevent RPC errors and improve stability.
     public ValueSet Settings { get; set; } = new();
 
     public bool ElevatedRequired { get; set; }
