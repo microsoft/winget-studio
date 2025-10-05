@@ -3,12 +3,12 @@
 
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using NuGet.Packaging;
 using Windows.Foundation.Collections;
@@ -36,6 +36,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
     private readonly ResourceSuggestionViewModel _noResultsSuggestion;
     private readonly ConcurrentDictionary<string, ResourceSuggestionViewModel> _allSuggestions = [];
+    private readonly ILogger<ValidationViewModel> _logger;
 
     private bool _isSearchTextSubmitted;
     private ConfigurationUnitModel? _currentUnit;
@@ -74,12 +75,14 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         IDSC dsc,
         IDSCExplorer dscExplorer,
         IUIFeedbackService ui,
-        IStringLocalizer<ValidationViewModel> localizer)
+        IStringLocalizer<ValidationViewModel> localizer,
+        ILogger<ValidationViewModel> logger)
     {
         _dsc = dsc;
         _dscExplorer = dscExplorer;
         _ui = ui;
         _localizer = localizer;
+        _logger = logger;
         _noResultsSuggestion = new();
         SelectedSuggestions = [_noResultsSuggestion];
     }
@@ -204,24 +207,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         {
             _currentUnit = CreateConfigurationUnitModel();
             var result = await _dsc.GetUnitAsync(_currentUnit);
-            if (!result.ResultInformation.IsOk)
-            {
-                var title = $"Error code: 0x{result.ResultInformation.ResultCode.HResult:X}";
-                StringBuilder messageBuilder = new();
-                if (!string.IsNullOrWhiteSpace(result.ResultInformation.Description))
-                {
-                    messageBuilder.AppendLine(result.ResultInformation.Description);
-                }
-
-                if (!string.IsNullOrEmpty(result.ResultInformation.Details))
-                {
-                    messageBuilder.AppendLine(result.ResultInformation.Details);
-                }
-
-                _ui.ShowTimedNotification(title, messageBuilder.ToString(), NotificationMessageSeverity.Error);
-            }
-
             await OnResultModeChangedAsync();
+            return result.ResultInformation;
         });
     }
 
@@ -234,7 +221,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         await RunDscOperationAsync(async () =>
         {
             var unit = CreateConfigurationUnitModel();
-            await _dsc.SetUnitAsync(unit);
+            var result = await _dsc.SetUnitAsync(unit);
+            return result.ResultInformation;
         });
     }
 
@@ -247,17 +235,22 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         await RunDscOperationAsync(async () =>
         {
             var unit = CreateConfigurationUnitModel();
-            await _dsc.TestUnitAsync(unit);
-            if (unit.TestResult)
+            var result = await _dsc.TestUnitAsync(unit);
+            if (result.ResultInformation.IsOk)
             {
-                var message = _localizer["Notification_MachineInDesiredState"];
-                _ui.ShowTimedNotification(message, NotificationMessageSeverity.Success);
+                if (unit.TestResult)
+                {
+                    var message = _localizer["Notification_MachineInDesiredState"];
+                    _ui.ShowTimedNotification(message, NotificationMessageSeverity.Success);
+                }
+                else
+                {
+                    var message = _localizer["Notification_MachineNotInDesiredState"];
+                    _ui.ShowTimedNotification(message, NotificationMessageSeverity.Error);
+                }
             }
-            else
-            {
-                var message = _localizer["Notification_MachineNotInDesiredState"];
-                _ui.ShowTimedNotification(message, NotificationMessageSeverity.Error);
-            }
+
+            return result.ResultInformation;
         });
     }
 
@@ -266,13 +259,32 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     /// <param name="action">The DSC operation to execute.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task RunDscOperationAsync(Func<Task> action)
+    private async Task RunDscOperationAsync(Func<Task<IDSCUnitResultInformation>> action)
     {
-        CanExecuteDSCOperation = false;
-        _ui.ShowTaskProgress();
-        await action();
-        _ui.HideTaskProgress();
-        CanExecuteDSCOperation = true;
+        try
+        {
+            CanExecuteDSCOperation = false;
+            _ui.ShowTaskProgress();
+            var result = await action();
+            if (result != null && !result.IsOk)
+            {
+                var title = $"0x{result.ResultCode.HResult:X}";
+                List<string> messageList = [result.Description, result.Details];
+                var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
+                _ui.ShowTimedNotification(title, message, NotificationMessageSeverity.Error);
+            }
+        }
+        catch (Exception e)
+        {
+            var message = $"Error occurred: {e.Message}";
+            _ui.ShowTimedNotification(message, NotificationMessageSeverity.Error);
+            _logger.LogError(e, "An error occurred while executing a DSC operation.");
+        }
+        finally
+        {
+            _ui.HideTaskProgress();
+            CanExecuteDSCOperation = true;
+        }
     }
 
     [RelayCommand]
@@ -461,7 +473,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         var yamlObj = deserializer.Deserialize(reader);
 
         // 2. Serialize to YAML
-        var serializer = new SerializerBuilder().Build();
+        var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
         return serializer.Serialize(yamlObj);
     }
 }
