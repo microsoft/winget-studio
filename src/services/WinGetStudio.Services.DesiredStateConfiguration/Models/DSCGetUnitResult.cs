@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
@@ -22,6 +23,6 @@ internal sealed class DSCGetUnitResult : IDSCGetUnitResult
         // information available even if the out-of-proc COM objects are no
         // longer available (e.g. AppInstaller service is no longer running).
         ResultInformation = new DSCUnitResultInformation(settingsResult.ResultInformation);
-        Settings = settingsResult.Settings == null ? [] : new Dictionary<string, object>(settingsResult.Settings);
+        Settings = settingsResult.Settings == null ? [] : settingsResult.Settings.DeepCopyViaYaml();
     }
 }

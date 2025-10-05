@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -202,7 +203,24 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         await RunDscOperationAsync(async () =>
         {
             _currentUnit = CreateConfigurationUnitModel();
-            await _dsc.GetUnitAsync(_currentUnit);
+            var result = await _dsc.GetUnitAsync(_currentUnit);
+            if (!result.ResultInformation.IsOk)
+            {
+                var title = $"Error code: 0x{result.ResultInformation.ResultCode.HResult:X}";
+                StringBuilder messageBuilder = new();
+                if (!string.IsNullOrWhiteSpace(result.ResultInformation.Description))
+                {
+                    messageBuilder.AppendLine(result.ResultInformation.Description);
+                }
+
+                if (!string.IsNullOrEmpty(result.ResultInformation.Details))
+                {
+                    messageBuilder.AppendLine(result.ResultInformation.Details);
+                }
+
+                _ui.ShowTimedNotification(title, messageBuilder.ToString(), NotificationMessageSeverity.Error);
+            }
+
             await OnResultModeChangedAsync();
         });
     }

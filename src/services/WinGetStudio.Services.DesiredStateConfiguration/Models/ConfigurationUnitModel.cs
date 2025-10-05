@@ -14,7 +14,6 @@ public class ConfigurationUnitModel
 {
     public string Type { get; set; } = string.Empty;
 
-    // TODO Deep copy of settings to prevent RPC errors and improve stability.
     public ValueSet Settings { get; set; } = new();
 
     public bool ElevatedRequired { get; set; }
@@ -53,7 +52,7 @@ public class ConfigurationUnitModel
                     new()
                     {
                         Resource = Type,
-                        Settings = new Dictionary<string, object>(Settings),
+                        Settings = Settings == null ? [] : new Dictionary<string, object>(Settings),
                     },
                 ],
             },
@@ -71,7 +70,7 @@ public class ConfigurationUnitModel
                     new()
                     {
                         Resource = Type,
-                        Settings = new Dictionary<string, object>(Settings),
+                        Settings = Settings == null ? [] : new Dictionary<string, object>(Settings),
                     },
                 ],
             },
@@ -102,7 +101,7 @@ public class ConfigurationUnitModel
                 {
                     Name = $"{Type}-0",
                     Type = Type,
-                    Properties = new Dictionary<string, object>(Settings),
+                    Properties = Settings == null ? [] : new Dictionary<string, object>(Settings),
                 },
             ],
         };

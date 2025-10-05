@@ -139,6 +139,11 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
                 duration = message.Duration;
             }
 
+            if (message.Message.Length > 512)
+            {
+                message.Message = string.Concat(message.Message.AsSpan(0, 512), "…");
+            }
+
             NotificationQueue.Show(new()
             {
                 Title = message.Title,
