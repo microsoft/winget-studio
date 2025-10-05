@@ -3,10 +3,11 @@
 
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using NuGet.Packaging;
 using Windows.Foundation.Collections;
@@ -18,6 +19,7 @@ using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
+using YamlDotNet.Serialization;
 
 namespace WinGetStudio.ViewModels;
 
@@ -25,6 +27,8 @@ public delegate ValidationViewModel ValidationViewModelFactory();
 
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
     private readonly IDSC _dsc;
     private readonly IDSCExplorer _dscExplorer;
     private readonly IUIFeedbackService _ui;
@@ -403,16 +407,43 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         if (_currentUnit != null)
         {
-            if (SelectedResultLanguageMode == ResultLanguageMode.JSON)
+            if (SelectedResultSchemaVersion == ResultSchemaVersion.V0_1)
             {
-                RawData = _currentUnit.ToJson();
+                var v0_1 = _currentUnit.ToWinGetConfigurationV0_1();
+                RawData = SelectedResultLanguageMode == ResultLanguageMode.JSON ? ToJson(v0_1) : ToYaml(v0_1);
             }
-            else
+            else if (SelectedResultSchemaVersion == ResultSchemaVersion.V0_2)
             {
-                RawData = _currentUnit.ToYaml();
+                var v0_2 = _currentUnit.ToWinGetConfigurationV0_2();
+                RawData = SelectedResultLanguageMode == ResultLanguageMode.JSON ? ToJson(v0_2) : ToYaml(v0_2);
+            }
+            else if (SelectedResultSchemaVersion == ResultSchemaVersion.V0_3)
+            {
+                var v0_3 = _currentUnit.ToWinGetConfigurationV0_3();
+                RawData = SelectedResultLanguageMode == ResultLanguageMode.JSON ? ToJson(v0_3) : ToYaml(v0_3);
             }
         }
 
         await Task.CompletedTask;
+    }
+
+    private string ToJson<T>(T obj)
+        where T : class
+    {
+        return JsonSerializer.Serialize(obj, _jsonOptions);
+    }
+
+    public string ToYaml<T>(T obj)
+        where T : class
+    {
+        // 1. Parse to JSON
+        var json = ToJson<T>(obj);
+        using var reader = new StringReader(json);
+        var deserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+        var yamlObj = deserializer.Deserialize(reader);
+
+        // 2. Serialize to YAML
+        var serializer = new SerializerBuilder().Build();
+        return serializer.Serialize(yamlObj);
     }
 }

@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Windows.Foundation.Collections;
-using YamlDotNet.Serialization;
 using V0_1 = WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfigurationV0_1;
 using V0_2 = WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfigurationV0_2;
 using V0_3 = WinGetStudio.Services.DesiredStateConfiguration.Models.DSCWinGetConfigurationV0_3;
@@ -15,8 +12,6 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 public class ConfigurationUnitModel
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
-
     public string Type { get; set; } = string.Empty;
 
     // TODO Deep copy of settings to prevent RPC errors and improve stability.
@@ -25,32 +20,6 @@ public class ConfigurationUnitModel
     public bool ElevatedRequired { get; set; }
 
     public bool TestResult { get; set; }
-
-    public string ToJson()
-    {
-        var config = ToWinGetConfigurationV0_1();
-        return JsonSerializer.Serialize(config, _jsonOptions);
-    }
-
-    /// <summary>
-    /// Converts the current object to its YAML representation.
-    /// </summary>
-    /// <remarks>The method serializes the object's properties and settings into a YAML-formatted string using
-    /// a camel case naming convention. The resulting YAML string can be used for configuration or data exchange
-    /// purposes.</remarks>
-    /// <returns>A YAML-formatted string representing the current object.</returns>
-    public string ToYaml()
-    {
-        // Parse to JSON
-        var json = ToJson();
-        using var reader = new StringReader(json);
-        var deserializer = new DeserializerBuilder().Build();
-        var obj = deserializer.Deserialize(reader);
-
-        // Serialize to YAML
-        var serializer = new SerializerBuilder().Build();
-        return serializer.Serialize(obj);
-    }
 
     /// <summary>
     /// Attempts to load and parse the provided YAML string into the current object's properties.
@@ -73,7 +42,7 @@ public class ConfigurationUnitModel
         return false;
     }
 
-    private V0_1.DSCWinGetConfigurationV0_1 ToWinGetConfigurationV0_1()
+    public V0_1.DSCWinGetConfigurationV0_1 ToWinGetConfigurationV0_1()
     {
         return new()
         {
@@ -91,7 +60,7 @@ public class ConfigurationUnitModel
         };
     }
 
-    private V0_2.DSCWinGetConfigurationV0_2 ToWinGetConfigurationV0_2()
+    public V0_2.DSCWinGetConfigurationV0_2 ToWinGetConfigurationV0_2()
     {
         return new()
         {
@@ -109,7 +78,7 @@ public class ConfigurationUnitModel
         };
     }
 
-    private V0_3.DSCWinGetConfigurationV0_3 ToWinGetConfigurationV0_3()
+    public V0_3.DSCWinGetConfigurationV0_3 ToWinGetConfigurationV0_3()
     {
         return new()
         {
@@ -133,6 +102,7 @@ public class ConfigurationUnitModel
                 {
                     Name = $"{Type}-0",
                     Type = Type,
+                    Properties = new Dictionary<string, object>(Settings),
                 },
             ],
         };
