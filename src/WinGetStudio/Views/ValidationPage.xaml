@@ -23,22 +23,20 @@
     </i:Interaction.Behaviors>
 
     <Page.Resources>
-        <converters:BoolNegationConverter x:Key="BoolNegationConverter" />
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible" />
-        <converters:BoolToObjectConverter x:Key="BoolToIntConverter" TrueValue="1" FalseValue="0"/>
-        <converters:BoolToObjectConverter x:Key="BoolToIntNegationConverter" TrueValue="0" FalseValue="1"/>
         <localConverters:ResourceSuggestionMatchConverter x:Key="ResourceSuggestionMatchConverter"/>
+        <x:Double x:Key="SectionMinWidth">100</x:Double>
     </Page.Resources>
 
-    <Grid x:Name="ContentArea" Padding="0" ColumnSpacing="32" RowSpacing="12">
+    <!-- Page layout -->
+    <Grid x:Name="ContentArea" ColumnSpacing="32" RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Spacing="8" Grid.Row="0">
+        <!-- Page header -->
+        <StackPanel Spacing="8">
             <!-- Description -->
             <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left">
                 <Run x:Uid="ValidationPage_Description"/>
@@ -153,77 +151,73 @@
                    Margin="0,8"
                    Grid.Row="1"/>
 
-        <Grid Grid.Row="2" ColumnSpacing="8" x:Name="MainGrid">
+        <!-- Page content -->
+        <Grid Grid.Row="2" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition />
+                <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
             </Grid.ColumnDefinitions>
 
+            <!-- Properties -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Properties control -->
+                <usercontrols:ConfigurationSettings Properties="{x:Bind ViewModel.Properties, Mode=OneWay}"
+                                                    HorizontalAlignment="Stretch"/>
+
+                <!-- Empty state message -->
+                <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
+                           Visibility="{x:Bind ViewModel.IsPropertiesEmpty, Mode=OneWay}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+
+                <!-- DSC buttons -->
+                <controls:UniformGrid Grid.Row="1" Rows="1" Columns="3" ColumnSpacing="8">
+                    <controls:UniformGrid.Resources>
+                        <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        </Style>
+                    </controls:UniformGrid.Resources>
+                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
+                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
+                </controls:UniformGrid>
+            </Grid>
+
+            <!-- Resizer -->
+            <controls:GridSplitter Grid.Column="1" />
+
             <!-- Results output -->
-            <Grid Width="Auto" ColumnSpacing="10" RowSpacing="12" Grid.Column="2" MinWidth="200">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <Grid Grid.Column="2" RowSpacing="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock x:Uid="ValidationPage_ResultsText" FontWeight="Bold" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center"/>
-                <Button Command="{x:Bind ViewModel.ConvertYamlToUICommand}" Grid.Column="1" Grid.Row="0">
-                    <TextBlock x:Uid="ValidationPage_ResultsToUIText"/>
-                </Button>
-                <Button Click="{x:Bind CopyResultsToClipboard}" Grid.Column="2" Grid.Row="0">
-                    <TextBlock x:Uid="ValidationPage_CopyToClipboard"/>
-                </Button>
+                <!-- Results header -->
+                <Grid ColumnSpacing="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Uid="ValidationPage_ResultsText" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <StackPanel HorizontalAlignment="Right" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                        <Button x:Uid="ValidationPage_ResultsToUIText" Command="{x:Bind ViewModel.ConvertYamlToUICommand}"/>
+                        <Button x:Uid="ValidationPage_CopyToClipboard" Click="{x:Bind CopyResultsToClipboard}"/>
+                    </StackPanel>
+                </Grid>
 
-                <TextBox Width="Auto"
-                         Text="{x:Bind ViewModel.RawData, Mode=TwoWay}"
+                <!-- Result output box -->
+                <TextBox Text="{x:Bind ViewModel.RawData, Mode=TwoWay}"
+                         Grid.Row="1"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
-                         VerticalAlignment="Stretch"
-                         HorizontalAlignment="Stretch"
-                         Grid.Row="1"
-                         Grid.ColumnSpan="4"
                          IsReadOnly="True"/>
-            </Grid>
-
-            <!-- Resizer -->
-            <controls:ContentSizer Grid.Row="2"
-                                   Grid.RowSpan="2"
-                                   Grid.Column="1"
-                                   HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Stretch"
-                                   TargetControl="{x:Bind PropertiesGrid}"/>
-
-            <!-- Properties -->
-            <Grid Grid.Column="0" x:Name="PropertiesGrid" MinWidth="300">
-                <usercontrols:ConfigurationSettings Properties="{x:Bind ViewModel.Properties, Mode=OneWay}"
-                                                Grid.Column="0"
-                                                HorizontalAlignment="Stretch"/>
-
-                <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
-                       Visibility="{x:Bind ViewModel.IsPropertiesEmpty, Mode=OneWay}"
-                       Grid.Row="1"
-                       Grid.Column="0"
-                       HorizontalAlignment="Center"
-                       Margin="0,50,0,0"
-                       TextAlignment="Center"/>
-
-                <Grid ColumnSpacing="8" Margin="0,12,0,0" VerticalAlignment="Bottom" Grid.Row="1" Grid.Column="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <!-- <ColumnDefinition Width="*"/> -->
-                    </Grid.ColumnDefinitions>
-                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
-                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
-                </Grid>
             </Grid>
         </Grid>
     </Grid>
