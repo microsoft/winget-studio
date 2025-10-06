@@ -138,23 +138,29 @@
   <data name="Settings_Personalization.Text" xml:space="preserve">
     <value>Personalization</value>
   </data>
-  <data name="Settings_Theme.Text" xml:space="preserve">
+  <data name="Settings_Theme.Header" xml:space="preserve">
     <value>Theme</value>
   </data>
-  <data name="Settings_Theme_Light.Content" xml:space="preserve">
+  <data name="Settings_Theme.Description" xml:space="preserve">
+    <value>Choose your theme</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
     <value>Light</value>
   </data>
-  <data name="Settings_Theme_Dark.Content" xml:space="preserve">
+  <data name="Settings_Theme_Dark" xml:space="preserve">
     <value>Dark</value>
   </data>
-  <data name="Settings_Theme_Default.Content" xml:space="preserve">
+  <data name="Settings_Theme_Default" xml:space="preserve">
     <value>Default</value>
   </data>
   <data name="Settings_Telemetry.Text" xml:space="preserve">
     <value>Telemetry</value>
   </data>
-  <data name="Settings_DisableTelemetry.Content" xml:space="preserve">
+  <data name="Settings_DisableTelemetry.Header" xml:space="preserve">
     <value>Disable telemetry</value>
+  </data>
+  <data name="Settings_DisableTelemetry.Description" xml:space="preserve">
+    <value>Disable all telemetry collection in the application.</value>
   </data>
   <data name="Settings_About.Text" xml:space="preserve">
     <value>About this application</value>
