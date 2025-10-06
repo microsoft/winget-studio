@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.UI.Xaml;
+using Windows.System;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -114,6 +115,18 @@ public partial class SettingsViewModel : ObservableRecipient
     private void OnUnloaded()
     {
         _userSettings.SettingsChanged -= OnSettingsChanged;
+    }
+
+    [RelayCommand]
+    private async Task OnOpenLogsAsync()
+    {
+        await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
+    }
+
+    [RelayCommand]
+    private async Task OnOpenSettingsAsync()
+    {
+        await Launcher.LaunchUriAsync(new Uri(_userSettings.FullPath));
     }
 
     /// <summary>

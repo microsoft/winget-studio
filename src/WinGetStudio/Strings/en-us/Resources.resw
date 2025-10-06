@@ -682,4 +682,10 @@
   <data name="Settings_ClearResourcesCacheButton.Content" xml:space="preserve">
     <value>Clear cache</value>
   </data>
+  <data name="Settings_OpenLogs.Text" xml:space="preserve">
+    <value>Open logs</value>
+  </data>
+  <data name="Settings_EditSettings.Text" xml:space="preserve">
+    <value>Edit JSON file</value>
+  </data>
 </root>

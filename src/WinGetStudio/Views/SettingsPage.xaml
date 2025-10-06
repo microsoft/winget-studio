@@ -21,9 +21,34 @@
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
     <Grid>
-        <StackPanel
-            x:Name="ContentArea">
-            <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
+        <StackPanel x:Name="ContentArea">
+
+            <!-- Personalization header with buttons -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <!-- Title -->
+                <TextBlock x:Uid="Settings_Personalization"
+                           Style="{ThemeResource SubtitleTextBlockStyle}" />
+
+                <!-- Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                    <Button Command="{x:Bind ViewModel.OpenLogsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE838;" FontSize="{ThemeResource BodyTextBlockFontSize}"/>
+                            <TextBlock x:Uid="Settings_OpenLogs" FontSize="{ThemeResource BodyTextBlockFontSize}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{x:Bind ViewModel.OpenSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE943;" FontSize="{ThemeResource BodyTextBlockFontSize}"/>
+                            <TextBlock x:Uid="Settings_EditSettings" FontSize="{ThemeResource BodyTextBlockFontSize}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
 
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <!-- Telemetry setting -->

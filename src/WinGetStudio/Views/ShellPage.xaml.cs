@@ -31,7 +31,6 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         _userSettings = App.GetService<IUserSettings>();
         ViewModel = viewModel;
         InitializeComponent();
-        AddDebugShortcuts();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
@@ -99,29 +98,6 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         var result = navigationService.GoBack();
 
         args.Handled = result;
-    }
-
-    [Conditional("DEBUG")]
-    private void AddDebugShortcuts()
-    {
-        var logsItem = new NavigationViewItem()
-        {
-            SelectsOnInvoked = false,
-            Content = "Open Logs Folder",
-            Icon = new FontIcon() { Glyph = "\uEBE8" },
-        };
-        logsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
-
-        var settingsItem = new NavigationViewItem()
-        {
-            SelectsOnInvoked = false,
-            Content = "Open Settings",
-            Icon = new FontIcon() { Glyph = "\uEBE8" },
-        };
-        settingsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_userSettings.FullPath));
-        NavigationViewControl.FooterMenuItems.Insert(0, new NavigationViewItemSeparator());
-        NavigationViewControl.FooterMenuItems.Insert(0, logsItem);
-        NavigationViewControl.FooterMenuItems.Insert(0, settingsItem);
     }
 
     private void OnNotificationShown(object? sender, NotificationMessage message)
