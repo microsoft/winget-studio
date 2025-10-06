@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Management.Configuration;
+using Windows.Win32.Foundation;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -20,6 +21,9 @@ internal sealed class DSCUnitResultInformation : IDSCUnitResultInformation
 
     /// <inheritdoc/>
     public ConfigurationUnitResultSource ResultSource { get; }
+
+    /// <inheritdoc/>
+    public bool IsOk => ResultCode == null || ResultCode.HResult == HRESULT.S_OK;
 
     public DSCUnitResultInformation(IConfigurationUnitResultInformation resultInformation)
     {

@@ -1,5 +1,5 @@
-<Page  
-    x:Class="WinGetStudio.Views.ValidationPage"  
+<Page
+    x:Class="WinGetStudio.Views.ValidationPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"  
@@ -27,6 +27,7 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible" />
         <converters:BoolToObjectConverter x:Key="BoolToIntConverter" TrueValue="1" FalseValue="0"/>
         <converters:BoolToObjectConverter x:Key="BoolToIntNegationConverter" TrueValue="0" FalseValue="1"/>
+        <converters:DoubleToVisibilityConverter x:Key="CountToVisibilityConverter" GreaterThan="0" FalseValue="Visible" TrueValue="Collapsed" />
         <localConverters:ResourceSuggestionMatchConverter x:Key="ResourceSuggestionMatchConverter"/>
     </Page.Resources>
 
@@ -206,7 +207,7 @@
                                                 HorizontalAlignment="Stretch"/>
 
                 <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
-                       Visibility="{x:Bind ViewModel.IsPropertiesEmpty, Mode=OneWay}"
+                       Visibility="{x:Bind ViewModel.Properties.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"
                        Grid.Row="1"
                        Grid.Column="0"
                        HorizontalAlignment="Center"
@@ -218,11 +219,10 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
-                        <!-- <ColumnDefinition Width="*"/> -->
                     </Grid.ColumnDefinitions>
-                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
-                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
+                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" HorizontalAlignment="Stretch" Grid.Column="1"/>
+                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" HorizontalAlignment="Stretch" Grid.Column="2"/>
                 </Grid>
             </Grid>
         </Grid>

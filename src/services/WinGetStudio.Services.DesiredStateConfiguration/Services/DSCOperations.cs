@@ -88,7 +88,7 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public async Task GetUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -98,10 +98,11 @@ internal sealed class DSCOperations : IDSCOperations
 
         var result = await Task.Run(() => processor.GetUnitSettings(input));
         unit.Settings = result.Settings;
+        return new DSCGetUnitResult(result);
     }
 
     /// <inheritdoc />
-    public async Task SetUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -110,11 +111,11 @@ internal sealed class DSCOperations : IDSCOperations
         input.Type = unit.Type;
 
         var result = await Task.Run(() => processor.ApplyUnit(input));
-        System.Diagnostics.Debug.WriteLine($"SetUnit result: {result.PreviouslyInDesiredState}");
+        return new DSCApplyUnitResult(result);
     }
 
     /// <inheritdoc />
-    public async Task TestUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -122,28 +123,27 @@ internal sealed class DSCOperations : IDSCOperations
         input.Settings = unit.Settings;
         input.Type = unit.Type;
         var result = await Task.Run(() => processor.TestUnit(input));
-        System.Diagnostics.Debug.WriteLine($"TestUnit result: {result.TestResult}");
         unit.TestResult = result.TestResult == ConfigurationTestResult.Positive;
+        return new DSCTestUnitResult(result);
     }
 
     /// <inheritdoc />
     /// Currently broken due to bug in DSC
     /// https://github.com/PowerShell/DSC/issues/786
-    public async Task ExportUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
         var input = config.CreateConfigurationUnit();
         input.Type = unit.Type;
         input.Intent = ConfigurationUnitIntent.Inform;
-
         var result = processor.GetAllUnits(input);
-
         if (result.Units != null)
         {
-            System.Diagnostics.Debug.WriteLine(result.Units);
             unit.Settings = result.Units[0].Settings;
         }
+
+        return new DSCGetAllUnitsResult(result);
     }
 
     public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()

@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using NuGet.Packaging;
 using Windows.Foundation.Collections;
@@ -27,6 +28,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private readonly IDSCExplorer _dscExplorer;
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
+    private readonly ILogger<ValidationViewModel> _logger;
     private readonly ResourceSuggestionViewModel _noResultsSuggestion;
     private readonly ConcurrentDictionary<string, ResourceSuggestionViewModel> _allSuggestions = [];
 
@@ -34,7 +36,13 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ReloadCommand))]
-    public partial bool AreSuggestionsLoaded { get; set; }
+    public partial bool CanReload { get; set; }
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GetCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SetCommand))]
+    [NotifyCanExecuteChangedFor(nameof(TestCommand))]
+    public partial bool CanExecuteDSCOperation { get; set; } = true;
 
     [ObservableProperty]
     public partial string? SearchResourceText { get; set; }
@@ -42,12 +50,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     public partial string RawData { get; set; } = string.Empty;
 
-    [ObservableProperty]
-    public partial bool ActionsEnabled { get; set; } = true;
-
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
-
-    public bool IsPropertiesEmpty => Properties.Count == 0;
 
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
 
@@ -55,19 +58,16 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         IDSC dsc,
         IDSCExplorer dscExplorer,
         IUIFeedbackService ui,
-        IStringLocalizer<ValidationViewModel> localizer)
+        IStringLocalizer<ValidationViewModel> localizer,
+        ILogger<ValidationViewModel> logger)
     {
         _dsc = dsc;
         _dscExplorer = dscExplorer;
         _ui = ui;
         _localizer = localizer;
+        _logger = logger;
         _noResultsSuggestion = new();
         SelectedSuggestions = [_noResultsSuggestion];
-
-        Properties.CollectionChanged += (_, __) =>
-        {
-            OnPropertyChanged(nameof(IsPropertiesEmpty));
-        };
     }
 
     public void OnNavigatedTo(object parameter)
@@ -203,54 +203,57 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <summary>
     /// Retrieves the current configuration unit from the system asynchronously.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnGetAsync()
     {
         await RunDscOperationAsync(async () =>
         {
-            ActionsEnabled = false;
             var unit = CreateConfigurationUnitModel();
-            await _dsc.DscGet(unit);
+            var result = await _dsc.GetUnitAsync(unit);
             RawData = unit.ToYaml();
-            ActionsEnabled = true;
+            return result.ResultInformation;
         });
     }
 
     /// <summary>
     /// Sets the current machine state to the specified configuration unit asynchronously.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnSetAsync()
     {
         await RunDscOperationAsync(async () =>
         {
-            ActionsEnabled = false;
             var unit = CreateConfigurationUnitModel();
-            await _dsc.DscSet(unit);
-            ActionsEnabled = true;
+            var result = await _dsc.SetUnitAsync(unit);
+            return result.ResultInformation;
         });
     }
 
     /// <summary>
     /// Tests whether the current machine state matches the specified configuration unit asynchronously.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnTestAsync()
     {
         await RunDscOperationAsync(async () =>
         {
             var unit = CreateConfigurationUnitModel();
-            await _dsc.DscTest(unit);
-            if (unit.TestResult)
+            var result = await _dsc.TestUnitAsync(unit);
+            if (result.ResultInformation == null || result.ResultInformation.IsOk)
             {
-                var message = _localizer["Notification_MachineInDesiredState"];
-                _ui.ShowTimedNotification(message, NotificationMessageSeverity.Success);
+                if (unit.TestResult)
+                {
+                    var message = _localizer["Notification_MachineInDesiredState"];
+                    _ui.ShowTimedNotification(message, NotificationMessageSeverity.Success);
+                }
+                else
+                {
+                    var message = _localizer["Notification_MachineNotInDesiredState"];
+                    _ui.ShowTimedNotification(message, NotificationMessageSeverity.Error);
+                }
             }
-            else
-            {
-                var message = _localizer["Notification_MachineNotInDesiredState"];
-                _ui.ShowTimedNotification(message, NotificationMessageSeverity.Error);
-            }
+
+            return result.ResultInformation;
         });
     }
 
@@ -259,13 +262,31 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     /// <param name="action">The DSC operation to execute.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task RunDscOperationAsync(Func<Task> action)
+    private async Task RunDscOperationAsync(Func<Task<IDSCUnitResultInformation?>> action)
     {
-        ActionsEnabled = false;
-        _ui.ShowTaskProgress();
-        await action();
-        _ui.HideTaskProgress();
-        ActionsEnabled = true;
+        try
+        {
+            CanExecuteDSCOperation = false;
+            _ui.ShowTaskProgress();
+            var result = await action();
+            if (result != null && !result.IsOk)
+            {
+                var title = $"0x{result.ResultCode.HResult:X}";
+                List<string> messageList = [result.Description, result.Details];
+                var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
+                _ui.ShowTimedNotification(title, message, NotificationMessageSeverity.Error);
+            }
+        }
+        catch (Exception e)
+        {
+            _ui.ShowTimedNotification(e.Message, NotificationMessageSeverity.Error);
+            _logger.LogError(e, "An error occurred while executing a DSC operation.");
+        }
+        finally
+        {
+            _ui.HideTaskProgress();
+            CanExecuteDSCOperation = true;
+        }
     }
 
     [RelayCommand]
@@ -318,7 +339,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         }
     }
 
-    [RelayCommand(CanExecute = nameof(AreSuggestionsLoaded))]
+    [RelayCommand(CanExecute = nameof(CanReload))]
     private async Task OnReloadAsync()
     {
         await LoadSuggestionsAsync();
@@ -390,7 +411,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     private async Task LoadSuggestionsAsync()
     {
-        AreSuggestionsLoaded = false;
+        CanReload = false;
         _allSuggestions.Clear();
         _ui.ShowTaskProgress();
         _ui.ShowTimedNotification(_localizer["LoadingDSCResourcesMessage"], NotificationMessageSeverity.Informational);
@@ -410,6 +431,6 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
         _ui.ShowTimedNotification(_localizer["CompletedLoadingDSCResourcesMessage"], NotificationMessageSeverity.Informational);
         _ui.HideTaskProgress();
-        AreSuggestionsLoaded = true;
+        CanReload = true;
     }
 }
