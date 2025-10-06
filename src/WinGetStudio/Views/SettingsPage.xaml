@@ -64,7 +64,12 @@
             <!-- Cache -->
             <TextBlock x:Uid="Settings_Resources" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
-                <Button x:Uid="Settings_ClearResourcesCache" Command="{x:Bind ViewModel.ClearModuleCatalogsCacheCommand}"/>
+                <ct:SettingsCard x:Uid="Settings_ClearResourcesCache">
+                    <ct:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xEDA2;" />
+                    </ct:SettingsCard.HeaderIcon>
+                    <Button x:Uid="Settings_ClearResourcesCacheButton" Command="{x:Bind ViewModel.ClearModuleCatalogsCacheCommand}"/>
+                </ct:SettingsCard>
             </StackPanel>
 
             <!-- About -->
