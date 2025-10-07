@@ -138,35 +138,41 @@
   <data name="Settings_Personalization.Text" xml:space="preserve">
     <value>Personalization</value>
   </data>
-  <data name="Settings_Theme.Text" xml:space="preserve">
+  <data name="Settings_Theme.Header" xml:space="preserve">
     <value>Theme</value>
   </data>
-  <data name="Settings_Theme_Light.Content" xml:space="preserve">
+  <data name="Settings_Theme.Description" xml:space="preserve">
+    <value>Choose your theme.</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
     <value>Light</value>
   </data>
-  <data name="Settings_Theme_Dark.Content" xml:space="preserve">
+  <data name="Settings_Theme_Dark" xml:space="preserve">
     <value>Dark</value>
   </data>
-  <data name="Settings_Theme_Default.Content" xml:space="preserve">
+  <data name="Settings_Theme_Default" xml:space="preserve">
     <value>Default</value>
   </data>
   <data name="Settings_Telemetry.Text" xml:space="preserve">
     <value>Telemetry</value>
   </data>
-  <data name="Settings_DisableTelemetry.Content" xml:space="preserve">
+  <data name="Settings_DisableTelemetry.Header" xml:space="preserve">
     <value>Disable telemetry</value>
+  </data>
+  <data name="Settings_DisableTelemetry.Description" xml:space="preserve">
+    <value>Disable all telemetry collection in the application.</value>
   </data>
   <data name="Settings_About.Text" xml:space="preserve">
     <value>About this application</value>
   </data>
   <data name="Settings_AboutDescription.Text" xml:space="preserve">
-    <value>TODO: Replace with your app description.</value>
+    <value>WinGet Studio is designed to help users create and modify WinGet configuration files, with built-in support for "get", "set", and "test" operations on DSC resources.</value>
   </data>
   <data name="SettingsPage_PrivacyTermsLink.Content" xml:space="preserve">
     <value>Privacy Statement</value>
   </data>
   <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
-    <value>https://YourPrivacyUrlGoesHere/</value>
+    <value>https://github.com/microsoft/winget-studio/blob/main/PRIVACY.md</value>
   </data>
   <data name="ConfigurationFileWarning.Title" xml:space="preserve">
     <value>Configuration file warning</value>
@@ -385,10 +391,10 @@
   <data name="ValidationPage_TestResultHeader.Text" xml:space="preserve">
     <value>Test Result</value>
   </data>
-  <data name="ValidationPage_ResultsToUIText.Text" xml:space="preserve">
+  <data name="ValidationPage_ResultsToUIText.Content" xml:space="preserve">
     <value>Apply results to properties</value>
   </data>
-  <data name="ValidationPage_CopyToClipboard.Text" xml:space="preserve">
+  <data name="ValidationPage_CopyToClipboard.Content" xml:space="preserve">
     <value>Copy results to clipboard</value>
   </data>
   <data name="SettingsControl_AddPropertyText.Text" xml:space="preserve">
@@ -667,7 +673,19 @@
   <data name="Settings_Resources.Text" xml:space="preserve">
     <value>Resources</value>
   </data>
-  <data name="Settings_ClearResourcesCache.Content" xml:space="preserve">
+  <data name="Settings_ClearResourcesCache.Header" xml:space="preserve">
     <value>Clear resources cache</value>
+  </data>
+  <data name="Settings_ClearResourcesCache.Description" xml:space="preserve">
+    <value>Clear cached resources to ensure they are reloaded from their catalog.</value>
+  </data>
+  <data name="Settings_ClearResourcesCacheButton.Content" xml:space="preserve">
+    <value>Clear cache</value>
+  </data>
+  <data name="Settings_OpenLogs.Text" xml:space="preserve">
+    <value>Open logs</value>
+  </data>
+  <data name="Settings_EditSettings.Text" xml:space="preserve">
+    <value>Edit JSON file</value>
   </data>
 </root>

@@ -7,6 +7,7 @@
     xmlns:helpers="using:WinGetStudio.Helpers"
     xmlns:xaml="using:Microsoft.UI.Xaml"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:ct="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
@@ -20,57 +21,80 @@
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
     <Grid>
-        <StackPanel
-            x:Name="ContentArea">
-            <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
+        <StackPanel x:Name="ContentArea">
 
-            <!-- Telemetry setting -->
-            <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
-                <TextBlock x:Uid="Settings_Telemetry" />
-                <CheckBox x:Uid="Settings_DisableTelemetry"
-                          IsChecked="{x:Bind ViewModel.DisableTelemetry, Mode=TwoWay}"
-                          Command="{x:Bind ViewModel.ToggleTelemetryCommand}" />
-            </StackPanel>
+            <!-- Personalization header with buttons -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <!-- Title -->
+                <TextBlock x:Uid="Settings_Personalization"
+                           Style="{ThemeResource SubtitleTextBlockStyle}" />
 
-            <!-- Theme -->
-            <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
-                <TextBlock x:Uid="Settings_Theme" />
-
-                <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                    <RadioButton
-                        x:Uid="Settings_Theme_Light"
-                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
-                        GroupName="AppTheme">
-                        <RadioButton.CommandParameter>
-                            <xaml:ElementTheme>Light</xaml:ElementTheme>
-                        </RadioButton.CommandParameter>
-                    </RadioButton>
-                    <RadioButton
-                        x:Uid="Settings_Theme_Dark"
-                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
-                        GroupName="AppTheme">
-                        <RadioButton.CommandParameter>
-                            <xaml:ElementTheme>Dark</xaml:ElementTheme>
-                        </RadioButton.CommandParameter>
-                    </RadioButton>
-                    <RadioButton
-                        x:Uid="Settings_Theme_Default"
-                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Default, Mode=OneWay}"
-                        GroupName="AppTheme">
-                        <RadioButton.CommandParameter>
-                            <xaml:ElementTheme>Default</xaml:ElementTheme>
-                        </RadioButton.CommandParameter>
-                    </RadioButton>
+                <!-- Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                    <Button Command="{x:Bind ViewModel.OpenLogsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE838;" FontSize="{ThemeResource BodyTextBlockFontSize}"/>
+                            <TextBlock x:Uid="Settings_OpenLogs" FontSize="{ThemeResource BodyTextBlockFontSize}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{x:Bind ViewModel.OpenSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE943;" FontSize="{ThemeResource BodyTextBlockFontSize}"/>
+                            <TextBlock x:Uid="Settings_EditSettings" FontSize="{ThemeResource BodyTextBlockFontSize}"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
+            </Grid>
+
+            <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
+                <!-- Telemetry setting -->
+                <ct:SettingsCard x:Uid="Settings_DisableTelemetry">
+                    <ct:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE9D2;" />
+                    </ct:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.DisableTelemetry, Mode=OneWay}"
+                                  x:Name="TelemetryToggleSwitch">
+                        <i:Interaction.Behaviors>
+                            <i:EventTriggerBehavior EventName="Toggled">
+                                <i:InvokeCommandAction Command="{x:Bind ViewModel.ToggleTelemetryCommand}"
+                                                       CommandParameter="{x:Bind TelemetryToggleSwitch.IsOn, Mode=OneWay}"/>
+                            </i:EventTriggerBehavior>
+                        </i:Interaction.Behaviors>
+                    </ToggleSwitch>
+                </ct:SettingsCard>
+
+                <!-- Theme setting -->
+                <ct:SettingsCard x:Uid="Settings_Theme">
+                    <ct:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE790;" />
+                    </ct:SettingsCard.HeaderIcon>
+                    <ComboBox x:Name="ThemeComboBox"
+                              ItemsSource="{x:Bind ViewModel.Themes}"
+                              SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=OneWay}"
+                              DisplayMemberPath="Name">
+                        <i:Interaction.Behaviors>
+                            <i:EventTriggerBehavior EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                                                       CommandParameter="{x:Bind ThemeComboBox.SelectedItem, Mode=OneWay}"/>
+                            </i:EventTriggerBehavior>
+                        </i:Interaction.Behaviors>
+                    </ComboBox>
+                </ct:SettingsCard>
             </StackPanel>
 
             <!-- Cache -->
             <TextBlock x:Uid="Settings_Resources" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
-                <Button x:Uid="Settings_ClearResourcesCache" Command="{x:Bind ViewModel.ClearModuleCatalogsCacheCommand}"/>
+                <ct:SettingsCard x:Uid="Settings_ClearResourcesCache">
+                    <ct:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xEDA2;" />
+                    </ct:SettingsCard.HeaderIcon>
+                    <Button x:Uid="Settings_ClearResourcesCacheButton" Command="{x:Bind ViewModel.ClearModuleCatalogsCacheCommand}"/>
+                </ct:SettingsCard>
             </StackPanel>
 
             <!-- About -->
