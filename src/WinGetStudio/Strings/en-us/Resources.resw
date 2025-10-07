@@ -255,6 +255,9 @@
   <data name="Shell_Validation.Content" xml:space="preserve">
     <value>Validate a resource</value>
   </data>
+  <data name="Shell_Export.Content" xml:space="preserve">
+    <value>Export configurations</value>
+  </data>
   <data name="ValidationPage_ModuleInput.PlaceholderText" xml:space="preserve">
     <value>Search DSC resources ...</value>
   </data>

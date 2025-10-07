@@ -14,6 +14,7 @@ internal sealed class AppPageService : PageService, IAppPageService
         Configure<MainViewModel, MainPage>();
         Configure<ConfigurationViewModel, ConfigurationPage>();
         Configure<ValidationViewModel, ValidationPage>();
+        Configure<ExportViewModel, ExportPage>();
         Configure<SettingsViewModel, SettingsPage>();
     }
 }

@@ -113,6 +113,8 @@ public partial class App : Application
                 services.AddTransient<ConfigurationPage>();
                 services.AddTransient<ValidationViewModel>();
                 services.AddTransient<ValidationPage>();
+                services.AddTransient<ExportViewModel>();
+                services.AddTransient<ExportPage>();
                 services.AddTransient<MainViewModel>();
                 services.AddTransient<MainPage>();
                 services.AddTransient<ShellPage>();
