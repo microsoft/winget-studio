@@ -1,5 +1,5 @@
-<Page  
-    x:Class="WinGetStudio.Views.ValidationPage"  
+<Page
+    x:Class="WinGetStudio.Views.ValidationPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"  
@@ -23,6 +23,7 @@
     </i:Interaction.Behaviors>
 
     <Page.Resources>
+        <converters:DoubleToVisibilityConverter x:Key="CountToVisibilityConverter" GreaterThan="0" FalseValue="Visible" TrueValue="Collapsed" />
         <localConverters:ResourceSuggestionMatchConverter x:Key="ResourceSuggestionMatchConverter"/>
         <x:Double x:Key="SectionMinWidth">100</x:Double>
     </Page.Resources>
@@ -172,7 +173,7 @@
 
                 <!-- Empty state message -->
                 <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
-                           Visibility="{x:Bind ViewModel.IsPropertiesEmpty, Mode=OneWay}"
+                           Visibility="{x:Bind ViewModel.Properties.Count, Converter={StaticResource CountToVisibilityConverter}, Mode=OneWay}"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center" />
 
@@ -183,9 +184,9 @@
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         </Style>
                     </controls:UniformGrid.Resources>
-                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="1"/>
-                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" IsEnabled="{x:Bind ViewModel.ActionsEnabled}" HorizontalAlignment="Stretch" Grid.Column="2"/>
+                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" HorizontalAlignment="Stretch" Grid.Column="1"/>
+                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" HorizontalAlignment="Stretch" Grid.Column="2"/>
                 </controls:UniformGrid>
             </Grid>
 

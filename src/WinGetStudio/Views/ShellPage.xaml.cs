@@ -18,6 +18,7 @@ namespace WinGetStudio.Views;
 
 public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
+    private const int MaxNotificationMessageLength = 512;
     private readonly IAppInfoService _appInfoService;
     private readonly IUIFeedbackService _uiFeedbackService;
     private readonly IUserSettings _userSettings;
@@ -113,6 +114,13 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             if (message.DismissBehavior == NotificationDismissBehavior.Timeout && message.Duration > TimeSpan.Zero)
             {
                 duration = message.Duration;
+            }
+
+            // Limit message length to avoid UI issues.
+            // TODO: We should add a link to open the logs for the full message.
+            if (message.Message.Length > MaxNotificationMessageLength)
+            {
+                message.Message = string.Concat(message.Message.AsSpan(0, MaxNotificationMessageLength), "…");
             }
 
             NotificationQueue.Show(new()

@@ -31,5 +31,5 @@ public interface IDSCUnitResultInformation
     /// <summary>
     /// Gets a value indicating whether the result indicates success or failure.
     /// </summary>
-    bool IsOk => ResultCode == null;
+    bool IsOk { get; }
 }
