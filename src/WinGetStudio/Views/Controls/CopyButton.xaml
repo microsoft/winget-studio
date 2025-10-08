@@ -26,7 +26,7 @@
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
-    <Style BasedOn="{StaticResource DefaultCopyButtonStyle}" TargetType="local:CopyButton" />
+    <Style BasedOn="{StaticResource DefaultButtonStyle}" TargetType="local:CopyButton" />
 
     <Style x:Key="DefaultCopyButtonStyle" TargetType="local:CopyButton">
         <Setter Property="Background" Value="{ThemeResource ButtonBackground}" />

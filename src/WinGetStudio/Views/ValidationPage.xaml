@@ -9,7 +9,7 @@
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:model="using:WinGetStudio.Models"
     xmlns:selectors="using:WinGetStudio.Selectors"
-    xmlns:usercontrols="using:WinGetStudio.Views.Controls"
+    xmlns:localControls="using:WinGetStudio.Views.Controls"
     xmlns:localConverters="using:WinGetStudio.Converters"
     xmlns:models="using:WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models"
     xmlns:vm="using:WinGetStudio.ViewModels"
@@ -168,14 +168,13 @@
                 </Grid.RowDefinitions>
 
                 <!-- Properties control -->
-                <usercontrols:ConfigurationSettings Properties="{x:Bind ViewModel.Properties, Mode=OneWay}"
+                <localControls:ConfigurationSettings Properties="{x:Bind ViewModel.Properties, Mode=OneWay}"
                                                     HorizontalAlignment="Stretch"/>
 
                 <!-- Empty state message -->
-                <TextBlock x:Uid="ValidationPage_EmptyPropertiesMessage"
-                           Visibility="{x:Bind ViewModel.Properties.Count, Converter={StaticResource CountToVisibilityConverter}, Mode=OneWay}"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center" />
+                <localControls:EmptyStateControl x:Uid="ValidationPage_EmptyPropertiesMessage"
+                                                 Glyph="&#xE700;"
+                                                 Visibility="{x:Bind ViewModel.Properties.Count, Converter={StaticResource CountToVisibilityConverter}, Mode=OneWay}"/>
 
                 <!-- DSC buttons -->
                 <controls:UniformGrid Grid.Row="1" Rows="1" Columns="3" ColumnSpacing="8">

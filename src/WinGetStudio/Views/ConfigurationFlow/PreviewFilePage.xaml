@@ -11,7 +11,7 @@
     xmlns:models="using:WinGetStudio.Models"
     xmlns:viewmodels="using:WinGetStudio.ViewModels"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
-    xmlns:userControls="using:WinGetStudio.Views.Controls"
+    xmlns:localControls="using:WinGetStudio.Views.Controls"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -53,9 +53,8 @@
     </Page.Resources>
 
     <!-- Page content -->
-    <Grid>
+    <Grid RowSpacing="12">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
@@ -73,43 +72,49 @@
             x:Name="ApplyDialog"
             PrimaryButtonCommand="{Binding ApplyCommand}" />
 
-        <!-- Description -->
-        <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left">
-            <Run x:Uid="ManagePage_Description"/>
-            <Hyperlink NavigateUri="https://learn.microsoft.com/powershell/dsc/concepts/configuration-documents/overview?view=dsc-3.0">
-                <Run x:Uid="ManagePage_LearnMoreLink" />
-            </Hyperlink>
-        </TextBlock>
+        <!-- Header -->
+        <StackPanel Spacing="8">
+            <!-- Description -->
+            <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left">
+                <Run x:Uid="ManagePage_Description"/>
+                <Hyperlink NavigateUri="https://learn.microsoft.com/powershell/dsc/concepts/configuration-documents/overview?view=dsc-3.0">
+                    <Run x:Uid="ManagePage_LearnMoreLink" />
+                </Hyperlink>
+            </TextBlock>
 
-        <!-- Select file box -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox PlaceholderText="C:\Users\user\configuration.winget"
-                     Text="{x:Bind ViewModel.FilePath, Mode=OneWay}"
-                     IsReadOnly="True"
-                     Padding="8"/>
-            <Button x:Uid="ManagePage_BrowseButton"
-                    Command="{x:Bind ViewModel.BrowseCommand}"
-                    Grid.Column="1" />
-        </Grid>
+            <!-- Select file box -->
+            <Grid ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox PlaceholderText="C:\Users\user\configuration.winget"
+                         Text="{x:Bind ViewModel.FilePath, Mode=OneWay}"
+                         IsReadOnly="True" />
+                <Button x:Uid="ManagePage_BrowseButton"
+                        Command="{x:Bind ViewModel.BrowseCommand}"
+                        Grid.Column="1" />
+            </Grid>
+        </StackPanel>
 
         <!-- Separator -->
         <Rectangle Height="1"
                    Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
                    HorizontalAlignment="Stretch"
                    Margin="0,8"
-                   Grid.Row="2"/>
+                   Grid.Row="1"/>
 
         <!-- Content -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
+
+            <localControls:EmptyStateControl Grid.Row="1"
+                                            Glyph="&#xE8FF;"
+                                            Text="Select or create a configuration file"/>
 
             <!-- Content header buttons -->
             <Grid>
@@ -445,7 +450,7 @@
                                          Text="{x:Bind ViewModel.SelectedUnit.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Height="Auto" />
 
-                                <userControls:ConfigurationSettings Properties="{x:Bind ViewModel.SelectedUnit.Properties, Mode=OneWay}" />
+                                <localControls:ConfigurationSettings Properties="{x:Bind ViewModel.SelectedUnit.Properties, Mode=OneWay}" />
 
                             </StackPanel>
                         </ScrollView>
