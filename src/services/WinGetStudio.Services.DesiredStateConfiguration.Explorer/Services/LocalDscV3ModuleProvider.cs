@@ -31,7 +31,7 @@ public sealed class LocalDscV3ModuleProvider : IModuleProvider
     }
 
     /// <inheritdoc/>
-    public async Task<DSCModuleCatalog> GetModuleCatalogAsync()
+    public async Task<GetModuleCatalogResult> GetModuleCatalogAsync()
     {
         var catalog = new DSCModuleCatalog { Name = Name };
         var resources = await _dsc.GetDscV3ResourcesAsync();
@@ -48,6 +48,16 @@ public sealed class LocalDscV3ModuleProvider : IModuleProvider
             catalog.Modules.TryAdd(resource.Name, module);
         }
 
-        return catalog;
+        // For local DSC v3 resources, caching is only enabled if resources are
+        // discovered. This workaround addresses a known issue where the WinGet
+        // COM API may return an empty resource list.
+        // See: https://github.com/PowerShell/DSC/issues/786
+        var cache = catalog.Modules?.Count > 0;
+
+        return new()
+        {
+            CanCache = cache,
+            Catalog = catalog,
+        };
     }
 }

@@ -46,7 +46,7 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     {
         var provider = GetModuleProvider(dscModule);
         await provider.EnrichModuleWithResourceDetailsAsync(dscModule);
-        if (provider.UseCache && _memoryCacheProvider.TryGet(provider.Name, out var inMemory))
+        if (_memoryCacheProvider.TryGet(provider.Name, out var inMemory))
         {
             _logger.LogInformation($"Updating cached module catalog for '{provider.Name}' after enriching module '{dscModule.Id}'.");
             await _jsonCacheProvider.SaveCacheAsync(inMemory);
@@ -68,12 +68,9 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     /// <param name="moduleProvider">The module provider to clear the cache for.</param>
     private async Task ClearCacheAsync(IModuleProvider moduleProvider)
     {
-        if (moduleProvider.UseCache)
-        {
-            _logger.LogInformation($"Clearing cache for module catalog '{moduleProvider.Name}'.");
-            _memoryCacheProvider.Remove(moduleProvider.Name);
-            await _jsonCacheProvider.ClearCacheAsync(moduleProvider.Name);
-        }
+        _logger.LogInformation($"Clearing cache for module catalog '{moduleProvider.Name}'.");
+        _memoryCacheProvider.Remove(moduleProvider.Name);
+        await _jsonCacheProvider.ClearCacheAsync(moduleProvider.Name);
     }
 
     /// <summary>
@@ -85,38 +82,34 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     {
         var moduleProvider = GetModuleProvider(catalogName);
 
-        // 1. Check cache first if enabled
-        if (moduleProvider.UseCache)
+        // 1 Check in-memory cache first
+        if (_memoryCacheProvider.TryGet(catalogName, out var inMemory))
         {
-            // 1.1 Check in-memory cache first
-            if (_memoryCacheProvider.TryGet(catalogName, out var inMemory))
-            {
-                _logger.LogInformation($"Using in-memory cached module catalog for '{catalogName}'.");
-                return inMemory;
-            }
-
-            // 1.2 Check JSON file cache next
-            var jsonCatalog = await _jsonCacheProvider.GetModuleCatalogAsync(catalogName);
-            if (jsonCatalog != null)
-            {
-                _logger.LogInformation($"Using JSON cached module catalog for '{catalogName}'.");
-                _memoryCacheProvider.Set(jsonCatalog);
-                return jsonCatalog;
-            }
+            _logger.LogInformation($"Using in-memory cached module catalog for '{catalogName}'.");
+            return inMemory;
         }
 
-        // 2. Fetch from provider
+        // 2 Check JSON file cache next
+        var jsonCatalog = await _jsonCacheProvider.GetModuleCatalogAsync(catalogName);
+        if (jsonCatalog != null)
+        {
+            _logger.LogInformation($"Using JSON cached module catalog for '{catalogName}'.");
+            _memoryCacheProvider.Set(jsonCatalog);
+            return jsonCatalog;
+        }
+
+        // 3. Fetch from provider
         _logger.LogInformation($"Fetching module catalog for '{catalogName}' from provider.");
-        var catalog = await moduleProvider.GetModuleCatalogAsync();
+        var result = await moduleProvider.GetModuleCatalogAsync();
 
-        // 3. Save to cache if enabled
-        if (moduleProvider.UseCache && catalog != null)
+        // 4. Save to cache if enabled
+        if (result?.CanCache ?? false)
         {
-            _memoryCacheProvider.Set(catalog);
-            await _jsonCacheProvider.SaveCacheAsync(catalog);
+            _memoryCacheProvider.Set(result.Catalog);
+            await _jsonCacheProvider.SaveCacheAsync(result.Catalog);
         }
 
-        return catalog;
+        return result.Catalog;
     }
 
     /// <summary>
