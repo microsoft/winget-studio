@@ -200,24 +200,24 @@
                 </Grid.RowDefinitions>
 
                 <!-- Results header -->
-                <Grid ColumnSpacing="4">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock x:Uid="ValidationPage_ResultsText" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <StackPanel HorizontalAlignment="Right" Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                        <Button x:Uid="ValidationPage_ResultsToUIText" Command="{x:Bind ViewModel.ConvertYamlToUICommand}"/>
-                        <Button x:Uid="ValidationPage_CopyToClipboard" Click="{x:Bind CopyResultsToClipboard}"/>
-                    </StackPanel>
-                </Grid>
+                <TextBlock x:Uid="ValidationPage_ResultsText" FontWeight="Bold"/>
 
                 <!-- Result output box -->
-                <TextBox Text="{x:Bind ViewModel.RawData, Mode=TwoWay}"
-                         Grid.Row="1"
-                         AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         IsReadOnly="True"/>
+                <Grid Grid.Row="1">
+                    <TextBox Text="{x:Bind ViewModel.RawData, Mode=TwoWay}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             IsReadOnly="True"/>
+
+                    <!-- Copy button -->
+                    <localControls:CopyButton Content="&#xE8C8;"
+                                              Click="{x:Bind CopyResultsToClipboard}"
+                                              VerticalAlignment="Top"
+                                              HorizontalAlignment="Right"
+                                              Background="Transparent"
+                                              BorderThickness="0"
+                                              Margin="10"/>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>
