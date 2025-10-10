@@ -33,9 +33,6 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     /// <inheritdoc/>
     public string Name => nameof(DSCModuleSource.PSGallery);
 
-    /// <inheritdoc/>
-    public bool UseCache => true;
-
     public PowerShellGalleryModuleProvider(
         ILogger<PowerShellGalleryModuleProvider> logger,
         INuGetV2Client client,
@@ -50,7 +47,7 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     }
 
     /// <inheritdoc />
-    public async Task<DSCModuleCatalog> GetModuleCatalogAsync()
+    public async Task<GetModuleCatalogResult> GetModuleCatalogAsync()
     {
         var catalog = new DSCModuleCatalog { Name = Name };
         try
@@ -92,7 +89,11 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
             _logger.LogError(e, "Exception occurred while retrieving DSC modules from PowerShell Gallery.");
         }
 
-        return catalog;
+        return new()
+        {
+            CanCache = true,
+            Catalog = catalog,
+        };
     }
 
     /// <inheritdoc/>
