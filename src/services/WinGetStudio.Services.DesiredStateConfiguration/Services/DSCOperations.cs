@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using Windows.Foundation;
 using Windows.Storage.Streams;
-using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -88,62 +87,45 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public async Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit)
+    public async Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit inputUnit)
     {
+        if (inputUnit is not DSCUnit dscUnit)
+        {
+            throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
+        }
+
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-        var input = config.CreateConfigurationUnit();
-        input.Settings = unit.Settings;
-        input.Type = unit.Type;
-
-        var result = await Task.Run(() => processor.GetUnitSettings(input));
-        unit.Settings = result.Settings;
+        var result = await Task.Run(() => processor.GetUnitSettings(dscUnit.ConfigUnit));
         return new DSCGetUnitResult(result);
     }
 
     /// <inheritdoc />
-    public async Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit)
+    public async Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit inputUnit)
     {
+        if (inputUnit is not DSCUnit dscUnit)
+        {
+            throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
+        }
+
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-        var input = config.CreateConfigurationUnit();
-        input.Settings = unit.Settings;
-        input.Type = unit.Type;
-
-        var result = await Task.Run(() => processor.ApplyUnit(input));
+        var result = await Task.Run(() => processor.ApplyUnit(dscUnit.ConfigUnit));
         return new DSCApplyUnitResult(result);
     }
 
     /// <inheritdoc />
-    public async Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit)
+    public async Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit inputUnit)
     {
-        ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-        var input = config.CreateConfigurationUnit();
-        input.Settings = unit.Settings;
-        input.Type = unit.Type;
-        var result = await Task.Run(() => processor.TestUnit(input));
-        unit.TestResult = result.TestResult == ConfigurationTestResult.Positive;
-        return new DSCTestUnitResult(result);
-    }
-
-    /// <inheritdoc />
-    /// Currently broken due to bug in DSC
-    /// https://github.com/PowerShell/DSC/issues/786
-    public async Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit)
-    {
-        ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-        var input = config.CreateConfigurationUnit();
-        input.Type = unit.Type;
-        input.Intent = ConfigurationUnitIntent.Inform;
-        var result = processor.GetAllUnits(input);
-        if (result.Units != null)
+        if (inputUnit is not DSCUnit dscUnit)
         {
-            unit.Settings = result.Units[0].Settings;
+            throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
         }
 
-        return new DSCGetAllUnitsResult(result);
+        ConfigurationStaticFunctions config = new();
+        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var result = await Task.Run(() => processor.TestUnit(dscUnit.ConfigUnit));
+        return new DSCTestUnitResult(result);
     }
 
     public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()

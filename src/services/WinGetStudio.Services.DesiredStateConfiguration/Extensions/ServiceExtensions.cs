@@ -16,8 +16,6 @@ public static class ServiceExtensions
         services.AddSingleton<IDSC, DSC>();
         services.AddSingleton<IDSCDeployment, DSCDeployment>();
         services.AddSingleton<IDSCOperations, DSCOperations>();
-        services.AddSingleton<IDSCFactory, DSCFactory>();
-        services.AddSingleton<IDSCSetBuilder, DSCSetBuilder>();
         return services;
     }
 }

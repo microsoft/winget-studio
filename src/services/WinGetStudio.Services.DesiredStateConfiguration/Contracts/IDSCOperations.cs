@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -36,28 +35,21 @@ internal interface IDSCOperations
     /// </summary>
     /// <param name="unit">Unit to get details for</param>
     /// <returns>Result of getting the unit details</returns>
-    public Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit unit);
 
     /// <summary>
     /// Set the machine state to the specified configuration unit.
     /// </summary>
     /// <param name="unit">Unit to set</param>
     /// <returns>Result of setting the unit</returns>
-    public Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit unit);
 
     /// <summary>
     /// Test whether the current machine state is the same as the configuration unit.
     /// </summary>
     /// <param name="unit">Unit to test</param>
     /// <returns>Result of testing the unit</returns>
-    public Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit);
-
-    /// <summary>
-    /// Exports the specified configuration unit.
-    /// </summary>
-    /// <param name="unit">Unit to export</param>
-    /// <returns>Result of exporting the unit</returns>
-    public Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit);
+    public Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit unit);
 
     /// <summary>
     /// Gets the list of available DSC v3 resources on the system.

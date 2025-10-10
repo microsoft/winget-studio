@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
@@ -37,16 +36,13 @@ internal sealed class DSC : IDSC
     public void GetConfigurationUnitDetails(IDSCSet set) => _dscOperations.GetConfigurationUnitDetails(set);
 
     /// <inheritdoc/>
-    public async Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.GetUnitAsync(unit);
+    public async Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit unit) => await _dscOperations.GetUnitAsync(unit);
 
     /// <inheritdoc/>
-    public async Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.SetUnitAsync(unit);
+    public async Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit unit) => await _dscOperations.SetUnitAsync(unit);
 
     /// <inheritdoc/>
-    public async Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.TestUnitAsync(unit);
-
-    /// <inheritdoc/>
-    public async Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit) => await _dscOperations.ExportUnitAsync(unit);
+    public async Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit unit) => await _dscOperations.TestUnitAsync(unit);
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync() => await _dscOperations.GetDscV3ResourcesAsync();
