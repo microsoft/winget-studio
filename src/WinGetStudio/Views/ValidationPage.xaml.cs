@@ -12,6 +12,8 @@ namespace WinGetStudio.Views;
 
 public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
 {
+    private bool _toggle;
+
     public ValidationViewModel ViewModel { get; }
 
     public ValidationPage()
@@ -49,5 +51,24 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
     {
         var value = await Editor.GetTextAsync();
         App.GetService<ILogger<ValidationPage>>().LogInformation(value);
+    }
+
+    private void Monaco_Set(object sender, RoutedEventArgs e)
+    {
+        Editor.SetText($"Date: {DateTime.Now}");
+    }
+
+    private void Monaco_Language(object sender, RoutedEventArgs e)
+    {
+        var language = _toggle ? "json" : "yaml";
+        _toggle = !_toggle;
+        Editor.SetLanguage(language);
+    }
+
+    private void Monaco_Theme(object sender, RoutedEventArgs e)
+    {
+        var theme = _toggle ? "vs-dark" : "vs";
+        _toggle = !_toggle;
+        Editor.SetTheme(theme);
     }
 }

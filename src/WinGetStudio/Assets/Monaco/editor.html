@@ -49,10 +49,10 @@
                         window.chrome.webview.postMessage({ type: 'value', value: editor?.getValue() ?? '' });
                         break;
                     case 'setLanguage':
-                        monaco.editor.setModelLanguage(editor.getModel(), msg.language || 'plaintext');
+                        monaco.editor.setModelLanguage(editor.getModel(), msg.value || 'plaintext');
                         break;
                     case 'setTheme':
-                        monaco.editor.setTheme(msg.theme || 'vs-dark');
+                        monaco.editor.setTheme(msg.value || 'vs-dark');
                         break;
                 }
             });

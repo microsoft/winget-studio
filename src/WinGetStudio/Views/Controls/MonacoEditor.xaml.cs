@@ -78,6 +78,7 @@ public sealed partial class MonacoEditor : UserControl
     private void SetIsLoading(bool isLoading)
     {
         LoadingProgressRing.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
+        Editor.Visibility = isLoading ? Visibility.Collapsed : Visibility.Visible;
     }
 
     /// <summary>
@@ -139,9 +140,31 @@ public sealed partial class MonacoEditor : UserControl
     }
 
     /// <summary>
+    /// Set the theme of the editor.
+    /// </summary>
+    /// <param name="theme">The theme to set (e.g., "vs-dark", "vs-light").</param>
+    public void SetTheme(string theme)
+    {
+        var msg = new EditorMessage<string>("setTheme", theme);
+        var json = JsonSerializer.Serialize(msg, _options);
+        Editor.CoreWebView2.PostWebMessageAsJson(json);
+    }
+
+    /// <summary>
+    /// Set the language of the editor.
+    /// </summary>
+    /// <param name="language">The language to set (e.g., "json", "yaml").</param>
+    public void SetLanguage(string language)
+    {
+        var msg = new EditorMessage<string>("setLanguage", language);
+        var json = JsonSerializer.Serialize(msg, _options);
+        Editor.CoreWebView2.PostWebMessageAsJson(json);
+    }
+
+    /// <summary>
     /// Represents a message from the web content to the host application.
     /// </summary>
     private sealed record EditorMessage<T>(
         [property: JsonPropertyName("type")] string Type,
-        [property: JsonPropertyName("payload")] T? Payload = default);
+        [property: JsonPropertyName("value")] T? Value = default);
 }
