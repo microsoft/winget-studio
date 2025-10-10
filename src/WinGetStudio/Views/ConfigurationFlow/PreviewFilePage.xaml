@@ -83,19 +83,31 @@
                 </Hyperlink>
             </TextBlock>
 
-            <!-- Select file box -->
-            <Grid ColumnSpacing="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox PlaceholderText="C:\Users\user\configuration.winget"
-                         Text="{x:Bind ViewModel.FilePath, Mode=OneWay}"
-                         IsReadOnly="True" />
-                <Button x:Uid="ManagePage_BrowseButton"
-                        Command="{x:Bind ViewModel.BrowseCommand}"
-                        Grid.Column="1" />
-            </Grid>
+            <!-- Action buttons -->
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <StackPanel.Resources>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Orientation" Value="Horizontal" />
+                        <Setter Property="Spacing" Value="4" />
+                    </Style>
+                    <Style TargetType="FontIcon">
+                        <Setter Property="FontSize" Value="{ThemeResource BodyTextBlockFontSize}" />
+                    </Style>
+                </StackPanel.Resources>
+
+                <Button>
+                    <StackPanel>
+                        <FontIcon Glyph="&#xE710;" />
+                        <TextBlock Text="New configuration" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.BrowseCommand}">
+                    <StackPanel>
+                        <FontIcon Glyph="&#xE8E5;" />
+                        <TextBlock Text="Open file" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </StackPanel>
 
         <!-- Separator -->
