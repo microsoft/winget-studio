@@ -46,6 +46,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     public partial string FilePath { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsConfigurationLoaded))]
     public partial bool IsInEditMode { get; set; }
 
     [ObservableProperty]
@@ -55,7 +56,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
 
     public bool IsEditPanelVisible => SelectedUnit != null;
 
-    public bool IsConfigurationLoaded => ConfigurationUnits.Count > 0;
+    public bool IsConfigurationLoaded => ConfigurationUnits.Count > 0 || IsInEditMode;
 
     public string Content => DscFile == null ? string.Empty : DscFile.Content;
 
