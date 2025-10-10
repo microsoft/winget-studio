@@ -1,0 +1,63 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8" />
+    <title>WinGet Studio - Monaco Editor</title>
+    <style>
+        html,
+        body,
+        #container {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src="/src/min/vs/loader.js"></script>
+</head>
+
+<body>
+    <!-- Container for the Monaco Editor -->
+    <div id="container"></div>
+
+    <script>
+        // Configure the base path for Monaco Editor
+        require.config({ paths: { 'vs': '/src/min/vs' } });
+
+        let editor;
+        require(['vs/editor/editor.main'], function () {
+            // Initialize the Monaco Editor
+            editor = monaco.editor.create(document.getElementById('container'), {
+                value: '',
+                language: 'json',
+                automaticLayout: true,
+                theme: 'vs-dark',
+                minimap: { enabled: false }
+            });
+        });
+
+        // Handle messages from the host
+        if (window.chrome?.webview) {
+            window.chrome.webview.addEventListener('message', e => {
+                const msg = e.data || {};
+                switch (msg.type) {
+                    case 'setValue':
+                        editor?.setValue(msg.value ?? '');
+                        break;
+                    case 'getValue':
+                        window.chrome.webview.postMessage({ type: 'value', value: editor?.getValue() ?? '' });
+                        break;
+                    case 'setLanguage':
+                        monaco.editor.setModelLanguage(editor.getModel(), msg.language || 'plaintext');
+                        break;
+                    case 'setTheme':
+                        monaco.editor.setTheme(msg.theme || 'vs-dark');
+                        break;
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

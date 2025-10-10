@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
@@ -42,5 +43,11 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
             ResourceExplorer dialog = new(resource) { XamlRoot = XamlRoot };
             await dialog.ShowAsync();
         }
+    }
+
+    private async void Monaco_Get(object sender, RoutedEventArgs e)
+    {
+        var value = await Editor.GetTextAsync();
+        App.GetService<ILogger<ValidationPage>>().LogInformation(value);
     }
 }
