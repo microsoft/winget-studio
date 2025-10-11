@@ -32,7 +32,7 @@ public partial class ApplySetUnit : ObservableObject
 
     public DSCUnitViewModel Unit { get; }
 
-    public ApplySetUnit(IDSCUnit unit, IStringLocalizer localizer, ILogger logger)
+    public ApplySetUnit(IDSCUnit unit, IStringLocalizer localizer)
     {
         Unit = new(unit);
         _localizer = localizer;

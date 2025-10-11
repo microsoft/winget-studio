@@ -57,7 +57,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
             _dscSet = dscSet;
             foreach (var unit in dscSet.Units)
             {
-                Units.Add(new(unit, _localizer, _logger));
+                Units.Add(new(unit, _localizer));
             }
         }
     }
