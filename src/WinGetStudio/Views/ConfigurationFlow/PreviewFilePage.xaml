@@ -93,17 +93,16 @@
                         <Setter Property="FontSize" Value="{ThemeResource BodyTextBlockFontSize}" />
                     </Style>
                 </StackPanel.Resources>
-
                 <Button>
                     <StackPanel>
                         <FontIcon Glyph="&#xE710;" />
-                        <TextBlock Text="New configuration" />
+                        <TextBlock x:Uid="PreviewPage_NewConfiguration" />
                     </StackPanel>
                 </Button>
-                <Button>
+                <Button Click="OpenConfigurationFile">
                     <StackPanel>
                         <FontIcon Glyph="&#xE8E5;" />
-                        <TextBlock Text="Open file" />
+                        <TextBlock x:Uid="PreviewPage_OpenConfiguration" />
                     </StackPanel>
                 </Button>
             </StackPanel>

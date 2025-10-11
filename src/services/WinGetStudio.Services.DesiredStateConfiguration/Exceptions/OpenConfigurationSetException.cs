@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Extensions.Localization;
 using Microsoft.Management.Configuration;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
@@ -37,5 +38,22 @@ public class OpenConfigurationSetException : ConfigurationException
         ResultCode = resultCode;
         Field = field;
         Value = value;
+    }
+
+    /// <summary>
+    /// Gets the localized error message for this exception.
+    /// </summary>
+    /// <param name="localizer">The localizer to use.</param>
+    /// <returns>The localized error message.</returns>
+    public string GetErrorMessage(IStringLocalizer localizer)
+    {
+        return ResultCode.HResult switch
+        {
+            WingetConfigErrorInvalidFieldType => localizer["ConfigurationFieldInvalidType", Field],
+            WingetConfigErrorInvalidFieldValue => localizer["ConfigurationFieldInvalidValue", Field, Value],
+            WingetConfigErrorMissingField => localizer["ConfigurationFieldMissing", Field],
+            WingetConfigErrorUnknownConfigurationFileVersion => localizer["ConfigurationFileVersionUnknown", Value],
+            _ => localizer["ConfigurationFileInvalid"],
+        };
     }
 }
