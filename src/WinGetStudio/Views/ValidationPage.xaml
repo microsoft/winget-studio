@@ -168,13 +168,11 @@
                 </Grid.RowDefinitions>
 
                 <!-- Properties control -->
-                <localControls:ConfigurationSettings Properties="{x:Bind ViewModel.Properties, Mode=OneWay}"
-                                                    HorizontalAlignment="Stretch"/>
+                <TextBox />
 
                 <!-- Empty state message -->
                 <localControls:EmptyStateControl x:Uid="ValidationPage_EmptyPropertiesMessage"
-                                                 Glyph="&#xE700;"
-                                                 Visibility="{x:Bind ViewModel.Properties.Count, Converter={StaticResource CountToVisibilityConverter}, Mode=OneWay}"/>
+                                                 Glyph="&#xE700;" />
 
                 <!-- DSC buttons -->
                 <controls:UniformGrid Grid.Row="1" Rows="1" Columns="3" ColumnSpacing="8">
@@ -204,7 +202,7 @@
 
                 <!-- Result output box -->
                 <Grid Grid.Row="1">
-                    <TextBox Text="{x:Bind ViewModel.RawData, Mode=TwoWay}"
+                    <TextBox Text="{x:Bind ViewModel.OutputText, Mode=TwoWay}"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"
                              IsReadOnly="True"/>

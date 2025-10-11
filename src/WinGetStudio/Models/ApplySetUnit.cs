@@ -30,11 +30,11 @@ public partial class ApplySetUnit : ObservableObject
 
     public bool IsExpanded => State == ApplySetUnitState.Failed || State == ApplySetUnitState.Skipped;
 
-    public DSCConfigurationUnitViewModel Unit { get; }
+    public DSCUnitViewModel Unit { get; }
 
     public ApplySetUnit(IDSCUnit unit, IStringLocalizer localizer, ILogger logger)
     {
-        Unit = new(unit, logger);
+        Unit = new(unit);
         _localizer = localizer;
         Update(ApplySetUnitState.NotStarted);
     }

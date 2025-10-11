@@ -5,11 +5,11 @@ using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.ViewModels;
 
-public class DSCConfigurationUnitDetailsViewModel
+public class DSCUnitDetailsViewModel
 {
     private readonly IDSCUnitDetails _unitDetails;
 
-    public DSCConfigurationUnitDetailsViewModel(IDSCUnitDetails unitDetails)
+    public DSCUnitDetailsViewModel(IDSCUnitDetails unitDetails)
     {
         _unitDetails = unitDetails;
     }

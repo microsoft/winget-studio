@@ -9,8 +9,6 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using NuGet.Packaging;
-using Windows.Foundation.Collections;
-using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -22,7 +20,7 @@ namespace WinGetStudio.ViewModels;
 
 public delegate ValidationViewModel ValidationViewModelFactory();
 
-public partial class ValidationViewModel : ObservableRecipient, INavigationAware
+public partial class ValidationViewModel : ObservableRecipient
 {
     private readonly IDSC _dsc;
     private readonly IDSCExplorer _dscExplorer;
@@ -48,11 +46,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     public partial string? SearchResourceText { get; set; }
 
     [ObservableProperty]
-    public partial string RawData { get; set; } = string.Empty;
+    public partial string OutputText { get; set; } = string.Empty;
 
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
-
-    public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
 
     public ValidationViewModel(
         IDSC dsc,
@@ -70,136 +66,6 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         SelectedSuggestions = [_noResultsSuggestion];
     }
 
-    public void OnNavigatedTo(object parameter)
-    {
-        if (parameter is IDSCUnit u)
-        {
-            var moduleName = u.ModuleName;
-            var type = u.Type;
-            SearchResourceText = moduleName == string.Empty ? type : $"{moduleName}/{type}";
-
-            foreach (var kvp in u.Settings)
-            {
-                if (kvp.Value is string s)
-                {
-                    Properties.Add(new(kvp.Key, new StringValue(s)));
-                }
-                else if (kvp.Value is bool b)
-                {
-                    Properties.Add(new(kvp.Key, new BooleanValue(b)));
-                }
-                else if (kvp.Value is double d)
-                {
-                    Properties.Add(new(kvp.Key, new NumberValue(d)));
-                }
-                else if (kvp.Value is ValueSet v)
-                {
-                    ObservableCollection<ConfigurationProperty> nestedProperties = new();
-                    ConvertYamlToUIHelper(nestedProperties, v);
-                    Properties.Add(new(kvp.Key, new ObjectValue(nestedProperties)));
-                }
-            }
-        }
-    }
-
-    public void OnNavigatedFrom()
-    {
-        // No-op
-    }
-
-    /// <summary>
-    /// Creates a new <see cref="ConfigurationUnitModel"/> instance based on the current module name and properties.
-    /// </summary>
-    /// <returns>Newly created <see cref="ConfigurationUnitModel"/> instance.</returns>
-    private ConfigurationUnitModel CreateConfigurationUnitModel()
-    {
-        ConfigurationUnitModel unit = new();
-        unit.Type = SearchResourceText;
-        ConfigurationPropertiesToValueSet(unit.Settings, Properties);
-        return unit;
-    }
-
-    private void ConfigurationPropertiesToValueSet(ValueSet settings, ObservableCollection<ConfigurationProperty> properties)
-    {
-        foreach (var property in properties)
-        {
-            if (property.Value.Value is string s)
-            {
-                settings.Add(new(property.Name, s));
-            }
-            else if (property.Value.Value is bool b)
-            {
-                settings.Add(new(property.Name, b));
-            }
-            else if (property.Value.Value is double d)
-            {
-                settings.Add(new(property.Name, d));
-            }
-            else if (property.Value.Value is ObservableCollection<ConfigurationProperty> nestedProperties)
-            {
-                ValueSet nestedSettings = new();
-                ConfigurationPropertiesToValueSet(nestedSettings, nestedProperties);
-                settings.Add(new(property.Name, nestedSettings));
-            }
-        }
-    }
-
-    /// <summary>
-    /// Converts YAML data into a user interface representation asynchronously.
-    /// </summary>
-    /// <remarks>This method processes the raw YAML data and updates the UI-related properties accordingly.
-    /// It clears the existing properties and populates them based on the parsed YAML configuration.</remarks>
-    [RelayCommand]
-    private void OnConvertYamlToUI()
-    {
-        var unit = CreateConfigurationUnitModel();
-        if (unit.TryLoad(RawData))
-        {
-            SearchResourceText = unit.Type;
-            Properties.Clear();
-            ConvertYamlToUIHelper(Properties, unit.Settings);
-        }
-        else
-        {
-            // TODO implement error handling
-        }
-    }
-
-    /// <summary>
-    /// Helper function to convert a <see cref="ValueSet"/> into an observable collection of configuration properties.
-    /// </summary>
-    /// <remarks>This method recursively processes nested <see cref="ValueSet"/> instances, converting them
-    /// into collections of configuration properties. Each key-value pair in the <paramref name="settings"/> is mapped
-    /// to a corresponding <see cref="ConfigurationProperty"/> based on the type of the value.</remarks>
-    /// <param name="properties">The collection to populate with configuration properties derived from the <paramref name="settings"/>.</param>
-    /// <param name="settings">A <see cref="ValueSet"/> containing key-value pairs to be converted into configuration properties. The values
-    /// can be of type <see langword="string"/>, <see langword="bool"/>, <see langword="double"/>, or nested <see
-    /// cref="ValueSet"/>.</param>
-    private void ConvertYamlToUIHelper(ObservableCollection<ConfigurationProperty> properties, ValueSet settings)
-    {
-        foreach (var kvp in settings)
-        {
-            if (kvp.Value is string s)
-            {
-                properties.Add(new(kvp.Key, new StringValue(s)));
-            }
-            else if (kvp.Value is bool b)
-            {
-                properties.Add(new(kvp.Key, new BooleanValue(b)));
-            }
-            else if (kvp.Value is double d)
-            {
-                properties.Add(new(kvp.Key, new NumberValue(d)));
-            }
-            else if (kvp.Value is ValueSet v)
-            {
-                ObservableCollection<ConfigurationProperty> nestedProperties = new();
-                ConvertYamlToUIHelper(nestedProperties, v);
-                properties.Add(new(kvp.Key, new ObjectValue(nestedProperties)));
-            }
-        }
-    }
-
     /// <summary>
     /// Retrieves the current configuration unit from the system asynchronously.
     /// </summary>
@@ -208,10 +74,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async () =>
         {
-            var unit = CreateConfigurationUnitModel();
-            var result = await _dsc.GetUnitAsync(unit);
-            RawData = unit.ToYaml();
-            return result.ResultInformation;
+            await Task.CompletedTask;
+            return null;
         });
     }
 
@@ -223,9 +87,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async () =>
         {
-            var unit = CreateConfigurationUnitModel();
-            var result = await _dsc.SetUnitAsync(unit);
-            return result.ResultInformation;
+            await Task.CompletedTask;
+            return null;
         });
     }
 
@@ -237,23 +100,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async () =>
         {
-            var unit = CreateConfigurationUnitModel();
-            var result = await _dsc.TestUnitAsync(unit);
-            if (result.ResultInformation == null || result.ResultInformation.IsOk)
-            {
-                if (unit.TestResult)
-                {
-                    var message = _localizer["Notification_MachineInDesiredState"];
-                    _ui.ShowTimedNotification(message, NotificationMessageSeverity.Success);
-                }
-                else
-                {
-                    var message = _localizer["Notification_MachineNotInDesiredState"];
-                    _ui.ShowTimedNotification(message, NotificationMessageSeverity.Error);
-                }
-            }
-
-            return result.ResultInformation;
+            await Task.CompletedTask;
+            return null;
         });
     }
 

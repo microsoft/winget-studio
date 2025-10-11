@@ -526,6 +526,9 @@
   <data name="PreviewPage_SelectConfigurationUnitMessage.Text" xml:space="preserve">
     <value>Select a configuration unit</value>
   </data>
+  <data name="PreviewPage_ValidateButton.Content" xml:space="preserve">
+    <value>Validate</value>
+  </data>
   <data name="ConfigurationFile_SummaryView.Content" xml:space="preserve">
     <value>Summary view</value>
     <comment>Show the summary view of the configuration file</comment>

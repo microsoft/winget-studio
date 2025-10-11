@@ -43,22 +43,8 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 
     private async void ShowSaveDialog(object sender, RoutedEventArgs e)
     {
-        if (!ViewModel.IsInEditMode)
-        {
-            ViewModel.IsInEditMode = !ViewModel.IsInEditMode;
-            await ViewModel.StoreYamlStateCommand.ExecuteAsync(null);
-            return;
-        }
-
-        if (await ViewModel.IsSaveRequiredAsync())
-        {
-            var dialog = SaveDialog;
-
-            await dialog.ShowAsync();
-        }
-
-        ViewModel.IsInEditMode = !ViewModel.IsInEditMode;
-        ViewModel.IsStateChanged = false;
+        var dialog = SaveDialog;
+        await dialog.ShowAsync();
     }
 
     private async void ShowApplyDialog(object sender, RoutedEventArgs e)
