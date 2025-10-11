@@ -73,7 +73,6 @@ public partial class App : Application
                 services.AddTransient<ActivationHandler<Windows.ApplicationModel.Activation.LaunchActivatedEventArgs>, DefaultActivationHandler>();
 
                 // Other Activation Handlers
-                services.AddTransient<IActivationHandler, ConfigurationFileActivationHandler>();
                 services.AddTransient<IActivationHandler, FileActivationHandler>();
 
                 // Services
