@@ -257,7 +257,8 @@
                                                                   Margin="{ThemeResource SmallRightMargin}" />
 
                                                         <!-- Validate unit -->
-                                                        <Button Command="{x:Bind ValidateCommand}">
+                                                        <Button Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.ValidateUnitCommand}"
+                                                                CommandParameter="{x:Bind}">
                                                             <StackPanel>
                                                                 <FontIcon Glyph="&#xE762;" />
                                                                 <TextBlock>Validate</TextBlock>

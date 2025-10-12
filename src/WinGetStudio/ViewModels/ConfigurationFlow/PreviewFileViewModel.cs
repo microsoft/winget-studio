@@ -104,6 +104,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
+    private void OnValidateUnit(DSCUnitViewModel unit)
+    {
+        // TODO
+    }
+
+    [RelayCommand]
     private void OnEditUnit(DSCUnitViewModel unit)
     {
         SelectedUnit = unit;

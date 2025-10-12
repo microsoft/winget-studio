@@ -4,6 +4,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
 
 namespace WinGetStudio.ViewModels;
 
@@ -55,16 +57,31 @@ public partial class DSCUnitViewModel : ObservableObject
         return unit.ModuleName == string.Empty ? unit.Type : $"{unit.ModuleName}/{unit.Type}";
     }
 
+    /// <summary>
+    /// Creates a configuration object representing this DSC unit.
+    /// </summary>
+    /// <returns>The configuration object.</returns>
+    public ConfigurationV3 ToConfigurationV3()
+    {
+        var config = new ConfigurationV3()
+        {
+            Resources =
+            [
+                new()
+                {
+                    Name = $"{Title}-0",
+                    Type = Title,
+                }
+            ],
+        };
+        config.AddWinGetMetadata();
+        return config;
+    }
+
     [RelayCommand]
     private async Task OnLoadedAsync()
     {
         var result = await _unit.GetDetailsAsync();
         Details = new DSCUnitDetailsViewModel(result);
-    }
-
-    [RelayCommand]
-    private async Task OnValidateAsync()
-    {
-        await Task.CompletedTask;
     }
 }
