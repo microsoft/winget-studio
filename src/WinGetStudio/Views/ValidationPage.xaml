@@ -8,7 +8,6 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:model="using:WinGetStudio.Models"
-    xmlns:selectors="using:WinGetStudio.Selectors"
     xmlns:localControls="using:WinGetStudio.Views.Controls"
     xmlns:localConverters="using:WinGetStudio.Converters"
     xmlns:models="using:WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models"

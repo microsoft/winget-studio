@@ -63,6 +63,8 @@ public partial class DSCUnitViewModel : ObservableObject
     /// <returns>The configuration object.</returns>
     public ConfigurationV3 ToConfigurationV3()
     {
+        var dependencies = Dependencies?.Count == 0 ? null : Dependencies?.ToList();
+        var properties = Settings?.Count == 0 ? null : Settings?.ToDictionary(kv => kv.Key, kv => kv.Value);
         var config = new ConfigurationV3()
         {
             Resources =
@@ -71,6 +73,8 @@ public partial class DSCUnitViewModel : ObservableObject
                 {
                     Name = $"{Title}-0",
                     Type = Title,
+                    DependsOn = dependencies,
+                    Properties = properties,
                 }
             ],
         };

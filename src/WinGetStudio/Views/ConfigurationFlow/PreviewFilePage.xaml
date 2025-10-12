@@ -131,7 +131,7 @@
                                              x:Uid="PreviewPage_SelectConfigurationFileMessage"/>
 
             <!-- Content header buttons -->
-            <Grid>
+            <Grid Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
@@ -479,10 +479,10 @@
                               Visibility="{x:Bind CodeView.IsSelected, Mode=OneWay}"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto">
-                    <TextBlock FontSize="{ThemeResource CaptionTextBlockFontSize}"
-                               Padding="15"
+                    <TextBlock Padding="15"
                                FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                               Text="Code goes here" />
+                               IsTextSelectionEnabled="True"
+                               Text="{x:Bind ViewModel.ConfigurationCode, Mode=OneWay}" />
                 </ScrollViewer>
             </Grid>
 

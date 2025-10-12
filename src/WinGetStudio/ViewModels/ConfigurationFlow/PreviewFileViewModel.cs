@@ -9,7 +9,9 @@ using Microsoft.Extensions.Logging;
 using Windows.Storage;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
+using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
+using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 
@@ -33,6 +35,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnitSelected))]
     public partial DSCUnitViewModel? SelectedUnit { get; set; }
+
+    [ObservableProperty]
+    public partial string? ConfigurationCode { get; set; }
 
     public bool IsUnitSelected => SelectedUnit != null;
 
