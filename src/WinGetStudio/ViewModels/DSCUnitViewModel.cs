@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
 
 namespace WinGetStudio.ViewModels;
@@ -32,14 +33,12 @@ public partial class DSCUnitViewModel : ObservableObject
 
     public IList<string>? Dependencies { get; set; }
 
-    public IList<KeyValuePair<string, object>>? Settings { get; set; }
+    public DSCPropertySet? Settings { get; set; }
 
-    public IList<KeyValuePair<string, string>>? Metadata { get; set; }
+    public DSCPropertySet? Metadata { get; set; }
 
     public DSCUnitViewModel(DSCUnitViewModel source)
     {
-        // TODO Deep copy members
-
         Unit = source.Unit;
         Id = source.Id;
         InstanceId = source.InstanceId;
@@ -54,8 +53,6 @@ public partial class DSCUnitViewModel : ObservableObject
 
     public DSCUnitViewModel(IDSCUnit unit)
     {
-        // TODO Deep copy members
-
         Unit = unit;
         Id = unit.Id;
         InstanceId = unit.InstanceId;
@@ -85,7 +82,9 @@ public partial class DSCUnitViewModel : ObservableObject
         }
 
         var dependencies = Dependencies?.Count == 0 ? null : Dependencies?.ToList();
-        var properties = Settings?.Count == 0 ? null : Settings?.ToDictionary(kv => kv.Key, kv => kv.Value);
+        var properties = Settings?.Count == 0 ? null : Settings?.DeepCopy();
+        var metadata = Metadata?.Count == 0 ? null : Metadata?.DeepCopy();
+        var additionalProperties = metadata == null ? [] : new Dictionary<string, object> { { "metadata", metadata } };
         var config = new ConfigurationV3()
         {
             Resources =
@@ -96,6 +95,7 @@ public partial class DSCUnitViewModel : ObservableObject
                     Type = Title,
                     DependsOn = dependencies,
                     Properties = properties,
+                    AdditionalProperties = additionalProperties,
                 }
             ],
         };
@@ -114,6 +114,12 @@ public partial class DSCUnitViewModel : ObservableObject
             Details = new DSCUnitDetailsViewModel(result);
         }
     }
+
+    /// <summary>
+    /// Creates a clone of this instance.
+    /// </summary>
+    /// <returns>A copy of this instance.</returns>
+    public DSCUnitViewModel Clone() => new(this);
 
     [RelayCommand]
     private async Task OnLoadedAsync() => await LoadDetailsAsync();

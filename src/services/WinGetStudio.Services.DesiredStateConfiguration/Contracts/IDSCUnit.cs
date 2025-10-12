@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -52,12 +53,12 @@ public interface IDSCUnit
     /// <summary>
     /// Gets the values that are for use by the configuration unit itself.
     /// </summary>
-    public IList<KeyValuePair<string, object>> Settings { get; }
+    public DSCPropertySet Settings { get; }
 
     /// <summary>
     /// Gets the metadata properties associated with the configuration unit.
     /// </summary>
-    public IList<KeyValuePair<string, string>> Metadata { get; }
+    public DSCPropertySet Metadata { get; }
 
     /// <summary>
     /// Gets the details of the configuration unit.

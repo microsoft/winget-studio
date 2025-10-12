@@ -42,10 +42,10 @@ internal sealed class DSCUnit : IDSCUnit
     public IList<string> Dependencies { get; }
 
     /// <inheritdoc/>
-    public IList<KeyValuePair<string, object>> Settings { get; }
+    public DSCPropertySet Settings { get; }
 
     /// <inheritdoc/>
-    public IList<KeyValuePair<string, string>> Metadata { get; }
+    public DSCPropertySet Metadata { get; }
 
     internal ConfigurationUnit ConfigUnit { get; }
 
@@ -71,8 +71,8 @@ internal sealed class DSCUnit : IDSCUnit
         RequiresElevation = GetRequiresElevation(unit);
 
         // Load dictionary values into list of key value pairs
-        Settings = unit.Settings.Select(s => new KeyValuePair<string, object>(s.Key, s.Value)).ToList();
-        Metadata = unit.Metadata.Select(m => new KeyValuePair<string, string>(m.Key, m.Value.ToString())).ToList();
+        Settings = new(unit.Settings);
+        Metadata = new(unit.Metadata);
 
         // Get module name from metadata
         ModuleName = Metadata.FirstOrDefault(m => m.Key == ModuleMetadataKey).Value?.ToString() ?? string.Empty;

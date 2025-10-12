@@ -116,10 +116,10 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void OnEditUnit(DSCUnitViewModel unit)
+    private void OnEditUnit(object unit)
     {
-        var editUnit = new DSCUnitViewModel();
-        SelectedUnit = unit;
+        var editUnit = unit?.ToString();
+        editUnit?.ToString();
     }
 
     [RelayCommand]
