@@ -30,7 +30,7 @@ internal sealed class DSCUnit : IDSCUnit
     public string Description { get; }
 
     /// <inheritdoc/>
-    public bool RequiresElevation { get; }
+    public SecurityContext SecurityContext { get; }
 
     /// <inheritdoc/>
     public string Intent { get; }
@@ -68,7 +68,7 @@ internal sealed class DSCUnit : IDSCUnit
         Description = descriptionObj?.ToString() ?? string.Empty;
 
         // Get security context
-        RequiresElevation = GetRequiresElevation(unit);
+        SecurityContext = GetSecurityContext(unit);
 
         // Load dictionary values into list of key value pairs
         Settings = new(unit.Settings);
@@ -99,21 +99,21 @@ internal sealed class DSCUnit : IDSCUnit
     }
 
     /// <summary>
-    /// Gets a value indicating whether the configuration unit requires elevated permissions to execute.
+    /// Gets the security context for the unit.
     /// </summary>
     /// <param name="unit">ConfigurationUnit unit</param>
-    /// <returns></returns>
-    public bool GetRequiresElevation(ConfigurationUnit unit)
+    /// <returns>The security context.</returns>
+    public SecurityContext GetSecurityContext(ConfigurationUnit unit)
     {
         // This property is not available in older version of winget.
         try
         {
-            return unit.Environment.Context == SecurityContext.Elevated;
+            return unit.Environment.Context;
         }
         catch
         {
-            // If we cannot determine the security context, default to not
-            return false;
+            // If we cannot determine the security context, return default option.
+            return default;
         }
     }
 }

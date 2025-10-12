@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Windows.Storage;
+using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -46,6 +47,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool CanViewCode => !IsEditMode;
 
     public bool IsEmptyState => !IsLoading && ConfigurationUnits == null;
+
+    public IReadOnlyList<UnitSecurityContext> SecurityContexts => UnitSecurityContext.All;
 
     public PreviewFileViewModel(
         ILogger<PreviewFileViewModel> logger,

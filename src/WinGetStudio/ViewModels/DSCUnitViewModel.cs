@@ -3,6 +3,8 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Management.Configuration;
+using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -17,18 +19,17 @@ public partial class DSCUnitViewModel : ObservableObject
     [ObservableProperty]
     public partial DSCUnitDetailsViewModel? Details { get; set; }
 
-    public string? Id { get; set; }
+    [ObservableProperty]
+    public partial string? Id { get; set; }
 
-    public Guid? InstanceId { get; set; }
+    [ObservableProperty]
+    public partial Guid? InstanceId { get; set; }
 
     [ObservableProperty]
     public partial string? Title { get; set; }
 
     [ObservableProperty]
     public partial string? Description { get; set; }
-
-    [ObservableProperty]
-    public partial bool RequiresElevation { get; set; }
 
     [ObservableProperty]
     public partial string? Intent { get; set; }
@@ -46,6 +47,12 @@ public partial class DSCUnitViewModel : ObservableObject
     [ObservableProperty]
     public partial string? SettingsJson { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RequiresElevation))]
+    public partial UnitSecurityContext? SelectedSecurityContext { get; set; }
+
+    public bool RequiresElevation => SelectedSecurityContext?.SecurityContext == SecurityContext.Elevated;
+
     public IList<KeyValuePair<string, object>>? MetadataList => Metadata?.ToList();
 
     public DSCUnitViewModel(DSCUnitViewModel source)
@@ -60,7 +67,7 @@ public partial class DSCUnitViewModel : ObservableObject
         InstanceId = unit.InstanceId;
         Title = GetTitle(unit);
         Description = unit.Description;
-        RequiresElevation = unit.RequiresElevation;
+        SelectedSecurityContext = UnitSecurityContext.FromEnum(unit.SecurityContext);
         Intent = unit.Intent;
         Dependencies = [..unit.Dependencies];
         Settings = unit.Settings.DeepCopy();
@@ -129,7 +136,7 @@ public partial class DSCUnitViewModel : ObservableObject
         InstanceId = source.InstanceId;
         Title = source.Title;
         Description = source.Description;
-        RequiresElevation = source.RequiresElevation;
+        SelectedSecurityContext = source.SelectedSecurityContext;
         Intent = source.Intent;
         Dependencies = source.Dependencies;
         Metadata = source.Metadata?.DeepCopy();

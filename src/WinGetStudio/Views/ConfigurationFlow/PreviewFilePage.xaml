@@ -267,7 +267,8 @@
                                                         </Button>
 
                                                         <!-- Edit unit -->
-                                                        <Button Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.EditUnitCommand}"
+                                                        <Button Style="{ThemeResource AccentButtonStyle}"
+                                                                Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.EditUnitCommand}"
                                                                 CommandParameter="{Binding}"
                                                                 Visibility="{Binding ElementName=PageRoot, Path=Tag.ViewModel.IsEditMode}">
                                                             <StackPanel>
@@ -465,15 +466,40 @@
                                         <RowDefinition Height="*" />
                                         <RowDefinition Height="auto" />
                                     </Grid.RowDefinitions>
-                                    <StackPanel Spacing="12">
-                                        <TextBox x:Uid="PreviewPage_ModuleHeader"
-                                                 Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Height="Auto" />
+
+                                    <!-- Edit form -->
+                                    <Grid RowSpacing="12">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="auto" />
+                                            <RowDefinition Height="auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid ColumnSpacing="4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox x:Uid="PreviewPage_ModuleHeader"
+                                                     Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     Height="Auto" />
+                                            <ComboBox ItemsSource="{x:Bind ViewModel.SecurityContexts}"
+                                                      SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
+                                                      Header="Security Context"
+                                                      Grid.Column="1"
+                                                      DisplayMemberPath="Name"/>
+                                        </Grid>
+
                                         <TextBox x:Uid="PreviewPage_DescriptionHeader"
+                                                 Grid.Row="1"
                                                  Text="{x:Bind ViewModel.SelectedUnit.Item2.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                  Height="Auto" />
-                                        <TextBox PlaceholderText="JSON content" Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsJson, Mode=TwoWay}" AcceptsReturn="True" />
-                                    </StackPanel>
+                                        <TextBox PlaceholderText="JSON content"
+                                                 Grid.Row="2"
+                                                 Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsJson, Mode=TwoWay}"
+                                                 AcceptsReturn="True" />
+                                    </Grid>
+
+                                    <!-- Action buttons -->
                                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                                         <Button Command="{x:Bind ViewModel.CancelSelectedUnitCommand}">Cancel</Button>
                                         <Button Style="{ThemeResource AccentButtonStyle}"
