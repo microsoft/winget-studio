@@ -87,13 +87,13 @@ public static class ConfigurationExtensions
     /// <returns>The YAML string.</returns>
     private static string ConfigurationToYaml(string json)
     {
-        // 2. Parse JSON as YAML (JSON is a subset of YAML)
+        // Parse JSON as YAML (JSON is a subset of YAML)
         var intermediate = new DeserializerBuilder()
             .WithAttemptingUnquotedStringTypeDeserialization()
             .Build()
             .Deserialize<object>(json);
 
-        // 3. Serialize as YAML
+        // Serialize as YAML
         return new SerializerBuilder()
             .WithQuotingNecessaryStrings()
             .DisableAliases()

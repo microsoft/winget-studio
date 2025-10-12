@@ -27,28 +27,30 @@ public partial class DSCUnitViewModel : ObservableObject
     [ObservableProperty]
     public partial string? Description { get; set; }
 
-    public bool RequiresElevation { get; set; }
+    [ObservableProperty]
+    public partial bool RequiresElevation { get; set; }
 
-    public string? Intent { get; set; }
+    [ObservableProperty]
+    public partial string? Intent { get; set; }
 
-    public IList<string>? Dependencies { get; set; }
+    [ObservableProperty]
+    public partial IList<string>? Dependencies { get; set; }
 
-    public DSCPropertySet? Settings { get; set; }
+    [ObservableProperty]
+    public partial DSCPropertySet? Settings { get; set; }
 
-    public DSCPropertySet? Metadata { get; set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MetadataList))]
+    public partial DSCPropertySet? Metadata { get; set; }
+
+    [ObservableProperty]
+    public partial string? SettingsJson { get; set; }
+
+    public IList<KeyValuePair<string, object>>? MetadataList => Metadata?.ToList();
 
     public DSCUnitViewModel(DSCUnitViewModel source)
     {
-        Unit = source.Unit;
-        Id = source.Id;
-        InstanceId = source.InstanceId;
-        Title = source.Title;
-        Description = source.Description;
-        RequiresElevation = source.RequiresElevation;
-        Intent = source.Intent;
-        Dependencies = source.Dependencies;
-        Settings = source.Settings;
-        Metadata = source.Metadata;
+        CopyFrom(source);
     }
 
     public DSCUnitViewModel(IDSCUnit unit)
@@ -60,9 +62,10 @@ public partial class DSCUnitViewModel : ObservableObject
         Description = unit.Description;
         RequiresElevation = unit.RequiresElevation;
         Intent = unit.Intent;
-        Dependencies = unit.Dependencies;
-        Settings = unit.Settings;
-        Metadata = unit.Metadata;
+        Dependencies = [..unit.Dependencies];
+        Settings = unit.Settings.DeepCopy();
+        SettingsJson = unit.Settings.ToJson();
+        Metadata = unit.Metadata.DeepCopy();
     }
 
     private string GetTitle(IDSCUnit unit)
@@ -113,6 +116,27 @@ public partial class DSCUnitViewModel : ObservableObject
             var result = await Unit.GetDetailsAsync();
             Details = new DSCUnitDetailsViewModel(result);
         }
+    }
+
+    /// <summary>
+    /// Copies the properties from another instance.
+    /// </summary>
+    /// <param name="source">The source instance.</param>
+    public void CopyFrom(DSCUnitViewModel source)
+    {
+        Unit = source.Unit;
+        Id = source.Id;
+        InstanceId = source.InstanceId;
+        Title = source.Title;
+        Description = source.Description;
+        RequiresElevation = source.RequiresElevation;
+        Intent = source.Intent;
+        Dependencies = source.Dependencies;
+        Metadata = source.Metadata?.DeepCopy();
+        SettingsJson = source.SettingsJson;
+
+        // Re-parse the settings JSON to ensure we have a separate instance.
+        Settings = DSCPropertySet.FromJsonOrYaml(SettingsJson);
     }
 
     /// <summary>

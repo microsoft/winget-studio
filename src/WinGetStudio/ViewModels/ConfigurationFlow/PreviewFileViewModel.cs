@@ -32,7 +32,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnitSelected))]
-    public partial DSCUnitViewModel? SelectedUnit { get; set; }
+    public partial Tuple<DSCUnitViewModel, DSCUnitViewModel>? SelectedUnit { get; set; }
 
     [ObservableProperty]
     public partial string? ConfigurationCode { get; set; }
@@ -116,16 +116,15 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void OnEditUnit(object unit)
+    private void OnEditUnit(DSCUnitViewModel unit)
     {
-        var editUnit = unit?.ToString();
-        editUnit?.ToString();
+        SelectedUnit = new(unit, unit.Clone());
     }
 
     [RelayCommand]
     private void OnDeleteUnit(DSCUnitViewModel unit)
     {
-        if (SelectedUnit == unit)
+        if (SelectedUnit?.Item1 == unit)
         {
             SelectedUnit = null;
         }
@@ -139,6 +138,30 @@ public partial class PreviewFileViewModel : ObservableRecipient
         // TODO
     }
 
+    [RelayCommand]
+    private void OnUpdateSelectedUnit()
+    {
+        if (SelectedUnit != null)
+        {
+            try
+            {
+                SelectedUnit.Item1.CopyFrom(SelectedUnit.Item2);
+                _ui.ShowTimedNotification($"Configuration unit updated", NotificationMessageSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Updating configuration unit failed");
+                _ui.ShowTimedNotification($"Updating configuration unit failed: {ex.Message}", NotificationMessageSeverity.Error);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void OnCancelSelectedUnit()
+    {
+        SelectedUnit = null;
+    }
+
     /// <summary>
     /// Shows the configuration set.
     /// </summary>
@@ -147,7 +170,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         ConfigurationUnits = dscSet == null ? null : new(dscSet.Units.Select(unit => new DSCUnitViewModel(unit)));
         ConfigurationCode = dscCode;
-        SelectedUnit = null;
+        SelectedUnit = default;
     }
 
     /// <summary>
