@@ -8,7 +8,7 @@
 #nullable enable
 
 
-namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.DSCConfigurationV202308
+namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3
 {
     #pragma warning disable // Disable all warnings
 
@@ -132,7 +132,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.DSCConf
     /// Describes a valid DSC Configuration Document.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.1.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class DSCConfigurationV202308
+    public partial class ConfigurationV3
     {
 
         /// <summary>
@@ -140,8 +140,8 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.DSCConf
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("$schema")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DSCConfigurationV202308Schema>))]
-        public DSCConfigurationV202308Schema Schema { get; set; } = default!;
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ConfigurationV3Schema>))]
+        public ConfigurationV3Schema Schema { get; set; } = default!;
 
         /// <summary>
         /// Defines runtime options for the configuration. Users and integrating tools can override use the defined parameters to pass alternate values to the configuration.
@@ -181,7 +181,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.DSCConf
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.1.0 (Newtonsoft.Json v13.0.0.0)")]
-    public enum DSCConfigurationV202308Schema
+    public enum ConfigurationV3Schema
     {
 
         [System.Text.Json.Serialization.JsonStringEnumMemberName(@"https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json")]

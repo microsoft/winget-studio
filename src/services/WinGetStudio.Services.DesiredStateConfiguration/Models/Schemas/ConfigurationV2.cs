@@ -8,17 +8,20 @@
 #nullable enable
 
 
-namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.WinGetConfigurationV01
+namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV2
 {
     #pragma warning disable // Disable all warnings
 
     /// <summary>
-    /// A representation of a configuration used by an orchestrator for WinDSC.
+    /// Description of what these resources do to apply the desired state in the configuration.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.1.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class WinGetConfigurationV01
+    public partial class ConfigurationV2
     {
 
+        /// <summary>
+        /// The properties of the configuration.
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         public Properties? Properties { get; set; } = default!;
 
@@ -37,9 +40,15 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.WinGetC
     public partial class Properties
     {
 
+        /// <summary>
+        /// The preconditions required to run the configuration.
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("assertions")]
         public System.Collections.Generic.List<Assertions>? Assertions { get; set; } = default!;
 
+        /// <summary>
+        /// A list of resources (software, tools, packages, settings, etc.) to be included in the configuration.
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("resources")]
         public System.Collections.Generic.List<Assertions>? Resources { get; set; } = default!;
 
@@ -56,7 +65,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.WinGetC
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$")]
-        public string ConfigurationVersion { get; set; } = "0.1.0";
+        public string ConfigurationVersion { get; set; } = "0.2.0";
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -74,7 +83,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.WinGetC
     {
 
         /// <summary>
-        /// The name of the resource.
+        /// The name of the resource. Optionally specify module and resource as module/resource.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("resource")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -82,7 +91,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.WinGetC
         public string Resource { get; set; } = default!;
 
         /// <summary>
-        /// The identifier of this item.
+        /// A unique identifier for this resource.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("id")]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
@@ -94,9 +103,15 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.WinGetC
         [System.Text.Json.Serialization.JsonPropertyName("dependsOn")]
         public System.Collections.Generic.List<string>? DependsOn { get; set; } = default!;
 
+        /// <summary>
+        /// Information about the module and/or resource.
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("directives")]
         public Directives? Directives { get; set; } = default!;
 
+        /// <summary>
+        /// Parameters as key-value pairs to be passed to the resource.
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("settings")]
         public object? Settings { get; set; } = default!;
 
@@ -129,6 +144,19 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.WinGetC
         [System.ComponentModel.DataAnnotations.StringLength(512)]
         public string? Description { get; set; } = default!;
 
+        /// <summary>
+        /// Enable using prerelease modules.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("allowPrerelease")]
+        public bool? AllowPrerelease { get; set; } = default!;
+
+        /// <summary>
+        /// Provides an indication of the security context in which the configuration unit should be run.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("securityContext")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DirectivesSecurityContext>))]
+        public DirectivesSecurityContext? SecurityContext { get; set; } = default!;
+
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
@@ -137,6 +165,24 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.WinGetC
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
         }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.5.1.0 (Newtonsoft.Json v13.0.0.0)")]
+    public enum DirectivesSecurityContext
+    {
+
+        [System.Text.Json.Serialization.JsonStringEnumMemberName(@"current")]
+        Current = 0,
+
+
+        [System.Text.Json.Serialization.JsonStringEnumMemberName(@"restricted")]
+        Restricted = 1,
+
+
+        [System.Text.Json.Serialization.JsonStringEnumMemberName(@"elevated")]
+        Elevated = 2,
+
 
     }
 }
