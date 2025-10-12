@@ -50,18 +50,6 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         }
     }
 
-    private async void ShowSaveDialog(object sender, RoutedEventArgs e)
-    {
-        var dialog = SaveDialog;
-        await dialog.ShowAsync();
-    }
-
-    private async void ShowApplyDialog(object sender, RoutedEventArgs e)
-    {
-        var dialog = ApplyDialog;
-        await dialog.ShowAsync();
-    }
-
     private async void OpenConfigurationFile(object sender, RoutedEventArgs e)
     {
         try

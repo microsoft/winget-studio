@@ -524,7 +524,7 @@
     <value>Select a configuration file</value>
   </data>
   <data name="PreviewPage_SelectConfigurationUnitMessage.Text" xml:space="preserve">
-    <value>Select a configuration unit</value>
+    <value>Select a configuration unit to edit</value>
   </data>
   <data name="PreviewPage_ValidateButton.Content" xml:space="preserve">
     <value>Validate</value>

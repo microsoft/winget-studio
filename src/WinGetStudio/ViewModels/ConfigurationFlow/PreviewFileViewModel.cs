@@ -23,16 +23,23 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private readonly IDSC _dsc;
 
     [ObservableProperty]
-    public partial bool IsEditMode { get; set; }
-
-    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmptyState))]
     public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
-    public partial ObservableCollection<DSCUnitViewModel> ConfigurationUnits { get; set; } = [];
+    [NotifyPropertyChangedFor(nameof(IsEmptyState))]
+    public partial ObservableCollection<DSCUnitViewModel>? ConfigurationUnits { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUnitSelected))]
     public partial DSCUnitViewModel? SelectedUnit { get; set; }
+
+    public bool IsUnitSelected => SelectedUnit != null;
+
+    [ObservableProperty]
+    public partial bool IsEditMode { get; set; }
+
+    public bool IsEmptyState => !IsLoading && ConfigurationUnits == null;
 
     public PreviewFileViewModel(
         ILogger<PreviewFileViewModel> logger,
@@ -46,14 +53,21 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _dsc = dsc;
     }
 
+    /// <summary>
+    /// Opens the configuration file.
+    /// </summary>
+    /// <param name="file">The configuration file to open.</param>
     public async Task OpenConfigurationFileAsync(StorageFile file)
     {
         try
         {
             _logger.LogInformation($"Selected file: {file.Path}");
+            ClearConfigurationSet();
+            IsLoading = true;
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-            dscSet.ToString();
+            _dsc.GetConfigurationUnitDetails(dscSet);
+            ShowConfigurationSet(dscSet);
         }
         catch (OpenConfigurationSetException ex)
         {
@@ -64,6 +78,10 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             _logger.LogError(ex, $"Unknown error while opening configuration set");
             _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 
@@ -84,4 +102,42 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         await Task.CompletedTask;
     }
+
+    [RelayCommand]
+    private void OnEditUnit(DSCUnitViewModel unit)
+    {
+        SelectedUnit = unit;
+    }
+
+    [RelayCommand]
+    private void OnDeleteUnit(DSCUnitViewModel unit)
+    {
+        if (SelectedUnit == unit)
+        {
+            SelectedUnit = null;
+        }
+
+        ConfigurationUnits?.Remove(unit);
+    }
+
+    [RelayCommand]
+    private void OnAddUnit()
+    {
+        // TODO
+    }
+
+    /// <summary>
+    /// Shows the configuration set.
+    /// </summary>
+    /// <param name="dscSet">The configuration set to show.</param>
+    private void ShowConfigurationSet(IDSCSet? dscSet)
+    {
+        ConfigurationUnits = dscSet == null ? null : new(dscSet.Units.Select(unit => new DSCUnitViewModel(unit)));
+        SelectedUnit = null;
+    }
+
+    /// <summary>
+    /// Clears the current configuration set.
+    /// </summary>
+    private void ClearConfigurationSet() => ShowConfigurationSet(null);
 }

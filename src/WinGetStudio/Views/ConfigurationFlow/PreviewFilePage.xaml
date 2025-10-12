@@ -19,7 +19,6 @@
             <converters:StringVisibilityConverter x:Key="StringVisibilityConverter"/>
             <converters:EmptyObjectToObjectConverter x:Key="EmptyObjectToVisibilityConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
             <converters:BoolToObjectConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible"/>
-            <converters:BoolToObjectConverter x:Key="BoolToVisibilityConverter" TrueValue="Visible" FalseValue="Collapsed"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter" />
             <DataTemplate x:Key="KeyValueTemplate">
                 <StackPanel Spacing="2"
@@ -49,12 +48,14 @@
             </Style>
             <x:Double x:Key="SectionSpacing">10</x:Double>
             <Thickness x:Key="BlockThickness">0,0,0,5</Thickness>
-            <x:Double x:Key="SectionMinWidth">100</x:Double>
+            <x:Double x:Key="SectionMinWidth">200</x:Double>
+            <converters:BoolToObjectConverter x:Key="BoolToGridLengthConverter" TrueValue="*" FalseValue="0" />
+            <converters:BoolToObjectConverter x:Key="BoolToMinWidthConverter" TrueValue="{StaticResource SectionMinWidth}" FalseValue="0" />
         </ResourceDictionary>
     </Page.Resources>
 
     <!-- Page content -->
-    <Grid RowSpacing="12">
+    <Grid RowSpacing="12" x:Name="PageRoot" Tag="{x:Bind}">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
@@ -126,6 +127,7 @@
             <!-- Empty state message -->
             <localControls:EmptyStateControl Grid.Row="1"
                                              Glyph="&#xE8FF;"
+                                             Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay}"
                                              x:Uid="PreviewPage_SelectConfigurationFileMessage"/>
 
             <!-- Content header buttons -->
@@ -149,16 +151,14 @@
 
                 <!-- Edit mode -->
                 <StackPanel Orientation="Horizontal"
-                            Spacing="8"
+                            Spacing="4"
                             Grid.Column="1"
-                            HorizontalAlignment="Right"
                             Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}">
                     <TextBlock x:Uid="ManagePage_EditModeLabel" VerticalAlignment="Center" />
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.IsEditMode, Mode=OneWay}"
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}"
                                   OffContent=""
                                   OnContent=""
-                                  MinWidth="0"
-                                  Toggled="ShowSaveDialog"/>
+                                  MinWidth="0"/>
                 </StackPanel>
             </Grid>
 
@@ -166,293 +166,299 @@
             <Grid Grid.Row="1">
                 <!-- Summary mode -->
                 <Grid Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}">
-                    <!-- Loading state -->
-                    <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
-                        <StackPanel.Resources>
-                            <Style TargetType="labs:Shimmer">
-                                <Setter Property="Height" Value="50" />
-                            </Style>
-                        </StackPanel.Resources>
-                        <labs:Shimmer />
-                        <labs:Shimmer />
-                        <labs:Shimmer />
-                        <labs:Shimmer />
-                        <labs:Shimmer />
-                        <labs:Shimmer />
-                    </StackPanel>
 
-                    <!-- Loaded content -->
-                    <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits, Mode=OneWay}"
-                              x:Name="ConfigurationUnitSections"
-                              Style="{StaticResource KeyValueList}"
-                              Visibility="{x:Bind ViewModel.IsEditMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
-                        <ListView.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Spacing="12" />
-                            </ItemsPanelTemplate>
-                        </ListView.ItemsPanel>
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
-                                <Setter Property="IsTabStop" Value="False" />
-                                <Setter Property="Padding" Value="0" />
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="viewmodels:DSCUnitViewModel">
-                                <Expander IsExpanded="False"
-                                          Tag="{x:Bind Id}"
-                                          HorizontalContentAlignment="Left"
-                                          HorizontalAlignment="Stretch">
-
-                                    <i:Interaction.Behaviors>
-                                        <i:EventTriggerBehavior EventName="Loaded">
-                                            <i:InvokeCommandAction Command="{x:Bind LoadedCommand}" />
-                                        </i:EventTriggerBehavior>
-                                    </i:Interaction.Behaviors>
-
-                                    <!-- Expander header -->
-                                    <Expander.Header>
-                                        <Grid Margin="0,8">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" HorizontalAlignment="Left" Spacing="2">
-
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="2">
-                                                    <TextBlock Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
-                                                    <FontIcon Glyph="&#xEA18;"
-                                                          VerticalAlignment="Center"
-                                                          Visibility="{x:Bind RequiresElevation}" />
-
-                                                </StackPanel>
-                                                <TextBlock Text="{x:Bind Description}" TextTrimming="CharacterEllipsis" />
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                                <Button Command="{x:Bind ValidateCommand}" x:Uid="PreviewPage_ValidateButton" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </Expander.Header>
-
-                                    <!-- Expander content -->
-                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
-                                        <StackPanel Padding="{StaticResource SectionPadding}" Spacing="{StaticResource SectionSpacing}">
-                                            <!-- Individual records -->
-                                            <Border
-                                                Padding="{StaticResource SectionPadding}"
-                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="{StaticResource BorderThicknessThin}"
-                                                CornerRadius="{StaticResource CornerRadiusMedium}">
-                                                <StackPanel Spacing="{StaticResource SectionSpacing}">
-                                                    <TextBlock
-                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                        Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                                        Text="Configuration" />
-                                                    <ListView ItemTemplate="{StaticResource KeyValueTemplate}" Style="{StaticResource KeyValueSubList}">
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Id" Value="{x:Bind Id}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Intent" Value="{x:Bind Intent}" />
-                                                    </ListView>
-                                                </StackPanel>
-                                            </Border>
-
-                                            <!--  Dependencies  -->
-                                            <Border
-                                                Padding="{StaticResource SectionPadding}"
-                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="{StaticResource BorderThicknessThin}"
-                                                CornerRadius="{StaticResource CornerRadiusMedium}"
-                                                Visibility="{x:Bind Dependencies, Converter={StaticResource CollectionVisibilityConverter}}">
-                                                <StackPanel Spacing="{StaticResource SectionSpacing}">
-                                                    <TextBlock
-                                                        x:Uid="ConfigurationUnit_Dependencies"
-                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                        Style="{ThemeResource BodyStrongTextBlockStyle}" />
-                                                    <ListView ItemsSource="{x:Bind Dependencies}" Style="{StaticResource KeyValueSubList}">
-                                                        <ListView.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <StackPanel Orientation="Vertical" Spacing="8" />
-                                                            </ItemsPanelTemplate>
-                                                        </ListView.ItemsPanel>
-                                                        <ListView.ItemTemplate>
-                                                            <DataTemplate x:DataType="x:String">
-                                                                <Border
-                                                                    Padding="{StaticResource Padding8x4}"
-                                                                    CornerRadius="{StaticResource CornerRadiusSmall}">
-                                                                    <TextBlock Tag="{x:Bind}">
-                                                                        <Hyperlink Click="Dependency_Click">
-                                                                            <Run Text="{x:Bind}" />
-                                                                        </Hyperlink>
-                                                                    </TextBlock>
-                                                                </Border>
-                                                            </DataTemplate>
-                                                        </ListView.ItemTemplate>
-                                                    </ListView>
-                                                </StackPanel>
-                                            </Border>
-
-                                            <!-- Metadata -->
-                                            <Border
-                                                Padding="{StaticResource SectionPadding}"
-                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="{StaticResource BorderThicknessThin}"
-                                                CornerRadius="{StaticResource CornerRadiusMedium}"
-                                                Visibility="{x:Bind Metadata, Converter={StaticResource CollectionVisibilityConverter}}">
-                                                <StackPanel Spacing="8">
-                                                    <TextBlock
-                                                        x:Uid="ConfigurationUnit_ResourceMetadata"
-                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                        Style="{ThemeResource BodyStrongTextBlockStyle}" />
-                                                    <ListView
-                                                        ItemTemplate="{ThemeResource KeyValueTemplate}"
-                                                        ItemsSource="{x:Bind Metadata}"
-                                                        Style="{ThemeResource KeyValueSubList}" />
-                                                </StackPanel>
-                                            </Border>
-
-                                            <!-- Settings -->
-                                            <Border
-                                                Padding="{StaticResource SectionPadding}"
-                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="{StaticResource BorderThicknessThin}"
-                                                CornerRadius="{StaticResource CornerRadiusMedium}"
-                                                Visibility="{x:Bind Settings, Converter={StaticResource CollectionVisibilityConverter}}">
-                                                <StackPanel Spacing="{StaticResource SectionSpacing}">
-                                                    <TextBlock
-                                                        x:Uid="ConfigurationUnit_Settings"
-                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                        Style="{ThemeResource BodyStrongTextBlockStyle}" />
-                                                    <ScrollViewer
-                                                        MaxHeight="{StaticResource MaxSettingsHeight}"
-                                                        Padding="{StaticResource SectionPadding}"
-                                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                        CornerRadius="{StaticResource CornerRadiusSmall}"
-                                                        VerticalScrollBarVisibility="Auto">
-                                                        <TextBlock
-                                                            FontFamily="Consolas"
-                                                            IsTextSelectionEnabled="True"
-                                                            Text="Settings goes here"
-                                                            TextWrapping="Wrap" />
-                                                    </ScrollViewer>
-                                                </StackPanel>
-                                            </Border>
-
-                                            <!-- Details -->
-                                            <Border
-                                                Padding="{StaticResource SectionPadding}"
-                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                BorderThickness="{StaticResource BorderThicknessThin}"
-                                                CornerRadius="{StaticResource CornerRadiusMedium}"
-                                                Visibility="{x:Bind Settings, Converter={StaticResource CollectionVisibilityConverter}}">
-                                                <StackPanel Spacing="{StaticResource SectionSpacing}">
-                                                    <TextBlock
-                                                        x:Uid="ConfigurationUnit_Details"
-                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                        Style="{ThemeResource BodyStrongTextBlockStyle}" />
-
-                                                    <!-- Shimmers -->
-                                                    <StackPanel Spacing="4" Visibility="{x:Bind Details, Mode=OneWay, Converter={StaticResource EmptyObjectToVisibilityConverter}}">
-                                                        <StackPanel.Resources>
-                                                            <Style TargetType="labs:Shimmer">
-                                                                <Setter Property="Margin" Value="0" />
-                                                                <Setter Property="Height" Value="{StaticResource ShimmerHeight}" />
-                                                                <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusSmall}" />
-                                                            </Style>
-                                                        </StackPanel.Resources>
-                                                        <labs:Shimmer />
-                                                        <labs:Shimmer />
-                                                        <labs:Shimmer />
-                                                        <labs:Shimmer />
-                                                        <labs:Shimmer />
-                                                    </StackPanel>
-
-                                                    <!-- Loaded details -->
-                                                    <ListView ItemTemplate="{StaticResource KeyValueTemplate}" Style="{ThemeResource KeyValueSubList}">
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitType" Value="{x:Bind Details.UnitType, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitDescription" Value="{x:Bind Details.UnitDescription, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitDocumentation" Value="{x:Bind Details.UnitDocumentationUri, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleName" Value="{x:Bind Details.ModuleName, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleSource" Value="{x:Bind Details.ModuleSource, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleDescription" Value="{x:Bind Details.ModuleDescription, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleDocumentationUri" Value="{x:Bind Details.ModuleDocumentationUri, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_PublishedModuleUri" Value="{x:Bind Details.PublishedModuleUri, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Version" Value="{x:Bind Details.Version, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Author" Value="{x:Bind Details.Author, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Publisher" Value="{x:Bind Details.Publisher, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_IsLocal" Value="{x:Bind Details.IsLocal, Mode=OneWay}" />
-                                                        <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_IsPublic" Value="{x:Bind Details.IsPublic, Mode=OneWay}" />
-                                                    </ListView>
-                                                </StackPanel>
-                                            </Border>
-                                        </StackPanel>
-                                    </ScrollViewer>
-                                </Expander>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-
-                    <!-- Edit mode panel -->
-                    <Grid Visibility="{x:Bind ViewModel.IsEditMode, Mode=OneWay}">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
+                            <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}" />
                             <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
+                            <ColumnDefinition MinWidth="{x:Bind ViewModel.IsEditMode, Mode=OneWay, Converter={StaticResource BoolToMinWidthConverter}}"
+                                              Width="{x:Bind ViewModel.IsEditMode, Mode=OneWay, Converter={StaticResource BoolToGridLengthConverter}}" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- List of configuration units -->
-                        <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits}"
-                                  SelectedItem="{x:Bind ViewModel.SelectedUnit, Mode=TwoWay}">
-                            <ListView.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Spacing="12" />
-                                </ItemsPanelTemplate>
-                            </ListView.ItemsPanel>
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="viewmodels:DSCUnitViewModel">
-                                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                            CornerRadius="4"
-                                            Padding="4">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Spacing="8" Grid.Column="0">
-                                                <TextBlock>
-                                                    <Run x:Uid="PreviewPage_Name" />
-                                                    <Run Text="{x:Bind Title}" />
-                                                </TextBlock>
-                                                <TextBlock>
-                                                    <Run x:Uid="PreviewPage_Description" />
-                                                    <Run Text="{x:Bind Description}" />
-                                                </TextBlock>
-                                            </StackPanel>
-                                            <Button Grid.Column="1">
-                                                <FontIcon Glyph="&#xE894;" FontSize="14" />
-                                            </Button>
-                                        </Grid>
-                                    </Border>
+                        <!-- Left panel -->
+                        <Grid>
+                            <!-- Loading state -->
+                            <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
+                                <StackPanel.Resources>
+                                    <Style TargetType="labs:Shimmer">
+                                        <Setter Property="Height" Value="50" />
+                                    </Style>
+                                </StackPanel.Resources>
+                                <labs:Shimmer />
+                                <labs:Shimmer />
+                                <labs:Shimmer />
+                                <labs:Shimmer />
+                                <labs:Shimmer />
+                                <labs:Shimmer />
+                            </StackPanel>
+                            
+                            <!-- Loaded content -->
+                            <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits, Mode=OneWay}"
+                                      SelectionMode="None"
+                                      x:Name="ConfigurationUnitSections"
+                                      Style="{StaticResource KeyValueList}">
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="12" />
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                                        <Setter Property="IsTabStop" Value="False" />
+                                        <Setter Property="Padding" Value="0" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="viewmodels:DSCUnitViewModel">
+                                        <Expander IsExpanded="False"
+                                                  Tag="{x:Bind Id}"
+                                                  HorizontalContentAlignment="Left"
+                                                  HorizontalAlignment="Stretch">
 
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
+                                            <i:Interaction.Behaviors>
+                                                <i:EventTriggerBehavior EventName="Loaded">
+                                                    <i:InvokeCommandAction Command="{x:Bind LoadedCommand}" />
+                                                </i:EventTriggerBehavior>
+                                            </i:Interaction.Behaviors>
+
+                                            <!-- Expander header -->
+                                            <Expander.Header>
+                                                <Grid Margin="0,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <!-- Header text -->
+                                                    <StackPanel Grid.Column="0" HorizontalAlignment="Left" Spacing="4">
+                                                        <TextBlock Text="{x:Bind Title}"
+                                                                   TextWrapping="NoWrap"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                                                        <TextBlock Text="{x:Bind Description}"
+                                                                   TextWrapping="NoWrap"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+
+                                                    <!-- Header actions -->
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                                        <StackPanel.Resources>
+                                                            <Style TargetType="StackPanel">
+                                                                <Setter Property="Orientation" Value="Horizontal" />
+                                                                <Setter Property="Spacing" Value="4" />
+                                                            </Style>
+                                                            <Style TargetType="FontIcon">
+                                                                <Setter Property="FontSize" Value="{ThemeResource BodyTextBlockFontSize}" />
+                                                            </Style>
+                                                        </StackPanel.Resources>
+
+                                                        <!-- Admin badge -->
+                                                        <FontIcon Glyph="&#xEA18;"
+                                                                  Visibility="{x:Bind RequiresElevation}"
+                                                                  Margin="{ThemeResource SmallRightMargin}" />
+
+                                                        <!-- Validate unit -->
+                                                        <Button Command="{x:Bind ValidateCommand}">
+                                                            <StackPanel>
+                                                                <FontIcon Glyph="&#xE762;" />
+                                                                <TextBlock>Validate</TextBlock>
+                                                            </StackPanel>
+                                                        </Button>
+
+                                                        <!-- Edit unit -->
+                                                        <Button Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.EditUnitCommand}"
+                                                                CommandParameter="{x:Bind}"
+                                                                Visibility="{Binding ElementName=PageRoot, Path=Tag.ViewModel.IsEditMode}">
+                                                            <StackPanel>
+                                                                <FontIcon Glyph="&#xE932;" />
+                                                                <TextBlock>Edit</TextBlock>
+                                                            </StackPanel>
+                                                        </Button>
+
+                                                        <!-- Delete unit -->
+                                                        <Button Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.DeleteUnitCommand}"
+                                                                CommandParameter="{x:Bind}"
+                                                                Visibility="{Binding ElementName=PageRoot, Path=Tag.ViewModel.IsEditMode}"
+                                                                Style="{ThemeResource AlternateCloseButtonStyle}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Expander.Header>
+
+                                            <!-- Expander content -->
+                                            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
+                                                <StackPanel Padding="{StaticResource SectionPadding}" Spacing="{StaticResource SectionSpacing}">
+                                                    <!-- Individual records -->
+                                                    <Border
+                                                        Padding="{StaticResource SectionPadding}"
+                                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                                        CornerRadius="{StaticResource CornerRadiusMedium}">
+                                                        <StackPanel Spacing="{StaticResource SectionSpacing}">
+                                                            <TextBlock
+                                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                                                Text="Configuration" />
+                                                            <ListView ItemTemplate="{StaticResource KeyValueTemplate}" Style="{StaticResource KeyValueSubList}">
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Id" Value="{x:Bind Id}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Intent" Value="{x:Bind Intent}" />
+                                                            </ListView>
+                                                        </StackPanel>
+                                                    </Border>
+
+                                                    <!--  Dependencies  -->
+                                                    <Border
+                                                        Padding="{StaticResource SectionPadding}"
+                                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                                        CornerRadius="{StaticResource CornerRadiusMedium}"
+                                                        Visibility="{x:Bind Dependencies, Converter={StaticResource CollectionVisibilityConverter}}">
+                                                        <StackPanel Spacing="{StaticResource SectionSpacing}">
+                                                            <TextBlock
+                                                                x:Uid="ConfigurationUnit_Dependencies"
+                                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                                            <ListView ItemsSource="{x:Bind Dependencies}" Style="{StaticResource KeyValueSubList}">
+                                                                <ListView.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <StackPanel Orientation="Vertical" Spacing="8" />
+                                                                    </ItemsPanelTemplate>
+                                                                </ListView.ItemsPanel>
+                                                                <ListView.ItemTemplate>
+                                                                    <DataTemplate x:DataType="x:String">
+                                                                        <Border
+                                                                            Padding="{StaticResource Padding8x4}"
+                                                                            CornerRadius="{StaticResource CornerRadiusSmall}">
+                                                                            <TextBlock Tag="{x:Bind}">
+                                                                                <Hyperlink Click="Dependency_Click">
+                                                                                    <Run Text="{x:Bind}" />
+                                                                                </Hyperlink>
+                                                                            </TextBlock>
+                                                                        </Border>
+                                                                    </DataTemplate>
+                                                                </ListView.ItemTemplate>
+                                                            </ListView>
+                                                        </StackPanel>
+                                                    </Border>
+
+                                                    <!-- Metadata -->
+                                                    <Border
+                                                        Padding="{StaticResource SectionPadding}"
+                                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                                        CornerRadius="{StaticResource CornerRadiusMedium}"
+                                                        Visibility="{x:Bind Metadata, Converter={StaticResource CollectionVisibilityConverter}}">
+                                                        <StackPanel Spacing="8">
+                                                            <TextBlock
+                                                                x:Uid="ConfigurationUnit_ResourceMetadata"
+                                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                                            <ListView
+                                                                ItemTemplate="{ThemeResource KeyValueTemplate}"
+                                                                ItemsSource="{x:Bind Metadata}"
+                                                                Style="{ThemeResource KeyValueSubList}" />
+                                                        </StackPanel>
+                                                    </Border>
+
+                                                    <!-- Settings -->
+                                                    <Border
+                                                        Padding="{StaticResource SectionPadding}"
+                                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                                        CornerRadius="{StaticResource CornerRadiusMedium}"
+                                                        Visibility="{x:Bind Settings, Converter={StaticResource CollectionVisibilityConverter}}">
+                                                        <StackPanel Spacing="{StaticResource SectionSpacing}">
+                                                            <TextBlock
+                                                                x:Uid="ConfigurationUnit_Settings"
+                                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                                            <ScrollViewer
+                                                                MaxHeight="{StaticResource MaxSettingsHeight}"
+                                                                Padding="{StaticResource SectionPadding}"
+                                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                                CornerRadius="{StaticResource CornerRadiusSmall}"
+                                                                VerticalScrollBarVisibility="Auto">
+                                                                <TextBlock
+                                                                    FontFamily="Consolas"
+                                                                    IsTextSelectionEnabled="True"
+                                                                    Text="Settings goes here"
+                                                                    TextWrapping="Wrap" />
+                                                            </ScrollViewer>
+                                                        </StackPanel>
+                                                    </Border>
+
+                                                    <!-- Details -->
+                                                    <Border
+                                                        Padding="{StaticResource SectionPadding}"
+                                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="{StaticResource BorderThicknessThin}"
+                                                        CornerRadius="{StaticResource CornerRadiusMedium}"
+                                                        Visibility="{x:Bind Settings, Converter={StaticResource CollectionVisibilityConverter}}">
+                                                        <StackPanel Spacing="{StaticResource SectionSpacing}">
+                                                            <TextBlock
+                                                                x:Uid="ConfigurationUnit_Details"
+                                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                Style="{ThemeResource BodyStrongTextBlockStyle}" />
+
+                                                            <!-- Shimmers -->
+                                                            <StackPanel Spacing="4" Visibility="{x:Bind Details, Mode=OneWay, Converter={StaticResource EmptyObjectToVisibilityConverter}}">
+                                                                <StackPanel.Resources>
+                                                                    <Style TargetType="labs:Shimmer">
+                                                                        <Setter Property="Margin" Value="0" />
+                                                                        <Setter Property="Height" Value="{StaticResource ShimmerHeight}" />
+                                                                        <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusSmall}" />
+                                                                    </Style>
+                                                                </StackPanel.Resources>
+                                                                <labs:Shimmer />
+                                                                <labs:Shimmer />
+                                                                <labs:Shimmer />
+                                                                <labs:Shimmer />
+                                                                <labs:Shimmer />
+                                                            </StackPanel>
+
+                                                            <!-- Loaded details -->
+                                                            <ListView ItemTemplate="{StaticResource KeyValueTemplate}" Style="{ThemeResource KeyValueSubList}">
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitType" Value="{x:Bind Details.UnitType, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitDescription" Value="{x:Bind Details.UnitDescription, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitDocumentation" Value="{x:Bind Details.UnitDocumentationUri, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleName" Value="{x:Bind Details.ModuleName, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleSource" Value="{x:Bind Details.ModuleSource, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleDescription" Value="{x:Bind Details.ModuleDescription, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleDocumentationUri" Value="{x:Bind Details.ModuleDocumentationUri, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_PublishedModuleUri" Value="{x:Bind Details.PublishedModuleUri, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Version" Value="{x:Bind Details.Version, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Author" Value="{x:Bind Details.Author, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Publisher" Value="{x:Bind Details.Publisher, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_IsLocal" Value="{x:Bind Details.IsLocal, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_IsPublic" Value="{x:Bind Details.IsPublic, Mode=OneWay}" />
+                                                            </ListView>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                            </ScrollViewer>
+                                        </Expander>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
 
                         <!-- Resizer -->
-                        <controls:GridSplitter Grid.Column="1" />
+                        <controls:GridSplitter Grid.Column="1" Visibility="{x:Bind ViewModel.IsEditMode, Mode=OneWay}" />
 
-                        <!-- Edit configuration unit -->
+                        <!-- Right panel -->
                         <Grid Grid.Column="2">
                             <!-- Empty state message -->
                             <localControls:EmptyStateControl Grid.Row="1"
-                                                             Glyph="&#xE8B0;"
+                                                             Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}"
+                                                             Glyph="&#xE932;"
                                                              x:Uid="PreviewPage_SelectConfigurationUnitMessage"/>
 
                             <!-- Edit panel -->
-                            <ScrollView Background="{StaticResource CardBackgroundFillColorSecondaryBrush}">
+                            <ScrollView Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay}"
+                                        Background="{StaticResource CardBackgroundFillColorSecondaryBrush}">
                                 <StackPanel Spacing="24" Padding="16">
                                     <TextBox x:Uid="PreviewPage_ModuleHeader"
                                              Text="{x:Bind ViewModel.SelectedUnit.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -488,6 +494,7 @@
                 <!-- Left buttons -->
                 <StackPanel Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal" Spacing="8" Width="Auto">
                     <Button x:Uid="ManagePage_AddResourceButtonText"
+                            Command="{x:Bind ViewModel.AddUnitCommand}"
                             Visibility="{x:Bind ViewModel.IsEditMode, Mode=OneWay}"/>
                 </StackPanel>
 
@@ -498,8 +505,7 @@
                     <Button x:Uid="ManagePage_SaveAsButtonText"
                             Visibility="{x:Bind ViewModel.IsEditMode, Mode=OneWay}"/>
                     <Button x:Uid="ManagePage_ApplyButtonText"
-                            Style="{ThemeResource AccentButtonStyle}"
-                            Click="ShowApplyDialog"/>
+                            Style="{ThemeResource AccentButtonStyle}"/>
                 </StackPanel>
             </Grid>
         </Grid>
