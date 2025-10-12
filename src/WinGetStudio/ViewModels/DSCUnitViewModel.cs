@@ -11,36 +11,52 @@ namespace WinGetStudio.ViewModels;
 
 public partial class DSCUnitViewModel : ObservableObject
 {
-    private readonly IDSCUnit _unit;
+    public IDSCUnit? Unit { get; set; }
 
     [ObservableProperty]
     public partial DSCUnitDetailsViewModel? Details { get; set; }
 
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
-    public Guid InstanceId { get; set; }
-
-    [ObservableProperty]
-    public partial string Title { get; set; }
+    public Guid? InstanceId { get; set; }
 
     [ObservableProperty]
-    public partial string Description { get; set; }
+    public partial string? Title { get; set; }
+
+    [ObservableProperty]
+    public partial string? Description { get; set; }
 
     public bool RequiresElevation { get; set; }
 
-    public string Intent { get; set; }
+    public string? Intent { get; set; }
 
-    public IList<string> Dependencies { get; }
+    public IList<string>? Dependencies { get; set; }
 
-    public IList<KeyValuePair<string, object>> Settings { get; set; }
+    public IList<KeyValuePair<string, object>>? Settings { get; set; }
 
-    public IList<KeyValuePair<string, string>> Metadata { get; set; }
+    public IList<KeyValuePair<string, string>>? Metadata { get; set; }
+
+    public DSCUnitViewModel(DSCUnitViewModel source)
+    {
+        // TODO Deep copy members
+
+        Unit = source.Unit;
+        Id = source.Id;
+        InstanceId = source.InstanceId;
+        Title = source.Title;
+        Description = source.Description;
+        RequiresElevation = source.RequiresElevation;
+        Intent = source.Intent;
+        Dependencies = source.Dependencies;
+        Settings = source.Settings;
+        Metadata = source.Metadata;
+    }
 
     public DSCUnitViewModel(IDSCUnit unit)
     {
-        _unit = unit;
+        // TODO Deep copy members
 
-        // Initialize properties from the unit
+        Unit = unit;
         Id = unit.Id;
         InstanceId = unit.InstanceId;
         Title = GetTitle(unit);
@@ -63,6 +79,11 @@ public partial class DSCUnitViewModel : ObservableObject
     /// <returns>The configuration object.</returns>
     public ConfigurationV3 ToConfigurationV3()
     {
+        if (string.IsNullOrEmpty(Title))
+        {
+            throw new InvalidOperationException("Title cannot be null or empty when creating configuration.");
+        }
+
         var dependencies = Dependencies?.Count == 0 ? null : Dependencies?.ToList();
         var properties = Settings?.Count == 0 ? null : Settings?.ToDictionary(kv => kv.Key, kv => kv.Value);
         var config = new ConfigurationV3()
@@ -82,10 +103,18 @@ public partial class DSCUnitViewModel : ObservableObject
         return config;
     }
 
-    [RelayCommand]
-    private async Task OnLoadedAsync()
+    /// <summary>
+    /// Loads the details of the configuration unit.
+    /// </summary>
+    public async Task LoadDetailsAsync()
     {
-        var result = await _unit.GetDetailsAsync();
-        Details = new DSCUnitDetailsViewModel(result);
+        if (Unit != null)
+        {
+            var result = await Unit.GetDetailsAsync();
+            Details = new DSCUnitDetailsViewModel(result);
+        }
     }
+
+    [RelayCommand]
+    private async Task OnLoadedAsync() => await LoadDetailsAsync();
 }

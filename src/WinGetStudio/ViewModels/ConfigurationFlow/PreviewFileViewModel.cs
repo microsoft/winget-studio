@@ -9,9 +9,7 @@ using Microsoft.Extensions.Logging;
 using Windows.Storage;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
-using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 
@@ -42,7 +40,10 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool IsUnitSelected => SelectedUnit != null;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanViewCode))]
     public partial bool IsEditMode { get; set; }
+
+    public bool CanViewCode => !IsEditMode;
 
     public bool IsEmptyState => !IsLoading && ConfigurationUnits == null;
 
@@ -72,7 +73,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             _dsc.GetConfigurationUnitDetails(dscSet);
-            ShowConfigurationSet(dscSet);
+            ShowConfigurationSet(dscSet, dscFile.Content);
         }
         catch (OpenConfigurationSetException ex)
         {
@@ -117,6 +118,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand]
     private void OnEditUnit(DSCUnitViewModel unit)
     {
+        var editUnit = new DSCUnitViewModel();
         SelectedUnit = unit;
     }
 
@@ -141,14 +143,15 @@ public partial class PreviewFileViewModel : ObservableRecipient
     /// Shows the configuration set.
     /// </summary>
     /// <param name="dscSet">The configuration set to show.</param>
-    private void ShowConfigurationSet(IDSCSet? dscSet)
+    private void ShowConfigurationSet(IDSCSet? dscSet, string? dscCode)
     {
         ConfigurationUnits = dscSet == null ? null : new(dscSet.Units.Select(unit => new DSCUnitViewModel(unit)));
+        ConfigurationCode = dscCode;
         SelectedUnit = null;
     }
 
     /// <summary>
     /// Clears the current configuration set.
     /// </summary>
-    private void ClearConfigurationSet() => ShowConfigurationSet(null);
+    private void ClearConfigurationSet() => ShowConfigurationSet(null, null);
 }

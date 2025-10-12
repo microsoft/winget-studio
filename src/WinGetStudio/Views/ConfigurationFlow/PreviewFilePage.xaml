@@ -138,13 +138,14 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Summary view / Code view buttons -->
-                <controls:Segmented SelectedIndex="0" x:Name="SegmentedModeView">
+                <controls:Segmented SelectedIndex="0" x:Name="SegmentedModeView" VerticalAlignment="Top">
                     <controls:SegmentedItem x:Name="SummaryView"
                                             x:Uid="ConfigurationFile_SummaryView"
                                             AutomationProperties.PositionInSet="1"
                                             AutomationProperties.SizeOfSet="2" />
                     <controls:SegmentedItem x:Name="CodeView"
                                             x:Uid="ConfigurationFile_CodeView"
+                                            IsEnabled="{x:Bind ViewModel.CanViewCode, Mode=OneWay}"
                                             AutomationProperties.PositionInSet="2"
                                             AutomationProperties.SizeOfSet="2" />
                 </controls:Segmented>

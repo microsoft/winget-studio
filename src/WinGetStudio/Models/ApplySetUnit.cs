@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
@@ -85,6 +85,7 @@ public partial class ApplySetUnit : ObservableObject
         switch (hresult)
         {
             case ConfigurationException.WingetConfigErrorDuplicateIdentifier:
+                Debug.Assert(Unit.Id != null, "Unit.Id should not be null here.");
                 return _localizer["ConfigurationUnitHasDuplicateIdentifier", Unit.Id];
             case ConfigurationException.WingetConfigErrorMissingDependency:
                 return _localizer["ConfigurationUnitHasMissingDependency", resultInformation.Details];
