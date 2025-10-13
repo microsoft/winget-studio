@@ -88,6 +88,15 @@
             <CommandBar HorizontalAlignment="Left" DefaultLabelPosition="Right">
                 <AppBarButton Icon="Page" x:Uid="PreviewPage_NewConfiguration" Command="{x:Bind ViewModel.NewConfigurationCommand}" />
                 <AppBarButton Icon="OpenFile" x:Uid="PreviewPage_OpenConfiguration" Click="OpenConfigurationFile" />
+                <AppBarToggleButton Icon="Edit"
+                                    Label="Edit"
+                                    IsChecked="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}"
+                                    Command="{x:Bind ViewModel.ToggleViewModeCommand}" />
+                <AppBarToggleButton x:Name="CodeView" Label="Code">
+                    <AppBarToggleButton.Icon>
+                        <FontIcon Glyph="&#xE943;" />
+                    </AppBarToggleButton.Icon>
+                </AppBarToggleButton>
                 <AppBarButton Icon="Add" Label="Add resource" Command="{x:Bind ViewModel.AddResourceCommand}" />
                 <AppBarSeparator />
                 <AppBarButton Icon="Accept" Label="Validate" Command="{x:Bind ViewModel.ValidateConfigurationCommand}" />
@@ -106,10 +115,6 @@
 
         <!-- Content -->
         <Grid Grid.Row="2" RowSpacing="12">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
 
             <!-- Empty state message -->
             <localControls:EmptyStateControl Grid.Row="1"
@@ -117,40 +122,8 @@
                                              Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay}"
                                              x:Uid="PreviewPage_SelectConfigurationFileMessage"/>
 
-            <!-- Content header buttons -->
-            <Grid Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-
-                <!-- Summary view / Code view buttons -->
-                <controls:Segmented SelectedIndex="0" x:Name="SegmentedModeView" VerticalAlignment="Top">
-                    <controls:SegmentedItem x:Name="SummaryView"
-                                            x:Uid="ConfigurationFile_SummaryView"
-                                            AutomationProperties.PositionInSet="1"
-                                            AutomationProperties.SizeOfSet="2" />
-                    <controls:SegmentedItem x:Name="CodeView"
-                                            x:Uid="ConfigurationFile_CodeView"
-                                            AutomationProperties.PositionInSet="2"
-                                            AutomationProperties.SizeOfSet="2" />
-                </controls:Segmented>
-
-                <!-- Edit mode -->
-                <StackPanel Orientation="Horizontal" Spacing="4" Grid.Column="1">
-                    <TextBlock x:Uid="ManagePage_EditModeLabel" VerticalAlignment="Center" />
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}" OffContent="" OnContent="" MinWidth="0">
-                        <i:Interaction.Behaviors>
-                            <i:EventTriggerBehavior EventName="Toggled">
-                                <i:InvokeCommandAction Command="{x:Bind ViewModel.ToggleViewModeCommand}" />
-                            </i:EventTriggerBehavior>
-                        </i:Interaction.Behaviors>
-                    </ToggleSwitch>
-                </StackPanel>
-            </Grid>
-
             <!-- Content body -->
-            <Grid Grid.Row="1">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}" />
                     <ColumnDefinition Width="auto" />
@@ -161,7 +134,7 @@
                 <!-- Left panel -->
                 <Grid>
                     <!-- Summary view -->
-                    <Grid Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}">
+                    <Grid Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
                         <!-- Loading state -->
                         <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
                             <StackPanel.Resources>
@@ -429,7 +402,7 @@
 
                     <!-- Code view -->
                     <ScrollViewer Grid.Row="4"
-                                  Visibility="{x:Bind CodeView.IsSelected, Mode=OneWay}"
+                                  Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay}"
                                   HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Auto">
                         <TextBlock Padding="15"
