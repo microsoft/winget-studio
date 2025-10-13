@@ -43,10 +43,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool IsUnitSelected => SelectedUnit != null;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanViewCode))]
     public partial bool IsEditMode { get; set; }
-
-    public bool CanViewCode => !IsEditMode;
 
     public bool IsEmptyState => !IsLoading && ConfigurationUnits == null;
 
@@ -146,19 +143,25 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void OnUpdateSelectedUnit()
+    private async Task OnUpdateSelectedUnitAsync()
     {
         if (SelectedUnit != null)
         {
             try
             {
+                _ui.ShowTaskProgress();
                 SelectedUnit.Item1.CopyFrom(SelectedUnit.Item2);
+                await UpdateConfigurationCodeAsync();
                 _ui.ShowTimedNotification($"Configuration unit updated", NotificationMessageSeverity.Success);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Updating configuration unit failed");
                 _ui.ShowTimedNotification($"Updating configuration unit failed: {ex.Message}", NotificationMessageSeverity.Error);
+            }
+            finally
+            {
+                _ui.HideTaskProgress();
             }
         }
     }
@@ -170,14 +173,16 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void OnToggleViewMode()
+    private async Task OnToggleViewModeAsync()
     {
         // The value of IsEditMode will be toggled after this method returns.
         var wasEditMode = IsEditMode;
         var isSwitchingToEditMode = !wasEditMode;
         if (isSwitchingToEditMode)
         {
-            ConfigurationCode = GenerateCode();
+            _ui.ShowTaskProgress();
+            await UpdateConfigurationCodeAsync();
+            _ui.HideTaskProgress();
         }
     }
 
@@ -206,21 +211,29 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
-    private string GenerateCode()
+    private async Task UpdateConfigurationCodeAsync()
     {
-        if (ConfigurationUnits == null)
-        {
-            return string.Empty;
-        }
+        ConfigurationCode = await GenerateConfigurationCodeAsync();
+    }
 
-        var config = new ConfigurationV3();
-        config.AddWinGetMetadata();
-        foreach (var unit in ConfigurationUnits)
+    private Task<string> GenerateConfigurationCodeAsync()
+    {
+        return Task.Run(() =>
         {
-            var unitConfig = unit.ToConfigurationV3();
-            config.Resources.AddRange(unitConfig.Resources);
-        }
+            if (ConfigurationUnits == null)
+            {
+                return string.Empty;
+            }
 
-        return config.ToYaml();
+            var config = new ConfigurationV3();
+            config.AddWinGetMetadata();
+            foreach (var unit in ConfigurationUnits)
+            {
+                var unitConfig = unit.ToConfigurationV3();
+                config.Resources.AddRange(unitConfig.Resources);
+            }
+
+            return config.ToYaml();
+        });
     }
 }
