@@ -10,7 +10,9 @@ using Windows.Storage;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
+using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
+using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 
@@ -167,6 +169,18 @@ public partial class PreviewFileViewModel : ObservableRecipient
         SelectedUnit = null;
     }
 
+    [RelayCommand]
+    private void OnToggleViewMode()
+    {
+        // The value of IsEditMode will be toggled after this method returns.
+        var wasEditMode = IsEditMode;
+        var isSwitchingToEditMode = !wasEditMode;
+        if (isSwitchingToEditMode)
+        {
+            ConfigurationCode = GenerateCode();
+        }
+    }
+
     /// <summary>
     /// Shows the configuration set.
     /// </summary>
@@ -190,5 +204,23 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             unit.ResolveDependencies(configurationUnits);
         }
+    }
+
+    private string GenerateCode()
+    {
+        if (ConfigurationUnits == null)
+        {
+            return string.Empty;
+        }
+
+        var config = new ConfigurationV3();
+        config.AddWinGetMetadata();
+        foreach (var unit in ConfigurationUnits)
+        {
+            var unitConfig = unit.ToConfigurationV3();
+            config.Resources.AddRange(unitConfig.Resources);
+        }
+
+        return config.ToYaml();
     }
 }

@@ -118,7 +118,7 @@ public partial class DSCUnitViewModel : ObservableObject
             [
                 new()
                 {
-                    Name = $"{Title}-0",
+                    Name = IdOrDefault,
                     Type = Title,
                     DependsOn = dependencyNames,
                     Properties = properties,

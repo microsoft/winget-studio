@@ -160,7 +160,13 @@
                     <ToggleSwitch IsOn="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}"
                                   OffContent=""
                                   OnContent=""
-                                  MinWidth="0"/>
+                                  MinWidth="0">
+                        <i:Interaction.Behaviors>
+                            <i:EventTriggerBehavior EventName="Toggled">
+                                <i:InvokeCommandAction Command="{x:Bind ViewModel.ToggleViewModeCommand}" />
+                            </i:EventTriggerBehavior>
+                        </i:Interaction.Behaviors>
+                    </ToggleSwitch>
                 </StackPanel>
             </Grid>
 
