@@ -72,6 +72,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             _logger.LogInformation($"Selected file: {file.Path}");
             ClearConfigurationSet();
+            IsEditMode = false;
             IsLoading = true;
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
