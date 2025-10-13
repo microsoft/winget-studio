@@ -448,7 +448,7 @@
                         </ListView>
                     </Grid>
 
-                     <!-- Code view -->
+                    <!-- Code view -->
                     <ScrollViewer Grid.Row="4"
                                   Visibility="{x:Bind CodeView.IsSelected, Mode=OneWay}"
                                   HorizontalScrollBarVisibility="Auto"
@@ -465,94 +465,94 @@
 
                 <!-- Right panel -->
                 <Grid Grid.Column="2">
-                        <!-- Empty state message -->
-                        <localControls:EmptyStateControl Grid.Row="1"
-                                                         Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}"
-                                                         Glyph="&#xE932;"
-                                                         x:Uid="PreviewPage_SelectConfigurationUnitMessage"/>
+                    <!-- Empty state message -->
+                    <localControls:EmptyStateControl Grid.Row="1"
+                                                     Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}"
+                                                     Glyph="&#xE932;"
+                                                     x:Uid="PreviewPage_SelectConfigurationUnitMessage"/>
 
-                        <!-- Edit panel -->
-                        <Grid Padding="{ThemeResource SectionPadding}"
+                    <!-- Edit panel -->
+                    <Grid Padding="{ThemeResource SectionPadding}"
                               RowSpacing="12"
                               Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay}"
                               Background="{StaticResource CardBackgroundFillColorSecondaryBrush}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="auto" />
-                            </Grid.RowDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
 
-                            <!-- Edit form -->
-                            <ScrollViewer VerticalScrollMode="Auto">
-                                <Grid RowSpacing="12">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="auto" />
-                                        <RowDefinition Height="auto" />
-                                        <RowDefinition Height="auto" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
+                        <!-- Edit form -->
+                        <ScrollViewer VerticalScrollMode="Auto">
+                            <Grid RowSpacing="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
 
-                                    <!-- Resource name and security context -->
-                                    <Grid ColumnSpacing="4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox x:Uid="PreviewPage_ModuleHeader"
-                                                 Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}"
-                                                 Height="Auto" />
-                                        <ComboBox ItemsSource="{x:Bind ViewModel.SecurityContexts}"
-                                                  SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
-                                                  Header="Security Context"
-                                                  Grid.Column="1"
-                                                  DisplayMemberPath="Name"/>
-                                    </Grid>
-
-                                    <!-- Resource id and dependencies -->
-                                    <Grid ColumnSpacing="4" Grid.Row="1">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Header="Unique identifier"
-                                                 PlaceholderText="{x:Bind ViewModel.SelectedUnit.Item1.DefaultId, Mode=OneWay}"
-                                                 Text="{x:Bind ViewModel.SelectedUnit.Item2.Id, Mode=TwoWay}"
-                                                 Height="Auto" />
-                                        <Button Content="Dependencies" Grid.Column="1" VerticalAlignment="Bottom">
-                                            <Button.Flyout>
-                                                <Flyout>
-                                                    <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits, Mode=OneWay}"
-                                                              SelectionMode="Multiple"
-                                                              IsMultiSelectCheckBoxEnabled="True"
-                                                              DisplayMemberPath="IdOrDefault"
-                                                              SelectionChanged="SelectedUnitDependencyChanged"
-                                                              Loaded="SelectedUnitDependencyLoaded"/>
-                                                </Flyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
-
-                                    <!-- Description -->
-                                    <TextBox x:Uid="PreviewPage_DescriptionHeader"
-                                             Grid.Row="2"
-                                             Text="{x:Bind ViewModel.SelectedUnit.Item2.Description, Mode=TwoWay}"
+                                <!-- Resource name and security context -->
+                                <Grid ColumnSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Uid="PreviewPage_ModuleHeader"
+                                             Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}"
                                              Height="Auto" />
-
-                                    <!-- Properties -->
-                                    <TextBox PlaceholderText="JSON content"
-                                             Grid.Row="3"
-                                             Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsJson, Mode=TwoWay}"
-                                             AcceptsReturn="True" />
+                                    <ComboBox ItemsSource="{x:Bind ViewModel.SecurityContexts}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
+                                              Header="Security Context"
+                                              Grid.Column="1"
+                                              DisplayMemberPath="Name"/>
                                 </Grid>
-                            </ScrollViewer>
 
-                            <!-- Action buttons -->
-                            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                                <Button Command="{x:Bind ViewModel.CancelSelectedUnitCommand}">Cancel</Button>
-                                <Button Style="{ThemeResource AccentButtonStyle}"
-                                        Command="{x:Bind ViewModel.UpdateSelectedUnitCommand}">Update</Button>
-                            </StackPanel>
-                        </Grid>
+                                <!-- Resource id and dependencies -->
+                                <Grid ColumnSpacing="4" Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Header="Unique identifier"
+                                             PlaceholderText="{x:Bind ViewModel.SelectedUnit.Item1.DefaultId, Mode=OneWay}"
+                                             Text="{x:Bind ViewModel.SelectedUnit.Item2.Id, Mode=TwoWay}"
+                                             Height="Auto" />
+                                    <Button Content="Dependencies" Grid.Column="1" VerticalAlignment="Bottom">
+                                        <Button.Flyout>
+                                            <Flyout>
+                                                <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits, Mode=OneWay}"
+                                                          SelectionMode="Multiple"
+                                                          IsMultiSelectCheckBoxEnabled="True"
+                                                          DisplayMemberPath="IdOrDefault"
+                                                          SelectionChanged="SelectedUnitDependencyChanged"
+                                                          Loaded="SelectedUnitDependencyLoaded"/>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </Grid>
+
+                                <!-- Description -->
+                                <TextBox x:Uid="PreviewPage_DescriptionHeader"
+                                         Grid.Row="2"
+                                         Text="{x:Bind ViewModel.SelectedUnit.Item2.Description, Mode=TwoWay}"
+                                         Height="Auto" />
+
+                                <!-- Properties -->
+                                <TextBox PlaceholderText="JSON content"
+                                         Grid.Row="3"
+                                         Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsJson, Mode=TwoWay}"
+                                         AcceptsReturn="True" />
+                            </Grid>
+                        </ScrollViewer>
+
+                        <!-- Action buttons -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                            <Button Command="{x:Bind ViewModel.CancelSelectedUnitCommand}">Cancel</Button>
+                            <Button Style="{ThemeResource AccentButtonStyle}"
+                                    Command="{x:Bind ViewModel.UpdateSelectedUnitCommand}">Update</Button>
+                        </StackPanel>
                     </Grid>
+                </Grid>
             </Grid>
 
             <!-- Footer -->
