@@ -15,11 +15,11 @@ namespace WinGetStudio.ViewModels;
 
 public partial class DSCUnitViewModel : ObservableObject
 {
-    private readonly string _defaultId = Guid.NewGuid().ToString();
-
     public IDSCUnit? Unit { get; set; }
 
-    public string IdOrDefault => string.IsNullOrWhiteSpace(Id) ? _defaultId : Id;
+    public string IdOrDefault => string.IsNullOrWhiteSpace(Id) ? DefaultId : Id;
+
+    public string DefaultId { get; } = Guid.NewGuid().ToString();
 
     [ObservableProperty]
     public partial DSCUnitDetailsViewModel? Details { get; set; }

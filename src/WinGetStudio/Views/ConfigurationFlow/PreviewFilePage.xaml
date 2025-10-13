@@ -505,6 +505,7 @@
                                                 <ColumnDefinition Width="auto" />
                                             </Grid.ColumnDefinitions>
                                             <TextBox Header="Unique identifier"
+                                                     PlaceholderText="{x:Bind ViewModel.SelectedUnit.Item1.DefaultId, Mode=OneWay}"
                                                      Text="{x:Bind ViewModel.SelectedUnit.Item2.Id, Mode=TwoWay}"
                                                      Height="Auto" />
                                             <Button Content="Dependencies" Grid.Column="1" VerticalAlignment="Bottom">
