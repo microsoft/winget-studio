@@ -49,7 +49,7 @@ public interface IDSCUnit
     /// <summary>
     /// Gets the <see cref="Id"/> values of the configuration units that this unit depends on.
     /// </summary>
-    public IList<string> Dependencies { get; }
+    public ISet<string> Dependencies { get; }
 
     /// <summary>
     /// Gets the values that are for use by the configuration unit itself.

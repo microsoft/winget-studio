@@ -19,7 +19,8 @@
             <converters:StringVisibilityConverter x:Key="StringVisibilityConverter"/>
             <converters:EmptyObjectToObjectConverter x:Key="EmptyObjectToVisibilityConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
             <converters:BoolToObjectConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible"/>
-            <converters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter" />
+            <converters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
+            <converters:CollectionVisibilityConverter x:Key="CollectionInverseVisibilityConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
             <DataTemplate x:Key="KeyValueTemplate">
                 <StackPanel Spacing="2"
                             Orientation="Horizontal"
@@ -302,7 +303,7 @@
                                                                 Style="{ThemeResource BodyStrongTextBlockStyle}"
                                                                 Text="Configuration" />
                                                             <ListView ItemTemplate="{StaticResource KeyValueTemplate}" Style="{StaticResource KeyValueSubList}">
-                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Id" Value="{x:Bind Id, Mode=OneWay}" />
+                                                                <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Id" Value="{x:Bind IdOrDefault, Mode=OneWay}" />
                                                                 <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Intent" Value="{x:Bind Intent, Mode=OneWay}" />
                                                             </ListView>
                                                         </StackPanel>
@@ -328,16 +329,19 @@
                                                                     </ItemsPanelTemplate>
                                                                 </ListView.ItemsPanel>
                                                                 <ListView.ItemTemplate>
-                                                                    <DataTemplate x:DataType="x:String">
-                                                                        <Border
-                                                                            Padding="{StaticResource Padding8x4}"
-                                                                            CornerRadius="{StaticResource CornerRadiusSmall}">
-                                                                            <TextBlock Tag="{x:Bind}">
-                                                                                <Hyperlink Click="Dependency_Click">
-                                                                                    <Run Text="{x:Bind}" />
-                                                                                </Hyperlink>
-                                                                            </TextBlock>
-                                                                        </Border>
+                                                                    <DataTemplate x:DataType="viewmodels:DSCUnitViewModel">
+                                                                        <controls:SwitchPresenter Value="{x:Bind IsVirtual, Mode=OneWay}" TargetType="x:Boolean">
+                                                                            <controls:Case Value="True">
+                                                                                <TextBlock Text="{x:Bind IdOrDefault, Mode=OneWay}" />
+                                                                            </controls:Case>
+                                                                            <controls:Case Value="False">
+                                                                                <TextBlock Tag="{x:Bind IdOrDefault, Mode=OneWay}">
+                                                                                    <Hyperlink Click="Dependency_Click">
+                                                                                        <Run Text="{x:Bind IdOrDefault, Mode=OneWay}" />
+                                                                                    </Hyperlink>
+                                                                                </TextBlock>
+                                                                            </controls:Case>
+                                                                        </controls:SwitchPresenter>
                                                                     </DataTemplate>
                                                                 </ListView.ItemTemplate>
                                                             </ListView>
@@ -459,28 +463,33 @@
                                                              x:Uid="PreviewPage_SelectConfigurationUnitMessage"/>
 
                             <!-- Edit panel -->
-                            <ScrollView Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay}"
-                                        Background="{StaticResource CardBackgroundFillColorSecondaryBrush}">
-                                <Grid Padding="{ThemeResource SectionPadding}">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="auto" />
-                                    </Grid.RowDefinitions>
+                            <Grid Padding="{ThemeResource SectionPadding}"
+                                  RowSpacing="12"
+                                  Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay}"
+                                  Background="{StaticResource CardBackgroundFillColorSecondaryBrush}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
 
-                                    <!-- Edit form -->
+                                <!-- Edit form -->
+                                <ScrollViewer VerticalScrollMode="Auto">
                                     <Grid RowSpacing="12">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="auto" />
                                             <RowDefinition Height="auto" />
+                                            <RowDefinition Height="auto" />
                                             <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
+
+                                        <!-- Resource name and security context -->
                                         <Grid ColumnSpacing="4">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="auto" />
                                             </Grid.ColumnDefinitions>
                                             <TextBox x:Uid="PreviewPage_ModuleHeader"
-                                                     Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}"
                                                      Height="Auto" />
                                             <ComboBox ItemsSource="{x:Bind ViewModel.SecurityContexts}"
                                                       SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
@@ -489,24 +498,50 @@
                                                       DisplayMemberPath="Name"/>
                                         </Grid>
 
+                                        <!-- Resource id and dependencies -->
+                                        <Grid ColumnSpacing="4" Grid.Row="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Header="Unique identifier"
+                                                     Text="{x:Bind ViewModel.SelectedUnit.Item2.Id, Mode=TwoWay}"
+                                                     Height="Auto" />
+                                            <Button Content="Dependencies" Grid.Column="1" VerticalAlignment="Bottom">
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits, Mode=OneWay}"
+                                                                  SelectionMode="Multiple"
+                                                                  IsMultiSelectCheckBoxEnabled="True"
+                                                                  DisplayMemberPath="IdOrDefault"
+                                                                  SelectionChanged="SelectedUnitDependencyChanged"
+                                                                  Loaded="SelectedUnitDependencyLoaded"/>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </Grid>
+
+                                        <!-- Description -->
                                         <TextBox x:Uid="PreviewPage_DescriptionHeader"
-                                                 Grid.Row="1"
-                                                 Text="{x:Bind ViewModel.SelectedUnit.Item2.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Height="Auto" />
-                                        <TextBox PlaceholderText="JSON content"
                                                  Grid.Row="2"
+                                                 Text="{x:Bind ViewModel.SelectedUnit.Item2.Description, Mode=TwoWay}"
+                                                 Height="Auto" />
+
+                                        <!-- Properties -->
+                                        <TextBox PlaceholderText="JSON content"
+                                                 Grid.Row="3"
                                                  Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsJson, Mode=TwoWay}"
                                                  AcceptsReturn="True" />
                                     </Grid>
+                                </ScrollViewer>
 
-                                    <!-- Action buttons -->
-                                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                                        <Button Command="{x:Bind ViewModel.CancelSelectedUnitCommand}">Cancel</Button>
-                                        <Button Style="{ThemeResource AccentButtonStyle}"
-                                                Command="{x:Bind ViewModel.UpdateSelectedUnitCommand}">Update</Button>
-                                    </StackPanel>
-                                </Grid>
-                            </ScrollView>
+                                <!-- Action buttons -->
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                                    <Button Command="{x:Bind ViewModel.CancelSelectedUnitCommand}">Cancel</Button>
+                                    <Button Style="{ThemeResource AccentButtonStyle}"
+                                            Command="{x:Bind ViewModel.UpdateSelectedUnitCommand}">Update</Button>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>

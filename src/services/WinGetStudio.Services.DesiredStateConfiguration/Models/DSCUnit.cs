@@ -39,7 +39,7 @@ internal sealed class DSCUnit : IDSCUnit
     public string ModuleName { get; }
 
     /// <inheritdoc/>
-    public IList<string> Dependencies { get; }
+    public ISet<string> Dependencies { get; }
 
     /// <inheritdoc/>
     public DSCPropertySet Settings { get; }
@@ -61,7 +61,7 @@ internal sealed class DSCUnit : IDSCUnit
         Id = unit.Identifier;
         InstanceId = unit.InstanceIdentifier;
         Intent = unit.Intent.ToString();
-        Dependencies = [.. unit.Dependencies];
+        Dependencies = unit.Dependencies.ToHashSet();
 
         // Get description from settings
         unit.Metadata.TryGetValue(DescriptionMetadataKey, out var descriptionObj);

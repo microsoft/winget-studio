@@ -77,6 +77,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             _dsc.GetConfigurationUnitDetails(dscSet);
             ShowConfigurationSet(dscSet, dscFile.Content);
+            ResolveDependencies();
         }
         catch (OpenConfigurationSetException ex)
         {
@@ -180,4 +181,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
     /// Clears the current configuration set.
     /// </summary>
     private void ClearConfigurationSet() => ShowConfigurationSet(null, null);
+
+    private void ResolveDependencies()
+    {
+        var configurationUnits = ConfigurationUnits ?? [];
+        foreach (var unit in configurationUnits)
+        {
+            unit.ResolveDependencies(configurationUnits);
+        }
+    }
 }

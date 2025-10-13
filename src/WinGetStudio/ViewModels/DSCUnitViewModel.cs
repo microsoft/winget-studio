@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Management.Configuration;
@@ -14,12 +15,19 @@ namespace WinGetStudio.ViewModels;
 
 public partial class DSCUnitViewModel : ObservableObject
 {
+    private readonly string _defaultId = Guid.NewGuid().ToString();
+
     public IDSCUnit? Unit { get; set; }
+
+    public string IdOrDefault => string.IsNullOrWhiteSpace(Id) ? _defaultId : Id;
 
     [ObservableProperty]
     public partial DSCUnitDetailsViewModel? Details { get; set; }
 
+    public bool IsVirtual { get; }
+
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IdOrDefault))]
     public partial string? Id { get; set; }
 
     [ObservableProperty]
@@ -35,7 +43,7 @@ public partial class DSCUnitViewModel : ObservableObject
     public partial string? Intent { get; set; }
 
     [ObservableProperty]
-    public partial IList<string>? Dependencies { get; set; }
+    public partial List<DSCUnitViewModel>? Dependencies { get; set; }
 
     [ObservableProperty]
     public partial DSCPropertySet? Settings { get; set; }
@@ -55,6 +63,14 @@ public partial class DSCUnitViewModel : ObservableObject
 
     public IList<KeyValuePair<string, object>>? MetadataList => Metadata?.ToList();
 
+    private DSCUnitViewModel(string id)
+    {
+        // A virtual unit is one that does not correspond to an actual DSC
+        // unit. or it has not been resolved yet to a real unit.
+        Id = id;
+        IsVirtual = true;
+    }
+
     public DSCUnitViewModel(DSCUnitViewModel source)
     {
         CopyFrom(source);
@@ -69,7 +85,7 @@ public partial class DSCUnitViewModel : ObservableObject
         Description = unit.Description;
         SelectedSecurityContext = UnitSecurityContext.FromEnum(unit.SecurityContext);
         Intent = unit.Intent;
-        Dependencies = [..unit.Dependencies];
+        Dependencies = [..unit.Dependencies.Select(d => new DSCUnitViewModel(d))];
         Settings = unit.Settings.DeepCopy();
         SettingsJson = unit.Settings.ToJson();
         Metadata = unit.Metadata.DeepCopy();
@@ -91,7 +107,8 @@ public partial class DSCUnitViewModel : ObservableObject
             throw new InvalidOperationException("Title cannot be null or empty when creating configuration.");
         }
 
-        var dependencies = Dependencies?.Count == 0 ? null : Dependencies?.ToList();
+        var dependencies = Dependencies?.Select(d => d.Id ?? string.Empty).Where(d => !string.IsNullOrEmpty(d)).ToList();
+        var dependencyNames = dependencies?.Count == 0 ? null : dependencies?.ToList();
         var properties = Settings?.Count == 0 ? null : Settings?.DeepCopy();
         var metadata = Metadata?.Count == 0 ? null : Metadata?.DeepCopy();
         var additionalProperties = metadata == null ? [] : new Dictionary<string, object> { { "metadata", metadata } };
@@ -103,7 +120,7 @@ public partial class DSCUnitViewModel : ObservableObject
                 {
                     Name = $"{Title}-0",
                     Type = Title,
-                    DependsOn = dependencies,
+                    DependsOn = dependencyNames,
                     Properties = properties,
                     AdditionalProperties = additionalProperties,
                 }
@@ -138,12 +155,34 @@ public partial class DSCUnitViewModel : ObservableObject
         Description = source.Description;
         SelectedSecurityContext = source.SelectedSecurityContext;
         Intent = source.Intent;
-        Dependencies = source.Dependencies;
+        Dependencies = source.Dependencies?.ToList();
         Metadata = source.Metadata?.DeepCopy();
         SettingsJson = source.SettingsJson;
 
         // Re-parse the settings JSON to ensure we have a separate instance.
         Settings = DSCPropertySet.FromJsonOrYaml(SettingsJson);
+    }
+
+    public void ResolveDependencies(IReadOnlyList<DSCUnitViewModel> availableUnits)
+    {
+        Debug.Assert(availableUnits.All(u => !u.IsVirtual), "Available units should not be virtual.");
+
+        // If there are no dependencies, nothing to resolve.
+        if (Dependencies == null || Dependencies.Count == 0)
+        {
+            return;
+        }
+
+        // Replace each dependency with the matching available unit, if found.
+        var resolvedDependencies = new List<DSCUnitViewModel>();
+        foreach (var dep in Dependencies)
+        {
+            var match = availableUnits.FirstOrDefault(u => u.Id == dep.Id);
+            resolvedDependencies.Add(match ?? dep);
+        }
+
+        // Update the dependencies list.
+        Dependencies = resolvedDependencies;
     }
 
     /// <summary>

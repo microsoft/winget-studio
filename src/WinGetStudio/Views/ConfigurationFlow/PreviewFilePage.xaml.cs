@@ -10,6 +10,7 @@ using WinGetStudio.Common.Windows.FileDialog;
 using WinGetStudio.Contracts.Views;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
 
 namespace WinGetStudio.Views.ConfigurationFlow;
@@ -27,7 +28,6 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         _ui = App.GetService<IUIFeedbackService>();
         ViewModel = App.GetService<PreviewFileViewModel>();
         InitializeComponent();
-        DataContext = ViewModel;
     }
 
     private async void Dependency_Click(Hyperlink sender, HyperlinkClickEventArgs args)
@@ -66,6 +66,52 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         catch (Exception ex)
         {
             _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
+        }
+    }
+
+    private void SelectedUnitDependencyChanged(object sender, SelectionChangedEventArgs e)
+    {
+        foreach (var id in e.AddedItems.OfType<DSCUnitViewModel>())
+        {
+            ViewModel.SelectedUnit?.Item2.Dependencies?.Add(id);
+        }
+
+        foreach (var id in e.RemovedItems.OfType<DSCUnitViewModel>())
+        {
+            ViewModel.SelectedUnit?.Item2.Dependencies?.Remove(id);
+        }
+    }
+
+    private void SelectedUnitDependencyLoaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is ListView listView && ViewModel.SelectedUnit != null)
+        {
+            // Disable the option that matches the currently selected unit
+            var container = listView.ContainerFromItem(ViewModel.SelectedUnit.Item1) as ListViewItem;
+            container?.IsEnabled = false;
+
+            // Get the set of IDs to select
+            var idsToSelect = ViewModel.SelectedUnit.Item2.Dependencies?.ToHashSet();
+            if (idsToSelect == null)
+            {
+                listView.SelectedItems.Clear();
+                return;
+            }
+
+            // Remove unneeded selections
+            foreach (var selectedItem in listView.SelectedItems.OfType<DSCUnitViewModel>())
+            {
+                if (!idsToSelect.Remove(selectedItem))
+                {
+                    listView.SelectedItems.Remove(selectedItem);
+                }
+            }
+
+            // Add missing selections
+            foreach (var id in idsToSelect)
+            {
+                listView.SelectedItems.Add(id);
+            }
         }
     }
 }
