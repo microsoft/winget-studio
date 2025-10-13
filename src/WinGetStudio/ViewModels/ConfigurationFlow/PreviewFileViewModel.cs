@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Windows.Storage;
+using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
@@ -31,6 +33,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmptyState))]
+    [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
     public partial ObservableCollection<DSCUnitViewModel>? ConfigurationUnits { get; set; }
 
     [ObservableProperty]
@@ -48,6 +53,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool IsEmptyState => !IsLoading && ConfigurationUnits == null;
 
     public IReadOnlyList<UnitSecurityContext> SecurityContexts => UnitSecurityContext.All;
+
+    public bool CanAddResource => ConfigurationUnits != null;
+
+    public bool CanApplyConfiguration => ConfigurationUnits?.Count > 0;
+
+    public bool CanValidateConfiguration => ConfigurationUnits?.Count > 0;
 
     public PreviewFileViewModel(
         ILogger<PreviewFileViewModel> logger,
@@ -96,6 +107,15 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
+    private void OnNewConfiguration()
+    {
+        _logger.LogInformation($"Creating new configuration set");
+        ClearConfigurationSet();
+        ConfigurationUnits = [];
+        AddResource();
+    }
+
+    [RelayCommand]
     private async Task OnSaveAsync()
     {
         await Task.CompletedTask;
@@ -103,12 +123,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     [RelayCommand]
     private async Task OnSaveAsAsync()
-    {
-        await Task.CompletedTask;
-    }
-
-    [RelayCommand]
-    private async Task OnApplyAsync()
     {
         await Task.CompletedTask;
     }
@@ -122,7 +136,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand]
     private void OnEditUnit(DSCUnitViewModel unit)
     {
-        SelectedUnit = new(unit, unit.Clone());
+        EditUnit(unit);
     }
 
     [RelayCommand]
@@ -136,10 +150,22 @@ public partial class PreviewFileViewModel : ObservableRecipient
         ConfigurationUnits?.Remove(unit);
     }
 
-    [RelayCommand]
-    private void OnAddUnit()
+    [RelayCommand(CanExecute = nameof(CanAddResource))]
+    private void OnAddResource()
     {
-        // TODO
+        AddResource();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanValidateConfiguration))]
+    private async Task OnValidateConfigurationAsync()
+    {
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanApplyConfiguration))]
+    private async Task OnApplyConfigurationAsync()
+    {
+        await Task.CompletedTask;
     }
 
     [RelayCommand]
@@ -150,9 +176,15 @@ public partial class PreviewFileViewModel : ObservableRecipient
             try
             {
                 _ui.ShowTaskProgress();
+                SelectedUnit.Item2.Validate();
                 SelectedUnit.Item1.CopyFrom(SelectedUnit.Item2);
                 await UpdateConfigurationCodeAsync();
                 _ui.ShowTimedNotification($"Configuration unit updated", NotificationMessageSeverity.Success);
+            }
+            catch (DSCUnitValidationException ex)
+            {
+                _logger.LogError(ex, "Validation of configuration unit failed");
+                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
             }
             catch (Exception ex)
             {
@@ -180,9 +212,25 @@ public partial class PreviewFileViewModel : ObservableRecipient
         var isSwitchingToEditMode = !wasEditMode;
         if (isSwitchingToEditMode)
         {
-            _ui.ShowTaskProgress();
-            await UpdateConfigurationCodeAsync();
-            _ui.HideTaskProgress();
+            try
+            {
+                _ui.ShowTaskProgress();
+                await UpdateConfigurationCodeAsync();
+            }
+            catch (DSCUnitValidationException ex)
+            {
+                _logger.LogError(ex, "Validation of configuration unit failed");
+                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Generating configuration code failed");
+                _ui.ShowTimedNotification($"Generating configuration code failed: {ex.Message}", NotificationMessageSeverity.Error);
+            }
+            finally
+            {
+                _ui.HideTaskProgress();
+            }
         }
     }
 
@@ -235,5 +283,39 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
             return config.ToYaml();
         });
+    }
+
+    private void EditUnit(DSCUnitViewModel unit)
+    {
+        IsEditMode = true;
+        SelectedUnit = new(unit, unit.Clone());
+    }
+
+    private void AddResource()
+    {
+        if (ConfigurationUnits != null)
+        {
+            var unit = new DSCUnitViewModel()
+            {
+                Title = "Module/Resource",
+                SelectedSecurityContext = UnitSecurityContext.Default,
+            };
+            ConfigurationUnits.Insert(0, unit);
+            EditUnit(unit);
+        }
+    }
+
+    partial void OnConfigurationUnitsChanged(ObservableCollection<DSCUnitViewModel>? oldValue, ObservableCollection<DSCUnitViewModel>? newValue)
+    {
+        oldValue?.CollectionChanged -= OnConfigurationUnitsContentChanged;
+        newValue?.CollectionChanged += OnConfigurationUnitsContentChanged;
+    }
+
+    private void OnConfigurationUnitsContentChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(CanValidateConfiguration));
+        OnPropertyChanged(nameof(CanApplyConfiguration));
+        ValidateConfigurationCommand.NotifyCanExecuteChanged();
+        ApplyConfigurationCommand.NotifyCanExecuteChanged();
     }
 }

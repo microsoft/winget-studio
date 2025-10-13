@@ -529,10 +529,10 @@
   <data name="PreviewPage_ValidateButton.Content" xml:space="preserve">
     <value>Validate</value>
   </data>
-  <data name="PreviewPage_NewConfiguration.Text" xml:space="preserve">
+  <data name="PreviewPage_NewConfiguration.Label" xml:space="preserve">
     <value>New configuration</value>
   </data>
-  <data name="PreviewPage_OpenConfiguration.Text" xml:space="preserve">
+  <data name="PreviewPage_OpenConfiguration.Label" xml:space="preserve">
     <value>Open configuration</value>
   </data>
   <data name="PreviewPage_FilePicker_ConfigurationFiles" xml:space="preserve">

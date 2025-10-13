@@ -5,6 +5,7 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Management.Configuration;
+using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
@@ -23,8 +24,6 @@ public partial class DSCUnitViewModel : ObservableObject
 
     [ObservableProperty]
     public partial DSCUnitDetailsViewModel? Details { get; set; }
-
-    public bool IsVirtual { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IdOrDefault))]
@@ -63,12 +62,8 @@ public partial class DSCUnitViewModel : ObservableObject
 
     public IList<KeyValuePair<string, object>>? MetadataList => Metadata?.ToList();
 
-    private DSCUnitViewModel(string id)
+    public DSCUnitViewModel()
     {
-        // A virtual unit is one that does not correspond to an actual DSC
-        // unit. or it has not been resolved yet to a real unit.
-        Id = id;
-        IsVirtual = true;
     }
 
     public DSCUnitViewModel(DSCUnitViewModel source)
@@ -85,7 +80,7 @@ public partial class DSCUnitViewModel : ObservableObject
         Description = unit.Description;
         SelectedSecurityContext = UnitSecurityContext.FromEnum(unit.SecurityContext);
         Intent = unit.Intent;
-        Dependencies = [..unit.Dependencies.Select(d => new DSCUnitViewModel(d))];
+        Dependencies = [..unit.Dependencies.Select(id => new DSCUnitViewModel() { Id = id })];
         Settings = unit.Settings.DeepCopy();
         SettingsJson = unit.Settings.ToJson();
         Metadata = unit.Metadata.DeepCopy();
@@ -96,17 +91,22 @@ public partial class DSCUnitViewModel : ObservableObject
         return unit.ModuleName == string.Empty ? unit.Type : $"{unit.ModuleName}/{unit.Type}";
     }
 
+    public void Validate()
+    {
+        if (string.IsNullOrEmpty(Title))
+        {
+            throw new DSCUnitValidationException("Title cannot be null or empty when creating configuration.");
+        }
+    }
+
     /// <summary>
     /// Creates a configuration object representing this DSC unit.
     /// </summary>
     /// <returns>The configuration object.</returns>
     public ConfigurationV3 ToConfigurationV3()
     {
-        if (string.IsNullOrEmpty(Title))
-        {
-            throw new InvalidOperationException("Title cannot be null or empty when creating configuration.");
-        }
-
+        Validate();
+        Debug.Assert(!string.IsNullOrEmpty(Title), "Title should not be null or empty after validation.");
         var dependencies = Dependencies?.Select(d => d.Id ?? string.Empty).Where(d => !string.IsNullOrEmpty(d)).ToList();
         var dependencyNames = dependencies?.Count == 0 ? null : dependencies?.ToList();
         var properties = Settings?.Count == 0 ? null : Settings?.DeepCopy();
@@ -160,13 +160,11 @@ public partial class DSCUnitViewModel : ObservableObject
         SettingsJson = source.SettingsJson;
 
         // Re-parse the settings JSON to ensure we have a separate instance.
-        Settings = DSCPropertySet.FromJsonOrYaml(SettingsJson);
+        Settings = string.IsNullOrEmpty(SettingsJson) ? null : DSCPropertySet.FromJsonOrYaml(SettingsJson);
     }
 
     public void ResolveDependencies(IReadOnlyList<DSCUnitViewModel> availableUnits)
     {
-        Debug.Assert(availableUnits.All(u => !u.IsVirtual), "Available units should not be virtual.");
-
         // If there are no dependencies, nothing to resolve.
         if (Dependencies == null || Dependencies.Count == 0)
         {
