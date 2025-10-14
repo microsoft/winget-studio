@@ -26,11 +26,32 @@ internal sealed class DSCOperations : IDSCOperations
         _logger = logger;
     }
 
+    /// <inheritdoc/>
     public async Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file)
     {
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
         var outOfProcResult = await OpenConfigurationSetAsync(file, processor);
         return new DSCSet(processor, outOfProcResult);
+    }
+
+    /// <inheritdoc />
+    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ValidateSetAsync(IDSCSet inputSet)
+    {
+        if (inputSet is not DSCSet dscSet)
+        {
+            throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
+        }
+
+        return AsyncInfo.Run<IDSCApplySetResult, IDSCSetChangeData>(async (cancellationToken, progress) =>
+        {
+            _logger.LogInformation("Starting to validate configuration set");
+            var task = dscSet.Processor.ApplySetAsync(dscSet.ConfigSet, ApplyConfigurationSetFlags.PerformConsistencyCheckOnly);
+            task.Progress += (sender, args) => progress.Report(new DSCSetChangeData(args));
+            var outOfProcResult = await task;
+            var inProcResult = new DSCApplySetResult(inputSet, outOfProcResult);
+            _logger.LogInformation($"Validate configuration finished.");
+            return inProcResult;
+        });
     }
 
     /// <inheritdoc />

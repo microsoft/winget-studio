@@ -19,6 +19,9 @@ public interface IDSC
     /// <inheritdoc cref="IDSCOperations.OpenConfigurationSetAsync" />
     public Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file);
 
+    /// <inheritdoc cref="IDSCOperations.ValidateSetAsync" />/>
+    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ValidateSetAsync(IDSCSet dscSet);
+
     /// <inheritdoc cref="IDSCOperations.ApplySetAsync" />
     public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet dscSet);
 

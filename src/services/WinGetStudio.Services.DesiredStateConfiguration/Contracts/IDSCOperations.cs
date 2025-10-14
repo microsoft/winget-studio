@@ -18,6 +18,13 @@ internal interface IDSCOperations
     public Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file);
 
     /// <summary>
+    /// Validate a DSC configuration set
+    /// </summary>
+    /// <param name="set">Configuration set to validate</param>
+    /// <returns>Result of validating the configuration</returns>
+    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ValidateSetAsync(IDSCSet set);
+
+    /// <summary>
     /// Apply a DSC configuration set
     /// </summary>
     /// <param name="set">Configuration set to apply</param>

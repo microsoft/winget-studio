@@ -30,6 +30,9 @@ internal sealed class DSC : IDSC
     public Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file) => _dscOperations.OpenConfigurationSetAsync(file);
 
     /// <inheritdoc/>
+    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ValidateSetAsync(IDSCSet set) => _dscOperations.ValidateSetAsync(set);
+
+    /// <inheritdoc/>
     public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet set) => _dscOperations.ApplySetAsync(set);
 
     /// <inheritdoc/>
