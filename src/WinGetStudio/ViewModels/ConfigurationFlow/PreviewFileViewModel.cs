@@ -91,6 +91,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         try
         {
+            _ui.ShowTaskProgress();
             _logger.LogInformation($"Selected file: {file.Path}");
             ClearConfigurationSet();
             IsEditMode = false;
@@ -114,6 +115,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         finally
         {
             IsLoading = false;
+            _ui.HideTaskProgress();
         }
     }
 
@@ -229,7 +231,31 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanValidateConfiguration))]
     private async Task OnValidateConfigurationAsync()
     {
-        await Task.CompletedTask;
+        if (!string.IsNullOrEmpty(ConfigurationCode))
+        {
+            try
+            {
+                _ui.ShowTaskProgress();
+                var dscFile = DSCFile.CreateVirtual(string.Empty, ConfigurationCode);
+                _logger.LogInformation($"Validating configuration code");
+                await _dsc.OpenConfigurationSetAsync(dscFile);
+                _ui.ShowTimedNotification($"Configuration code is valid", NotificationMessageSeverity.Success);
+            }
+            catch (OpenConfigurationSetException ex)
+            {
+                _logger.LogError(ex, $"Validation of configuration code failed");
+                _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Unknown error while validating configuration code");
+                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
+            }
+            finally
+            {
+                _ui.HideTaskProgress();
+            }
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanApplyConfiguration))]
