@@ -236,15 +236,21 @@ public partial class PreviewFileViewModel : ObservableRecipient
             try
             {
                 _ui.ShowTaskProgress();
-                var dscFile = DSCFile.CreateVirtual(string.Empty, ConfigurationCode);
+                var dscFile = DSCFile.CreateVirtual(, ConfigurationCode);
                 _logger.LogInformation($"Validating configuration code");
-                await _dsc.OpenConfigurationSetAsync(dscFile);
+                var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+                await _dsc.ValidateSetAsync(dscSet);
                 _ui.ShowTimedNotification($"Configuration code is valid", NotificationMessageSeverity.Success);
             }
             catch (OpenConfigurationSetException ex)
             {
-                _logger.LogError(ex, $"Validation of configuration code failed");
+                _logger.LogError(ex, $"Opening configuration set failed during validation");
                 _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
+            }
+            catch (ApplyConfigurationSetException ex)
+            {
+                _logger.LogError(ex, $"Validation of configuration set failed");
+                _ui.ShowTimedNotification(ex.GetSetErrorMessage(_localizer), NotificationMessageSeverity.Error);
             }
             catch (Exception ex)
             {
