@@ -66,8 +66,8 @@
         <ContentDialog
             x:Uid="PreviewPage_SaveDialog"
             x:Name="SaveDialog"
-            PrimaryButtonCommand="{x:Bind ViewModel.SaveCommand}"
-            SecondaryButtonCommand="{x:Bind ViewModel.SaveAsCommand}" />
+            PrimaryButtonCommand="{x:Bind ViewModel.SaveConfigurationCommand}"
+            SecondaryButtonCommand="{x:Bind ViewModel.SaveConfigurationAsCommand}" />
 
         <ContentDialog
             x:Uid="PreviewPage_ApplyDialog"
@@ -88,22 +88,24 @@
             <CommandBar HorizontalAlignment="Left" DefaultLabelPosition="Right">
                 <AppBarButton Icon="Page" x:Uid="PreviewPage_NewConfiguration" Command="{x:Bind ViewModel.NewConfigurationCommand}" />
                 <AppBarButton Icon="OpenFile" x:Uid="PreviewPage_OpenConfiguration" Click="OpenConfigurationFile" />
-                <AppBarToggleButton Icon="Edit"
-                                    Label="Edit"
-                                    IsChecked="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}"
-                                    Command="{x:Bind ViewModel.ToggleViewModeCommand}" />
-                <AppBarToggleButton x:Name="CodeView" Label="Code">
+                <AppBarToggleButton IsChecked="{x:Bind ViewModel.IsCodeView, Mode=TwoWay}"
+                                    Label="Code"
+                                    Command="{x:Bind ViewModel.ToggleCodeViewCommand}">
                     <AppBarToggleButton.Icon>
                         <FontIcon Glyph="&#xE943;" />
                     </AppBarToggleButton.Icon>
                 </AppBarToggleButton>
+                <AppBarToggleButton Icon="Edit"
+                                    Label="Edit"
+                                    IsChecked="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}"
+                                    Command="{x:Bind ViewModel.ToggleEditModeCommand}" />
                 <AppBarButton Icon="Add" Label="Add resource" Command="{x:Bind ViewModel.AddResourceCommand}" />
                 <AppBarSeparator />
                 <AppBarButton Icon="Accept" Label="Validate" Command="{x:Bind ViewModel.ValidateConfigurationCommand}" />
                 <AppBarButton Icon="Play" Label="Apply" IsEnabled="{x:Bind ViewModel.CanApplyConfiguration, Mode=OneWay}" />
                 <AppBarSeparator />
-                <AppBarButton Icon="Save" Label="Save" />
-                <AppBarButton Icon="Save" Label="Save as" />
+                <AppBarButton Icon="Save" Label="Save" IsEnabled="{x:Bind ViewModel.CanSaveConfiguration, Mode=OneWay}" />
+                <AppBarButton Icon="Save" Label="Save as" IsEnabled="{x:Bind ViewModel.CanSaveConfiguration, Mode=OneWay}" />
             </CommandBar>
         </StackPanel>
 
@@ -134,7 +136,7 @@
                 <!-- Left panel -->
                 <Grid>
                     <!-- Summary view -->
-                    <Grid Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
+                    <Grid Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
                         <!-- Loading state -->
                         <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
                             <StackPanel.Resources>
@@ -402,7 +404,7 @@
 
                     <!-- Code view -->
                     <ScrollViewer Grid.Row="4"
-                                  Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay}"
+                                  Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}"
                                   HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Auto">
                         <TextBlock Padding="15"
