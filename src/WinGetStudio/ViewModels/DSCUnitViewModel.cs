@@ -64,6 +64,10 @@ public partial class DSCUnitViewModel : ObservableObject
 
     public DSCUnitViewModel()
     {
+        SelectedSecurityContext = UnitSecurityContext.Default;
+        Dependencies = [];
+        Settings = [];
+        Metadata = [];
     }
 
     public DSCUnitViewModel(DSCUnitViewModel source)
@@ -107,8 +111,8 @@ public partial class DSCUnitViewModel : ObservableObject
     {
         Validate();
         Debug.Assert(!string.IsNullOrEmpty(Title), "Title should not be null or empty after validation.");
-        var dependencies = Dependencies?.Select(d => d.Id ?? string.Empty).Where(d => !string.IsNullOrEmpty(d)).ToList();
-        var dependencyNames = dependencies?.Count == 0 ? null : dependencies?.ToList();
+        var dependencies = Dependencies?.Select(d => d.IdOrDefault).ToList();
+        var dependencyNames = dependencies?.Count == 0 ? null : dependencies;
         var properties = Settings?.Count == 0 ? null : Settings?.DeepCopy();
         var metadata = Metadata?.Count == 0 ? null : Metadata?.DeepCopy();
         var additionalProperties = metadata == null ? [] : new Dictionary<string, object> { { "metadata", metadata } };
@@ -126,7 +130,16 @@ public partial class DSCUnitViewModel : ObservableObject
                 }
             ],
         };
+
+        // Add WinGet metadata to the configuration.
         config.AddWinGetMetadata();
+
+        // Add security context metadata if specified and not default.
+        if (SelectedSecurityContext != null && SelectedSecurityContext != UnitSecurityContext.Default)
+        {
+            config.Resources[0].AddSecurityContext(SelectedSecurityContext.Value);
+        }
+
         return config;
     }
 

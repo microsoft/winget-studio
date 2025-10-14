@@ -8,36 +8,43 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
 using YamlDotNet.Serialization;
+using ConfigurationV3Resource = WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3.Json6;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 
 public static class ConfigurationExtensions
 {
+    private const string MetadataKey = "metadata";
     private const string WinGetMetadataKey = "winget";
     private const string ProcessorMetadataKey = "processor";
     private const string IdentifierMetadataKey = "identifier";
+    private const string SecurityContextMetadataKey = "securityContext";
     private const string DSCv3MetadataValue = "dscv3";
 
     /// <summary>
-    /// Add WinGet metadata to the configuration.
+    /// Adds WinGet metadata to the configuration.
     /// </summary>
     /// <param name="config">The configuration to add metadata to.</param>
     public static void AddWinGetMetadata(this ConfigurationV3 config)
     {
-        config.Metadata = new Dictionary<string, object>()
-        {
-            {
-                WinGetMetadataKey, new Dictionary<string, object>()
-                {
-                    {
-                        ProcessorMetadataKey, new Dictionary<string, object>()
-                        {
-                            { IdentifierMetadataKey, DSCv3MetadataValue },
-                        }
-                    },
-                }
-            },
-        };
+        var metadata = config.Metadata as IDictionary<string, object> ?? new Dictionary<string, object>();
+        config.Metadata = metadata;
+        var wingetMetadata = EnsureObjectDict(metadata, WinGetMetadataKey);
+        var processorMetadata = EnsureObjectDict(wingetMetadata, ProcessorMetadataKey);
+        processorMetadata[IdentifierMetadataKey] = DSCv3MetadataValue;
+    }
+
+    /// <summary>
+    /// Adds the security context to the resource.
+    /// </summary>
+    /// <param name="resource">The resource to add the security context to.</param>
+    /// <param name="securityContext">The security context value.</param>
+    public static void AddSecurityContext(this ConfigurationV3Resource resource, string securityContext)
+    {
+        resource.AdditionalProperties ??= new Dictionary<string, object>();
+        var metadata = EnsureObjectDict(resource.AdditionalProperties, MetadataKey);
+        var wingetMetadata = EnsureObjectDict(metadata, WinGetMetadataKey);
+        wingetMetadata[SecurityContextMetadataKey] = securityContext;
     }
 
     /// <summary>
@@ -129,5 +136,22 @@ public static class ConfigurationExtensions
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Ensures that the specified key in the dictionary contains a dictionary object.
+    /// </summary>
+    /// <param name="dict">The parent dictionary.</param>
+    /// <param name="key">The key to check.</param>
+    /// <returns>The dictionary object.</returns>
+    public static IDictionary<string, object> EnsureObjectDict(IDictionary<string, object> dict, string key)
+    {
+        if (!dict.TryGetValue(key, out var obj) || obj is not IDictionary<string, object> value)
+        {
+            value = new Dictionary<string, object>();
+            dict[key] = value!;
+        }
+
+        return value;
     }
 }

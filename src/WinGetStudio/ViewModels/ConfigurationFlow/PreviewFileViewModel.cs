@@ -331,9 +331,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
             var unit = new DSCUnitViewModel()
             {
                 Title = "Module/Resource",
-                SelectedSecurityContext = UnitSecurityContext.Default,
             };
             ConfigurationUnits.Insert(0, unit);
+            unit.ResolveDependencies(ConfigurationUnits);
             EditUnit(unit);
             await UpdateConfigurationCodeAsync();
         }

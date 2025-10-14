@@ -87,8 +87,11 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         if (sender is ListView listView && ViewModel.SelectedUnit != null)
         {
             // Disable the option that matches the currently selected unit
-            var container = listView.ContainerFromItem(ViewModel.SelectedUnit.Item1) as ListViewItem;
-            container?.IsEnabled = false;
+            foreach (var item in listView.Items.OfType<DSCUnitViewModel>())
+            {
+                var container = listView.ContainerFromItem(item) as ListViewItem;
+                container?.IsEnabled = item != ViewModel.SelectedUnit.Item1;
+            }
 
             // Get the set of IDs to select
             var idsToSelect = ViewModel.SelectedUnit.Item2.Dependencies?.ToHashSet();
