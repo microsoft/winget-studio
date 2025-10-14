@@ -22,4 +22,9 @@ public interface IDSCApplySetResult
     /// Gets the results of the individual units in the configuration file.
     /// </summary>
     public IReadOnlyList<IDSCApplyUnitResult> UnitResults { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the result indicates success or failure.
+    /// </summary>
+    public bool IsOk { get; }
 }

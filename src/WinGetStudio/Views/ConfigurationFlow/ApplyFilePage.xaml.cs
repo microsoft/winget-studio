@@ -22,7 +22,7 @@ public sealed partial class ApplyFilePage : Page, IView<ApplyFileViewModel>
 
     private void CopyOutputMessage(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (sender is Button copyButton && copyButton.Tag is ApplySetUnit unit)
+        if (sender is Button copyButton && copyButton.Tag is ApplySetUnitViewModel unit)
         {
             var outputText = new StringBuilder();
 

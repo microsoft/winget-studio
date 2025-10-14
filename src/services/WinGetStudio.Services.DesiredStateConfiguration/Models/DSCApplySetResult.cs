@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Management.Configuration;
+using Windows.Win32.Foundation;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -27,4 +28,6 @@ internal sealed class DSCApplySetResult : IDSCApplySetResult
     public Exception ResultCode { get; }
 
     public IReadOnlyList<IDSCApplyUnitResult> UnitResults { get; }
+
+    public bool IsOk => ResultCode == null || ResultCode.HResult == HRESULT.S_OK;
 }

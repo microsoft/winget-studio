@@ -45,10 +45,7 @@ internal sealed class DSCOperations : IDSCOperations
         return AsyncInfo.Run<IDSCApplySetResult, IDSCSetChangeData>(async (cancellationToken, progress) =>
         {
             _logger.LogInformation("Starting to validate configuration set");
-            var task = dscSet.Processor.ApplySetAsync(dscSet.ConfigSet, ApplyConfigurationSetFlags.PerformConsistencyCheckOnly);
-            task.Progress += (sender, args) => progress.Report(new DSCSetChangeData(args));
-            var outOfProcResult = await task;
-            var inProcResult = new DSCApplySetResult(inputSet, outOfProcResult);
+            var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.PerformConsistencyCheckOnly);
             _logger.LogInformation($"Validate configuration finished.");
             return inProcResult;
         });
@@ -65,10 +62,7 @@ internal sealed class DSCOperations : IDSCOperations
         return AsyncInfo.Run<IDSCApplySetResult, IDSCSetChangeData>(async (cancellationToken, progress) =>
         {
             _logger.LogInformation("Starting to apply configuration set");
-            var task = dscSet.Processor.ApplySetAsync(dscSet.ConfigSet, ApplyConfigurationSetFlags.None);
-            task.Progress += (sender, args) => progress.Report(new DSCSetChangeData(args));
-            var outOfProcResult = await task;
-            var inProcResult = new DSCApplySetResult(inputSet, outOfProcResult);
+            var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.None);
             _logger.LogInformation($"Apply configuration finished.");
             return inProcResult;
         });
@@ -221,7 +215,7 @@ internal sealed class DSCOperations : IDSCOperations
     {
         var inputStream = await StringToStreamAsync(file.Content);
         var openConfigResult = processor.OpenConfigurationSet(inputStream);
-        var configSet = openConfigResult.Set ?? throw new OpenConfigurationSetException(openConfigResult.ResultCode, openConfigResult.Field, openConfigResult.Value);
+        var configSet = openConfigResult.Set ?? throw new OpenConfigurationSetException(openConfigResult);
 
         // Set input file path in the configuration set to inform the
         // processor about the working directory when applying the
@@ -304,5 +298,21 @@ internal sealed class DSCOperations : IDSCOperations
         // After GetSetDetailsAsync completes, the Details property will be
         // populated if the details were found.
         return new DSCUnitDetails(unitFound.Details);
+    }
+
+    /// <summary>
+    /// Applies a configuration set and reports progress.
+    /// </summary>
+    /// <param name="progress">Progress reporter</param>
+    /// <param name="dscSet">Configuration set to apply</param>
+    /// <param name="flags">Apply flags</param>
+    /// <returns>Apply result</returns>
+    private async Task<DSCApplySetResult> ApplySetInternalAsync(IProgress<IDSCSetChangeData> progress, DSCSet dscSet, ApplyConfigurationSetFlags flags)
+    {
+        var task = dscSet.Processor.ApplySetAsync(dscSet.ConfigSet, flags);
+        task.Progress += (sender, args) => progress.Report(new DSCSetChangeData(args));
+        var outOfProcResult = await task;
+        var result = new DSCApplySetResult(dscSet, outOfProcResult);
+        return result.IsOk ? result : throw new ApplyConfigurationSetException(result);
     }
 }

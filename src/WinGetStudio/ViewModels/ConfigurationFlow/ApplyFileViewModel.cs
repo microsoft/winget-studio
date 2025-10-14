@@ -33,7 +33,7 @@ public partial class ApplyFileViewModel : ObservableRecipient, INavigationAware
 
     private bool IsDone => !IsLoading;
 
-    public ObservableCollection<ApplySetUnit> Units { get; } = [];
+    public ObservableCollection<ApplySetUnitViewModel> Units { get; } = [];
 
     public ApplyFileViewModel(
         IConfigurationFrameNavigationService navigationService,

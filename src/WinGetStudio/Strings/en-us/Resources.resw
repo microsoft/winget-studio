@@ -284,6 +284,24 @@
     <value>The field '{0}' is missing or empty.</value>
     <comment>{Locked="{0}"} An error in reading a configuration file. {0} is a placeholder replaced by the expected field name from the file.</comment>
   </data>
+  <data name="ConfigurationTestFailed" xml:space="preserve">
+    <value>Some of the configuration units failed while testing their state.</value>
+  </data>
+  <data name="ConfigurationTestNotRun" xml:space="preserve">
+    <value>Configuration state was not tested.</value>
+  </data>
+  <data name="ConfigurationGetFailed" xml:space="preserve">
+    <value>The configuration unit failed getting its properties.</value>
+  </data>
+  <data name="ConfigurationUnitIsPartOfDependencyCycle" xml:space="preserve">
+    <value>This configuration unit is part of a dependency cycle.</value>
+  </data>
+  <data name="ConfigurationWarningNotAccepted" xml:space="preserve">
+    <value>The user declined to continue execution.</value>
+  </data>
+  <data name="ConfigurationSetDependencyCycle" xml:space="preserve">
+    <value>The dependency graph contains a cycle which cannot be resolved.</value>
+  </data>
   <data name="ConfigurationUnitAssertHadNegativeResult" xml:space="preserve">
     <value>The system is not in the desired state asserted by the configuration.</value>
   </data>
@@ -356,10 +374,10 @@
     <value>This configuration unit was not run for an unknown reason: {0}</value>
     <comment>{Locked="{0}"} {0} is a placeholder for the unrecognized error code.</comment>
   </data>
-  <data name="WinGetConfigUnitImportModuleAdmin" xml:space="preserve">
+  <data name="ConfigurationUnitImportModuleAdmin" xml:space="preserve">
     <value>Loading the module for the configuration unit failed because it requires administrator privileges to run.</value>
   </data>
-  <data name="WinGetConfigUnitSettingConfigRoot" xml:space="preserve">
+  <data name="ConfigurationUnitSettingConfigRoot" xml:space="preserve">
     <value>A unit contains a setting that requires the config root.</value>
   </data>
   <data name="ConfigurationUnitNotRunDueToFailedAssert" xml:space="preserve">
@@ -372,6 +390,13 @@
   <data name="ConfigurationFileInvalid" xml:space="preserve">
     <value>The configuration file is invalid.</value>
     <comment>An error in reading a configuration file.</comment>
+  </data>
+  <data name="ConfigurationYamlInvalid" xml:space="preserve">
+    <value>The configuration file is not a valid YAML file.</value>
+    <comment>An error in reading a configuration file.</comment>
+  </data>
+  <data name="ConfigurationSetApplyFailed" xml:space="preserve">
+    <value>An error occurred while applying the configuration.</value>
   </data>
   <data name="Shell_AI.Content" xml:space="preserve">
     <value>Generate a configuration file </value>

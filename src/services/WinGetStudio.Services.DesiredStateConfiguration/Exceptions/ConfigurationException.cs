@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Extensions.Localization;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 
@@ -23,6 +24,9 @@ public class ConfigurationException : Exception
     public const int WingetConfigErrorSetDependencyCycle = unchecked((int)0x8A15C00C);
     public const int WingetConfigErrorInvalidFieldValue = unchecked((int)0x8A15C00D);
     public const int WingetConfigErrorMissingField = unchecked((int)0x8A15C00E);
+    public const int WinGetConfigErrorTestFailed = unchecked((int)0x8A15C00F);
+    public const int WinGetConfigErrorTestNotRun = unchecked((int)0x8A15C010);
+    public const int WinGetConfigErrorGetFailed = unchecked((int)0x8A15C011);
 
     // WinGet Configuration unit error codes:
     public const int WinGetConfigUnitNotFound = unchecked((int)0x8A15C101);
@@ -36,4 +40,110 @@ public class ConfigurationException : Exception
     public const int WinGetConfigUnitInvokeInvalidResult = unchecked((int)0x8A15C109);
     public const int WinGetConfigUnitSettingConfigRoot = unchecked((int)0x8A15C110);
     public const int WinGetConfigUnitImportModuleAdmin = unchecked((int)0x8A15C111);
+
+    public static bool TryGetSkipMessage(IStringLocalizer localizer, int errorCode, out string message)
+    {
+        // Override for the dependency unsatisfied case to provide a more specific message
+        if (errorCode == WingetConfigErrorDependencyUnsatisfied)
+        {
+            message = localizer["ConfigurationUnitNotRunDueToDependency"];
+            return true;
+        }
+
+        return TryGetErrorMessage(localizer, errorCode, out message);
+    }
+
+    public static bool TryGetErrorMessage(IStringLocalizer localizer, int errorCode, out string message)
+    {
+        message = null;
+        switch (errorCode)
+        {
+            case WingetConfigErrorInvalidConfigurationFile:
+                message = localizer["ConfigurationFileInvalid"];
+                return true;
+            case WingetConfigErrorInvalidYaml:
+                message = localizer["ConfigurationYamlInvalid"];
+                return true;
+            case WingetConfigErrorInvalidFieldType:
+                // expects a field name as argument
+                return false;
+            case WingetConfigErrorUnknownConfigurationFileVersion:
+                // expects a version number as argument
+                return false;
+            case WingetConfigErrorSetApplyFailed:
+                message = localizer["ConfigurationSetApplyFailed"];
+                return true;
+            case WingetConfigErrorDuplicateIdentifier:
+                // expects an identifier as argument
+                return false;
+            case WingetConfigErrorMissingDependency:
+                // expects details as argument
+                return false;
+            case WingetConfigErrorDependencyUnsatisfied:
+                message = localizer["ConfigurationUnitIsPartOfDependencyCycle"];
+                return true;
+            case WingetConfigErrorAssertionFailed:
+                message = localizer["ConfigurationUnitAssertHadNegativeResult"];
+                return true;
+            case WingetConfigErrorManuallySkipped:
+                message = localizer["ConfigurationUnitManuallySkipped"];
+                return true;
+            case WingetConfigErrorWarningNotAccepted:
+                message = localizer["ConfigurationWarningNotAccepted"];
+                return true;
+            case WingetConfigErrorSetDependencyCycle:
+                message = localizer["ConfigurationSetDependencyCycle"];
+                return true;
+            case WingetConfigErrorInvalidFieldValue:
+                // expects a field name as argument
+                return false;
+            case WingetConfigErrorMissingField:
+                // expects a field name as argument
+                return false;
+            case WinGetConfigErrorTestFailed:
+                message = localizer["ConfigurationTestFailed"];
+                return true;
+            case WinGetConfigErrorTestNotRun:
+                message = localizer["ConfigurationTestNotRun"];
+                return true;
+            case WinGetConfigErrorGetFailed:
+                message = localizer["ConfigurationGetFailed"];
+                return true;
+            case WinGetConfigUnitNotFound:
+                message = localizer["ConfigurationUnitNotFoundInModule"];
+                return true;
+            case WinGetConfigUnitNotFoundRepository:
+                message = localizer["ConfigurationUnitNotFound"];
+                return true;
+            case WinGetConfigUnitMultipleMatches:
+                message = localizer["ConfigurationUnitNotFound"];
+                return true;
+            case WinGetConfigUnitInvokeGet:
+                message = localizer["ConfigurationUnitFailedDuringGet"];
+                return true;
+            case WinGetConfigUnitInvokeTest:
+                message = localizer["ConfigurationUnitFailedDuringTest"];
+                return true;
+            case WinGetConfigUnitInvokeSet:
+                message = localizer["ConfigurationUnitFailedDuringSet"];
+                return true;
+            case WinGetConfigUnitModuleConflict:
+                message = localizer["ConfigurationUnitModuleConflict"];
+                return true;
+            case WinGetConfigUnitImportModule:
+                message = localizer["ConfigurationUnitModuleImportFailed"];
+                return true;
+            case WinGetConfigUnitInvokeInvalidResult:
+                message = localizer["ConfigurationUnitReturnedInvalidResult"];
+                return true;
+            case WinGetConfigUnitSettingConfigRoot:
+                message = localizer["ConfigurationUnitSettingConfigRoot"];
+                return true;
+            case WinGetConfigUnitImportModuleAdmin:
+                message = localizer["ConfigurationUnitImportModuleAdmin"];
+                return true;
+            default:
+                return false;
+        }
+    }
 }

@@ -36,7 +36,7 @@
                     <StackLayout Spacing="8" />
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="models:ApplySetUnit">
+                    <DataTemplate x:DataType="models:ApplySetUnitViewModel">
                         <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="{x:Bind IsExpanded, Mode=OneWay}">
                             <Expander.Header>
                                 <StackPanel HorizontalAlignment="Left" Spacing="8" Orientation="Horizontal">
