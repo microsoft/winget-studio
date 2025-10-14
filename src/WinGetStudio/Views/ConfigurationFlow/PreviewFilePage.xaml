@@ -17,7 +17,6 @@
     <Page.Resources>
         <ResourceDictionary>
             <converters:StringVisibilityConverter x:Key="StringVisibilityConverter"/>
-            <converters:EmptyObjectToObjectConverter x:Key="EmptyObjectToVisibilityConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
             <converters:BoolToObjectConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionInverseVisibilityConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
@@ -347,7 +346,8 @@
                                                     Background="{ThemeResource LayerFillColorDefaultBrush}"
                                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                     BorderThickness="{StaticResource BorderThicknessThin}"
-                                                    CornerRadius="{StaticResource CornerRadiusMedium}">
+                                                    CornerRadius="{StaticResource CornerRadiusMedium}"
+                                                    Visibility="{x:Bind ShowDetails, Mode=OneWay}">
                                                     <StackPanel Spacing="{StaticResource SectionSpacing}">
                                                         <TextBlock
                                                             x:Uid="ConfigurationUnit_Details"
@@ -355,7 +355,7 @@
                                                             Style="{ThemeResource BodyStrongTextBlockStyle}" />
 
                                                         <!-- Shimmers -->
-                                                        <StackPanel Spacing="4" Visibility="{x:Bind Details, Mode=OneWay, Converter={StaticResource EmptyObjectToVisibilityConverter}}">
+                                                        <StackPanel Spacing="4" Visibility="{x:Bind AreDetailsLoading, Mode=OneWay}">
                                                             <StackPanel.Resources>
                                                                 <Style TargetType="labs:Shimmer">
                                                                     <Setter Property="Margin" Value="0" />

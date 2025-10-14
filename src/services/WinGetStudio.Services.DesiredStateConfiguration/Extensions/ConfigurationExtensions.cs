@@ -16,6 +16,7 @@ public static class ConfigurationExtensions
 {
     private const string MetadataKey = "metadata";
     private const string WinGetMetadataKey = "winget";
+    private const string DescriptionMetadataKey = "description";
     private const string ProcessorMetadataKey = "processor";
     private const string IdentifierMetadataKey = "identifier";
     private const string SecurityContextMetadataKey = "securityContext";
@@ -45,6 +46,18 @@ public static class ConfigurationExtensions
         var metadata = EnsureObjectDict(resource.AdditionalProperties, MetadataKey);
         var wingetMetadata = EnsureObjectDict(metadata, WinGetMetadataKey);
         wingetMetadata[SecurityContextMetadataKey] = securityContext;
+    }
+
+    /// <summary>
+    /// Adds a description to the resource.
+    /// </summary>
+    /// <param name="resource">The resource to add the description to.</param>
+    /// <param name="description">The description text.</param>
+    public static void AddDescription(this ConfigurationV3Resource resource, string description)
+    {
+        resource.AdditionalProperties ??= new Dictionary<string, object>();
+        var metadata = EnsureObjectDict(resource.AdditionalProperties, MetadataKey);
+        metadata[DescriptionMetadataKey] = description;
     }
 
     /// <summary>

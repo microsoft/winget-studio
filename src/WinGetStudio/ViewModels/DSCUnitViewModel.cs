@@ -23,7 +23,14 @@ public partial class DSCUnitViewModel : ObservableObject
     public string DefaultId { get; } = Guid.NewGuid().ToString();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowDetails))]
     public partial DSCUnitDetailsViewModel? Details { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowDetails))]
+    public partial bool AreDetailsLoading { get; set; }
+
+    public bool ShowDetails => Details != null || AreDetailsLoading;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IdOrDefault))]
@@ -97,7 +104,7 @@ public partial class DSCUnitViewModel : ObservableObject
 
     public void Validate()
     {
-        if (string.IsNullOrEmpty(Title))
+        if (string.IsNullOrWhiteSpace(Title))
         {
             throw new DSCUnitValidationException("Title cannot be null or empty when creating configuration.");
         }
@@ -140,6 +147,12 @@ public partial class DSCUnitViewModel : ObservableObject
             config.Resources[0].AddSecurityContext(SelectedSecurityContext.Value);
         }
 
+        // Add description if specified.
+        if (!string.IsNullOrWhiteSpace(Description))
+        {
+            config.Resources[0].AddDescription(Description);
+        }
+
         return config;
     }
 
@@ -150,8 +163,10 @@ public partial class DSCUnitViewModel : ObservableObject
     {
         if (Unit != null)
         {
+            AreDetailsLoading = true;
             var result = await Unit.GetDetailsAsync();
             Details = new DSCUnitDetailsViewModel(result);
+            AreDetailsLoading = false;
         }
     }
 
