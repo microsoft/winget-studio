@@ -235,12 +235,6 @@
                                                             <TextBlock>Edit</TextBlock>
                                                         </StackPanel>
                                                     </Button>
-
-                                                    <!-- Delete unit -->
-                                                    <Button Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.DeleteUnitCommand}"
-                                                            CommandParameter="{Binding}"
-                                                            Visibility="{Binding ElementName=PageRoot, Path=Tag.ViewModel.IsEditMode}"
-                                                            Style="{ThemeResource AlternateCloseButtonStyle}" />
                                                 </StackPanel>
                                             </Grid>
                                         </Expander.Header>
@@ -500,11 +494,23 @@
                         </ScrollViewer>
 
                         <!-- Action buttons -->
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                            <Button Command="{x:Bind ViewModel.CancelSelectedUnitCommand}">Cancel</Button>
-                            <Button Style="{ThemeResource AccentButtonStyle}"
-                                    Command="{x:Bind ViewModel.UpdateSelectedUnitCommand}">Update</Button>
-                        </StackPanel>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button Command="{x:Bind ViewModel.DeleteSelectedUnitCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="{ThemeResource BodyTextBlockFontSize}" />
+                                    <TextBlock>Delete</TextBlock>
+                                </StackPanel>
+                            </Button>
+                            <StackPanel Orientation="Horizontal" Spacing="8" Grid.Column="1">
+                                <Button Command="{x:Bind ViewModel.CancelSelectedUnitCommand}">Cancel</Button>
+                                <Button Style="{ThemeResource AccentButtonStyle}"
+                                            Command="{x:Bind ViewModel.UpdateSelectedUnitCommand}">Update</Button>
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>

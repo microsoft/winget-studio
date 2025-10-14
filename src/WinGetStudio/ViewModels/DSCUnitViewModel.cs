@@ -188,8 +188,11 @@ public partial class DSCUnitViewModel : ObservableObject
         var resolvedDependencies = new List<DSCUnitViewModel>();
         foreach (var dep in Dependencies)
         {
-            var match = availableUnits.FirstOrDefault(u => u.Id == dep.Id);
-            resolvedDependencies.Add(match ?? dep);
+            var match = availableUnits.FirstOrDefault(u => dep.IdOrDefault == u.IdOrDefault);
+            if (match != null)
+            {
+                resolvedDependencies.Add(match);
+            }
         }
 
         // Update the dependencies list.

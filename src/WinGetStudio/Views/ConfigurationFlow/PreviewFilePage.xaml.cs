@@ -95,7 +95,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 
             // Get the set of IDs to select
             var idsToSelect = ViewModel.SelectedUnit.Item2.Dependencies?.ToHashSet();
-            if (idsToSelect == null)
+            if (idsToSelect == null || idsToSelect.Count == 0)
             {
                 listView.SelectedItems.Clear();
                 return;

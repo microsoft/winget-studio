@@ -35,6 +35,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmptyState))]
+    [NotifyPropertyChangedFor(nameof(CanApplyConfiguration))]
+    [NotifyPropertyChangedFor(nameof(CanValidateConfiguration))]
+    [NotifyPropertyChangedFor(nameof(CanSaveConfiguration))]
     [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
@@ -167,15 +170,35 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void OnDeleteUnit(DSCUnitViewModel unit)
+    private async Task OnDeleteSelectedUnitAsync()
     {
-        _logger.LogInformation($"Deleting unit {unit.Title}");
-        if (SelectedUnit?.Item1 == unit)
+        if (SelectedUnit != null)
         {
-            SelectedUnit = null;
+            try
+            {
+                _ui.ShowTaskProgress();
+                _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
+                ConfigurationUnits?.Remove(SelectedUnit.Item1);
+                ResolveDependencies();
+                await UpdateConfigurationCodeAsync();
+                SelectedUnit = null;
+                _ui.ShowTimedNotification($"Configuration unit deleted", NotificationMessageSeverity.Success);
+            }
+            catch (DSCUnitValidationException ex)
+            {
+                _logger.LogError(ex, "Validation of configuration units failed after deletion");
+                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Deleting configuration unit failed");
+                _ui.ShowTimedNotification($"Deleting configuration unit failed: {ex.Message}", NotificationMessageSeverity.Error);
+            }
+            finally
+            {
+                _ui.HideTaskProgress();
+            }
         }
-
-        ConfigurationUnits?.Remove(unit);
     }
 
     [RelayCommand(CanExecute = nameof(CanAddResource))]
@@ -273,7 +296,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         ConfigurationUnits = dscSet == null ? null : new(dscSet.Units.Select(unit => new DSCUnitViewModel(unit)));
         ConfigurationCode = dscCode;
-        SelectedUnit = default;
+        SelectedUnit = null;
     }
 
     /// <summary>
