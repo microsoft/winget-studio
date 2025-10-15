@@ -1,24 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.IO;
+
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 public interface IDSCFile
 {
     /// <summary>
-    /// Gets the configuration file name
+    /// Gets the file info of the configuration file, or null if the file is virtual.
     /// </summary>
-    public string Name { get; }
-
-    /// <summary>
-    /// Gets the configuration file path
-    /// </summary>
-    public string Path { get; }
-
-    /// <summary>
-    /// Gets the configuration file directory path
-    /// </summary>
-    public string DirectoryPath { get; }
+    public FileInfo FileInfo { get; }
 
     /// <summary>
     /// Gets the configuration file content

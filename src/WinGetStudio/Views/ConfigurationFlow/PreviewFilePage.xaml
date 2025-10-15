@@ -167,7 +167,7 @@
                         </StackPanel>
 
                         <!-- Loaded content -->
-                        <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits, Mode=OneWay}"
+                        <ListView ItemsSource="{x:Bind ViewModel.ConfigurationSet.Units, Mode=OneWay}"
                                   SelectionMode="None"
                                   x:Name="ConfigurationUnitSections"
                                   Style="{StaticResource KeyValueList}">
@@ -419,7 +419,7 @@
                         <TextBlock Padding="15"
                                    FontFamily="{StaticResource CascadiaMonoFontFamily}"
                                    IsTextSelectionEnabled="True"
-                                   Text="{x:Bind ViewModel.ConfigurationCode, Mode=OneWay}" />
+                                   Text="{x:Bind ViewModel.ConfigurationSet.Code, Mode=OneWay}" />
                     </ScrollViewer>
                 </Grid>
 
@@ -483,7 +483,7 @@
                                     <Button Content="Dependencies" Grid.Column="1" VerticalAlignment="Bottom">
                                         <Button.Flyout>
                                             <Flyout>
-                                                <ListView ItemsSource="{x:Bind ViewModel.ConfigurationUnits, Mode=OneWay}"
+                                                <ListView ItemsSource="{x:Bind ViewModel.ConfigurationSet.Units, Mode=OneWay}"
                                                           SelectionMode="Multiple"
                                                           IsMultiSelectCheckBoxEnabled="True"
                                                           DisplayMemberPath="IdOrDefault"

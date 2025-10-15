@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,9 +11,7 @@ using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
-using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 
@@ -42,14 +39,11 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ToggleEditModeCommand))]
-    public partial ObservableCollection<DSCUnitViewModel>? ConfigurationUnits { get; set; }
+    public partial DSCSetViewModel ConfigurationSet { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnitSelected))]
     public partial Tuple<DSCUnitViewModel, DSCUnitViewModel>? SelectedUnit { get; set; }
-
-    [ObservableProperty]
-    public partial string? ConfigurationCode { get; set; }
 
     [ObservableProperty]
     public partial bool IsEditMode { get; set; }
@@ -59,17 +53,17 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     public bool IsUnitSelected => SelectedUnit != null;
 
-    public bool IsEmptyState => !IsLoading && ConfigurationUnits == null;
+    public bool IsEmptyState => !IsLoading && ConfigurationSet == null;
 
-    public bool CanAddResource => ConfigurationUnits != null;
+    public bool CanAddResource => ConfigurationSet != null;
 
-    public bool CanToggleEditMode => ConfigurationUnits != null;
+    public bool CanToggleEditMode => ConfigurationSet != null;
 
-    public bool CanApplyConfiguration => ConfigurationUnits?.Count > 0;
+    public bool CanApplyConfiguration => ConfigurationSet?.Units.Count > 0;
 
-    public bool CanValidateConfiguration => ConfigurationUnits?.Count > 0;
+    public bool CanValidateConfiguration => ConfigurationSet?.Units.Count > 0;
 
-    public bool CanSaveConfiguration => ConfigurationUnits?.Count > 0;
+    public bool CanSaveConfiguration => ConfigurationSet?.Units.Count > 0;
 
     public PreviewFileViewModel(
         ILogger<PreviewFileViewModel> logger,
@@ -93,14 +87,14 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             _ui.ShowTaskProgress();
             _logger.LogInformation($"Selected file: {file.Path}");
-            ClearConfigurationSet();
             IsEditMode = false;
             IsLoading = true;
+            SelectedUnit = null;
+            ConfigurationSet = new DSCSetViewModel(_logger);
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+            ConfigurationSet.Use(dscSet, dscFile);
             _dsc.GetConfigurationUnitDetails(dscSet);
-            ShowConfigurationSet(dscSet, dscFile.Content);
-            ResolveDependencies();
         }
         catch (OpenConfigurationSetException ex)
         {
@@ -126,8 +120,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             _ui.ShowTaskProgress();
             _logger.LogInformation($"Creating new configuration set");
-            ClearConfigurationSet();
-            ConfigurationUnits = [];
+            SelectedUnit = null;
+            ConfigurationSet = new DSCSetViewModel(_logger);
             await AddResourceAsync();
         }
         catch (DSCUnitValidationException ex)
@@ -174,15 +168,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand]
     private async Task OnDeleteSelectedUnitAsync()
     {
-        if (SelectedUnit != null)
+        if (ConfigurationSet != null && SelectedUnit != null)
         {
             try
             {
                 _ui.ShowTaskProgress();
                 _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
-                ConfigurationUnits?.Remove(SelectedUnit.Item1);
-                ResolveDependencies();
-                await UpdateConfigurationCodeAsync();
+                await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
                 SelectedUnit = null;
                 _ui.ShowTimedNotification($"Configuration unit deleted", NotificationMessageSeverity.Success);
             }
@@ -231,13 +223,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanValidateConfiguration))]
     private async Task OnValidateConfigurationAsync()
     {
-        if (!string.IsNullOrEmpty(ConfigurationCode))
+        if (ConfigurationSet != null)
         {
             try
             {
                 _ui.ShowTaskProgress();
-                var dscFile = DSCFile.CreateVirtual(, ConfigurationCode);
                 _logger.LogInformation($"Validating configuration code");
+                var dscFile = ConfigurationSet.GetLatestDSCFile();
                 var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
                 await _dsc.ValidateSetAsync(dscSet);
                 _ui.ShowTimedNotification($"Configuration code is valid", NotificationMessageSeverity.Success);
@@ -273,15 +265,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand]
     private async Task OnUpdateSelectedUnitAsync()
     {
-        if (SelectedUnit != null)
+        if (ConfigurationSet != null && SelectedUnit != null)
         {
             try
             {
                 _ui.ShowTaskProgress();
                 _logger.LogInformation($"Updating selected unit {SelectedUnit.Item1.Title}");
-                SelectedUnit.Item2.Validate();
-                SelectedUnit.Item1.CopyFrom(SelectedUnit.Item2);
-                await UpdateConfigurationCodeAsync();
+                await ConfigurationSet.UpdateAsync(SelectedUnit.Item1, SelectedUnit.Item2);
                 _ui.ShowTimedNotification($"Configuration unit updated", NotificationMessageSeverity.Success);
             }
             catch (DSCUnitValidationException ex)
@@ -320,59 +310,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _logger.LogInformation($"Toggling code view to {(IsCodeView ? "ON" : "OFF")}");
     }
 
-    /// <summary>
-    /// Shows the configuration set.
-    /// </summary>
-    /// <param name="dscSet">The configuration set to show.</param>
-    private void ShowConfigurationSet(IDSCSet? dscSet, string? dscCode)
-    {
-        ConfigurationUnits = dscSet == null ? null : new(dscSet.Units.Select(unit => new DSCUnitViewModel(unit)));
-        ConfigurationCode = dscCode;
-        SelectedUnit = null;
-    }
-
-    /// <summary>
-    /// Clears the current configuration set.
-    /// </summary>
-    private void ClearConfigurationSet() => ShowConfigurationSet(null, null);
-
-    private void ResolveDependencies()
-    {
-        _logger.LogInformation("Resolving dependencies between configuration units");
-        var configurationUnits = ConfigurationUnits ?? [];
-        foreach (var unit in configurationUnits)
-        {
-            unit.ResolveDependencies(configurationUnits);
-        }
-    }
-
-    private async Task UpdateConfigurationCodeAsync()
-    {
-        _logger.LogInformation("Updating configuration code");
-        ConfigurationCode = await GenerateConfigurationCodeAsync();
-    }
-
-    private Task<string> GenerateConfigurationCodeAsync()
-    {
-        return Task.Run(() =>
-        {
-            if (ConfigurationUnits == null)
-            {
-                return string.Empty;
-            }
-
-            var config = new ConfigurationV3();
-            config.AddWinGetMetadata();
-            foreach (var unit in ConfigurationUnits)
-            {
-                var unitConfig = unit.ToConfigurationV3();
-                config.Resources.AddRange(unitConfig.Resources);
-            }
-
-            return config.ToYaml();
-        });
-    }
-
     private void EditUnit(DSCUnitViewModel unit)
     {
         IsEditMode = true;
@@ -381,26 +318,21 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     private async Task AddResourceAsync()
     {
-        if (ConfigurationUnits != null)
+        if (ConfigurationSet != null)
         {
-            var unit = new DSCUnitViewModel()
-            {
-                Title = "Module/Resource",
-            };
-            ConfigurationUnits.Insert(0, unit);
-            unit.ResolveDependencies(ConfigurationUnits);
+            var unit = new DSCUnitViewModel() { Title = "Module/Resource" };
+            await ConfigurationSet.AddAsync(unit);
             EditUnit(unit);
-            await UpdateConfigurationCodeAsync();
         }
     }
 
-    partial void OnConfigurationUnitsChanged(ObservableCollection<DSCUnitViewModel>? oldValue, ObservableCollection<DSCUnitViewModel>? newValue)
+    partial void OnConfigurationSetChanged(DSCSetViewModel? oldValue, DSCSetViewModel? newValue)
     {
-        oldValue?.CollectionChanged -= OnConfigurationUnitsContentChanged;
-        newValue?.CollectionChanged += OnConfigurationUnitsContentChanged;
+        oldValue?.UnitsCollectionChanged -= OnConfigurationSetUnitsChanged;
+        newValue?.UnitsCollectionChanged += OnConfigurationSetUnitsChanged;
     }
 
-    private void OnConfigurationUnitsContentChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void OnConfigurationSetUnitsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         // Notify validation
         OnPropertyChanged(nameof(CanValidateConfiguration));

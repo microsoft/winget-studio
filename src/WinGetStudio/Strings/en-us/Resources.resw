@@ -284,6 +284,9 @@
     <value>The field '{0}' is missing or empty.</value>
     <comment>{Locked="{0}"} An error in reading a configuration file. {0} is a placeholder replaced by the expected field name from the file.</comment>
   </data>
+  <data name="ConfigurationErrorLineAndRow" xml:space="preserve">
+    <value>(Line {0}, Column {1})</value>
+  </data>
   <data name="ConfigurationTestFailed" xml:space="preserve">
     <value>Some of the configuration units failed while testing their state.</value>
   </data>

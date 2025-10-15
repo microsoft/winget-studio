@@ -220,9 +220,13 @@ internal sealed class DSCOperations : IDSCOperations
         // Set input file path in the configuration set to inform the
         // processor about the working directory when applying the
         // configuration
-        configSet.Name = file.Name;
-        configSet.Origin = file.DirectoryPath;
-        configSet.Path = file.Path;
+        if (file.FileInfo != null)
+        {
+            configSet.Name = file.FileInfo.Name;
+            configSet.Origin = file.FileInfo.Directory.FullName;
+            configSet.Path = file.FileInfo.FullName;
+        }
+
         return configSet;
     }
 

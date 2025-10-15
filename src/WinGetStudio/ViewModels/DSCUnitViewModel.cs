@@ -191,7 +191,7 @@ public partial class DSCUnitViewModel : ObservableObject
         Settings = string.IsNullOrEmpty(SettingsJson) ? null : DSCPropertySet.FromJsonOrYaml(SettingsJson);
     }
 
-    public void ResolveDependencies(IReadOnlyList<DSCUnitViewModel> availableUnits)
+    public void ResolveDependencies(DSCSetViewModel dscSet)
     {
         // If there are no dependencies, nothing to resolve.
         if (Dependencies == null || Dependencies.Count == 0)
@@ -203,7 +203,7 @@ public partial class DSCUnitViewModel : ObservableObject
         var resolvedDependencies = new List<DSCUnitViewModel>();
         foreach (var dep in Dependencies)
         {
-            var match = availableUnits.FirstOrDefault(u => dep.IdOrDefault == u.IdOrDefault);
+            var match = dscSet.Units.FirstOrDefault(u => dep.IdOrDefault == u.IdOrDefault);
             if (match != null)
             {
                 resolvedDependencies.Add(match);
