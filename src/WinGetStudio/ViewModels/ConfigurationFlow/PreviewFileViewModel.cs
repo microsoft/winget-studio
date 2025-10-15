@@ -25,6 +25,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private readonly IUIFeedbackService _ui;
     private readonly IDSC _dsc;
     private readonly IAppFrameNavigationService _navigation;
+    private readonly IConfigurationSetManager _manager;
 
     public IReadOnlyList<UnitSecurityContext> SecurityContexts => UnitSecurityContext.All;
 
@@ -72,13 +73,15 @@ public partial class PreviewFileViewModel : ObservableRecipient
         IStringLocalizer<PreviewFileViewModel> localizer,
         IUIFeedbackService ui,
         IDSC dsc,
-        IAppFrameNavigationService navigation)
+        IAppFrameNavigationService navigation,
+        IConfigurationSetManager manager)
     {
         _logger = logger;
         _localizer = localizer;
         _ui = ui;
         _dsc = dsc;
         _navigation = navigation;
+        _manager = manager;
     }
 
     /// <summary>
@@ -115,6 +118,28 @@ public partial class PreviewFileViewModel : ObservableRecipient
             IsLoading = false;
             _ui.HideTaskProgress();
         }
+    }
+
+    [RelayCommand]
+    private void OnLoaded()
+    {
+        if (_manager.ActivePreviewState.ActiveSet != null)
+        {
+            _logger.LogInformation("Restored active configuration set from manager");
+            ConfigurationSet = _manager.ActivePreviewState.ActiveSet;
+            IsCodeView = _manager.ActivePreviewState.IsCodeView;
+            IsEditMode = _manager.ActivePreviewState.IsEditMode;
+            SelectedUnit = _manager.ActivePreviewState.SelectedUnit;
+        }
+    }
+
+    [RelayCommand]
+    private void OnUnloaded()
+    {
+        _manager.ActivePreviewState.ActiveSet = ConfigurationSet;
+        _manager.ActivePreviewState.IsCodeView = IsCodeView;
+        _manager.ActivePreviewState.IsEditMode = IsEditMode;
+        _manager.ActivePreviewState.SelectedUnit = SelectedUnit;
     }
 
     [RelayCommand]

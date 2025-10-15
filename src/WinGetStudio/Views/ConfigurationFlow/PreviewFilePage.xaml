@@ -14,6 +14,15 @@
     xmlns:localControls="using:WinGetStudio.Views.Controls"
     mc:Ignorable="d">
 
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+        <i:EventTriggerBehavior EventName="Unloaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.UnloadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+
     <Page.Resources>
         <ResourceDictionary>
             <converters:StringVisibilityConverter x:Key="StringVisibilityConverter"/>
