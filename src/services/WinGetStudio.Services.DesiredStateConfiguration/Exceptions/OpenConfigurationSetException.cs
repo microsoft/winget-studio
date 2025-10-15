@@ -63,7 +63,7 @@ public class OpenConfigurationSetException : ConfigurationException
         var position = string.Empty;
         if (Line > 0)
         {
-            position = $" ${localizer["ConfigurationErrorLineAndRow", Line, Column]}";
+            position = $" {localizer["ConfigurationErrorLineAndRow", Line, Column]}";
         }
 
         return $"{message}{position}";

@@ -39,7 +39,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ToggleEditModeCommand))]
-    public partial DSCSetViewModel ConfigurationSet { get; set; }
+    public partial DSCSetViewModel? ConfigurationSet { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnitSelected))]
