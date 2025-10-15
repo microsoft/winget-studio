@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
 using YamlDotNet.Serialization;
 using ConfigurationV3Resource = WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3.Json6;
@@ -46,6 +47,17 @@ public static class ConfigurationExtensions
         var metadata = EnsureObjectDict(resource.AdditionalProperties, MetadataKey);
         var wingetMetadata = EnsureObjectDict(metadata, WinGetMetadataKey);
         wingetMetadata[SecurityContextMetadataKey] = securityContext;
+    }
+
+    /// <summary>
+    /// Adds metadata to the resource.
+    /// </summary>
+    /// <param name="resource">The resource to add metadata to.</param>
+    /// <param name="metadata">The metadata to add.</param>
+    public static void AddMetdata(this ConfigurationV3Resource resource, DSCPropertySet metadata)
+    {
+        resource.AdditionalProperties ??= new Dictionary<string, object>();
+        resource.AdditionalProperties[MetadataKey] = metadata;
     }
 
     /// <summary>

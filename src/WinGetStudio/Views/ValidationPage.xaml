@@ -167,11 +167,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- Properties control -->
-                <TextBox />
-
-                <!-- Empty state message -->
-                <localControls:EmptyStateControl x:Uid="ValidationPage_EmptyPropertiesMessage"
-                                                 Glyph="&#xE700;" />
+                <TextBox AcceptsReturn="True" Text="{x:Bind ViewModel.SettingsText, Mode=TwoWay}" />
 
                 <!-- DSC buttons -->
                 <controls:UniformGrid Grid.Row="1" Rows="1" Columns="3" ColumnSpacing="8">

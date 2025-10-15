@@ -13,7 +13,7 @@ internal sealed class DSCGetUnitResult : IDSCGetUnitResult
     public IDSCUnitResultInformation ResultInformation { get; }
 
     /// <inheritdoc/>
-    public IReadOnlyDictionary<string, object> Settings { get; }
+    public DSCPropertySet Settings { get; }
 
     public DSCGetUnitResult(GetConfigurationUnitSettingsResult settingsResult)
     {

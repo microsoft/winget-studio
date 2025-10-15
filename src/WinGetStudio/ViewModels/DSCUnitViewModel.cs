@@ -59,7 +59,7 @@ public partial class DSCUnitViewModel : ObservableObject
     public partial DSCPropertySet? Metadata { get; set; }
 
     [ObservableProperty]
-    public partial string? SettingsJson { get; set; }
+    public partial string? SettingsText { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RequiresElevation))]
@@ -93,7 +93,7 @@ public partial class DSCUnitViewModel : ObservableObject
         Intent = unit.Intent;
         Dependencies = [..unit.Dependencies.Select(id => new DSCUnitViewModel() { Id = id })];
         Settings = unit.Settings.DeepCopy();
-        SettingsJson = unit.Settings.ToJson();
+        SettingsText = unit.Settings.ToYaml();
         Metadata = unit.Metadata.DeepCopy();
     }
 
@@ -141,6 +141,12 @@ public partial class DSCUnitViewModel : ObservableObject
         // Add WinGet metadata to the configuration.
         config.AddWinGetMetadata();
 
+        // Add resource metadata
+        if (Metadata != null && Metadata.Count > 0)
+        {
+            config.Resources[0].AddMetdata(Metadata.DeepCopy());
+        }
+
         // Add security context metadata if specified and not default.
         if (SelectedSecurityContext != null && SelectedSecurityContext != UnitSecurityContext.Default)
         {
@@ -185,10 +191,10 @@ public partial class DSCUnitViewModel : ObservableObject
         Intent = source.Intent;
         Dependencies = source.Dependencies?.ToList();
         Metadata = source.Metadata?.DeepCopy();
-        SettingsJson = source.SettingsJson;
+        SettingsText = source.SettingsText;
 
-        // Re-parse the settings JSON to ensure we have a separate instance.
-        Settings = string.IsNullOrEmpty(SettingsJson) ? null : DSCPropertySet.FromJsonOrYaml(SettingsJson);
+        // Re-parse the settings text to ensure we have an up-to-date object.
+        Settings = string.IsNullOrEmpty(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText);
     }
 
     public void ResolveDependencies(DSCSetViewModel dscSet)

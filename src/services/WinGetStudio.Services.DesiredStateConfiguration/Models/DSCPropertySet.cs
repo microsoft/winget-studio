@@ -29,7 +29,7 @@ public sealed partial class DSCPropertySet : Dictionary<string, object>
     public DSCPropertySet DeepCopy()
     {
         var yaml = ToYaml();
-        return FromJsonOrYaml(yaml);
+        return FromYaml(yaml);
     }
 
     public string ToJson() => JsonSerializer.Serialize(this, _jsonOptions);
@@ -39,7 +39,7 @@ public sealed partial class DSCPropertySet : Dictionary<string, object>
         .Build()
         .Serialize(this);
 
-    public static DSCPropertySet FromJsonOrYaml(string input) => new DeserializerBuilder()
+    public static DSCPropertySet FromYaml(string input) => new DeserializerBuilder()
         .WithAttemptingUnquotedStringTypeDeserialization()
         .Build()
         .Deserialize<DSCPropertySet>(input);

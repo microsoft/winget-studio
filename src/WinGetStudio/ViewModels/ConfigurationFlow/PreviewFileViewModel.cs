@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Windows.Storage;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -23,6 +24,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
     private readonly IUIFeedbackService _ui;
     private readonly IDSC _dsc;
+    private readonly IAppFrameNavigationService _navigation;
 
     public IReadOnlyList<UnitSecurityContext> SecurityContexts => UnitSecurityContext.All;
 
@@ -69,12 +71,14 @@ public partial class PreviewFileViewModel : ObservableRecipient
         ILogger<PreviewFileViewModel> logger,
         IStringLocalizer<PreviewFileViewModel> localizer,
         IUIFeedbackService ui,
-        IDSC dsc)
+        IDSC dsc,
+        IAppFrameNavigationService navigation)
     {
         _logger = logger;
         _localizer = localizer;
         _ui = ui;
         _dsc = dsc;
+        _navigation = navigation;
     }
 
     /// <summary>
@@ -155,7 +159,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand]
     private void OnValidateUnit(DSCUnitViewModel unit)
     {
-        // TODO
+        if (ConfigurationSet != null && unit != null)
+        {
+            _logger.LogInformation($"Validating unit {unit.Title}");
+            var unitClone = unit.Clone();
+            var param = new ValidateUnitNavigationContext(unitClone);
+            _navigation.NavigateTo<ValidationViewModel>(param);
+        }
     }
 
     [RelayCommand]

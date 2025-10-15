@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -15,5 +16,5 @@ public interface IDSCGetUnitResult
     /// <summary>
     /// Gets the settings for the configuration unit.
     /// </summary>
-    IReadOnlyDictionary<string, object> Settings { get; }
+    DSCPropertySet Settings { get; }
 }

@@ -334,7 +334,7 @@
                                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                     BorderThickness="{StaticResource BorderThicknessThin}"
                                                     CornerRadius="{StaticResource CornerRadiusMedium}"
-                                                    Visibility="{x:Bind SettingsJson, Mode=OneWay, Converter={StaticResource StringVisibilityConverter}}">
+                                                    Visibility="{x:Bind SettingsText, Mode=OneWay, Converter={StaticResource StringVisibilityConverter}}">
                                                     <StackPanel Spacing="{StaticResource SectionSpacing}">
                                                         <TextBlock
                                                             x:Uid="ConfigurationUnit_Settings"
@@ -349,7 +349,7 @@
                                                             <TextBlock
                                                                 FontFamily="{ThemeResource CascadiaMonoFontFamily}"
                                                                 IsTextSelectionEnabled="True"
-                                                                Text="{x:Bind SettingsJson, Mode=OneWay}"
+                                                                Text="{x:Bind SettingsText, Mode=OneWay}"
                                                                 TextWrapping="Wrap" />
                                                         </ScrollViewer>
                                                     </StackPanel>
@@ -503,7 +503,7 @@
                                 <!-- Properties -->
                                 <TextBox PlaceholderText="JSON content"
                                          Grid.Row="3"
-                                         Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsJson, Mode=TwoWay}"
+                                         Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsText, Mode=TwoWay}"
                                          AcceptsReturn="True" />
                             </Grid>
                         </ScrollViewer>
