@@ -15,17 +15,22 @@ namespace WinGetStudio.Views.Controls;
 
 public sealed partial class MonacoEditor : UserControl
 {
+    private const string GetTextApi = "getText";
+    private const string SetTextApi = "setText";
+    private const string SetThemeApi = "setTheme";
+    private const string SetLanguageApi = "setLanguage";
+    private const string ContentChangedApi = "contentChanged";
+
     private const string HostName = "MonacoAssets";
     private const string WebView2UserDataFolderEnvVar = "WEBVIEW2_USER_DATA_FOLDER";
+
     private readonly JsonSerializerOptions _options;
-
-    // Throttle for TextChanged event
     private readonly DispatcherTimer _timer;
+
+    public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(MonacoEditor), new PropertyMetadata(string.Empty, OnTextPropertyChanged));
+
     private bool _pending;
-
     private string? _unboundText;
-
-    // Guard to avoid feedback loop
     private bool _internalSet;
 
     /// <summary>
@@ -33,25 +38,19 @@ public sealed partial class MonacoEditor : UserControl
     /// </summary>
     public event EventHandler? TextChanged;
 
-    // APIs
-    private const string GetTextApi = "getText";
-    private const string SetTextApi = "setText";
-    private const string SetThemeApi = "setTheme";
-    private const string SetLanguageApi = "setLanguage";
-    private const string ContentChangedApi = "contentChanged";
-
     /// <summary>
     /// Gets the path to the Monaco assets.
     /// </summary>
     private string MonacoAssetsPath => Path.Combine(AppContext.BaseDirectory, "Assets", "Monaco");
 
+    /// <summary>
+    /// Gets or sets the text in the editor.
+    /// </summary>
     public string? Text
     {
         get => (string?)GetValue(TextProperty);
         set => SetValue(TextProperty, value);
     }
-
-    public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(MonacoEditor), new PropertyMetadata(string.Empty, OnTextPropertyChanged));
 
     public MonacoEditor()
     {
@@ -75,9 +74,16 @@ public sealed partial class MonacoEditor : UserControl
         return response?.Value;
     }
 
+    /// <summary>
+    /// Handle changes to the Text dependency property.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
     private static void OnTextPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
     {
         var control = (MonacoEditor)sender;
+
+        // Only update the editor if the change is external
         if (!control._internalSet)
         {
             control._unboundText = e.NewValue?.ToString();
@@ -118,6 +124,11 @@ public sealed partial class MonacoEditor : UserControl
         Editor.CoreWebView2.PostWebMessageAsJson(json);
     }
 
+    /// <summary>
+    /// Handle the Loaded event of the WebView2 control.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
     private async void Editor_Loaded(object sender, RoutedEventArgs e)
     {
         // Initialize WebView2
@@ -247,6 +258,10 @@ public sealed partial class MonacoEditor : UserControl
         _timer.Start();
     }
 
+    /// <summary>
+    /// Set the text in the editor.
+    /// </summary>
+    /// <param name="text">The text to set.</param>
     private void SetEditorText(string? text)
     {
         var msg = new EditorMessage() { Type = SetTextApi, Value = text };
