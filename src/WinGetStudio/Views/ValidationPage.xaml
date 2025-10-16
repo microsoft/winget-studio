@@ -176,7 +176,6 @@
                         <Button Click="Monaco_Get" Content="Get" />
                         <Button Click="Monaco_Set" Content="Set" />
                         <Button Click="Monaco_Language" Content="JSON/YAML" />
-                        <Button Click="Monaco_Theme" Content="Dark/Light" />
                     </StackPanel>
                     <localControls:MonacoEditor x:Name="Editor" Grid.Row="1" />
                 </Grid>

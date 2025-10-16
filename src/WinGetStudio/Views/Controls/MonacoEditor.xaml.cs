@@ -4,22 +4,46 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Timers;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
+using Windows.System;
 using Windows.UI;
+using WinGetStudio.Services.Core.Helpers;
 
 namespace WinGetStudio.Views.Controls;
 
-public sealed partial class MonacoEditor : UserControl
+public sealed partial class MonacoEditor : UserControl, IDisposable
 {
-    private readonly JsonSerializerOptions _options;
     private const string HostName = "MonacoAssets";
+    private const string WebView2UserDataFolderEnvVar = "WEBVIEW2_USER_DATA_FOLDER";
+    private readonly JsonSerializerOptions _options;
+    private readonly System.Timers.Timer _textChangedThrottle;
+    private bool _textChangedThrottled;
+    private bool _disposedValue;
 
+    public event EventHandler? TextChanged;
+
+    // APIs
+    private const string GetTextApi = "getText";
+    private const string SetTextApi = "setText";
+    private const string SetThemeApi = "setTheme";
+    private const string SetLanguageApi = "setLanguage";
+    private const string ContentChangedApi = "contentChanged";
+
+    /// <summary>
+    /// Gets the path to the Monaco assets.
+    /// </summary>
     private string MonacoAssetsPath => Path.Combine(AppContext.BaseDirectory, "Assets", "Monaco");
+
+    public string? Text { get; private set; }
 
     public MonacoEditor()
     {
+        _textChangedThrottle = new(250);
+        _textChangedThrottle.Elapsed += OnTextChangedThrottleElapsed;
+        _textChangedThrottle.AutoReset = false;
         _options = new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -27,16 +51,67 @@ public sealed partial class MonacoEditor : UserControl
 
         InitializeComponent();
         SetIsLoading(true);
+        Environment.SetEnvironmentVariable(WebView2UserDataFolderEnvVar, RuntimeHelper.GetMonacoWebUserDataDirectory(), EnvironmentVariableTarget.Process);
+    }
+
+    /// <summary>
+    /// Get the current text from the editor asynchronously.
+    /// </summary>
+    /// <returns>The current text from the editor.</returns>
+    public async Task<string?> GetTextAsync()
+    {
+        var msg = new EditorMessage() { Type = GetTextApi };
+        var response = await PostAndWaitForResponseAsync(msg);
+        return response?.Value;
+    }
+
+    /// <summary>
+    /// Set the text in the editor.
+    /// </summary>
+    /// <param name="text">The text to set.</param>
+    public void SetText(string? text)
+    {
+        Text = text;
+        var msg = new EditorMessage() { Type = SetTextApi, Value = text };
+        var json = JsonSerializer.Serialize(msg, _options);
+        Editor.CoreWebView2.PostWebMessageAsJson(json);
+    }
+
+    /// <summary>
+    /// Update the editor theme based on the current application theme.
+    /// </summary>
+    public void UpdateTheme()
+    {
+        var theme = Application.Current.RequestedTheme == ApplicationTheme.Light ? "vs" : "vs-dark";
+        var msg = new EditorMessage() { Type = SetThemeApi, Value = theme };
+        var json = JsonSerializer.Serialize(msg, _options);
+        Editor.CoreWebView2.PostWebMessageAsJson(json);
+    }
+
+    /// <summary>
+    /// Set the language of the editor.
+    /// </summary>
+    /// <param name="language">The language to set (e.g., "json", "yaml").</param>
+    public void SetLanguage(string language)
+    {
+        var msg = new EditorMessage() { Type = SetLanguageApi, Value = language };
+        var json = JsonSerializer.Serialize(msg, _options);
+        Editor.CoreWebView2.PostWebMessageAsJson(json);
     }
 
     private async void Editor_Loaded(object sender, RoutedEventArgs e)
     {
+        // Initialize WebView2
         await Editor.EnsureCoreWebView2Async();
-        Editor.DefaultBackgroundColor = Color.FromArgb(0, 0, 0, 0);
         Editor.CoreWebView2.SetVirtualHostNameToFolderMapping(HostName, MonacoAssetsPath, CoreWebView2HostResourceAccessKind.Allow);
+
+        // Set transparent background
+        Editor.DefaultBackgroundColor = Color.FromArgb(0, 0, 0, 0);
 
         // Handle WebView2 events
         Editor.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
+        Editor.CoreWebView2.PermissionRequested += OnPermissionRequested;
+        Editor.CoreWebView2.NewWindowRequested += OnNewWindowRequested;
 
         // Configure WebView2 settings
         var editorSettings = Editor.CoreWebView2.Settings;
@@ -54,6 +129,10 @@ public sealed partial class MonacoEditor : UserControl
         Editor.CoreWebView2.Navigate($"https://{HostName}/editor.html");
     }
 
+    /// <summary>
+    /// Set WebView2 settings for debug mode only.
+    /// </summary>
+    /// <param name="settings">The WebView2 settings.</param>
     [Conditional("DEBUG")]
     private static void DebugModeSettings(CoreWebView2Settings settings)
     {
@@ -67,8 +146,63 @@ public sealed partial class MonacoEditor : UserControl
     /// <param name="args">The event args.</param>
     private void OnNavigationCompleted(CoreWebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
+        UpdateTheme();
         SetIsLoading(false);
+        SetText(Text);
+        Editor.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
         Editor.Focus(FocusState.Programmatic);
+    }
+
+    /// <summary>
+    /// Handle permission requested event.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="args">The event args.</param>
+    private void OnPermissionRequested(CoreWebView2 sender, CoreWebView2PermissionRequestedEventArgs args)
+    {
+        // Automatically allow clipboard read permissions
+        if (args.PermissionKind == CoreWebView2PermissionKind.ClipboardRead)
+        {
+            args.State = CoreWebView2PermissionState.Allow;
+            args.Handled = true;
+        }
+    }
+
+    /// <summary>
+    /// Handle new window requested event.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="args">The event args.</param>
+    private async void OnNewWindowRequested(CoreWebView2 sender, CoreWebView2NewWindowRequestedEventArgs args)
+    {
+        // Intercept new window requests to handle external links
+        if (args.Uri != null && args.IsUserInitiated)
+        {
+            args.Handled = true;
+            await ShowOpenUriDialogAsync(new Uri(args.Uri));
+        }
+    }
+
+    /// <summary>
+    /// Handle web message received event.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="args">The event args.</param>
+    private void OnWebMessageReceived(CoreWebView2 sender, CoreWebView2WebMessageReceivedEventArgs args)
+    {
+        try
+        {
+            var message = JsonSerializer.Deserialize<EditorMessage>(args.WebMessageAsJson);
+            if (message?.Type == ContentChangedApi)
+            {
+                Text = message.Value;
+                ThrottleTextChanged();
+            }
+        }
+        catch
+        {
+            // No-op
+        }
     }
 
     /// <summary>
@@ -82,22 +216,35 @@ public sealed partial class MonacoEditor : UserControl
     }
 
     /// <summary>
-    /// Get the current text from the editor asynchronously.
+    /// Show a dialog to open a URI.
     /// </summary>
-    /// <returns>The current text from the editor.</returns>
-    public async Task<string?> GetTextAsync()
+    /// <param name="uri">The URI to open.</param>
+    private async Task ShowOpenUriDialogAsync(Uri uri)
     {
-        var tcs = new TaskCompletionSource<string?>();
+        OpenUriDialog.Content = uri.ToString();
+        var result = await OpenUriDialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            await Launcher.LaunchUriAsync(uri);
+        }
+    }
 
+    /// <summary>
+    /// Post a message to the editor and wait for a response.
+    /// </summary>
+    /// <param name="postMessage">The message to post.</param>
+    /// <returns>The response message, or null if no response is received.</returns>
+    private async Task<EditorMessage?> PostAndWaitForResponseAsync(EditorMessage postMessage)
+    {
+        var tcs = new TaskCompletionSource<EditorMessage?>();
         void Handler(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             try
             {
-                var doc = JsonDocument.Parse(e.WebMessageAsJson).RootElement;
-                if (doc.TryGetProperty("type", out var typeProp) && typeProp.GetString() == "value")
+                var receivedMessage = JsonSerializer.Deserialize<EditorMessage>(e.WebMessageAsJson);
+                if (receivedMessage?.Type == postMessage.Type)
                 {
-                    var text = doc.TryGetProperty("value", out var valProp) ? valProp.GetString() : null;
-                    tcs.TrySetResult(text);
+                    tcs.TrySetResult(receivedMessage);
                 }
             }
             catch (Exception ex)
@@ -109,10 +256,9 @@ public sealed partial class MonacoEditor : UserControl
         try
         {
             Editor.CoreWebView2.WebMessageReceived += Handler;
-            var message = JsonSerializer.Serialize(new EditorMessage<object>("getValue"));
-            Editor.CoreWebView2.PostWebMessageAsJson(message);
-
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            var json = JsonSerializer.Serialize(postMessage);
+            Editor.CoreWebView2.PostWebMessageAsJson(json);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
             using (cts.Token.Register(() => tcs.TrySetCanceled()))
             {
                 return await tcs.Task;
@@ -129,42 +275,67 @@ public sealed partial class MonacoEditor : UserControl
     }
 
     /// <summary>
-    /// Set the text in the editor.
+    /// Handle the elapsed event of the text changed throttle timer.
     /// </summary>
-    /// <param name="text">The text to set.</param>
-    public void SetText(string text)
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private void OnTextChangedThrottleElapsed(object? sender, ElapsedEventArgs e)
     {
-        var msg = new EditorMessage<string>("setValue", text);
-        var json = JsonSerializer.Serialize(msg, _options);
-        Editor.CoreWebView2.PostWebMessageAsJson(json);
+        if (_textChangedThrottled)
+        {
+            _textChangedThrottled = false;
+            TextChanged?.Invoke(this, EventArgs.Empty);
+            _textChangedThrottle.Start();
+        }
     }
 
     /// <summary>
-    /// Set the theme of the editor.
+    /// Throttle the TextChanged event to avoid firing it too frequently.
     /// </summary>
-    /// <param name="theme">The theme to set (e.g., "vs-dark", "vs-light").</param>
-    public void SetTheme(string theme)
+    private void ThrottleTextChanged()
     {
-        var msg = new EditorMessage<string>("setTheme", theme);
-        var json = JsonSerializer.Serialize(msg, _options);
-        Editor.CoreWebView2.PostWebMessageAsJson(json);
-    }
+        if (_textChangedThrottle.Enabled)
+        {
+            _textChangedThrottled = true;
+            return;
+        }
 
-    /// <summary>
-    /// Set the language of the editor.
-    /// </summary>
-    /// <param name="language">The language to set (e.g., "json", "yaml").</param>
-    public void SetLanguage(string language)
-    {
-        var msg = new EditorMessage<string>("setLanguage", language);
-        var json = JsonSerializer.Serialize(msg, _options);
-        Editor.CoreWebView2.PostWebMessageAsJson(json);
+        TextChanged?.Invoke(this, EventArgs.Empty);
+        _textChangedThrottle.Start();
     }
 
     /// <summary>
     /// Represents a message from the web content to the host application.
     /// </summary>
-    private sealed record EditorMessage<T>(
-        [property: JsonPropertyName("type")] string Type,
-        [property: JsonPropertyName("value")] T? Value = default);
+    private sealed partial class EditorMessage
+    {
+        public const string TypePropertyName = "type";
+        public const string ValuePropertyName = "value";
+
+        [JsonPropertyName(TypePropertyName)]
+        public string? Type { get; set; }
+
+        [JsonPropertyName(ValuePropertyName)]
+        public string? Value { get; set; }
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _textChangedThrottle.Dispose();
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }

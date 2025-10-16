@@ -5,8 +5,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.ViewModels;
+using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.Views;
 
@@ -20,6 +22,14 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
     {
         ViewModel = App.GetService<ValidationViewModel>();
         InitializeComponent();
+        Editor.TextChanged += (s, e) =>
+        {
+            // TextChanged may be raised on a non-UI thread!
+            App.GetService<IUIDispatcher>().EnqueueAsync(() =>
+            {
+                ViewModel.RawData = Editor.Text ?? string.Empty;
+            });
+        };
     }
 
     /// <summary>
@@ -63,12 +73,5 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
         var language = _toggle ? "json" : "yaml";
         _toggle = !_toggle;
         Editor.SetLanguage(language);
-    }
-
-    private void Monaco_Theme(object sender, RoutedEventArgs e)
-    {
-        var theme = _toggle ? "vs-dark" : "vs";
-        _toggle = !_toggle;
-        Editor.SetTheme(theme);
     }
 }

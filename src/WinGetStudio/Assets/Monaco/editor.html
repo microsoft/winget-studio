@@ -1,18 +1,12 @@
 ﻿<!doctype html>
 <html>
 <head>
+    <link rel="icon" href="data:,">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta charset="utf-8" />
     <title>WinGet Studio - Monaco Editor</title>
     <style>
-        html,
-        body,
-        #container {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            overflow: hidden;
-        }
+        html, body, #container { height: 100%; width: 100%; margin: 0; overflow: hidden; }
     </style>
     <script src="/src/min/vs/loader.js"></script>
 </head>
@@ -25,28 +19,40 @@
         // Configure the base path for Monaco Editor
         require.config({ paths: { 'vs': '/src/min/vs' } });
 
+        // Load and initialize the Monaco Editor
         let editor;
         require(['vs/editor/editor.main'], function () {
-            // Initialize the Monaco Editor
             editor = monaco.editor.create(document.getElementById('container'), {
-                value: '',
-                language: 'json',
+                language: 'yaml',
                 automaticLayout: true,
-                theme: 'vs-dark',
                 minimap: { enabled: false }
             });
+
+            // Notify host of content changes
+            editor.getModel().onDidChangeContent((event) => {
+                let contentChangedMsg = NewEditorMessage('contentChanged', editor.getValue() || '');
+                window.chrome.webview.postMessage(contentChangedMsg);
+            });
+
+
+            // Focus the editor when the window loads
+            editor.focus();
         });
+
+        // Adjust layout on window resize
+        window.onresize = () => editor?.layout();
 
         // Handle messages from the host
         if (window.chrome?.webview) {
             window.chrome.webview.addEventListener('message', e => {
                 const msg = e.data || {};
                 switch (msg.type) {
-                    case 'setValue':
-                        editor?.setValue(msg.value ?? '');
+                    case 'setText':
+                        editor?.setValue(msg.value || '');
                         break;
-                    case 'getValue':
-                        window.chrome.webview.postMessage({ type: 'value', value: editor?.getValue() ?? '' });
+                    case 'getText':
+                        let getTextMsg = NewEditorMessage('getText', editor?.getValue() || '');
+                        window.chrome.webview.postMessage(getTextMsg);
                         break;
                     case 'setLanguage':
                         monaco.editor.setModelLanguage(editor.getModel(), msg.value || 'plaintext');
@@ -56,6 +62,10 @@
                         break;
                 }
             });
+        }
+
+        function NewEditorMessage(type, value) {
+            return { type: type, value: value };
         }
     </script>
 </body>

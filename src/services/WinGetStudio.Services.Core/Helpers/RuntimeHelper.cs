@@ -24,6 +24,7 @@ public static class RuntimeHelper
     private const string LocalStateDir = "LocalState";
     private const string LogsDir = "Logs";
     private const string ModuleCatalogsDir = "ModuleCatalogs";
+    private const string MonacoWebUserDataDir = "MonacoWebUserData";
 
     /// <summary>
     /// Gets a value indicating whether the app is running as an MSIX package.
@@ -59,6 +60,12 @@ public static class RuntimeHelper
     /// </summary>
     /// <returns>The module catalog cache path.</returns>
     public static string GetModuleCatalogCachePath() => Path.Combine(GetLocalStatePath(), ModuleCatalogsDir);
+
+    /// <summary>
+    /// Gets the Monaco WebView2 user data directory.
+    /// </summary>
+    /// <returns>The Monaco WebView2 user data directory.</returns>
+    public static string GetMonacoWebUserDataDirectory() => Path.Combine(GetTempStatePath(), MonacoWebUserDataDir);
 
     /// <summary>
     /// Gets the application version.

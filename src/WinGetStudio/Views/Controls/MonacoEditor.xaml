@@ -10,5 +10,9 @@
     <Grid>
         <ProgressRing x:Name="LoadingProgressRing" />
         <WebView2 x:Name="Editor" Loaded="Editor_Loaded"/>
+        <ContentDialog
+            x:Uid="MonacoEditor_OpenUriDialog"
+            x:Name="OpenUriDialog"
+            PrimaryButtonStyle="{ThemeResource AccentButtonStyle}" />
     </Grid>
 </UserControl>
