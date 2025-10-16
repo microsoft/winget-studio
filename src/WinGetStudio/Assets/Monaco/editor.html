@@ -42,6 +42,14 @@
         // Adjust layout on window resize
         window.onresize = () => editor?.layout();
 
+        // Disable printing
+        window.print = () => { };
+        window.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+        }
+        });
+
         // Handle messages from the host
         if (window.chrome?.webview) {
             window.chrome.webview.addEventListener('message', e => {

@@ -22,14 +22,7 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
     {
         ViewModel = App.GetService<ValidationViewModel>();
         InitializeComponent();
-        Editor.TextChanged += (s, e) =>
-        {
-            // TextChanged may be raised on a non-UI thread!
-            App.GetService<IUIDispatcher>().EnqueueAsync(() =>
-            {
-                ViewModel.RawData = Editor.Text ?? string.Empty;
-            });
-        };
+        Editor.TextChanged += (s, e) => ViewModel.RawData = Editor.Text ?? string.Empty;
     }
 
     /// <summary>

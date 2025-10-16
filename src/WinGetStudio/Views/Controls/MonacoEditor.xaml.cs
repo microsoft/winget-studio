@@ -14,15 +14,19 @@ using WinGetStudio.Services.Core.Helpers;
 
 namespace WinGetStudio.Views.Controls;
 
-public sealed partial class MonacoEditor : UserControl, IDisposable
+public sealed partial class MonacoEditor : UserControl
 {
     private const string HostName = "MonacoAssets";
     private const string WebView2UserDataFolderEnvVar = "WEBVIEW2_USER_DATA_FOLDER";
     private readonly JsonSerializerOptions _options;
-    private readonly System.Timers.Timer _textChangedThrottle;
-    private bool _textChangedThrottled;
-    private bool _disposedValue;
 
+    // Throttle for TextChanged event
+    private readonly DispatcherTimer _timer;
+    private bool _pending;
+
+    /// <summary>
+    /// Raised when the text in the editor changes.
+    /// </summary>
     public event EventHandler? TextChanged;
 
     // APIs
@@ -41,9 +45,8 @@ public sealed partial class MonacoEditor : UserControl, IDisposable
 
     public MonacoEditor()
     {
-        _textChangedThrottle = new(250);
-        _textChangedThrottle.Elapsed += OnTextChangedThrottleElapsed;
-        _textChangedThrottle.AutoReset = false;
+        _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+        _timer.Tick += OnTimerTick;
         _options = new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -195,14 +198,52 @@ public sealed partial class MonacoEditor : UserControl, IDisposable
             var message = JsonSerializer.Deserialize<EditorMessage>(args.WebMessageAsJson);
             if (message?.Type == ContentChangedApi)
             {
-                Text = message.Value;
-                ThrottleTextChanged();
+                OnContentChanged(message.Value);
             }
         }
         catch
         {
             // No-op
         }
+    }
+
+    /// <summary>
+    /// Handle the content changed event from the editor.
+    /// </summary>
+    /// <param name="text">The new text content.</param>
+    private void OnContentChanged(string? text)
+    {
+        Text = text;
+
+        // If the timer is running, mark pending change and return
+        if (_timer.IsEnabled)
+        {
+            _pending = true;
+            return;
+        }
+
+        // Timer is not running, raise event and start timer
+        TextChanged?.Invoke(this, EventArgs.Empty);
+        _timer.Start();
+    }
+
+    /// <summary>
+    /// Handle the elapsed event of the text changed throttle timer.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private void OnTimerTick(object? sender, object e)
+    {
+        // If there are pending changes, raise event and reset pending flag
+        if (_pending)
+        {
+            _pending = false;
+            TextChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        // No pending changes, stop the timer
+        _timer.Stop();
     }
 
     /// <summary>
@@ -275,36 +316,6 @@ public sealed partial class MonacoEditor : UserControl, IDisposable
     }
 
     /// <summary>
-    /// Handle the elapsed event of the text changed throttle timer.
-    /// </summary>
-    /// <param name="sender">The sender.</param>
-    /// <param name="e">The event args.</param>
-    private void OnTextChangedThrottleElapsed(object? sender, ElapsedEventArgs e)
-    {
-        if (_textChangedThrottled)
-        {
-            _textChangedThrottled = false;
-            TextChanged?.Invoke(this, EventArgs.Empty);
-            _textChangedThrottle.Start();
-        }
-    }
-
-    /// <summary>
-    /// Throttle the TextChanged event to avoid firing it too frequently.
-    /// </summary>
-    private void ThrottleTextChanged()
-    {
-        if (_textChangedThrottle.Enabled)
-        {
-            _textChangedThrottled = true;
-            return;
-        }
-
-        TextChanged?.Invoke(this, EventArgs.Empty);
-        _textChangedThrottle.Start();
-    }
-
-    /// <summary>
     /// Represents a message from the web content to the host application.
     /// </summary>
     private sealed partial class EditorMessage
@@ -317,25 +328,5 @@ public sealed partial class MonacoEditor : UserControl, IDisposable
 
         [JsonPropertyName(ValuePropertyName)]
         public string? Value { get; set; }
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (!_disposedValue)
-        {
-            if (disposing)
-            {
-                _textChangedThrottle.Dispose();
-            }
-
-            _disposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }
