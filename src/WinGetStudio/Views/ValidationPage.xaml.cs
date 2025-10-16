@@ -52,13 +52,16 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
 
     private async void Monaco_Get(object sender, RoutedEventArgs e)
     {
-        var value = await Editor.GetTextAsync();
+        // var value = await Editor.GetTextAsync();
+        await Task.CompletedTask;
+        var value = ViewModel.Text;
         App.GetService<ILogger<ValidationPage>>().LogInformation(value);
     }
 
     private void Monaco_Set(object sender, RoutedEventArgs e)
     {
-        Editor.SetText($"Date: {DateTime.Now}");
+        // Editor.SetText($"Date: {DateTime.Now}");
+        ViewModel.Text = $"Date: {DateTime.Now}";
     }
 
     private void Monaco_Language(object sender, RoutedEventArgs e)

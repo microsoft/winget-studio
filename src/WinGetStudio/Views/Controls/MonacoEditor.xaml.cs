@@ -4,7 +4,6 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Timers;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
@@ -24,6 +23,11 @@ public sealed partial class MonacoEditor : UserControl
     private readonly DispatcherTimer _timer;
     private bool _pending;
 
+    private string? _unboundText;
+
+    // Guard to avoid feedback loop
+    private bool _internalSet;
+
     /// <summary>
     /// Raised when the text in the editor changes.
     /// </summary>
@@ -41,16 +45,19 @@ public sealed partial class MonacoEditor : UserControl
     /// </summary>
     private string MonacoAssetsPath => Path.Combine(AppContext.BaseDirectory, "Assets", "Monaco");
 
-    public string? Text { get; private set; }
+    public string? Text
+    {
+        get => (string?)GetValue(TextProperty);
+        set => SetValue(TextProperty, value);
+    }
+
+    public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(MonacoEditor), new PropertyMetadata(string.Empty, OnTextPropertyChanged));
 
     public MonacoEditor()
     {
-        _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+        _timer = new() { Interval = TimeSpan.FromMilliseconds(500) };
         _timer.Tick += OnTimerTick;
-        _options = new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        };
+        _options = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
         InitializeComponent();
         SetIsLoading(true);
@@ -68,16 +75,25 @@ public sealed partial class MonacoEditor : UserControl
         return response?.Value;
     }
 
+    private static void OnTextPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (MonacoEditor)sender;
+        if (!control._internalSet)
+        {
+            control._unboundText = e.NewValue?.ToString();
+            control.SetEditorText(control._unboundText);
+        }
+    }
+
     /// <summary>
-    /// Set the text in the editor.
+    /// Set the text in the editor internally.
     /// </summary>
     /// <param name="text">The text to set.</param>
-    public void SetText(string? text)
+    private void SetTextPropertyInternal(string? text)
     {
+        _internalSet = true;
         Text = text;
-        var msg = new EditorMessage() { Type = SetTextApi, Value = text };
-        var json = JsonSerializer.Serialize(msg, _options);
-        Editor.CoreWebView2.PostWebMessageAsJson(json);
+        _internalSet = false;
     }
 
     /// <summary>
@@ -151,7 +167,7 @@ public sealed partial class MonacoEditor : UserControl
     {
         UpdateTheme();
         SetIsLoading(false);
-        SetText(Text);
+        SetEditorText(Text);
         Editor.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
         Editor.Focus(FocusState.Programmatic);
     }
@@ -198,7 +214,7 @@ public sealed partial class MonacoEditor : UserControl
             var message = JsonSerializer.Deserialize<EditorMessage>(args.WebMessageAsJson);
             if (message?.Type == ContentChangedApi)
             {
-                OnContentChanged(message.Value);
+                OnEditorContentChanged(message.Value);
             }
         }
         catch
@@ -211,9 +227,10 @@ public sealed partial class MonacoEditor : UserControl
     /// Handle the content changed event from the editor.
     /// </summary>
     /// <param name="text">The new text content.</param>
-    private void OnContentChanged(string? text)
+    private void OnEditorContentChanged(string? text)
     {
-        Text = text;
+        // Always update the unbound text
+        _unboundText = text;
 
         // If the timer is running, mark pending change and return
         if (_timer.IsEnabled)
@@ -222,9 +239,19 @@ public sealed partial class MonacoEditor : UserControl
             return;
         }
 
+        // Set the text property internally
+        SetTextPropertyInternal(text);
+
         // Timer is not running, raise event and start timer
         TextChanged?.Invoke(this, EventArgs.Empty);
         _timer.Start();
+    }
+
+    private void SetEditorText(string? text)
+    {
+        var msg = new EditorMessage() { Type = SetTextApi, Value = text };
+        var json = JsonSerializer.Serialize(msg, _options);
+        Editor.CoreWebView2.PostWebMessageAsJson(json);
     }
 
     /// <summary>
@@ -234,10 +261,11 @@ public sealed partial class MonacoEditor : UserControl
     /// <param name="e">The event args.</param>
     private void OnTimerTick(object? sender, object e)
     {
-        // If there are pending changes, raise event and reset pending flag
+        // If there are pending changes, update the text property and raise event
         if (_pending)
         {
             _pending = false;
+            SetTextPropertyInternal(_unboundText);
             TextChanged?.Invoke(this, EventArgs.Empty);
             return;
         }

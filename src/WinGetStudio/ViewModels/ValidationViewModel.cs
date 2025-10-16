@@ -50,6 +50,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     public partial string RawData { get; set; } = string.Empty;
 
+    [ObservableProperty]
+    public partial string? Text { get; set; }
+
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
 
     public ObservableCollection<ConfigurationProperty> Properties { get; } = new();
