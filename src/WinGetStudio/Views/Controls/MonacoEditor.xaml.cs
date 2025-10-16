@@ -9,7 +9,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using Windows.System;
 using Windows.UI;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Core.Helpers;
+using WinGetStudio.Services.Settings;
 
 namespace WinGetStudio.Views.Controls;
 
@@ -20,9 +22,13 @@ public sealed partial class MonacoEditor : UserControl
     private const string SetLanguageApi = "setLanguage";
     private const string ContentChangedApi = "contentChanged";
 
+    private const string LightTheme = "vs";
+    private const string DarkTheme = "vs-dark";
+
     private const string HostName = "MonacoAssets";
     private const string WebView2UserDataFolderEnvVar = "WEBVIEW2_USER_DATA_FOLDER";
 
+    private readonly ThemeFeatureSettings _themeSettings;
     private readonly JsonSerializerOptions _options;
     private readonly DispatcherTimer _timer;
 
@@ -56,6 +62,10 @@ public sealed partial class MonacoEditor : UserControl
         _timer = new() { Interval = TimeSpan.FromMilliseconds(500) };
         _timer.Tick += OnTimerTick;
         _options = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
+        var appSettings = App.GetService<IAppSettingsService>();
+        _themeSettings = appSettings.GetFeature<ThemeFeatureSettings>();
+        _themeSettings.ThemeApplied += OnThemeApplied;
 
         InitializeComponent();
         SetIsLoading(true);
@@ -91,11 +101,29 @@ public sealed partial class MonacoEditor : UserControl
     }
 
     /// <summary>
+    /// Handle theme changes from the theme applier service.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="newTheme">The new theme.</param>
+    private void OnThemeApplied(object? sender, ElementTheme newTheme)
+    {
+        DispatcherQueue.TryEnqueue(() => SetTheme(newTheme));
+    }
+
+    /// <summary>
     /// Update the editor theme based on the current application theme.
     /// </summary>
-    public void UpdateTheme()
+    private void SetTheme(ElementTheme newTheme)
     {
-        var theme = Application.Current.RequestedTheme == ApplicationTheme.Light ? "vs" : "vs-dark";
+        // Resolve the theme to use
+        var theme = newTheme switch
+        {
+            ElementTheme.Light => LightTheme,
+            ElementTheme.Dark => DarkTheme,
+            _ => _themeSettings.DefaultAppTheme == ApplicationTheme.Light ? LightTheme : DarkTheme,
+        };
+
+        // Send the theme change message to the editor
         var msg = new EditorMessage() { Type = SetThemeApi, Value = theme };
         var json = JsonSerializer.Serialize(msg, _options);
         Editor.CoreWebView2.PostWebMessageAsJson(json);
@@ -164,7 +192,7 @@ public sealed partial class MonacoEditor : UserControl
     /// <param name="args">The event args.</param>
     private void OnNavigationCompleted(CoreWebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
-        UpdateTheme();
+        SetTheme(_themeSettings.Theme);
         SetIsLoading(false);
         SetEditorText(Text);
         Editor.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
