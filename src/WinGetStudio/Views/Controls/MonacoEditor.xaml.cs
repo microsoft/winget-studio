@@ -15,7 +15,6 @@ namespace WinGetStudio.Views.Controls;
 
 public sealed partial class MonacoEditor : UserControl
 {
-    private const string GetTextApi = "getText";
     private const string SetTextApi = "setText";
     private const string SetThemeApi = "setTheme";
     private const string SetLanguageApi = "setLanguage";
@@ -61,17 +60,6 @@ public sealed partial class MonacoEditor : UserControl
         InitializeComponent();
         SetIsLoading(true);
         Environment.SetEnvironmentVariable(WebView2UserDataFolderEnvVar, RuntimeHelper.GetMonacoWebUserDataDirectory(), EnvironmentVariableTarget.Process);
-    }
-
-    /// <summary>
-    /// Get the current text from the editor asynchronously.
-    /// </summary>
-    /// <returns>The current text from the editor.</returns>
-    public async Task<string?> GetTextAsync()
-    {
-        var msg = new EditorMessage() { Type = GetTextApi };
-        var response = await PostAndWaitForResponseAsync(msg);
-        return response?.Value;
     }
 
     /// <summary>
@@ -310,51 +298,6 @@ public sealed partial class MonacoEditor : UserControl
         if (result == ContentDialogResult.Primary)
         {
             await Launcher.LaunchUriAsync(uri);
-        }
-    }
-
-    /// <summary>
-    /// Post a message to the editor and wait for a response.
-    /// </summary>
-    /// <param name="postMessage">The message to post.</param>
-    /// <returns>The response message, or null if no response is received.</returns>
-    private async Task<EditorMessage?> PostAndWaitForResponseAsync(EditorMessage postMessage)
-    {
-        var tcs = new TaskCompletionSource<EditorMessage?>();
-        void Handler(object sender, CoreWebView2WebMessageReceivedEventArgs e)
-        {
-            try
-            {
-                var receivedMessage = JsonSerializer.Deserialize<EditorMessage>(e.WebMessageAsJson);
-                if (receivedMessage?.Type == postMessage.Type)
-                {
-                    tcs.TrySetResult(receivedMessage);
-                }
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-        }
-
-        try
-        {
-            Editor.CoreWebView2.WebMessageReceived += Handler;
-            var json = JsonSerializer.Serialize(postMessage);
-            Editor.CoreWebView2.PostWebMessageAsJson(json);
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-            using (cts.Token.Register(() => tcs.TrySetCanceled()))
-            {
-                return await tcs.Task;
-            }
-        }
-        catch
-        {
-            return null;
-        }
-        finally
-        {
-            Editor.CoreWebView2.WebMessageReceived -= Handler;
         }
     }
 

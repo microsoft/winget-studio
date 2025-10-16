@@ -34,7 +34,6 @@
                 window.chrome.webview.postMessage(contentChangedMsg);
             });
 
-
             // Focus the editor when the window loads
             editor.focus();
         });
@@ -57,10 +56,6 @@
                 switch (msg.type) {
                     case 'setText':
                         editor?.setValue(msg.value || '');
-                        break;
-                    case 'getText':
-                        let getTextMsg = NewEditorMessage('getText', editor?.getValue() || '');
-                        window.chrome.webview.postMessage(getTextMsg);
                         break;
                     case 'setLanguage':
                         monaco.editor.setModelLanguage(editor.getModel(), msg.value || 'plaintext');

@@ -701,6 +701,6 @@
     <value>Open</value>
   </data>
   <data name="MonacoEditor_OpenUriDialog.Title" xml:space="preserve">
-    <value>>Do you want Peek to open the external application?</value>
+    <value>Do you want WinGet Studio to open the external application?</value>
   </data>
 </root>
