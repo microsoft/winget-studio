@@ -28,12 +28,16 @@ public sealed partial class MonacoEditor : UserControl
     private const string HostName = "MonacoAssets";
     private const string WebView2UserDataFolderEnvVar = "WEBVIEW2_USER_DATA_FOLDER";
 
+    private const int InitialThrottleInterval = 500;
+
     private readonly ThemeFeatureSettings _themeSettings;
     private readonly JsonSerializerOptions _options;
     private readonly DispatcherTimer _timer;
 
     public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(MonacoEditor), new PropertyMetadata(null, OnTextPropertyChanged));
     public static readonly DependencyProperty SyntaxProperty = DependencyProperty.Register(nameof(Syntax), typeof(string), typeof(MonacoEditor), new PropertyMetadata(null, OnSyntaxPropertyChanged));
+    public static readonly DependencyProperty UseThrottleProperty = DependencyProperty.Register(nameof(UseThrottle), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(true));
+    public static readonly DependencyProperty ThrottleIntervalProperty = DependencyProperty.Register(nameof(ThrottleInterval), typeof(int), typeof(MonacoEditor), new PropertyMetadata(InitialThrottleInterval, OnThrottleIntervalPropertyChanged));
 
     private bool _pending;
     private string? _unboundText;
@@ -67,9 +71,27 @@ public sealed partial class MonacoEditor : UserControl
         set => SetValue(SyntaxProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether to use throttling for text change events.
+    /// </summary>
+    public bool UseThrottle
+    {
+        get => (bool)GetValue(UseThrottleProperty);
+        set => SetValue(UseThrottleProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the throttle interval in milliseconds.
+    /// </summary>
+    public int ThrottleInterval
+    {
+        get => (int)GetValue(ThrottleIntervalProperty);
+        set => SetValue(ThrottleIntervalProperty, value);
+    }
+
     public MonacoEditor()
     {
-        _timer = new() { Interval = TimeSpan.FromMilliseconds(500) };
+        _timer = new();
         _timer.Tick += OnTimerTick;
         _options = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
@@ -79,6 +101,7 @@ public sealed partial class MonacoEditor : UserControl
 
         InitializeComponent();
         SetIsLoading(true);
+        SetThrottleIntervalInternal(ThrottleInterval);
         Environment.SetEnvironmentVariable(WebView2UserDataFolderEnvVar, RuntimeHelper.GetMonacoWebUserDataDirectory(), EnvironmentVariableTarget.Process);
     }
 
@@ -108,6 +131,18 @@ public sealed partial class MonacoEditor : UserControl
     {
         var control = (MonacoEditor)sender;
         control.SetLanguage(e.NewValue?.ToString());
+    }
+
+    /// <summary>
+    /// Handle changes to the ThrottleInterval dependency property.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private static void OnThrottleIntervalPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (MonacoEditor)sender;
+        var newInterval = e.NewValue is int interval && interval > 0 ? interval : InitialThrottleInterval;
+        control._timer.Interval = TimeSpan.FromMilliseconds(newInterval);
     }
 
     /// <summary>
@@ -299,7 +334,13 @@ public sealed partial class MonacoEditor : UserControl
 
         // Timer is not running, raise event and start timer
         TextChanged?.Invoke(this, EventArgs.Empty);
-        _timer.Start();
+
+        // If throttling is enabled, start the timer otherwise, don't start the
+        // timer and allow immediate updates
+        if (UseThrottle)
+        {
+            _timer.Start();
+        }
     }
 
     /// <summary>
@@ -345,6 +386,12 @@ public sealed partial class MonacoEditor : UserControl
         LoadingProgressRing.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
         Editor.Visibility = isLoading ? Visibility.Collapsed : Visibility.Visible;
     }
+
+    /// <summary>
+    /// Sets the throttle interval internally.
+    /// </summary>
+    /// <param name="interval">The interval in milliseconds.</param>
+    private void SetThrottleIntervalInternal(int interval) => _timer.Interval = TimeSpan.FromMilliseconds(interval);
 
     /// <summary>
     /// Show a dialog to open a URI.

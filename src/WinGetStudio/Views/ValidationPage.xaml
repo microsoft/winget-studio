@@ -169,7 +169,9 @@
 
                 <Grid>
                     <localControls:MonacoEditor x:Name="Editor"
-                                                Syntax="json"
+                                                Syntax=""
+                                                UseThrottle="True"
+                                                ThrottleInterval="500"
                                                 Text="{x:Bind ViewModel.Text, Mode=TwoWay}" />
                 </Grid>
 
