@@ -32,7 +32,8 @@ public sealed partial class MonacoEditor : UserControl
     private readonly JsonSerializerOptions _options;
     private readonly DispatcherTimer _timer;
 
-    public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(MonacoEditor), new PropertyMetadata(string.Empty, OnTextPropertyChanged));
+    public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(MonacoEditor), new PropertyMetadata(null, OnTextPropertyChanged));
+    public static readonly DependencyProperty SyntaxProperty = DependencyProperty.Register(nameof(Syntax), typeof(string), typeof(MonacoEditor), new PropertyMetadata(null, OnSyntaxPropertyChanged));
 
     private bool _pending;
     private string? _unboundText;
@@ -55,6 +56,15 @@ public sealed partial class MonacoEditor : UserControl
     {
         get => (string?)GetValue(TextProperty);
         set => SetValue(TextProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the syntax/language of the editor (e.g., "json", "yaml").
+    /// </summary>
+    public string? Syntax
+    {
+        get => (string?)GetValue(SyntaxProperty);
+        set => SetValue(SyntaxProperty, value);
     }
 
     public MonacoEditor()
@@ -90,6 +100,17 @@ public sealed partial class MonacoEditor : UserControl
     }
 
     /// <summary>
+    /// Handle changes to the Syntax dependency property.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private static void OnSyntaxPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (MonacoEditor)sender;
+        control.SetLanguage(e.NewValue?.ToString());
+    }
+
+    /// <summary>
     /// Set the text in the editor internally.
     /// </summary>
     /// <param name="text">The text to set.</param>
@@ -115,29 +136,35 @@ public sealed partial class MonacoEditor : UserControl
     /// </summary>
     private void SetTheme(ElementTheme newTheme)
     {
-        // Resolve the theme to use
-        var theme = newTheme switch
+        if (Editor.CoreWebView2 != null)
         {
-            ElementTheme.Light => LightTheme,
-            ElementTheme.Dark => DarkTheme,
-            _ => _themeSettings.DefaultAppTheme == ApplicationTheme.Light ? LightTheme : DarkTheme,
-        };
+            // Resolve the theme to use
+            var theme = newTheme switch
+            {
+                ElementTheme.Light => LightTheme,
+                ElementTheme.Dark => DarkTheme,
+                _ => _themeSettings.DefaultAppTheme == ApplicationTheme.Light ? LightTheme : DarkTheme,
+            };
 
-        // Send the theme change message to the editor
-        var msg = new EditorMessage() { Type = SetThemeApi, Value = theme };
-        var json = JsonSerializer.Serialize(msg, _options);
-        Editor.CoreWebView2.PostWebMessageAsJson(json);
+            // Send the theme change message to the editor
+            var msg = new EditorMessage() { Type = SetThemeApi, Value = theme };
+            var json = JsonSerializer.Serialize(msg, _options);
+            Editor.CoreWebView2.PostWebMessageAsJson(json);
+        }
     }
 
     /// <summary>
     /// Set the language of the editor.
     /// </summary>
     /// <param name="language">The language to set (e.g., "json", "yaml").</param>
-    public void SetLanguage(string language)
+    private void SetLanguage(string? language)
     {
-        var msg = new EditorMessage() { Type = SetLanguageApi, Value = language };
-        var json = JsonSerializer.Serialize(msg, _options);
-        Editor.CoreWebView2.PostWebMessageAsJson(json);
+        if (Editor.CoreWebView2 != null)
+        {
+            var msg = new EditorMessage() { Type = SetLanguageApi, Value = language };
+            var json = JsonSerializer.Serialize(msg, _options);
+            Editor.CoreWebView2.PostWebMessageAsJson(json);
+        }
     }
 
     /// <summary>
@@ -193,6 +220,7 @@ public sealed partial class MonacoEditor : UserControl
     private void OnNavigationCompleted(CoreWebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
         SetTheme(_themeSettings.Theme);
+        SetLanguage(Syntax);
         SetIsLoading(false);
         SetEditorText(Text);
         Editor.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
@@ -280,9 +308,12 @@ public sealed partial class MonacoEditor : UserControl
     /// <param name="text">The text to set.</param>
     private void SetEditorText(string? text)
     {
-        var msg = new EditorMessage() { Type = SetTextApi, Value = text };
-        var json = JsonSerializer.Serialize(msg, _options);
-        Editor.CoreWebView2.PostWebMessageAsJson(json);
+        if (Editor.CoreWebView2 != null)
+        {
+            var msg = new EditorMessage() { Type = SetTextApi, Value = text };
+            var json = JsonSerializer.Serialize(msg, _options);
+            Editor.CoreWebView2.PostWebMessageAsJson(json);
+        }
     }
 
     /// <summary>

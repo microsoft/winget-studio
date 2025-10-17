@@ -1,21 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
-using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.ViewModels;
-using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.Views;
 
 public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
 {
-    private bool _toggle;
-
     public ValidationViewModel ViewModel { get; }
 
     public ValidationPage()
@@ -48,26 +43,5 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
             ResourceExplorer dialog = new(resource) { XamlRoot = XamlRoot };
             await dialog.ShowAsync();
         }
-    }
-
-    private async void Monaco_Get(object sender, RoutedEventArgs e)
-    {
-        // var value = await Editor.GetTextAsync();
-        await Task.CompletedTask;
-        var value = ViewModel.Text;
-        App.GetService<ILogger<ValidationPage>>().LogInformation(value);
-    }
-
-    private void Monaco_Set(object sender, RoutedEventArgs e)
-    {
-        // Editor.SetText($"Date: {DateTime.Now}");
-        ViewModel.Text = $"Date: {DateTime.Now}";
-    }
-
-    private void Monaco_Language(object sender, RoutedEventArgs e)
-    {
-        var language = _toggle ? "json" : "yaml";
-        _toggle = !_toggle;
-        Editor.SetLanguage(language);
     }
 }

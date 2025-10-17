@@ -168,16 +168,9 @@
                 </Grid.RowDefinitions>
 
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <StackPanel Orientation="Horizontal">
-                        <Button Click="Monaco_Get" Content="Get" />
-                        <Button Click="Monaco_Set" Content="Set" />
-                        <Button Click="Monaco_Language" Content="JSON/YAML" />
-                    </StackPanel>
-                    <localControls:MonacoEditor x:Name="Editor" Grid.Row="1" Text="{x:Bind ViewModel.Text, Mode=TwoWay}" />
+                    <localControls:MonacoEditor x:Name="Editor"
+                                                Syntax="json"
+                                                Text="{x:Bind ViewModel.Text, Mode=TwoWay}" />
                 </Grid>
 
                 <Grid Visibility="Collapsed">
