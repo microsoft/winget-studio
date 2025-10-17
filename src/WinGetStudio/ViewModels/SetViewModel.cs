@@ -13,12 +13,12 @@ using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.Configurati
 
 namespace WinGetStudio.ViewModels;
 
-public sealed partial class DSCSetViewModel : ObservableObject
+public sealed partial class SetViewModel : ObservableObject
 {
     private readonly ILogger _logger;
-    private readonly ObservableCollection<DSCUnitViewModel> _units;
+    private readonly ObservableCollection<UnitViewModel> _units;
 
-    public ReadOnlyObservableCollection<DSCUnitViewModel> Units { get; }
+    public ReadOnlyObservableCollection<UnitViewModel> Units { get; }
 
     public IDSCFile? OriginalDscFile { get; private set; }
 
@@ -33,7 +33,7 @@ public sealed partial class DSCSetViewModel : ObservableObject
         remove => _units.CollectionChanged -= value;
     }
 
-    public DSCSetViewModel(ILogger logger)
+    public SetViewModel(ILogger logger)
     {
         _logger = logger;
         _units = [];
@@ -57,21 +57,21 @@ public sealed partial class DSCSetViewModel : ObservableObject
         ResolveDependencies();
     }
 
-    public async Task AddAsync(DSCUnitViewModel unit)
+    public async Task AddAsync(UnitViewModel unit)
     {
         _units.Insert(0, unit);
         unit.ResolveDependencies(this);
         await UpdateConfigurationCodeAsync();
     }
 
-    public async Task RemoveAsync(DSCUnitViewModel unit)
+    public async Task RemoveAsync(UnitViewModel unit)
     {
         _units.Remove(unit);
         ResolveDependencies();
         await UpdateConfigurationCodeAsync();
     }
 
-    public async Task UpdateAsync(DSCUnitViewModel original, DSCUnitViewModel updated)
+    public async Task UpdateAsync(UnitViewModel original, UnitViewModel updated)
     {
         updated.Validate();
         original.CopyFrom(updated);

@@ -71,12 +71,12 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 
     private void SelectedUnitDependencyChanged(object sender, SelectionChangedEventArgs e)
     {
-        foreach (var id in e.AddedItems.OfType<DSCUnitViewModel>())
+        foreach (var id in e.AddedItems.OfType<UnitViewModel>())
         {
             ViewModel.SelectedUnit?.Item2.Dependencies?.Add(id);
         }
 
-        foreach (var id in e.RemovedItems.OfType<DSCUnitViewModel>())
+        foreach (var id in e.RemovedItems.OfType<UnitViewModel>())
         {
             ViewModel.SelectedUnit?.Item2.Dependencies?.Remove(id);
         }
@@ -87,7 +87,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         if (sender is ListView listView && ViewModel.SelectedUnit != null)
         {
             // Disable the option that matches the currently selected unit
-            foreach (var item in listView.Items.OfType<DSCUnitViewModel>())
+            foreach (var item in listView.Items.OfType<UnitViewModel>())
             {
                 var container = listView.ContainerFromItem(item) as ListViewItem;
                 container?.IsEnabled = item != ViewModel.SelectedUnit.Item1;
@@ -102,7 +102,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             }
 
             // Remove unneeded selections
-            foreach (var selectedItem in listView.SelectedItems.OfType<DSCUnitViewModel>())
+            foreach (var selectedItem in listView.SelectedItems.OfType<UnitViewModel>())
             {
                 if (!idsToSelect.Remove(selectedItem))
                 {

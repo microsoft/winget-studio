@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WinGetStudio.Models;
 
-public partial class ConfigurationUnitDataEntry : ObservableObject
+public partial class UnitDataEntry : ObservableObject
 {
     [ObservableProperty]
     public partial string Key { get; set; }

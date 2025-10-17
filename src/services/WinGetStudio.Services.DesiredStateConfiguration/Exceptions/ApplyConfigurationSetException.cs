@@ -1,7 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Microsoft.Extensions.Localization;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -37,6 +41,37 @@ public sealed partial class ApplyConfigurationSetException : ConfigurationExcept
 
         // Fallback to a generic error message
         return localizer["ConfigurationSetApplyFailed"];
+    }
+
+    /// <summary>
+    /// Gets a summary message for the unit results in the apply set result.
+    /// </summary>
+    /// <param name="localizer">The localizer to use for retrieving localized strings.</param>
+    /// <returns>The summary message.</returns>
+    public string GetUnitsSummaryMessage(IStringLocalizer localizer)
+    {
+        var unitMessages = ApplySetResult.UnitResults
+            .Select(unit => GetUnitSummaryMessage(localizer, unit))
+            .Where(msg => !string.IsNullOrEmpty(msg));
+        return string.Join(Environment.NewLine, unitMessages);
+    }
+
+    /// <summary>
+    /// Gets a summary message for a unit result.
+    /// </summary>
+    /// <param name="localizer">The localizer to use for retrieving localized strings.</param>
+    /// <param name="unitResult">The unit result to get the summary message for.</param>
+    /// <returns>The summary message.</returns>
+    private string GetUnitSummaryMessage(IStringLocalizer localizer, IDSCApplyUnitResult unitResult)
+    {
+        if (unitResult.ResultInformation != null && !unitResult.ResultInformation.IsOk)
+        {
+            return unitResult.State == ConfigurationUnitState.Skipped
+                ? GetUnitSkipMessage(localizer, unitResult.ResultInformation)
+                : GetUnitErrorMessage(localizer, unitResult.Unit, unitResult.ResultInformation);
+        }
+
+        return string.Empty;
     }
 
     /// <summary>

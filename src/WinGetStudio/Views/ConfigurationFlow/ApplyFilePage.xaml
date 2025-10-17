@@ -31,16 +31,16 @@
 
         <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}">Applying Configuration File</TextBlock>
         <ScrollView Grid.Row="1" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}">
-            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Units}">
+            <ItemsRepeater ItemsSource="{x:Bind ViewModel.ApplySet.Units, Mode=OneWay}">
                 <ItemsRepeater.Layout>
                     <StackLayout Spacing="8" />
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="models:ApplySetUnitViewModel">
+                    <DataTemplate x:DataType="models:ApplyUnitViewModel">
                         <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="{x:Bind IsExpanded, Mode=OneWay}">
                             <Expander.Header>
                                 <StackPanel HorizontalAlignment="Left" Spacing="8" Orientation="Horizontal">
-                                    <controls:SwitchPresenter Value="{x:Bind State, Mode=OneWay}" TargetType="models:ApplySetUnitState">
+                                    <controls:SwitchPresenter Value="{x:Bind State, Mode=OneWay}" TargetType="models:ApplyUnitState">
                                         <controls:Case Value="Failed">
                                             <FontIcon Glyph="&#xEA39;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                         </controls:Case>

@@ -3,7 +3,7 @@
 
 namespace WinGetStudio.Models;
 
-public enum ApplySetUnitState
+public enum ApplyUnitState
 {
     NotStarted,
     InProgress,

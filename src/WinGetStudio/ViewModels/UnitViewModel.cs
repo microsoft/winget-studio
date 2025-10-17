@@ -14,7 +14,7 @@ using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.Configurati
 
 namespace WinGetStudio.ViewModels;
 
-public partial class DSCUnitViewModel : ObservableObject
+public partial class UnitViewModel : ObservableObject
 {
     public IDSCUnit? Unit { get; set; }
 
@@ -24,7 +24,7 @@ public partial class DSCUnitViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowDetails))]
-    public partial DSCUnitDetailsViewModel? Details { get; set; }
+    public partial UnitDetailsViewModel? Details { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowDetails))]
@@ -49,7 +49,7 @@ public partial class DSCUnitViewModel : ObservableObject
     public partial string? Intent { get; set; }
 
     [ObservableProperty]
-    public partial List<DSCUnitViewModel>? Dependencies { get; set; }
+    public partial List<UnitViewModel>? Dependencies { get; set; }
 
     [ObservableProperty]
     public partial DSCPropertySet? Settings { get; set; }
@@ -69,7 +69,7 @@ public partial class DSCUnitViewModel : ObservableObject
 
     public IList<KeyValuePair<string, object>>? MetadataList => Metadata?.ToList();
 
-    public DSCUnitViewModel()
+    public UnitViewModel()
     {
         SelectedSecurityContext = UnitSecurityContext.Default;
         Dependencies = [];
@@ -77,12 +77,12 @@ public partial class DSCUnitViewModel : ObservableObject
         Metadata = [];
     }
 
-    public DSCUnitViewModel(DSCUnitViewModel source)
+    public UnitViewModel(UnitViewModel source)
     {
         CopyFrom(source);
     }
 
-    public DSCUnitViewModel(IDSCUnit unit)
+    public UnitViewModel(IDSCUnit unit)
     {
         Unit = unit;
         Id = unit.Id;
@@ -91,7 +91,7 @@ public partial class DSCUnitViewModel : ObservableObject
         Description = unit.Description;
         SelectedSecurityContext = UnitSecurityContext.FromEnum(unit.SecurityContext);
         Intent = unit.Intent;
-        Dependencies = [..unit.Dependencies.Select(id => new DSCUnitViewModel() { Id = id })];
+        Dependencies = [..unit.Dependencies.Select(id => new UnitViewModel() { Id = id })];
         Settings = unit.Settings.DeepCopy();
         SettingsText = unit.Settings.ToYaml();
         Metadata = unit.Metadata.DeepCopy();
@@ -171,7 +171,7 @@ public partial class DSCUnitViewModel : ObservableObject
         {
             AreDetailsLoading = true;
             var result = await Unit.GetDetailsAsync();
-            Details = new DSCUnitDetailsViewModel(result);
+            Details = new UnitDetailsViewModel(result);
             AreDetailsLoading = false;
         }
     }
@@ -180,7 +180,7 @@ public partial class DSCUnitViewModel : ObservableObject
     /// Copies the properties from another instance.
     /// </summary>
     /// <param name="source">The source instance.</param>
-    public void CopyFrom(DSCUnitViewModel source)
+    public void CopyFrom(UnitViewModel source)
     {
         Unit = source.Unit;
         Id = source.Id;
@@ -197,7 +197,7 @@ public partial class DSCUnitViewModel : ObservableObject
         Settings = string.IsNullOrEmpty(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText);
     }
 
-    public void ResolveDependencies(DSCSetViewModel dscSet)
+    public void ResolveDependencies(SetViewModel dscSet)
     {
         // If there are no dependencies, nothing to resolve.
         if (Dependencies == null || Dependencies.Count == 0)
@@ -206,7 +206,7 @@ public partial class DSCUnitViewModel : ObservableObject
         }
 
         // Replace each dependency with the matching available unit, if found.
-        var resolvedDependencies = new List<DSCUnitViewModel>();
+        var resolvedDependencies = new List<UnitViewModel>();
         foreach (var dep in Dependencies)
         {
             var match = dscSet.Units.FirstOrDefault(u => dep.IdOrDefault == u.IdOrDefault);
@@ -224,7 +224,7 @@ public partial class DSCUnitViewModel : ObservableObject
     /// Creates a clone of this instance.
     /// </summary>
     /// <returns>A copy of this instance.</returns>
-    public DSCUnitViewModel Clone() => new(this);
+    public UnitViewModel Clone() => new(this);
 
     [RelayCommand]
     private async Task OnLoadedAsync() => await LoadDetailsAsync();

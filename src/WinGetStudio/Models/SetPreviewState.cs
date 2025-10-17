@@ -5,11 +5,11 @@ using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Models;
 
-public sealed partial class ConfigurationSetPreviewState
+public sealed partial class SetPreviewState
 {
-    public DSCSetViewModel? ActiveSet { get; set; }
+    public SetViewModel? ActiveSet { get; set; }
 
-    public Tuple<DSCUnitViewModel, DSCUnitViewModel>? SelectedUnit { get; set; }
+    public Tuple<UnitViewModel, UnitViewModel>? SelectedUnit { get; set; }
 
     public bool IsEditMode { get; set; }
 

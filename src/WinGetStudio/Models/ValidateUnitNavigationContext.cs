@@ -7,9 +7,9 @@ namespace WinGetStudio.Models;
 
 public sealed partial class ValidateUnitNavigationContext
 {
-    public DSCUnitViewModel UnitToValidate { get; }
+    public UnitViewModel UnitToValidate { get; }
 
-    public ValidateUnitNavigationContext(DSCUnitViewModel unitToValidate)
+    public ValidateUnitNavigationContext(UnitViewModel unitToValidate)
     {
         UnitToValidate = unitToValidate;
     }

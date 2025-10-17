@@ -192,7 +192,7 @@
                                 </Style>
                             </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="viewmodels:DSCUnitViewModel">
+                                <DataTemplate x:DataType="viewmodels:UnitViewModel">
                                     <Expander IsExpanded="False"
                                               Tag="{x:Bind Id, Mode=OneWay}"
                                               HorizontalContentAlignment="Left"
@@ -278,8 +278,8 @@
                                                             Style="{ThemeResource BodyStrongTextBlockStyle}"
                                                             Text="Configuration" />
                                                         <ListView ItemTemplate="{StaticResource KeyValueTemplate}" Style="{StaticResource KeyValueSubList}">
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Id" Value="{x:Bind IdOrDefault, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Intent" Value="{x:Bind Intent, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_Id" Value="{x:Bind IdOrDefault, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_Intent" Value="{x:Bind Intent, Mode=OneWay}" />
                                                         </ListView>
                                                     </StackPanel>
                                                 </Border>
@@ -304,7 +304,7 @@
                                                                 </ItemsPanelTemplate>
                                                             </ListView.ItemsPanel>
                                                             <ListView.ItemTemplate>
-                                                                <DataTemplate x:DataType="viewmodels:DSCUnitViewModel">
+                                                                <DataTemplate x:DataType="viewmodels:UnitViewModel">
                                                                     <TextBlock Tag="{x:Bind IdOrDefault, Mode=OneWay}">
                                                                         <Hyperlink Click="Dependency_Click">
                                                                             <Run Text="{x:Bind IdOrDefault, Mode=OneWay}" />
@@ -396,19 +396,19 @@
 
                                                         <!-- Loaded details -->
                                                         <ListView ItemTemplate="{StaticResource KeyValueTemplate}" Style="{ThemeResource KeyValueSubList}">
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitType" Value="{x:Bind Details.UnitType, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitDescription" Value="{x:Bind Details.UnitDescription, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_UnitDocumentation" Value="{x:Bind Details.UnitDocumentationUri, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleName" Value="{x:Bind Details.ModuleName, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleSource" Value="{x:Bind Details.ModuleSource, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleDescription" Value="{x:Bind Details.ModuleDescription, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_ModuleDocumentationUri" Value="{x:Bind Details.ModuleDocumentationUri, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_PublishedModuleUri" Value="{x:Bind Details.PublishedModuleUri, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Version" Value="{x:Bind Details.Version, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Author" Value="{x:Bind Details.Author, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_Publisher" Value="{x:Bind Details.Publisher, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_IsLocal" Value="{x:Bind Details.IsLocal, Mode=OneWay}" />
-                                                            <models:ConfigurationUnitDataEntry x:Uid="ConfigurationUnit_IsPublic" Value="{x:Bind Details.IsPublic, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_UnitType" Value="{x:Bind Details.UnitType, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_UnitDescription" Value="{x:Bind Details.UnitDescription, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_UnitDocumentation" Value="{x:Bind Details.UnitDocumentationUri, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_ModuleName" Value="{x:Bind Details.ModuleName, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_ModuleSource" Value="{x:Bind Details.ModuleSource, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_ModuleDescription" Value="{x:Bind Details.ModuleDescription, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_ModuleDocumentationUri" Value="{x:Bind Details.ModuleDocumentationUri, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_PublishedModuleUri" Value="{x:Bind Details.PublishedModuleUri, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_Version" Value="{x:Bind Details.Version, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_Author" Value="{x:Bind Details.Author, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_Publisher" Value="{x:Bind Details.Publisher, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_IsLocal" Value="{x:Bind Details.IsLocal, Mode=OneWay}" />
+                                                            <models:UnitDataEntry x:Uid="ConfigurationUnit_IsPublic" Value="{x:Bind Details.IsPublic, Mode=OneWay}" />
                                                         </ListView>
                                                     </StackPanel>
                                                 </Border>

@@ -9,14 +9,14 @@ using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Models;
 
-public partial class ApplySetUnitViewModel : ObservableObject
+public partial class ApplyUnitViewModel : ObservableObject
 {
     private readonly IStringLocalizer _localizer;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLoading))]
     [NotifyPropertyChangedFor(nameof(IsExpanded))]
-    public partial ApplySetUnitState State { get; set; }
+    public partial ApplyUnitState State { get; set; }
 
     [ObservableProperty]
     public partial string? Message { get; set; }
@@ -24,36 +24,36 @@ public partial class ApplySetUnitViewModel : ObservableObject
     [ObservableProperty]
     public partial string? Description { get; set; }
 
-    public bool IsLoading => State == ApplySetUnitState.InProgress;
+    public bool IsLoading => State == ApplyUnitState.InProgress;
 
-    public bool IsExpanded => State == ApplySetUnitState.Failed || State == ApplySetUnitState.Skipped;
+    public bool IsExpanded => State == ApplyUnitState.Failed || State == ApplyUnitState.Skipped;
 
-    public DSCUnitViewModel Unit { get; }
+    public UnitViewModel Unit { get; }
 
-    public ApplySetUnitViewModel(IDSCUnit unit, IStringLocalizer localizer)
+    public ApplyUnitViewModel(IStringLocalizer localizer, IDSCUnit unit)
     {
         Unit = new(unit);
         _localizer = localizer;
-        Update(ApplySetUnitState.NotStarted);
+        Update(ApplyUnitState.NotStarted);
     }
 
-    public void Update(ApplySetUnitState state, IDSCUnitResultInformation? resultInformation = null)
+    public void Update(ApplyUnitState state, IDSCUnitResultInformation? resultInformation = null)
     {
         State = state;
-        if (State == ApplySetUnitState.Succeeded)
+        if (State == ApplyUnitState.Succeeded)
         {
             Message = _localizer["ConfigurationUnitSuccess"];
         }
-        else if (State == ApplySetUnitState.NotStarted)
+        else if (State == ApplyUnitState.NotStarted)
         {
             Message = _localizer["ConfigurationUnitNotStarted"];
         }
-        else if (State == ApplySetUnitState.Failed && resultInformation != null)
+        else if (State == ApplyUnitState.Failed && resultInformation != null)
         {
             Message = ApplyConfigurationSetException.GetUnitErrorMessage(_localizer, Unit.Unit, resultInformation);
             Description = ApplyConfigurationSetException.GetErrorDescription(resultInformation);
         }
-        else if (State == ApplySetUnitState.Skipped && resultInformation != null)
+        else if (State == ApplyUnitState.Skipped && resultInformation != null)
         {
             Message = ApplyConfigurationSetException.GetUnitSkipMessage(_localizer, resultInformation);
             Description = ApplyConfigurationSetException.GetErrorDescription(resultInformation);

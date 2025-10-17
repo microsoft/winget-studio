@@ -24,8 +24,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
     private readonly IUIFeedbackService _ui;
     private readonly IDSC _dsc;
-    private readonly IAppFrameNavigationService _navigation;
-    private readonly IConfigurationSetManager _manager;
+    private readonly IAppFrameNavigationService _appNavigation;
+    private readonly IConfigurationFrameNavigationService _configNavigation;
+    private readonly IConfigurationManager _manager;
 
     public IReadOnlyList<UnitSecurityContext> SecurityContexts => UnitSecurityContext.All;
 
@@ -42,11 +43,11 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ToggleEditModeCommand))]
-    public partial DSCSetViewModel? ConfigurationSet { get; set; }
+    public partial SetViewModel? ConfigurationSet { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnitSelected))]
-    public partial Tuple<DSCUnitViewModel, DSCUnitViewModel>? SelectedUnit { get; set; }
+    public partial Tuple<UnitViewModel, UnitViewModel>? SelectedUnit { get; set; }
 
     [ObservableProperty]
     public partial bool IsEditMode { get; set; }
@@ -73,14 +74,16 @@ public partial class PreviewFileViewModel : ObservableRecipient
         IStringLocalizer<PreviewFileViewModel> localizer,
         IUIFeedbackService ui,
         IDSC dsc,
-        IAppFrameNavigationService navigation,
-        IConfigurationSetManager manager)
+        IAppFrameNavigationService appNavigation,
+        IConfigurationFrameNavigationService configNavigation,
+        IConfigurationManager manager)
     {
         _logger = logger;
         _localizer = localizer;
         _ui = ui;
         _dsc = dsc;
-        _navigation = navigation;
+        _appNavigation = appNavigation;
+        _configNavigation = configNavigation;
         _manager = manager;
     }
 
@@ -97,7 +100,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             IsEditMode = false;
             IsLoading = true;
             SelectedUnit = null;
-            ConfigurationSet = new DSCSetViewModel(_logger);
+            ConfigurationSet = new SetViewModel(_logger);
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             ConfigurationSet.Use(dscSet, dscFile);
@@ -123,23 +126,16 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand]
     private void OnLoaded()
     {
-        if (_manager.ActivePreviewState.ActiveSet != null)
+        if (_manager.ActiveSetPreviewState.ActiveSet != null)
         {
-            _logger.LogInformation("Restored active configuration set from manager");
-            ConfigurationSet = _manager.ActivePreviewState.ActiveSet;
-            IsCodeView = _manager.ActivePreviewState.IsCodeView;
-            IsEditMode = _manager.ActivePreviewState.IsEditMode;
-            SelectedUnit = _manager.ActivePreviewState.SelectedUnit;
+            RestoreState();
         }
     }
 
     [RelayCommand]
     private void OnUnloaded()
     {
-        _manager.ActivePreviewState.ActiveSet = ConfigurationSet;
-        _manager.ActivePreviewState.IsCodeView = IsCodeView;
-        _manager.ActivePreviewState.IsEditMode = IsEditMode;
-        _manager.ActivePreviewState.SelectedUnit = SelectedUnit;
+        CaptureState();
     }
 
     [RelayCommand]
@@ -150,7 +146,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             _ui.ShowTaskProgress();
             _logger.LogInformation($"Creating new configuration set");
             SelectedUnit = null;
-            ConfigurationSet = new DSCSetViewModel(_logger);
+            ConfigurationSet = new SetViewModel(_logger);
             await AddResourceAsync();
         }
         catch (DSCUnitValidationException ex)
@@ -182,19 +178,19 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void OnValidateUnit(DSCUnitViewModel unit)
+    private void OnValidateUnit(UnitViewModel unit)
     {
         if (ConfigurationSet != null && unit != null)
         {
             _logger.LogInformation($"Validating unit {unit.Title}");
             var unitClone = unit.Clone();
             var param = new ValidateUnitNavigationContext(unitClone);
-            _navigation.NavigateTo<ValidationViewModel>(param);
+            _appNavigation.NavigateTo<ValidationViewModel>(param);
         }
     }
 
     [RelayCommand]
-    private void OnEditUnit(DSCUnitViewModel unit)
+    private void OnEditUnit(UnitViewModel unit)
     {
         _logger.LogInformation($"Editing unit {unit.Title}");
         EditUnit(unit);
@@ -277,7 +273,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
             catch (ApplyConfigurationSetException ex)
             {
                 _logger.LogError(ex, $"Validation of configuration set failed");
-                _ui.ShowTimedNotification(ex.GetSetErrorMessage(_localizer), NotificationMessageSeverity.Error);
+                var title = ex.GetSetErrorMessage(_localizer);
+                var message = ex.GetUnitsSummaryMessage(_localizer);
+                _ui.ShowTimedNotification(title, message, NotificationMessageSeverity.Error);
             }
             catch (Exception ex)
             {
@@ -292,9 +290,10 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand(CanExecute = nameof(CanApplyConfiguration))]
-    private async Task OnApplyConfigurationAsync()
+    private void OnApplyConfiguration()
     {
-        await Task.CompletedTask;
+        CaptureState();
+        _configNavigation.NavigateTo<ApplyFileViewModel>();
     }
 
     [RelayCommand]
@@ -345,7 +344,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _logger.LogInformation($"Toggling code view to {(IsCodeView ? "ON" : "OFF")}");
     }
 
-    private void EditUnit(DSCUnitViewModel unit)
+    private void EditUnit(UnitViewModel unit)
     {
         IsEditMode = true;
         SelectedUnit = new(unit, unit.Clone());
@@ -355,13 +354,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (ConfigurationSet != null)
         {
-            var unit = new DSCUnitViewModel() { Title = "Module/Resource" };
+            var unit = new UnitViewModel() { Title = "Module/Resource" };
             await ConfigurationSet.AddAsync(unit);
             EditUnit(unit);
         }
     }
 
-    partial void OnConfigurationSetChanged(DSCSetViewModel? oldValue, DSCSetViewModel? newValue)
+    partial void OnConfigurationSetChanged(SetViewModel? oldValue, SetViewModel? newValue)
     {
         oldValue?.UnitsCollectionChanged -= OnConfigurationSetUnitsChanged;
         newValue?.UnitsCollectionChanged += OnConfigurationSetUnitsChanged;
@@ -381,5 +380,29 @@ public partial class PreviewFileViewModel : ObservableRecipient
         OnPropertyChanged(nameof(CanSaveConfiguration));
         SaveConfigurationCommand.NotifyCanExecuteChanged();
         SaveConfigurationAsCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>
+    /// Captures the current state to the configuration manager.
+    /// </summary>
+    private void CaptureState()
+    {
+        _logger.LogInformation("Capturing active configuration set");
+        _manager.ActiveSetPreviewState.ActiveSet = ConfigurationSet;
+        _manager.ActiveSetPreviewState.IsCodeView = IsCodeView;
+        _manager.ActiveSetPreviewState.IsEditMode = IsEditMode;
+        _manager.ActiveSetPreviewState.SelectedUnit = SelectedUnit;
+    }
+
+    /// <summary>
+    /// Restores the state from the configuration manager.
+    /// </summary>
+    private void RestoreState()
+    {
+        _logger.LogInformation("Restoring active configuration set");
+        ConfigurationSet = _manager.ActiveSetPreviewState.ActiveSet;
+        IsCodeView = _manager.ActiveSetPreviewState.IsCodeView;
+        IsEditMode = _manager.ActiveSetPreviewState.IsEditMode;
+        SelectedUnit = _manager.ActiveSetPreviewState.SelectedUnit;
     }
 }

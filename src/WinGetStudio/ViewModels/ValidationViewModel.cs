@@ -330,7 +330,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <returns>The created DSC unit.</returns>
     private async Task<IDSCUnit> CreateUnitAsync()
     {
-        var unit = new DSCUnitViewModel
+        var unit = new UnitViewModel
         {
             Title = SearchResourceText ?? string.Empty,
             Settings = DSCPropertySet.FromYaml(SettingsText ?? string.Empty),

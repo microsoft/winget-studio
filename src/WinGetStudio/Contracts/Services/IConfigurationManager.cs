@@ -5,7 +5,9 @@ using WinGetStudio.Models;
 
 namespace WinGetStudio.Contracts.Services;
 
-public interface IConfigurationSetManager
+public interface IConfigurationManager
 {
-    ConfigurationSetPreviewState ActivePreviewState { get; set; }
+    SetPreviewState ActiveSetPreviewState { get; set; }
+
+    SetApplyState ActiveSetApplyState { get; set; }
 }
