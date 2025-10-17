@@ -116,6 +116,12 @@ public partial class ApplyFileViewModel : ObservableRecipient
         _navigationService.NavigateToDefaultPage();
     }
 
+    [RelayCommand]
+    private void OnBack()
+    {
+        _navigationService.NavigateToDefaultPage();
+    }
+
     private bool CanRestoreState() => _manager.ActiveSetApplyState.ActiveApplySet != null;
 
     private void CaptureState()

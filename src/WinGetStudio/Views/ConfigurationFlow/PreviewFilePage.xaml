@@ -97,7 +97,7 @@
             <!-- Action buttons -->
             <CommandBar HorizontalAlignment="Left" DefaultLabelPosition="Right">
                 <AppBarButton Icon="Page" x:Uid="PreviewPage_NewConfiguration" Command="{x:Bind ViewModel.NewConfigurationCommand}" />
-                <AppBarButton Icon="OpenFile" x:Uid="PreviewPage_OpenConfiguration" Click="OpenConfigurationFile" />
+                <AppBarButton Icon="OpenFile" x:Uid="PreviewPage_OpenConfiguration" Click="OpenConfigurationFile" IsEnabled="{x:Bind ViewModel.CanOpenConfigurationFile}" />
                 <AppBarToggleButton IsChecked="{x:Bind ViewModel.IsCodeView, Mode=TwoWay}"
                                     Label="Code"
                                     Command="{x:Bind ViewModel.ToggleCodeViewCommand}">

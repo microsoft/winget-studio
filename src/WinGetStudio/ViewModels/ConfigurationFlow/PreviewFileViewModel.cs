@@ -60,11 +60,15 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     public bool IsEmptyState => !IsLoading && ConfigurationSet == null;
 
-    public bool CanAddResource => ConfigurationSet != null && !ReadOnlyMode;
+    public bool CanAddUnit => ConfigurationSet != null && !ReadOnlyMode;
+
+    public bool CanUpdateUnit => !ReadOnlyMode;
+
+    public bool CanDeleteUnit => !ReadOnlyMode;
 
     public bool CanToggleEditMode => ConfigurationSet != null;
 
-    public bool CanApplyConfiguration => ConfigurationSet?.Units.Count > 0;
+    public bool CanApplyConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
 
     public bool CanViewResults => IsApplyInProgress;
 
@@ -72,9 +76,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     public bool CanValidateConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
 
-    public bool CanSaveConfiguration => ConfigurationSet?.Units.Count > 0;
+    public bool CanSaveConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
 
-    public bool CanUpdateUnit => !ReadOnlyMode;
+    public bool CanSaveConfigurationAs => ConfigurationSet?.Units.Count > 0;
+
+    public bool CanOpenConfigurationFile => !IsApplyInProgress;
+
+    public bool CanCreateNewConfiguration => !IsApplyInProgress;
 
     public ApplySetViewModel? ActiveApplySet => _manager.ActiveSetApplyState.ActiveApplySet;
 
@@ -151,7 +159,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         CaptureState();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanCreateNewConfiguration))]
     private async Task OnNewConfigurationAsync()
     {
         try
@@ -184,7 +192,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         await Task.CompletedTask;
     }
 
-    [RelayCommand(CanExecute = nameof(CanSaveConfiguration))]
+    [RelayCommand(CanExecute = nameof(CanSaveConfigurationAs))]
     private async Task OnSaveConfigurationAsAsync()
     {
         await Task.CompletedTask;
@@ -209,7 +217,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         EditUnit(unit);
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanDeleteUnit))]
     private async Task OnDeleteSelectedUnitAsync()
     {
         if (ConfigurationSet != null && SelectedUnit != null)
@@ -239,7 +247,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
-    [RelayCommand(CanExecute = nameof(CanAddResource))]
+    [RelayCommand(CanExecute = nameof(CanAddUnit))]
     private async Task OnAddResourceAsync()
     {
         try
@@ -406,6 +414,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
         // Notify save
         OnPropertyChanged(nameof(CanSaveConfiguration));
         SaveConfigurationCommand.NotifyCanExecuteChanged();
+
+        // Notify save as
+        OnPropertyChanged(nameof(CanSaveConfigurationAs));
         SaveConfigurationAsCommand.NotifyCanExecuteChanged();
     }
 
