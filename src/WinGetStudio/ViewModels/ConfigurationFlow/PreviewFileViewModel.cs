@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
@@ -32,14 +33,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmptyState))]
-    public partial bool IsLoading { get; set; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsEmptyState))]
     [NotifyPropertyChangedFor(nameof(CanApplyConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanApplyConfigurationOrViewResult))]
     [NotifyPropertyChangedFor(nameof(CanValidateConfiguration))]
-    [NotifyPropertyChangedFor(nameof(CanSaveConfiguration))]
     [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
@@ -56,17 +52,28 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [ObservableProperty]
     public partial bool IsCodeView { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmptyState))]
+    public partial bool IsConfigurationLoading { get; set; }
+
+    [MemberNotNullWhen(true, nameof(ConfigurationSet))]
+    public bool IsConfigurationLoaded => ConfigurationSet != null;
+
+    public bool IsApplyInProgress => ActiveApplySet != null;
+
+    public bool ReadOnlyMode => IsApplyInProgress;
+
     public bool IsUnitSelected => SelectedUnit != null;
 
-    public bool IsEmptyState => !IsLoading && ConfigurationSet == null;
+    public bool IsEmptyState => !IsConfigurationLoading && !IsConfigurationLoaded;
 
-    public bool CanAddUnit => ConfigurationSet != null && !ReadOnlyMode;
+    public bool CanAddUnit => IsConfigurationLoaded && !ReadOnlyMode;
 
     public bool CanUpdateUnit => !ReadOnlyMode;
 
     public bool CanDeleteUnit => !ReadOnlyMode;
 
-    public bool CanToggleEditMode => ConfigurationSet != null;
+    public bool CanToggleEditMode => IsConfigurationLoaded;
 
     public bool CanApplyConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
 
@@ -76,8 +83,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     public bool CanValidateConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
 
-    public bool CanSaveConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
-
     public bool CanSaveConfigurationAs => ConfigurationSet?.Units.Count > 0;
 
     public bool CanOpenConfigurationFile => !IsApplyInProgress;
@@ -85,10 +90,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool CanCreateNewConfiguration => !IsApplyInProgress;
 
     public ApplySetViewModel? ActiveApplySet => _manager.ActiveSetApplyState.ActiveApplySet;
-
-    public bool IsApplyInProgress => ActiveApplySet != null;
-
-    public bool ReadOnlyMode => IsApplyInProgress;
 
     public PreviewFileViewModel(
         ILogger<PreviewFileViewModel> logger,
@@ -119,7 +120,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             _ui.ShowTaskProgress();
             _logger.LogInformation($"Selected file: {file.Path}");
             IsEditMode = false;
-            IsLoading = true;
+            IsConfigurationLoading = true;
             SelectedUnit = null;
             ConfigurationSet = new SetViewModel(_logger);
             var dscFile = await DSCFile.LoadAsync(file.Path);
@@ -139,8 +140,31 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
         finally
         {
-            IsLoading = false;
+            IsConfigurationLoading = false;
             _ui.HideTaskProgress();
+        }
+    }
+
+    public async Task SaveConfigurationAsAsync(string filePath)
+    {
+        if (IsConfigurationLoaded)
+        {
+            try
+            {
+                _ui.ShowTaskProgress();
+                _logger.LogInformation($"Saving configuration set as {filePath}");
+                await ConfigurationSet.SaveAsAsync(filePath);
+                _ui.ShowTimedNotification($"Configuration saved successfully", NotificationMessageSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Saving configuration set failed");
+                _ui.ShowTimedNotification($"Saving configuration set failed: {ex.Message}", NotificationMessageSeverity.Error);
+            }
+            finally
+            {
+                _ui.HideTaskProgress();
+            }
         }
     }
 
@@ -186,22 +210,34 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
-    [RelayCommand(CanExecute = nameof(CanSaveConfiguration))]
+    [RelayCommand]
     private async Task OnSaveConfigurationAsync()
     {
-        await Task.CompletedTask;
-    }
-
-    [RelayCommand(CanExecute = nameof(CanSaveConfigurationAs))]
-    private async Task OnSaveConfigurationAsAsync()
-    {
-        await Task.CompletedTask;
+        if (IsConfigurationLoaded)
+        {
+            try
+            {
+                _ui.ShowTaskProgress();
+                _logger.LogInformation($"Saving configuration set");
+                await ConfigurationSet.SaveAsync();
+                _ui.ShowTimedNotification($"Configuration saved successfully", NotificationMessageSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Saving configuration set failed");
+                _ui.ShowTimedNotification($"Saving configuration set failed: {ex.Message}", NotificationMessageSeverity.Error);
+            }
+            finally
+            {
+                _ui.HideTaskProgress();
+            }
+        }
     }
 
     [RelayCommand]
     private void OnValidateUnit(UnitViewModel unit)
     {
-        if (ConfigurationSet != null && unit != null)
+        if (IsConfigurationLoaded && unit != null)
         {
             _logger.LogInformation($"Validating unit {unit.Title}");
             var unitClone = unit.Clone();
@@ -220,7 +256,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanDeleteUnit))]
     private async Task OnDeleteSelectedUnitAsync()
     {
-        if (ConfigurationSet != null && SelectedUnit != null)
+        if (IsConfigurationLoaded && SelectedUnit != null)
         {
             try
             {
@@ -275,7 +311,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanValidateConfiguration))]
     private async Task OnValidateConfigurationAsync()
     {
-        if (ConfigurationSet != null)
+        if (IsConfigurationLoaded)
         {
             try
             {
@@ -315,7 +351,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsApplyInProgress)
         {
-            CaptureState();
             _configNavigation.NavigateTo<ApplyFileViewModel>();
         }
     }
@@ -333,7 +368,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanUpdateUnit))]
     private async Task OnUpdateSelectedUnitAsync()
     {
-        if (ConfigurationSet != null && SelectedUnit != null)
+        if (IsConfigurationLoaded && SelectedUnit != null)
         {
             try
             {
@@ -386,7 +421,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     private async Task AddResourceAsync()
     {
-        if (ConfigurationSet != null)
+        if (IsConfigurationLoaded)
         {
             var unit = new UnitViewModel() { Title = "Module/Resource" };
             await ConfigurationSet.AddAsync(unit);
@@ -412,12 +447,10 @@ public partial class PreviewFileViewModel : ObservableRecipient
         ApplyConfigurationCommand.NotifyCanExecuteChanged();
 
         // Notify save
-        OnPropertyChanged(nameof(CanSaveConfiguration));
         SaveConfigurationCommand.NotifyCanExecuteChanged();
 
         // Notify save as
         OnPropertyChanged(nameof(CanSaveConfigurationAs));
-        SaveConfigurationAsCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>

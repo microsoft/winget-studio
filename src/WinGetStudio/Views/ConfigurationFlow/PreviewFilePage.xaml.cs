@@ -69,6 +69,24 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         }
     }
 
+    private async void SaveConfigurationFileAs(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var filePicker = new WindowSaveFileDialog();
+            filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], ".winget");
+            var selectedFile = filePicker.Show(App.MainWindow);
+            if (!string.IsNullOrEmpty(selectedFile))
+            {
+                await ViewModel.SaveConfigurationAsAsync(selectedFile);
+            }
+        }
+        catch (Exception ex)
+        {
+            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
+        }
+    }
+
     private void SelectedUnitDependencyChanged(object sender, SelectionChangedEventArgs e)
     {
         foreach (var id in e.AddedItems.OfType<UnitViewModel>())

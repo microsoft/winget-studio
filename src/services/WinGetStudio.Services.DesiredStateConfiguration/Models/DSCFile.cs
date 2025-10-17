@@ -28,6 +28,9 @@ public sealed class DSCFile : IDSCFile
         Content = content;
     }
 
+    /// <inheritdoc/>
+    public bool CanSave => FileInfo != null;
+
     /// <summary>
     /// Load a configuration file from a path.
     /// </summary>
@@ -49,5 +52,28 @@ public sealed class DSCFile : IDSCFile
     public static IDSCFile CreateVirtual(string content)
     {
         return new DSCFile(content);
+    }
+
+    /// <summary>
+    /// Create a virtual file with the specified content and file path without writing to disk.
+    /// </summary>
+    /// <param name="filePath">The path to the file.</param>
+    /// <param name="content">Content of the file</param>
+    /// <returns>The configuration file.</returns>
+    public static IDSCFile CreateVirtual(string filePath, string content)
+    {
+        var fileInfo = new FileInfo(filePath);
+        return new DSCFile(fileInfo, content);
+    }
+
+    /// <inheritdoc/>
+    public async Task SaveAsync()
+    {
+        if (FileInfo == null)
+        {
+            throw new InvalidDataException("Cannot save a file without a valid file path.");
+        }
+
+        await File.WriteAllTextAsync(FileInfo.FullName, Content);
     }
 }

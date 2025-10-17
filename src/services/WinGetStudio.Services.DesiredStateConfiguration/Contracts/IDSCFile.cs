@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.IO;
+using System.Threading.Tasks;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -16,4 +17,15 @@ public interface IDSCFile
     /// Gets the configuration file content
     /// </summary>
     public string Content { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the configuration file can be saved.
+    /// </summary>
+    public bool CanSave { get; }
+
+    /// <summary>
+    /// Save the configuration file to disk.
+    /// </summary>
+    /// <exception cref="InvalidDataException">Thrown if the file is virtual and cannot be saved.</exception>
+    public Task SaveAsync();
 }

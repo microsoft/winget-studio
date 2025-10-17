@@ -521,31 +521,7 @@
   <data name="PreviewPage_Name.Text" xml:space="preserve">
     <value>Name: </value>
   </data>
-  <data name="PreviewPage_SaveDialog.PrimaryButtonText" xml:space="preserve">
-    <value>Save</value>
-  </data>
-  <data name="PreviewPage_SaveDialog.SecondaryButtonText" xml:space="preserve">
-    <value>Save As</value>
-  </data>
-  <data name="PreviewPage_SaveDialog.Title" xml:space="preserve">
-    <value>Unsaved Changes</value>
-  </data>
-  <data name="PreviewPage_SaveDialog.Content" xml:space="preserve">
-    <value>Unsaved changes need to be saved or discarded before switching out of edit mode</value>
-  </data>
-  <data name="PreviewPage_SaveDialog.CloseButtonText" xml:space="preserve">
-    <value>Discard</value>
-  </data>
-  <data name="PreviewPage_ApplyDialog.Title" xml:space="preserve">
-    <value>Warning of Terms</value>
-  </data>
-  <data name="PreviewPage_ApplyDialog.PrimaryButtonText" xml:space="preserve">
-    <value>I agree and continue</value>
-  </data>
-  <data name="PreviewPage_ApplyDialog.CloseButtonText" xml:space="preserve">
-    <value>Cancel</value>
-  </data>
-  <data name="PreviewPage_ApplyDialog.Content" xml:space="preserve">
+  <data name="PreviewPage_ApplyInfoBar.Message" xml:space="preserve">
     <value>You are responsible for understanding the configuration settings you are choosing to execute. Microsoft is not responsible for the configuration file you have authored or imported. This configuration may change settings in Windows, install software, change software settings (including security settings), and accept user agreements to third-party packages and services on your behalf. By running this configuration file, you acknowledge that you understand and agree to these resources and settings. Any applications installed are licensed to you by their owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages or services.</value>
   </data>
   <data name="PreviewPage_SelectConfigurationFileMessage.Text" xml:space="preserve">

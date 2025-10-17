@@ -20,12 +20,17 @@ public sealed partial class SetViewModel : ObservableObject
 
     public ReadOnlyObservableCollection<UnitViewModel> Units { get; }
 
-    public IDSCFile? OriginalDscFile { get; private set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSave))]
+    private partial IDSCFile? OriginalDscFile { get; set; }
+
+    [ObservableProperty]
+    private partial IDSCFile? CurrentDscFile { get; set; }
 
     [ObservableProperty]
     public partial string? Code { get; set; }
 
-    private IDSCFile? CurrentDscFile { get; set; }
+    public bool CanSave => OriginalDscFile?.CanSave ?? false;
 
     public event NotifyCollectionChangedEventHandler? UnitsCollectionChanged
     {
@@ -44,7 +49,6 @@ public sealed partial class SetViewModel : ObservableObject
     {
         Debug.Assert(Units.Count == 0, "Units collection should be empty when initializing from a DSC set.");
         OriginalDscFile = dscFile;
-        CurrentDscFile = dscFile;
 
         // Update units and code.
         Code = dscFile?.Content;
@@ -94,7 +98,22 @@ public sealed partial class SetViewModel : ObservableObject
         CurrentDscFile = null;
     }
 
-    public IDSCFile GetLatestDSCFile() => CurrentDscFile ?? DSCFile.CreateVirtual(Code);
+    public IDSCFile GetLatestDSCFile()
+    {
+        if (CurrentDscFile == null)
+        {
+            if (OriginalDscFile?.FileInfo != null)
+            {
+                CurrentDscFile = DSCFile.CreateVirtual(OriginalDscFile.FileInfo.FullName, Code);
+            }
+            else
+            {
+                CurrentDscFile = DSCFile.CreateVirtual(Code);
+            }
+        }
+
+        return CurrentDscFile;
+    }
 
     private Task<string> GenerateConfigurationCodeAsync()
     {
@@ -110,5 +129,26 @@ public sealed partial class SetViewModel : ObservableObject
 
             return config.ToYaml();
         });
+    }
+
+    public async Task SaveAsync()
+    {
+        var dscFile = GetLatestDSCFile();
+        if (dscFile.CanSave)
+        {
+            await dscFile.SaveAsync();
+        }
+    }
+
+    public async Task SaveAsAsync(string filePath)
+    {
+        OriginalDscFile = DSCFile.CreateVirtual(filePath, Code);
+        await OriginalDscFile.SaveAsync();
+    }
+
+    partial void OnOriginalDscFileChanged(IDSCFile? oldValue, IDSCFile? newValue)
+    {
+        // When the original DSC file changes, reset the current DSC file to match it.
+        CurrentDscFile = newValue;
     }
 }
