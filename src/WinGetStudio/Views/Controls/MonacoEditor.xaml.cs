@@ -97,7 +97,6 @@ public sealed partial class MonacoEditor : UserControl
 
         var appSettings = App.GetService<IAppSettingsService>();
         _themeSettings = appSettings.GetFeature<ThemeFeatureSettings>();
-        _themeSettings.ThemeApplied += OnThemeApplied;
 
         InitializeComponent();
         SetIsLoading(true);
@@ -235,6 +234,20 @@ public sealed partial class MonacoEditor : UserControl
 
         // Load the Monaco Editor HTML page
         Editor.CoreWebView2.Navigate($"https://{HostName}/editor.html");
+
+        // Subscribe to theme changes
+        _themeSettings.ThemeApplied += OnThemeApplied;
+    }
+
+    /// <summary>
+    /// Handle the Unloaded event of the WebView2 control.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private void Editor_Unloaded(object sender, RoutedEventArgs e)
+    {
+        // Unsubscribe from theme changes
+        _themeSettings.ThemeApplied -= OnThemeApplied;
     }
 
     /// <summary>
