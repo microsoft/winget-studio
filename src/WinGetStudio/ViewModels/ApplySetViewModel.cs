@@ -22,7 +22,7 @@ public sealed partial class ApplySetViewModel : ObservableObject
 
     public int TotalCompletedUnits => Units.Count(u => u.IsCompleted);
 
-    public string Summary => _localizer["ApplySet_TotalUnitsCompleted", TotalUnits == 0 ? 0 : (int)((double)TotalCompletedUnits / TotalUnits) * 100];
+    public string Summary => _localizer["ApplySet_TotalUnitsCompleted", TotalUnits == 0 ? 0 : (int)((double)TotalCompletedUnits / TotalUnits * 100)];
 
     /// <summary>
     /// Event raised when the apply set is completed.
