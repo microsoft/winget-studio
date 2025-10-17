@@ -45,10 +45,10 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     public partial bool CanExecuteDSCOperation { get; set; } = true;
 
     [ObservableProperty]
-    public partial string RawData { get; set; } = string.Empty;
+    public partial string? SearchResourceText { get; set; }
 
     [ObservableProperty]
-    public partial string? Text { get; set; }
+    public partial string RawData { get; set; } = string.Empty;
 
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
 
