@@ -156,7 +156,7 @@
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarSeparator />
-                <AppBarButton Icon="Save" Label="Save" Command="{x:Bind ViewModel.SaveConfigurationCommand}" IsEnabled="{x:Bind ViewModel.ConfigurationSet.CanSave, Mode=OneWay}" />
+                <AppBarButton Icon="Save" Label="Save" Command="{x:Bind ViewModel.SaveConfigurationCommand}" />
                 <AppBarButton Icon="Save" Label="Save as" Click="SaveConfigurationFileAs" IsEnabled="{x:Bind ViewModel.CanSaveConfigurationAs, Mode=OneWay}" />
             </CommandBar>
         </StackPanel>

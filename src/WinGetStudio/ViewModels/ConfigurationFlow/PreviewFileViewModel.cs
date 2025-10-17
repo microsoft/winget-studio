@@ -36,6 +36,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [NotifyPropertyChangedFor(nameof(CanApplyConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanApplyConfigurationOrViewResult))]
     [NotifyPropertyChangedFor(nameof(CanValidateConfiguration))]
+    [NotifyPropertyChangedFor(nameof(CanSaveConfiguration))]
     [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
@@ -61,17 +62,17 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     public bool IsApplyInProgress => ActiveApplySet != null;
 
-    public bool ReadOnlyMode => IsApplyInProgress;
+    public bool IsReadOnlyMode => IsApplyInProgress;
 
     public bool IsUnitSelected => SelectedUnit != null;
 
     public bool IsEmptyState => !IsConfigurationLoading && !IsConfigurationLoaded;
 
-    public bool CanAddUnit => IsConfigurationLoaded && !ReadOnlyMode;
+    public bool CanAddUnit => IsConfigurationLoaded && !IsReadOnlyMode;
 
-    public bool CanUpdateUnit => !ReadOnlyMode;
+    public bool CanUpdateUnit => !IsReadOnlyMode;
 
-    public bool CanDeleteUnit => !ReadOnlyMode;
+    public bool CanDeleteUnit => !IsReadOnlyMode;
 
     public bool CanToggleEditMode => IsConfigurationLoaded;
 
@@ -82,6 +83,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool CanApplyConfigurationOrViewResult => CanApplyConfiguration || CanViewResults;
 
     public bool CanValidateConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
+
+    public bool CanSaveConfiguration => IsConfigurationLoaded && ConfigurationSet.CanSave && !IsReadOnlyMode;
 
     public bool CanSaveConfigurationAs => ConfigurationSet?.Units.Count > 0;
 
@@ -163,6 +166,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
             }
             finally
             {
+                // After saving as a new file, re-evaluate if saving is possible
+                OnPropertyChanged(nameof(CanSaveConfiguration));
+                SaveConfigurationCommand.NotifyCanExecuteChanged();
                 _ui.HideTaskProgress();
             }
         }
@@ -210,7 +216,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanSaveConfiguration))]
     private async Task OnSaveConfigurationAsync()
     {
         if (IsConfigurationLoaded)
