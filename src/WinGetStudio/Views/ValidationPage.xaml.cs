@@ -17,7 +17,6 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
     {
         ViewModel = App.GetService<ValidationViewModel>();
         InitializeComponent();
-        Editor.TextChanged += (s, e) => ViewModel.RawData = Editor.Text ?? string.Empty;
     }
 
     /// <summary>
