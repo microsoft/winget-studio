@@ -6,9 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using Microsoft.Management.Configuration;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WingetStudio.Services.VisualFeedback.Contracts;
@@ -27,7 +25,11 @@ public partial class ApplyFileViewModel : ObservableRecipient
     private readonly IConfigurationManager _manager;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsReadyToCompleted))]
+    [NotifyCanExecuteChangedFor(nameof(DoneCommand))]
     public partial ApplySetViewModel? ApplySet { get; set; }
+
+    public bool IsReadyToCompleted => ApplySet?.IsCompleted ?? false;
 
     public ApplyFileViewModel(
         IConfigurationFrameNavigationService navigationService,
@@ -50,16 +52,15 @@ public partial class ApplyFileViewModel : ObservableRecipient
     [RelayCommand]
     private async Task OnLoadedAsync()
     {
-        var applyState = _manager.ActiveSetApplyState;
-        if (applyState.ActiveApplySet == null)
+        if (CanRestoreState())
         {
-            _logger.LogInformation("Starting to apply configuration set");
-            await ApplyPreviewSetAsync();
+            _logger.LogInformation("Restoring previous apply configuration set state");
+            RestoreState();
         }
         else
         {
-            _logger.LogInformation("Resuming application of configuration set");
-            ApplySet = applyState.ActiveApplySet;
+            _logger.LogInformation("Starting to apply configuration set");
+            await ApplyPreviewSetAsync();
         }
     }
 
@@ -77,9 +78,9 @@ public partial class ApplyFileViewModel : ObservableRecipient
             var dscFile = activeSet.GetLatestDSCFile();
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             ApplySet = new ApplySetViewModel(_localizer, dscSet);
-            _manager.ActiveSetApplyState.ActiveApplySet = ApplySet;
+            CaptureState();
             var applySetTask = _dsc.ApplySetAsync(dscSet);
-            applySetTask.Progress += OnDataChanged;
+            applySetTask.Progress += (_, data) => OnDataChanged(ApplySet, data);
             await applySetTask;
         }
         catch (OpenConfigurationSetException ex)
@@ -103,40 +104,45 @@ public partial class ApplyFileViewModel : ObservableRecipient
         }
     }
 
-    private async void OnDataChanged(object? sender, IDSCSetChangeData data)
+    private async void OnDataChanged(ApplySetViewModel applySet, IDSCSetChangeData data)
     {
-        await _dispatcher.EnqueueAsync(() => OnDataChangedInternal(data));
+        await _dispatcher.EnqueueAsync(() => applySet.OnDataChanged(data));
     }
 
-    private void OnDataChangedInternal(IDSCSetChangeData data)
+    [RelayCommand(CanExecute = nameof(IsReadyToCompleted))]
+    private void OnDone()
     {
-        if (data.Change == ConfigurationSetChangeEventType.UnitStateChanged && data.Unit != null && ApplySet != null)
-        {
-            var unit = ApplySet.Units.FirstOrDefault(u => u.Unit.InstanceId == data.Unit.InstanceId);
-            if (unit != null)
-            {
-                if (data.UnitState == ConfigurationUnitState.InProgress)
-                {
-                    unit.Update(ApplyUnitState.InProgress);
-                }
-                else if (data.UnitState == ConfigurationUnitState.Skipped)
-                {
-                    unit.Update(ApplyUnitState.Skipped, data.ResultInformation);
-                }
-                else if (data.UnitState == ConfigurationUnitState.Completed)
-                {
-                    var state = data.ResultInformation.IsOk ? ApplyUnitState.Succeeded : ApplyUnitState.Failed;
-                    unit.Update(state, data.ResultInformation);
-                }
-            }
-        }
+        ClearState();
+        _navigationService.NavigateToDefaultPage();
     }
 
-    [RelayCommand]
-    private async Task OnDoneAsync()
+    private bool CanRestoreState() => _manager.ActiveSetApplyState.ActiveApplySet != null;
+
+    private void CaptureState()
+    {
+        _manager.ActiveSetApplyState.ActiveApplySet = ApplySet;
+    }
+
+    private void RestoreState()
+    {
+        ApplySet = _manager.ActiveSetApplyState.ActiveApplySet;
+    }
+
+    private void ClearState()
     {
         _manager.ActiveSetApplyState.ActiveApplySet = null;
-        _navigationService.NavigateToDefaultPage();
-        await Task.CompletedTask;
+    }
+
+    partial void OnApplySetChanged(ApplySetViewModel? oldValue, ApplySetViewModel? newValue)
+    {
+        oldValue?.Completed -= OnApplySetCompleted;
+        newValue?.Completed += OnApplySetCompleted;
+    }
+
+    private void OnApplySetCompleted(object? sender, EventArgs e)
+    {
+        // Notify is ready to complete
+        OnPropertyChanged(nameof(IsReadyToCompleted));
+        DoneCommand.NotifyCanExecuteChanged();
     }
 }
