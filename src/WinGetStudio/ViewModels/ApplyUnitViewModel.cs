@@ -16,6 +16,7 @@ public partial class ApplyUnitViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLoading))]
     [NotifyPropertyChangedFor(nameof(IsExpanded))]
+    [NotifyPropertyChangedFor(nameof(IsCompleted))]
     public partial ApplyUnitState State { get; set; }
 
     [ObservableProperty]
@@ -27,6 +28,8 @@ public partial class ApplyUnitViewModel : ObservableObject
     public bool IsLoading => State == ApplyUnitState.InProgress;
 
     public bool IsExpanded => State == ApplyUnitState.Failed || State == ApplyUnitState.Skipped;
+
+    public bool IsCompleted => State == ApplyUnitState.Succeeded || State == ApplyUnitState.Failed || State == ApplyUnitState.Skipped;
 
     public UnitViewModel Unit { get; }
 

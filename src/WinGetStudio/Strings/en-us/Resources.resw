@@ -734,4 +734,7 @@
   <data name="Settings_EditSettings.Text" xml:space="preserve">
     <value>Edit JSON file</value>
   </data>
+  <data name="ApplySet_TotalUnitsCompleted" xml:space="preserve">
+    <value>{0}% Completed</value>
+  </data>
 </root>

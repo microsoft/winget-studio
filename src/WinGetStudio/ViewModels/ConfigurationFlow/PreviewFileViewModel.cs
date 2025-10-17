@@ -37,6 +37,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmptyState))]
     [NotifyPropertyChangedFor(nameof(CanApplyConfiguration))]
+    [NotifyPropertyChangedFor(nameof(CanApplyConfigurationOrViewResult))]
     [NotifyPropertyChangedFor(nameof(CanValidateConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanSaveConfiguration))]
     [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
@@ -59,15 +60,27 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     public bool IsEmptyState => !IsLoading && ConfigurationSet == null;
 
-    public bool CanAddResource => ConfigurationSet != null;
+    public bool CanAddResource => ConfigurationSet != null && !ReadOnlyMode;
 
     public bool CanToggleEditMode => ConfigurationSet != null;
 
     public bool CanApplyConfiguration => ConfigurationSet?.Units.Count > 0;
 
-    public bool CanValidateConfiguration => ConfigurationSet?.Units.Count > 0;
+    public bool CanViewResults => IsApplyInProgress;
+
+    public bool CanApplyConfigurationOrViewResult => CanApplyConfiguration || CanViewResults;
+
+    public bool CanValidateConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
 
     public bool CanSaveConfiguration => ConfigurationSet?.Units.Count > 0;
+
+    public bool CanUpdateUnit => !ReadOnlyMode;
+
+    public ApplySetViewModel? ActiveApplySet => _manager.ActiveSetApplyState.ActiveApplySet;
+
+    public bool IsApplyInProgress => ActiveApplySet != null;
+
+    public bool ReadOnlyMode => IsApplyInProgress;
 
     public PreviewFileViewModel(
         ILogger<PreviewFileViewModel> logger,
@@ -289,14 +302,27 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanViewResults))]
+    private void OnViewResult()
+    {
+        if (IsApplyInProgress)
+        {
+            CaptureState();
+            _configNavigation.NavigateTo<ApplyFileViewModel>();
+        }
+    }
+
     [RelayCommand(CanExecute = nameof(CanApplyConfiguration))]
     private void OnApplyConfiguration()
     {
-        CaptureState();
-        _configNavigation.NavigateTo<ApplyFileViewModel>();
+        if (!IsApplyInProgress)
+        {
+            CaptureState();
+            _configNavigation.NavigateTo<ApplyFileViewModel>();
+        }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanUpdateUnit))]
     private async Task OnUpdateSelectedUnitAsync()
     {
         if (ConfigurationSet != null && SelectedUnit != null)
@@ -374,6 +400,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
         // Notify apply
         OnPropertyChanged(nameof(CanApplyConfiguration));
+        OnPropertyChanged(nameof(CanApplyConfigurationOrViewResult));
         ApplyConfigurationCommand.NotifyCanExecuteChanged();
 
         // Notify save

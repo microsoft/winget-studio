@@ -92,6 +92,8 @@
                 </Hyperlink>
             </TextBlock>
 
+            <Grid></Grid>
+
             <!-- Action buttons -->
             <CommandBar HorizontalAlignment="Left" DefaultLabelPosition="Right">
                 <AppBarButton Icon="Page" x:Uid="PreviewPage_NewConfiguration" Command="{x:Bind ViewModel.NewConfigurationCommand}" />
@@ -110,19 +112,60 @@
                 <AppBarButton Icon="Add" Label="Add resource" Command="{x:Bind ViewModel.AddResourceCommand}" />
                 <AppBarSeparator />
                 <AppBarButton Icon="Accept" Label="Validate" Command="{x:Bind ViewModel.ValidateConfigurationCommand}" />
-                <AppBarButton Icon="Play" Label="Apply" AllowFocusOnInteraction="True" IsEnabled="{x:Bind ViewModel.CanApplyConfiguration, Mode=OneWay}">
+                <AppBarButton Label="Apply" IsEnabled="{x:Bind ViewModel.CanApplyConfigurationOrViewResult, Mode=OneWay}">
+                    <AppBarButton.Icon>
+                        <FontIcon x:Name="PulsingIcon" Glyph="&#xE768;" />
+                    </AppBarButton.Icon>
+
+                    <i:Interaction.Behaviors>
+                        <i:DataTriggerBehavior Binding="{x:Bind ViewModel.IsApplyInProgress}" Value="True">
+                            <i:ControlStoryboardAction>
+                                <i:ControlStoryboardAction.Storyboard>
+                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetName="PulsingIcon"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="1.0"
+                                                         To="0.3"
+                                                         Duration="0:0:1" />
+                                    </Storyboard>
+                                </i:ControlStoryboardAction.Storyboard>
+                            </i:ControlStoryboardAction>
+                        </i:DataTriggerBehavior>
+                    </i:Interaction.Behaviors>
+
                     <AppBarButton.Flyout>
                         <Flyout>
-                            <InfoBar Severity="Warning" IsOpen="True" IsClosable="False" Width="400">
-                                <InfoBar.Message>
-                                    You are responsible for understanding the configuration settings you are choosing to execute. Microsoft is not responsible for the configuration file you have authored or imported. This configuration may change settings in Windows, install software, change software settings (including security settings), and accept user agreements to third-party packages and services on your behalf. By running this configuration file, you acknowledge that you understand and agree to these resources and settings. Any applications installed are licensed to you by their owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages or services.
-                                </InfoBar.Message>
-                                <InfoBar.ActionButton>
-                                    <Button Style="{StaticResource AccentButtonStyle}"
-                                            Content="Apply"
-                                            Command="{x:Bind ViewModel.ApplyConfigurationCommand}" />
-                                </InfoBar.ActionButton>
-                            </InfoBar>
+                            <controls:SwitchPresenter Value="{x:Bind ViewModel.IsApplyInProgress}" TargetType="x:Boolean">
+                                <controls:Case Value="True">
+                                    <Grid Visibility="{x:Bind ViewModel.IsApplyInProgress}" Width="400" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ProgressRing IsIndeterminate="False"
+                                                      Height="{ThemeResource BodyTextBlockFontSize}"
+                                                      Width="{ThemeResource BodyTextBlockFontSize}"
+                                                      Background="{ThemeResource ProgressBarBackgroundThemeBrush}"
+                                                      Value="{x:Bind ViewModel.ActiveApplySet.TotalCompletedUnits, Mode=OneWay}"
+                                                      Maximum="{x:Bind ViewModel.ActiveApplySet.TotalUnits}" />
+                                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{x:Bind ViewModel.ActiveApplySet.Summary, Mode=OneWay}"/>
+                                        <Button Grid.Column="2" Content="View result" Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.ViewResultCommand}" />
+                                    </Grid>
+                                </controls:Case>
+                                <controls:Case Value="False">
+                                    <InfoBar Severity="Warning" IsOpen="True" IsClosable="False" Width="400">
+                                        <InfoBar.Message>
+                                            You are responsible for understanding the configuration settings you are choosing to execute. Microsoft is not responsible for the configuration file you have authored or imported. This configuration may change settings in Windows, install software, change software settings (including security settings), and accept user agreements to third-party packages and services on your behalf. By running this configuration file, you acknowledge that you understand and agree to these resources and settings. Any applications installed are licensed to you by their owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages or services.
+                                        </InfoBar.Message>
+                                        <InfoBar.ActionButton>
+                                            <Button Style="{StaticResource AccentButtonStyle}"
+                                                    Content="Apply"
+                                                    Command="{x:Bind ViewModel.ApplyConfigurationCommand}" />
+                                        </InfoBar.ActionButton>
+                                    </InfoBar>
+                                </controls:Case>
+                            </controls:SwitchPresenter>
                         </Flyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>

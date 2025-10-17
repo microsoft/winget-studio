@@ -12,19 +12,30 @@ namespace WinGetStudio.ViewModels;
 
 public sealed partial class ApplySetViewModel : ObservableObject
 {
+    private readonly ObservableCollection<ApplyUnitViewModel> _units;
+    private readonly IStringLocalizer _localizer;
+
     [ObservableProperty]
     public partial bool IsCompleted { get; set; }
+
+    public int TotalUnits => Units.Count;
+
+    public int TotalCompletedUnits => Units.Count(u => u.IsCompleted);
+
+    public string Summary => _localizer["ApplySet_TotalUnitsCompleted", TotalUnits == 0 ? 0 : (int)((double)TotalCompletedUnits / TotalUnits) * 100];
 
     /// <summary>
     /// Event raised when the apply set is completed.
     /// </summary>
     public event EventHandler? Completed;
 
-    public ObservableCollection<ApplyUnitViewModel> Units { get; }
+    public ReadOnlyObservableCollection<ApplyUnitViewModel> Units { get; }
 
     public ApplySetViewModel(IStringLocalizer localizer, IDSCSet applySet)
     {
-        Units = [..applySet.Units.Select(unit => new ApplyUnitViewModel(localizer, unit))];
+        _localizer = localizer;
+        _units = [.. applySet.Units.Select(unit => new ApplyUnitViewModel(localizer, unit))];
+        Units = new(_units);
     }
 
     /// <summary>
@@ -55,6 +66,10 @@ public sealed partial class ApplySetViewModel : ObservableObject
                     var state = data.ResultInformation.IsOk ? ApplyUnitState.Succeeded : ApplyUnitState.Failed;
                     unit.Update(state, data.ResultInformation);
                 }
+
+                // Notify summary properties
+                OnPropertyChanged(nameof(TotalCompletedUnits));
+                OnPropertyChanged(nameof(Summary));
             }
         }
     }
