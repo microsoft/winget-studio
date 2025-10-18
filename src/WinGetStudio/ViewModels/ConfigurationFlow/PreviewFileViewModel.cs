@@ -36,11 +36,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [NotifyPropertyChangedFor(nameof(CanApplyConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanApplyConfigurationOrViewResult))]
     [NotifyPropertyChangedFor(nameof(CanValidateConfiguration))]
-    [NotifyPropertyChangedFor(nameof(CanSaveConfiguration))]
+    [NotifyPropertyChangedFor(nameof(CanSaveConfigurationAs))]
     [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ToggleEditModeCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SaveConfigurationCommand))]
     public partial SetViewModel? ConfigurationSet { get; set; }
 
     [ObservableProperty]
@@ -86,7 +87,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     public bool CanSaveConfiguration => IsConfigurationLoaded && ConfigurationSet.CanSave && !IsReadOnlyMode;
 
-    public bool CanSaveConfigurationAs => ConfigurationSet?.Units.Count > 0;
+    public bool CanSaveConfigurationAs => IsConfigurationLoaded && !IsReadOnlyMode;
 
     public bool CanOpenConfigurationFile => !IsApplyInProgress;
 
@@ -167,7 +168,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
             finally
             {
                 // After saving as a new file, re-evaluate if saving is possible
-                OnPropertyChanged(nameof(CanSaveConfiguration));
                 SaveConfigurationCommand.NotifyCanExecuteChanged();
                 _ui.HideTaskProgress();
             }
