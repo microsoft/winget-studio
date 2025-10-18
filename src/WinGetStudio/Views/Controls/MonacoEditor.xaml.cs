@@ -20,6 +20,7 @@ public sealed partial class MonacoEditor : UserControl
     private const string SetTextApi = "setText";
     private const string SetThemeApi = "setTheme";
     private const string SetLanguageApi = "setLanguage";
+    private const string SetReadOnlyApi = "setReadOnly";
     private const string ContentChangedApi = "contentChanged";
 
     private const string LightTheme = "vs";
@@ -38,6 +39,7 @@ public sealed partial class MonacoEditor : UserControl
     public static readonly DependencyProperty SyntaxProperty = DependencyProperty.Register(nameof(Syntax), typeof(string), typeof(MonacoEditor), new PropertyMetadata(null, OnSyntaxPropertyChanged));
     public static readonly DependencyProperty UseThrottleProperty = DependencyProperty.Register(nameof(UseThrottle), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(true));
     public static readonly DependencyProperty ThrottleIntervalProperty = DependencyProperty.Register(nameof(ThrottleInterval), typeof(int), typeof(MonacoEditor), new PropertyMetadata(InitialThrottleInterval, OnThrottleIntervalPropertyChanged));
+    public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register(nameof(IsReadOnly), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(false, OnIsReadOnlyPropertyChanged));
 
     private bool _pending;
     private string? _unboundText;
@@ -69,6 +71,12 @@ public sealed partial class MonacoEditor : UserControl
     {
         get => (string?)GetValue(SyntaxProperty);
         set => SetValue(SyntaxProperty, value);
+    }
+
+    public bool IsReadOnly
+    {
+        get => (bool)GetValue(IsReadOnlyProperty);
+        set => SetValue(IsReadOnlyProperty, value);
     }
 
     /// <summary>
@@ -133,6 +141,17 @@ public sealed partial class MonacoEditor : UserControl
     }
 
     /// <summary>
+    /// Handle changes to the IsReadOnly dependency property.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private static void OnIsReadOnlyPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (MonacoEditor)sender;
+        control.SetReadOnly((bool)e.NewValue);
+    }
+
+    /// <summary>
     /// Handle changes to the ThrottleInterval dependency property.
     /// </summary>
     /// <param name="sender">The sender.</param>
@@ -181,7 +200,7 @@ public sealed partial class MonacoEditor : UserControl
             };
 
             // Send the theme change message to the editor
-            var msg = new EditorMessage() { Type = SetThemeApi, Value = theme };
+            var msg = new EditorMessage<string>() { Type = SetThemeApi, Value = theme };
             var json = JsonSerializer.Serialize(msg, _options);
             Editor.CoreWebView2.PostWebMessageAsJson(json);
         }
@@ -195,7 +214,21 @@ public sealed partial class MonacoEditor : UserControl
     {
         if (Editor.CoreWebView2 != null)
         {
-            var msg = new EditorMessage() { Type = SetLanguageApi, Value = language };
+            var msg = new EditorMessage<string>() { Type = SetLanguageApi, Value = language };
+            var json = JsonSerializer.Serialize(msg, _options);
+            Editor.CoreWebView2.PostWebMessageAsJson(json);
+        }
+    }
+
+    /// <summary>
+    /// Set the read-only state of the editor.
+    /// </summary>
+    /// <param name="isReadOnly">True to set read-only, false otherwise.</param>
+    private void SetReadOnly(bool isReadOnly)
+    {
+        if (Editor.CoreWebView2 != null)
+        {
+            var msg = new EditorMessage<bool>() { Type = SetReadOnlyApi, Value = isReadOnly };
             var json = JsonSerializer.Serialize(msg, _options);
             Editor.CoreWebView2.PostWebMessageAsJson(json);
         }
@@ -269,6 +302,7 @@ public sealed partial class MonacoEditor : UserControl
     {
         SetTheme(_themeSettings.Theme);
         SetLanguage(Syntax);
+        SetReadOnly(IsReadOnly);
         SetIsLoading(false);
         SetEditorText(Text);
         Editor.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
@@ -314,7 +348,7 @@ public sealed partial class MonacoEditor : UserControl
     {
         try
         {
-            var message = JsonSerializer.Deserialize<EditorMessage>(args.WebMessageAsJson);
+            var message = JsonSerializer.Deserialize<EditorMessage<string>>(args.WebMessageAsJson);
             if (message?.Type == ContentChangedApi)
             {
                 OnEditorContentChanged(message.Value);
@@ -364,7 +398,7 @@ public sealed partial class MonacoEditor : UserControl
     {
         if (Editor.CoreWebView2 != null)
         {
-            var msg = new EditorMessage() { Type = SetTextApi, Value = text };
+            var msg = new EditorMessage<string>() { Type = SetTextApi, Value = text };
             var json = JsonSerializer.Serialize(msg, _options);
             Editor.CoreWebView2.PostWebMessageAsJson(json);
         }
@@ -423,7 +457,7 @@ public sealed partial class MonacoEditor : UserControl
     /// <summary>
     /// Represents a message from the web content to the host application.
     /// </summary>
-    private sealed partial class EditorMessage
+    private sealed partial class EditorMessage<T>
     {
         public const string TypePropertyName = "type";
         public const string ValuePropertyName = "value";
@@ -432,6 +466,6 @@ public sealed partial class MonacoEditor : UserControl
         public string? Type { get; set; }
 
         [JsonPropertyName(ValuePropertyName)]
-        public string? Value { get; set; }
+        public T? Value { get; set; }
     }
 }

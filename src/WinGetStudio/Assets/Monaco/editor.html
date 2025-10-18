@@ -34,6 +34,27 @@
                 window.chrome.webview.postMessage(contentChangedMsg);
             });
 
+            // Handle messages from the host
+            if (window.chrome?.webview) {
+                window.chrome.webview.addEventListener('message', e => {
+                    const msg = e.data || {};
+                    switch (msg.type) {
+                        case 'setText':
+                            editor.setValue(msg.value || '');
+                            break;
+                        case 'setLanguage':
+                            monaco.editor.setModelLanguage(editor.getModel(), msg.value || 'plaintext');
+                            break;
+                        case 'setTheme':
+                            monaco.editor.setTheme(msg.value || 'vs-dark');
+                            break;
+                        case 'setReadOnly':
+                            editor.updateOptions({ readOnly: msg.value || false });
+                            break;
+                    }
+                });
+            }
+
             // Focus the editor when the window loads
             editor.focus();
         });
@@ -49,24 +70,7 @@
         }
         });
 
-        // Handle messages from the host
-        if (window.chrome?.webview) {
-            window.chrome.webview.addEventListener('message', e => {
-                const msg = e.data || {};
-                switch (msg.type) {
-                    case 'setText':
-                        editor?.setValue(msg.value || '');
-                        break;
-                    case 'setLanguage':
-                        monaco.editor.setModelLanguage(editor.getModel(), msg.value || 'plaintext');
-                        break;
-                    case 'setTheme':
-                        monaco.editor.setTheme(msg.value || 'vs-dark');
-                        break;
-                }
-            });
-        }
-
+        // Helper function to create editor messages
         function NewEditorMessage(type, value) {
             return { type: type, value: value };
         }
