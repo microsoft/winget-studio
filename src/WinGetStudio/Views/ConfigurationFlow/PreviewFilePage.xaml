@@ -498,12 +498,9 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox x:Uid="PreviewPage_ModuleHeader"
-                                             Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}"
-                                             Height="Auto" />
+                                    <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}" />
                                     <ComboBox ItemsSource="{x:Bind ViewModel.SecurityContexts}"
                                               SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
-                                              Header="Security Context"
                                               Grid.Column="1"
                                               DisplayMemberPath="Name"/>
                                 </Grid>

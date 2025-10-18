@@ -123,6 +123,7 @@ public partial class App : Application
                 services.AddTransient<NotificationPaneViewModel>();
                 services.AddTransient<LoadingProgressBarViewModel>();
                 services.AddTransient<ResourceExplorerViewModel>();
+                services.AddTransient<ResourceAutoSuggestBoxViewModel>();
 
                 // Factories
                 services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));

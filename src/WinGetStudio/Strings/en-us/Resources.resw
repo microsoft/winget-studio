@@ -509,9 +509,6 @@
   <data name="ValidationPage_TestButton.Content" xml:space="preserve">
     <value>Test</value>
   </data>
-  <data name="PreviewPage_ModuleHeader.Header" xml:space="preserve">
-    <value>Resource full name</value>
-  </data>
   <data name="PreviewPage_DescriptionHeader.Header" xml:space="preserve">
     <value>Description</value>
   </data>
