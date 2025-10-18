@@ -11,6 +11,8 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 public sealed partial class DSCPropertySet : Dictionary<string, object>
 {
     private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
+    private static readonly ISerializer _yamlSerializer = new SerializerBuilder().DisableAliases().WithQuotingNecessaryStrings().Build();
+    private static readonly IDeserializer _yamlDeserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
 
     public DSCPropertySet()
         : this(null)
@@ -34,13 +36,7 @@ public sealed partial class DSCPropertySet : Dictionary<string, object>
 
     public string ToJson() => JsonSerializer.Serialize(this, _jsonOptions);
 
-    public string ToYaml() => new SerializerBuilder()
-        .WithQuotingNecessaryStrings()
-        .Build()
-        .Serialize(this);
+    public string ToYaml() => _yamlSerializer.Serialize(this);
 
-    public static DSCPropertySet FromYaml(string input) => new DeserializerBuilder()
-        .WithAttemptingUnquotedStringTypeDeserialization()
-        .Build()
-        .Deserialize<DSCPropertySet>(input);
+    public static DSCPropertySet FromYaml(string input) => _yamlDeserializer.Deserialize<DSCPropertySet>(input);
 }

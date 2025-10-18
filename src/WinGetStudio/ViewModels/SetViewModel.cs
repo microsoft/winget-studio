@@ -45,16 +45,26 @@ public sealed partial class SetViewModel : ObservableObject
         Units = new(_units);
     }
 
-    public void Use(IDSCSet dscSet, IDSCFile dscFile)
+    public async Task UseAsync(IDSCSet dscSet, IDSCFile dscFile)
     {
         Debug.Assert(Units.Count == 0, "Units collection should be empty when initializing from a DSC set.");
         OriginalDscFile = dscFile;
 
         // Update units and code.
         Code = dscFile?.Content;
-        foreach (var unit in dscSet?.Units ?? [])
+
+        var units = dscSet?.Units ?? [];
+        var tasks = units.Select(async unit =>
         {
-            _units.Add(new(unit));
+            UnitViewModel vm = new();
+            await vm.CopyFromAsync(unit);
+            return vm;
+        });
+
+        var result = await Task.WhenAll(tasks);
+        foreach (var unit in result)
+        {
+            _units.Add(unit);
         }
 
         // Resolve dependencies between units.
@@ -78,7 +88,7 @@ public sealed partial class SetViewModel : ObservableObject
     public async Task UpdateAsync(UnitViewModel original, UnitViewModel updated)
     {
         updated.Validate();
-        original.CopyFrom(updated);
+        await original.CopyFromAsync(updated);
         await UpdateConfigurationCodeAsync();
     }
 

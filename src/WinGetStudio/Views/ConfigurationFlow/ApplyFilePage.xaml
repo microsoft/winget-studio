@@ -59,7 +59,7 @@
                                             <FontIcon Glyph="&#xF138;" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                         </controls:Case>
                                     </controls:SwitchPresenter>
-                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Unit.Title}" />
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Title}" />
                                 </StackPanel>
                             </Expander.Header>
                             <Expander.Content>

@@ -23,6 +23,9 @@ public static class ConfigurationExtensions
     private const string SecurityContextMetadataKey = "securityContext";
     private const string DSCv3MetadataValue = "dscv3";
 
+    private static readonly ISerializer _yamlSerializer = new SerializerBuilder().DisableAliases().WithQuotingNecessaryStrings().Build();
+    private static readonly IDeserializer _yamlDeserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
+
     /// <summary>
     /// Adds WinGet metadata to the configuration.
     /// </summary>
@@ -120,17 +123,10 @@ public static class ConfigurationExtensions
     private static string ConfigurationToYaml(string json)
     {
         // Parse JSON as YAML (JSON is a subset of YAML)
-        var intermediate = new DeserializerBuilder()
-            .WithAttemptingUnquotedStringTypeDeserialization()
-            .Build()
-            .Deserialize<object>(json);
+        var intermediate = _yamlDeserializer.Deserialize<object>(json);
 
         // Serialize as YAML
-        return new SerializerBuilder()
-            .WithQuotingNecessaryStrings()
-            .DisableAliases()
-            .Build()
-            .Serialize(intermediate);
+        return _yamlSerializer.Serialize(intermediate);
     }
 
     /// <summary>

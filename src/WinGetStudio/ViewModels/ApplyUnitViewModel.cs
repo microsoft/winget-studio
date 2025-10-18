@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Localization;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Models;
 
@@ -31,11 +30,13 @@ public partial class ApplyUnitViewModel : ObservableObject
 
     public bool IsCompleted => State == ApplyUnitState.Succeeded || State == ApplyUnitState.Failed || State == ApplyUnitState.Skipped;
 
-    public UnitViewModel Unit { get; }
+    public IDSCUnit Unit { get; }
+
+    public string Title => Unit.ModuleName == string.Empty ? Unit.Type : $"{Unit.ModuleName}/{Unit.Type}";
 
     public ApplyUnitViewModel(IStringLocalizer localizer, IDSCUnit unit)
     {
-        Unit = new(unit);
+        Unit = unit;
         _localizer = localizer;
         Update(ApplyUnitState.NotStarted);
     }
@@ -53,7 +54,7 @@ public partial class ApplyUnitViewModel : ObservableObject
         }
         else if (State == ApplyUnitState.Failed && resultInformation != null)
         {
-            Message = ApplyConfigurationSetException.GetUnitErrorMessage(_localizer, Unit.Unit, resultInformation);
+            Message = ApplyConfigurationSetException.GetUnitErrorMessage(_localizer, Unit, resultInformation);
             Description = ApplyConfigurationSetException.GetErrorDescription(resultInformation);
         }
         else if (State == ApplyUnitState.Skipped && resultInformation != null)

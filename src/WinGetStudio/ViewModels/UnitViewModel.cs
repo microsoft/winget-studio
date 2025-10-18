@@ -77,26 +77,6 @@ public partial class UnitViewModel : ObservableObject
         Metadata = [];
     }
 
-    public UnitViewModel(UnitViewModel source)
-    {
-        CopyFrom(source);
-    }
-
-    public UnitViewModel(IDSCUnit unit)
-    {
-        Unit = unit;
-        Id = unit.Id;
-        InstanceId = unit.InstanceId;
-        Title = GetTitle(unit);
-        Description = unit.Description;
-        SelectedSecurityContext = UnitSecurityContext.FromEnum(unit.SecurityContext);
-        Intent = unit.Intent;
-        Dependencies = [..unit.Dependencies.Select(id => new UnitViewModel() { Id = id })];
-        Settings = unit.Settings.DeepCopy();
-        SettingsText = unit.Settings.ToYaml();
-        Metadata = unit.Metadata.DeepCopy();
-    }
-
     private string GetTitle(IDSCUnit unit)
     {
         return unit.ModuleName == string.Empty ? unit.Type : $"{unit.ModuleName}/{unit.Type}";
@@ -180,7 +160,7 @@ public partial class UnitViewModel : ObservableObject
     /// Copies the properties from another instance.
     /// </summary>
     /// <param name="source">The source instance.</param>
-    public void CopyFrom(UnitViewModel source)
+    public async Task CopyFromAsync(UnitViewModel source)
     {
         Unit = source.Unit;
         Id = source.Id;
@@ -190,11 +170,34 @@ public partial class UnitViewModel : ObservableObject
         SelectedSecurityContext = source.SelectedSecurityContext;
         Intent = source.Intent;
         Dependencies = source.Dependencies?.ToList();
-        Metadata = source.Metadata?.DeepCopy();
         SettingsText = source.SettingsText;
 
         // Re-parse the settings text to ensure we have an up-to-date object.
-        Settings = string.IsNullOrEmpty(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText);
+        (Metadata, Settings) = await Task.Run(() =>
+        {
+            var m = source.Metadata?.DeepCopy();
+            var s = string.IsNullOrEmpty(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText);
+            return (m, s);
+        });
+    }
+
+    public async Task CopyFromAsync(IDSCUnit unit)
+    {
+        Unit = unit;
+        Id = unit.Id;
+        InstanceId = unit.InstanceId;
+        Title = GetTitle(unit);
+        Description = unit.Description;
+        SelectedSecurityContext = UnitSecurityContext.FromEnum(unit.SecurityContext);
+        Intent = unit.Intent;
+        Dependencies = [..unit.Dependencies.Select(id => new UnitViewModel() { Id = id })];
+        (Settings, SettingsText, Metadata) = await Task.Run(() =>
+        {
+            var m = unit.Metadata.DeepCopy();
+            var s = unit.Settings.DeepCopy();
+            var st = s.ToYaml();
+            return (s, st, m);
+        });
     }
 
     public void ResolveDependencies(SetViewModel dscSet)
@@ -224,7 +227,12 @@ public partial class UnitViewModel : ObservableObject
     /// Creates a clone of this instance.
     /// </summary>
     /// <returns>A copy of this instance.</returns>
-    public UnitViewModel Clone() => new(this);
+    public async Task<UnitViewModel> CloneAsync()
+    {
+        var clone = new UnitViewModel();
+        await clone.CopyFromAsync(this);
+        return clone;
+    }
 
     [RelayCommand]
     private async Task OnLoadedAsync() => await LoadDetailsAsync();

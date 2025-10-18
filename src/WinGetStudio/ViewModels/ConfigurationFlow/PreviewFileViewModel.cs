@@ -128,7 +128,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             ConfigurationSet = new SetViewModel(_logger);
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-            ConfigurationSet.Use(dscSet, dscFile);
+            await ConfigurationSet.UseAsync(dscSet, dscFile);
             _dsc.GetConfigurationUnitDetails(dscSet);
         }
         catch (OpenConfigurationSetException ex)
@@ -241,22 +241,22 @@ public partial class PreviewFileViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void OnValidateUnit(UnitViewModel unit)
+    private async Task OnValidateUnitAsync(UnitViewModel unit)
     {
         if (IsConfigurationLoaded && unit != null)
         {
             _logger.LogInformation($"Validating unit {unit.Title}");
-            var unitClone = unit.Clone();
+            var unitClone = await unit.CloneAsync();
             var param = new ValidateUnitNavigationContext(unitClone);
             _appNavigation.NavigateTo<ValidationViewModel>(param);
         }
     }
 
     [RelayCommand]
-    private void OnEditUnit(UnitViewModel unit)
+    private async Task OnEditUnit(UnitViewModel unit)
     {
         _logger.LogInformation($"Editing unit {unit.Title}");
-        EditUnit(unit);
+        await EditUnitAsync(unit);
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteUnit))]
@@ -419,10 +419,11 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _logger.LogInformation($"Toggling code view to {(IsCodeView ? "ON" : "OFF")}");
     }
 
-    private void EditUnit(UnitViewModel unit)
+    private async Task EditUnitAsync(UnitViewModel unit)
     {
         IsEditMode = true;
-        SelectedUnit = new(unit, unit.Clone());
+        var unitClone = await unit.CloneAsync();
+        SelectedUnit = new(unit, unitClone);
     }
 
     private async Task AddResourceAsync()
@@ -431,7 +432,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             var unit = new UnitViewModel() { Title = "Module/Resource" };
             await ConfigurationSet.AddAsync(unit);
-            EditUnit(unit);
+            await EditUnitAsync(unit);
         }
     }
 
