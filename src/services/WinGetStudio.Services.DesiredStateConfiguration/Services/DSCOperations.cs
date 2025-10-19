@@ -68,6 +68,26 @@ internal sealed class DSCOperations : IDSCOperations
         });
     }
 
+    /// <inheritdoc/>
+    public IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet)
+    {
+        if (inputSet is not DSCSet dscSet)
+        {
+            throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
+        }
+
+        return AsyncInfo.Run<IDSCTestSetResult, IDSCTestUnitResult>(async (cancellationToken, progress) =>
+        {
+            _logger.LogInformation("Starting to test configuration set");
+            var task = dscSet.Processor.TestSetAsync(dscSet.ConfigSet);
+            task.Progress += (sender, args) => progress.Report(new DSCTestUnitResult(args));
+            var outOfProcResult = await task;
+            var result = new DSCTestSetResult(outOfProcResult);
+            _logger.LogInformation($"Test configuration finished with result: {result.TestResult}");
+            return result;
+        });
+    }
+
     /// <inheritdoc />
     public void GetConfigurationUnitDetails(IDSCSet inputSet)
     {

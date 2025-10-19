@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Management.Configuration;
 using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
@@ -339,6 +340,44 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 var title = ex.GetSetErrorMessage(_localizer);
                 var message = ex.GetUnitsSummaryMessage(_localizer);
                 _ui.ShowTimedNotification(title, message, NotificationMessageSeverity.Error);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Unknown error while validating configuration code");
+                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
+            }
+            finally
+            {
+                _ui.HideTaskProgress();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task OnTestConfigurationAsync()
+    {
+        if (IsConfigurationLoaded)
+        {
+            try
+            {
+                _ui.ShowTaskProgress();
+                _logger.LogInformation($"Testing configuration code");
+                var dscFile = ConfigurationSet.GetLatestDSCFile();
+                var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+                var result = await _dsc.TestSetAsync(dscSet);
+                if (result.TestResult == ConfigurationTestResult.Positive)
+                {
+                    _ui.ShowTimedNotification(_localizer["Notification_MachineInDesiredState"], NotificationMessageSeverity.Success);
+                }
+                else
+                {
+                    _ui.ShowTimedNotification(_localizer["Notification_MachineNotInDesiredState"], NotificationMessageSeverity.Error);
+                }
+            }
+            catch (OpenConfigurationSetException ex)
+            {
+                _logger.LogError(ex, $"Opening configuration set failed during validation");
+                _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
             }
             catch (Exception ex)
             {

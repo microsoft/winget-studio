@@ -25,6 +25,9 @@ public interface IDSC
     /// <inheritdoc cref="IDSCOperations.ApplySetAsync" />
     public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet dscSet);
 
+    /// <inheritdoc cref="IDSCOperations.TestSetAsync" />
+    public IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet);
+
     /// <inheritdoc cref="IDSCOperations.GetConfigurationUnitDetails" />
     public void GetConfigurationUnitDetails(IDSCSet dscSet);
 

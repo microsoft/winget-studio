@@ -23,7 +23,6 @@ public delegate ValidationViewModel ValidationViewModelFactory();
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IDSC _dsc;
-    private readonly IDSCExplorer _dscExplorer;
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
     private readonly ILogger<ValidationViewModel> _logger;
@@ -45,13 +44,11 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     public ValidationViewModel(
         IDSC dsc,
-        IDSCExplorer dscExplorer,
         IUIFeedbackService ui,
         IStringLocalizer<ValidationViewModel> localizer,
         ILogger<ValidationViewModel> logger)
     {
         _dsc = dsc;
-        _dscExplorer = dscExplorer;
         _ui = ui;
         _localizer = localizer;
         _logger = logger;

@@ -101,6 +101,11 @@
                 <AppBarButton Icon="Add" Label="Add resource" Command="{x:Bind ViewModel.AddResourceCommand}" />
                 <AppBarSeparator />
                 <AppBarButton Icon="Accept" Label="Validate" Command="{x:Bind ViewModel.ValidateConfigurationCommand}" />
+                <AppBarButton Label="Test" Command="{x:Bind ViewModel.TestConfigurationCommand}">
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xEC77;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
                 <AppBarButton Label="Apply" IsEnabled="{x:Bind ViewModel.CanApplyConfigurationOrViewResult, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon x:Name="PulsingIcon" Glyph="&#xE768;" />

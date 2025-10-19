@@ -32,6 +32,13 @@ internal interface IDSCOperations
     public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet set);
 
     /// <summary>
+    /// Test a DSC configuration set
+    /// </summary>
+    /// <param name="inputSet">Configuration set to test</param>
+    /// <returns>Result of testing the configuration</returns>
+    public IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet);
+
+    /// <summary>
     /// Get details of configuration units in a set
     /// </summary>
     /// <param name="set">Configuration set to get details for</param>
