@@ -37,9 +37,11 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [NotifyPropertyChangedFor(nameof(CanApplyConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanApplyConfigurationOrViewResult))]
     [NotifyPropertyChangedFor(nameof(CanValidateConfiguration))]
+    [NotifyPropertyChangedFor(nameof(CanTestConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanSaveConfigurationAs))]
     [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
+    [NotifyCanExecuteChangedFor(nameof(TestConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ValidateConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(ToggleEditModeCommand))]
     [NotifyCanExecuteChangedFor(nameof(SaveConfigurationCommand))]
@@ -83,6 +85,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool CanViewResults => IsApplyInProgress;
 
     public bool CanApplyConfigurationOrViewResult => CanApplyConfiguration || CanViewResults;
+
+    public bool CanTestConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
 
     public bool CanValidateConfiguration => ConfigurationSet?.Units.Count > 0 && !IsApplyInProgress;
 
@@ -353,7 +357,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanTestConfiguration))]
     private async Task OnTestConfigurationAsync()
     {
         if (IsConfigurationLoaded)
@@ -486,6 +490,10 @@ public partial class PreviewFileViewModel : ObservableRecipient
         // Notify validation
         OnPropertyChanged(nameof(CanValidateConfiguration));
         ValidateConfigurationCommand.NotifyCanExecuteChanged();
+
+        // Notify test
+        OnPropertyChanged(nameof(CanTestConfiguration));
+        TestConfigurationCommand.NotifyCanExecuteChanged();
 
         // Notify apply
         OnPropertyChanged(nameof(CanApplyConfiguration));
