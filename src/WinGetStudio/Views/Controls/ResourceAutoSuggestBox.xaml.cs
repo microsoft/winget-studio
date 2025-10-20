@@ -11,6 +11,7 @@ namespace WinGetStudio.Views.Controls;
 public sealed partial class ResourceAutoSuggestBox : UserControl
 {
     public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(ResourceAutoSuggestBox), new PropertyMetadata(null));
+    public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(nameof(Header), typeof(string), typeof(ResourceAutoSuggestBox), new PropertyMetadata(null));
 
     public ResourceAutoSuggestBoxViewModel ViewModel { get; }
 
@@ -18,6 +19,12 @@ public sealed partial class ResourceAutoSuggestBox : UserControl
     {
         get => (string)GetValue(TextProperty);
         set => SetValue(TextProperty, value);
+    }
+
+    public string Header
+    {
+        get => (string)GetValue(HeaderProperty);
+        set => SetValue(HeaderProperty, value);
     }
 
     public ResourceAutoSuggestBox()

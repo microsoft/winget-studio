@@ -503,8 +503,9 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
-                                    <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}" />
-                                    <ComboBox ItemsSource="{x:Bind ViewModel.SecurityContexts}"
+                                    <localControls:ResourceAutoSuggestBox Header="Resource type" Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}" />
+                                    <ComboBox Header="Security context"
+                                              ItemsSource="{x:Bind ViewModel.SecurityContexts}"
                                               SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
                                               Grid.Column="1"
                                               DisplayMemberPath="Name"/>

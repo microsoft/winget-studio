@@ -30,6 +30,7 @@
         </Grid.ColumnDefinitions>
 
         <AutoSuggestBox x:Uid="ValidationPage_ModuleInput"
+                        Header="{x:Bind Header, Mode=OneWay}"
                         Text="{x:Bind Text, Mode=TwoWay}"
                         TextMemberPath="SearchText"
                         ItemsSource="{x:Bind ViewModel.SelectedSuggestions, Mode=OneWay}">
@@ -110,11 +111,11 @@
             </AutoSuggestBox.ItemTemplate>
         </AutoSuggestBox>
         <!-- Action buttons-->
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-            <Button VerticalAlignment="Stretch" Click="ExploreResource_Click">
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
+            <Button Click="ExploreResource_Click" VerticalAlignment="Stretch" Padding="8">
                 <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE946;" />
             </Button>
-            <Button VerticalAlignment="Stretch" Command="{x:Bind ViewModel.ReloadCommand}">
+            <Button  Command="{x:Bind ViewModel.ReloadCommand}" Padding="8">
                 <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE72C;" />
             </Button>
         </StackPanel>
