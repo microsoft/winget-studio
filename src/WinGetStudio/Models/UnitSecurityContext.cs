@@ -12,6 +12,9 @@ public sealed partial class UnitSecurityContext
     /// </summary>
     public static IReadOnlyList<UnitSecurityContext> All { get; } = [..Enum.GetValues<SecurityContext>().Select(c => new UnitSecurityContext(c.ToString(), c))];
 
+    /// <summary>
+    /// Gets the default security context.
+    /// </summary>
     public static UnitSecurityContext Default => FromEnum(SecurityContext.Current);
 
     /// <summary>

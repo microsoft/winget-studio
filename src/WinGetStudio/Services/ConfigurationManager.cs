@@ -8,8 +8,10 @@ namespace WinGetStudio.Services;
 
 internal sealed partial class ConfigurationManager : IConfigurationManager
 {
+    /// <inheritdoc/>
     public SetPreviewState ActiveSetPreviewState { get; set; }
 
+    /// <inheritdoc/>
     public SetApplyState ActiveSetApplyState { get; set; }
 
     public ConfigurationManager()

@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <WinGetConfigSchema Include="$(ProjectDir)\Schemas\configuration.schema.0.2.json" ClassName="ConfigurationV2" />
     <WinGetConfigSchema Include="$(ProjectDir)\Schemas\configuration.schema.2023.08.json" ClassName="ConfigurationV3" />
   </ItemGroup>
 
