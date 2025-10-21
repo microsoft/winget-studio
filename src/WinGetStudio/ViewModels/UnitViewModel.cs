@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Localization;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
@@ -16,6 +17,8 @@ namespace WinGetStudio.ViewModels;
 
 public partial class UnitViewModel : ObservableObject
 {
+    private readonly IStringLocalizer _localizer;
+
     public IDSCUnit? Unit { get; set; }
 
     public string IdOrDefault => string.IsNullOrWhiteSpace(Id) ? DefaultId : Id;
@@ -69,8 +72,9 @@ public partial class UnitViewModel : ObservableObject
 
     public IList<KeyValuePair<string, object>>? MetadataList => Metadata?.ToList();
 
-    public UnitViewModel()
+    public UnitViewModel(IStringLocalizer localizer)
     {
+        _localizer = localizer;
         SelectedSecurityContext = UnitSecurityContext.Default;
         Dependencies = [];
         Settings = [];
@@ -86,7 +90,12 @@ public partial class UnitViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(Title))
         {
-            throw new DSCUnitValidationException("Title cannot be null or empty when creating configuration.");
+            throw new DSCUnitValidationException(_localizer["Unit_TitleCannotBeNullOrEmpty"]);
+        }
+
+        if (!string.IsNullOrEmpty(SettingsText))
+        {
+            DSCPropertySet.FromYaml(SettingsText);
         }
     }
 
@@ -190,7 +199,7 @@ public partial class UnitViewModel : ObservableObject
         Description = unit.Description;
         SelectedSecurityContext = UnitSecurityContext.FromEnum(unit.SecurityContext);
         Intent = unit.Intent;
-        Dependencies = [..unit.Dependencies.Select(id => new UnitViewModel() { Id = id })];
+        Dependencies = [..unit.Dependencies.Select(id => new UnitViewModel(_localizer) { Id = id })];
         (Settings, SettingsText, Metadata) = await Task.Run(() =>
         {
             var m = unit.Metadata.DeepCopy();
@@ -229,7 +238,7 @@ public partial class UnitViewModel : ObservableObject
     /// <returns>A copy of this instance.</returns>
     public async Task<UnitViewModel> CloneAsync()
     {
-        var clone = new UnitViewModel();
+        var clone = new UnitViewModel(_localizer);
         await clone.CopyFromAsync(this);
         return clone;
     }

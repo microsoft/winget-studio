@@ -536,6 +536,30 @@
   <data name="PreviewPage_OpenConfiguration.Label" xml:space="preserve">
     <value>Open configuration</value>
   </data>
+  <data name="PreviewPage_Code.Label" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="PreviewPage_Edit.Label" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="PreviewPage_AddResource.Label" xml:space="preserve">
+    <value>Add resource</value>
+  </data>
+  <data name="PreviewPage_Validate.Label" xml:space="preserve">
+    <value>Validate</value>
+  </data>
+  <data name="PreviewPage_Apply.Label" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="PreviewPage_Test.Label" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="PreviewPage_Save.Label" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="PreviewPage_SaveAs.Label" xml:space="preserve">
+    <value>Save As</value>
+  </data>
   <data name="PreviewPage_FilePicker_ConfigurationFiles" xml:space="preserve">
     <value>Configuration files</value>
   </data>
@@ -710,4 +734,67 @@
   <data name="ApplySet_TotalUnitsCompleted" xml:space="preserve">
     <value>{0}% Completed</value>
   </data>
-</root>
+  <data name="Unit_TitleCannotBeNullOrEmpty" xml:space="preserve">
+    <value>Title cannot be null or empty when creating configuration.</value>
+  </data>
+  <data name="File_PathCannotBeNullOrEmpty" xml:space="preserve">
+    <value>Cannot save a file without a valid file path.</value>
+  </data>
+  <data name="PreviewFile_SavedSuccessfully" xml:space="preserve">
+    <value>Configuration saved successfully</value>
+  </data>
+  <data name="PreviewFile_SaveFailed" xml:space="preserve">
+    <value>Failed to save configuration: {0}</value>
+  </data>
+  <data name="PreviewFile_CreateNewConfigurationFailed" xml:space="preserve">
+    <value>Creating new configuration set failed: {0}</value>
+  </data>
+  <data name="PreviewFile_SaveSuccessfulMessage" xml:space="preserve">
+    <value>Configuration saved successfully</value>
+  </data>
+  <data name="PreviewFile_SaveFailedMessage" xml:space="preserve">
+    <value>Saving configuration set failed: {0}</value>
+  </data>
+  <data name="PreviewFile_DeleteSuccessfulMessage" xml:space="preserve">
+    <value>Configuration unit deleted</value>
+  </data>
+  <data name="PreviewFile_DeleteFailedMessage" xml:space="preserve">
+    <value>Deleting configuration unit failed: {0}</value>
+  </data>
+  <data name="PreviewFile_AddResourceFailedMessage" xml:space="preserve">
+    <value>Adding new resource failed: {0}</value>
+  </data>
+  <data name="PreviewFile_ValidationSuccessfulMessage" xml:space="preserve">
+    <value>Configuration code is valid</value>
+  </data>
+  <data name="PreviewFile_ValidationFailedMessage" xml:space="preserve">
+    <value>Configuration unit updated</value>
+  </data>
+  <data name="PreviewFile_UpdateFailedMessage" xml:space="preserve">
+    <value>Updating configuration unit failed: {0}</value>
+  </data>
+  <data name="PreviewFile_ViewResultButton.Content" xml:space="preserve">
+    <value>View result</value>
+  </data>
+  <data name="PreviewFile_ApplyButton.Content" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="PreviewFile_DependenciesButton.Content" xml:space="preserve">
+    <value>Dependencies</value>
+  </data>
+  <data name="ApplyFile_DoneButton.Content" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ApplyFile_BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="PreviewFile_ResourceAutoSuggestBox.Header" xml:space="preserve">
+    <value>Resource type</value>
+  </data>
+  <data name="PreviewFile_SecurityContenxtComboBox.Header" xml:space="preserve">
+    <value>Security context</value>
+  </data>
+  <data name="PreviewFile_ResourceNameTextBox.Header" xml:space="preserve">
+    <value>Resource name</value>
+  </data>
+ </root>

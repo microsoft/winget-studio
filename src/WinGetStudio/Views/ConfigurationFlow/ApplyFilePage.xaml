@@ -104,8 +104,8 @@
             </ItemsRepeater>
         </ScrollView>
         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-            <Button Content="Back" MinWidth="120" Command="{x:Bind ViewModel.BackCommand}" />
-            <Button Content="Done" Style="{ThemeResource AccentButtonStyle}" MinWidth="120" Command="{x:Bind ViewModel.DoneCommand}" />
+            <Button x:Uid="ApplyFile_BackButton" MinWidth="120" Command="{x:Bind ViewModel.BackCommand}" />
+            <Button x:Uid="ApplyFile_DoneButton" Style="{ThemeResource AccentButtonStyle}" MinWidth="120" Command="{x:Bind ViewModel.DoneCommand}" />
         </StackPanel>
     </Grid>
 </Page>

@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -26,6 +27,7 @@ public interface IDSCFile
     /// <summary>
     /// Save the configuration file to disk.
     /// </summary>
+    /// <param name="localizer">The string localizer.</param>
     /// <exception cref="InvalidDataException">Thrown if the file is virtual and cannot be saved.</exception>
-    public Task SaveAsync();
+    public Task SaveAsync(IStringLocalizer localizer);
 }

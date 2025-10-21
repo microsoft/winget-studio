@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -67,11 +68,11 @@ public sealed class DSCFile : IDSCFile
     }
 
     /// <inheritdoc/>
-    public async Task SaveAsync()
+    public async Task SaveAsync(IStringLocalizer localizer)
     {
         if (FileInfo == null)
         {
-            throw new InvalidDataException("Cannot save a file without a valid file path.");
+            throw new InvalidDataException(localizer["File_PathCannotBeNullOrEmpty"]);
         }
 
         await File.WriteAllTextAsync(FileInfo.FullName, Content);

@@ -165,7 +165,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// <returns>The created DSC unit.</returns>
     private async Task<IDSCUnit> CreateUnitAsync()
     {
-        var unit = new UnitViewModel
+        var unit = new UnitViewModel(_localizer)
         {
             Title = SearchResourceText ?? string.Empty,
             Settings = DSCPropertySet.FromYaml(SettingsText ?? string.Empty),

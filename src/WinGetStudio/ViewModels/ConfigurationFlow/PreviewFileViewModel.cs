@@ -131,7 +131,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             IsEditMode = false;
             IsConfigurationLoading = true;
             SelectedUnit = null;
-            ConfigurationSet = new SetViewModel(_logger);
+            ConfigurationSet = new SetViewModel(_logger, _localizer);
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             await ConfigurationSet.UseAsync(dscSet, dscFile);
@@ -163,12 +163,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 _ui.ShowTaskProgress();
                 _logger.LogInformation($"Saving configuration set as {filePath}");
                 await ConfigurationSet.SaveAsAsync(filePath);
-                _ui.ShowTimedNotification($"Configuration saved successfully", NotificationMessageSeverity.Success);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_SavedSuccessfully"], NotificationMessageSeverity.Success);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Saving configuration set failed");
-                _ui.ShowTimedNotification($"Saving configuration set failed: {ex.Message}", NotificationMessageSeverity.Error);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_SaveFailed", ex.Message], NotificationMessageSeverity.Error);
             }
             finally
             {
@@ -202,7 +202,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             _ui.ShowTaskProgress();
             _logger.LogInformation($"Creating new configuration set");
             SelectedUnit = null;
-            ConfigurationSet = new SetViewModel(_logger);
+            ConfigurationSet = new SetViewModel(_logger, _localizer);
             await AddResourceAsync();
         }
         catch (DSCUnitValidationException ex)
@@ -213,7 +213,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         catch (Exception ex)
         {
             _logger.LogError(ex, "Creating new configuration set failed");
-            _ui.ShowTimedNotification($"Creating new configuration set failed: {ex.Message}", NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification(_localizer["PreviewFile_CreateNewConfigurationFailed", ex.Message], NotificationMessageSeverity.Error);
         }
         finally
         {
@@ -231,12 +231,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 _ui.ShowTaskProgress();
                 _logger.LogInformation($"Saving configuration set");
                 await ConfigurationSet.SaveAsync();
-                _ui.ShowTimedNotification($"Configuration saved successfully", NotificationMessageSeverity.Success);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_SaveSuccessfulMessage"], NotificationMessageSeverity.Success);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Saving configuration set failed");
-                _ui.ShowTimedNotification($"Saving configuration set failed: {ex.Message}", NotificationMessageSeverity.Error);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_SaveFailedMessage", ex.Message], NotificationMessageSeverity.Error);
             }
             finally
             {
@@ -275,7 +275,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
                 await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
                 SelectedUnit = null;
-                _ui.ShowTimedNotification($"Configuration unit deleted", NotificationMessageSeverity.Success);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_DeleteSuccessfulMessage"], NotificationMessageSeverity.Success);
             }
             catch (DSCUnitValidationException ex)
             {
@@ -285,7 +285,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Deleting configuration unit failed");
-                _ui.ShowTimedNotification($"Deleting configuration unit failed: {ex.Message}", NotificationMessageSeverity.Error);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_DeleteFailedMessage", ex.Message], NotificationMessageSeverity.Error);
             }
             finally
             {
@@ -311,7 +311,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         catch (Exception ex)
         {
             _logger.LogError(ex, "Adding new resource failed");
-            _ui.ShowTimedNotification($"Adding new resource failed: {ex.Message}", NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification(_localizer["PreviewFile_AddResourceFailedMessage", ex.Message], NotificationMessageSeverity.Error);
         }
         finally
         {
@@ -331,7 +331,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 var dscFile = ConfigurationSet.GetLatestDSCFile();
                 var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
                 await _dsc.ValidateSetAsync(dscSet);
-                _ui.ShowTimedNotification($"Configuration code is valid", NotificationMessageSeverity.Success);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_ValidationSuccessfulMessage"], NotificationMessageSeverity.Success);
             }
             catch (OpenConfigurationSetException ex)
             {
@@ -424,7 +424,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 _ui.ShowTaskProgress();
                 _logger.LogInformation($"Updating selected unit {SelectedUnit.Item1.Title}");
                 await ConfigurationSet.UpdateAsync(SelectedUnit.Item1, SelectedUnit.Item2);
-                _ui.ShowTimedNotification($"Configuration unit updated", NotificationMessageSeverity.Success);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_ValidationFailedMessage"], NotificationMessageSeverity.Success);
             }
             catch (DSCUnitValidationException ex)
             {
@@ -434,7 +434,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Updating configuration unit failed");
-                _ui.ShowTimedNotification($"Updating configuration unit failed: {ex.Message}", NotificationMessageSeverity.Error);
+                _ui.ShowTimedNotification(_localizer["PreviewFile_UpdateFailedMessage", ex.Message], NotificationMessageSeverity.Error);
             }
             finally
             {
@@ -473,7 +473,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            var unit = new UnitViewModel() { Title = "Module/Resource" };
+            var unit = new UnitViewModel(_localizer) { Title = "Module/Resource" };
             await ConfigurationSet.AddAsync(unit);
             await EditUnitAsync(unit);
         }

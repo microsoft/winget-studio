@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
@@ -16,6 +17,7 @@ namespace WinGetStudio.ViewModels;
 public sealed partial class SetViewModel : ObservableObject
 {
     private readonly ILogger _logger;
+    private readonly IStringLocalizer _localizer;
     private readonly ObservableCollection<UnitViewModel> _units;
 
     public ReadOnlyObservableCollection<UnitViewModel> Units { get; }
@@ -38,9 +40,10 @@ public sealed partial class SetViewModel : ObservableObject
         remove => _units.CollectionChanged -= value;
     }
 
-    public SetViewModel(ILogger logger)
+    public SetViewModel(ILogger logger, IStringLocalizer localizer)
     {
         _logger = logger;
+        _localizer = localizer;
         _units = [];
         Units = new(_units);
     }
@@ -56,7 +59,7 @@ public sealed partial class SetViewModel : ObservableObject
         var units = dscSet?.Units ?? [];
         var tasks = units.Select(async unit =>
         {
-            UnitViewModel vm = new();
+            UnitViewModel vm = new(_localizer);
             await vm.CopyFromAsync(unit);
             return vm;
         });
@@ -101,13 +104,6 @@ public sealed partial class SetViewModel : ObservableObject
         }
     }
 
-    public async Task UpdateConfigurationCodeAsync()
-    {
-        _logger.LogInformation("Updating configuration code");
-        Code = await GenerateConfigurationCodeAsync();
-        CurrentDscFile = null;
-    }
-
     public IDSCFile GetLatestDSCFile()
     {
         if (CurrentDscFile == null)
@@ -123,6 +119,13 @@ public sealed partial class SetViewModel : ObservableObject
         }
 
         return CurrentDscFile;
+    }
+
+    private async Task UpdateConfigurationCodeAsync()
+    {
+        _logger.LogInformation("Updating configuration code");
+        Code = await GenerateConfigurationCodeAsync();
+        CurrentDscFile = null;
     }
 
     private Task<string> GenerateConfigurationCodeAsync()
@@ -146,14 +149,14 @@ public sealed partial class SetViewModel : ObservableObject
         var dscFile = GetLatestDSCFile();
         if (dscFile.CanSave)
         {
-            await dscFile.SaveAsync();
+            await dscFile.SaveAsync(_localizer);
         }
     }
 
     public async Task SaveAsAsync(string filePath)
     {
         OriginalDscFile = DSCFile.CreateVirtual(filePath, Code);
-        await OriginalDscFile.SaveAsync();
+        await OriginalDscFile.SaveAsync(_localizer);
     }
 
     partial void OnOriginalDscFileChanged(IDSCFile? oldValue, IDSCFile? newValue)

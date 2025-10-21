@@ -4,14 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:helpers="using:WinGetStudio.Helpers"
     xmlns:xaml="using:Microsoft.UI.Xaml"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:ct="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d">
-    <Page.Resources>
-        <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
-    </Page.Resources>
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />

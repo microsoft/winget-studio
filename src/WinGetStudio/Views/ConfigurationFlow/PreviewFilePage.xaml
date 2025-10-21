@@ -87,26 +87,21 @@
             <CommandBar HorizontalAlignment="Left" DefaultLabelPosition="Right">
                 <AppBarButton Icon="Page" x:Uid="PreviewPage_NewConfiguration" Command="{x:Bind ViewModel.NewConfigurationCommand}" />
                 <AppBarButton Icon="OpenFile" x:Uid="PreviewPage_OpenConfiguration" Click="OpenConfigurationFile" IsEnabled="{x:Bind ViewModel.CanOpenConfigurationFile}" />
-                <AppBarToggleButton IsChecked="{x:Bind ViewModel.IsCodeView, Mode=TwoWay}"
-                                    Label="Code"
-                                    Command="{x:Bind ViewModel.ToggleCodeViewCommand}">
+                <AppBarToggleButton IsChecked="{x:Bind ViewModel.IsCodeView, Mode=TwoWay}" x:Uid="PreviewPage_Code" Command="{x:Bind ViewModel.ToggleCodeViewCommand}">
                     <AppBarToggleButton.Icon>
                         <FontIcon Glyph="&#xE943;" />
                     </AppBarToggleButton.Icon>
                 </AppBarToggleButton>
-                <AppBarToggleButton Icon="Edit"
-                                    Label="Edit"
-                                    IsChecked="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}"
-                                    Command="{x:Bind ViewModel.ToggleEditModeCommand}" />
-                <AppBarButton Icon="Add" Label="Add resource" Command="{x:Bind ViewModel.AddResourceCommand}" />
+                <AppBarToggleButton Icon="Edit" x:Uid="PreviewPage_Edit" IsChecked="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}" Command="{x:Bind ViewModel.ToggleEditModeCommand}" />
+                <AppBarButton Icon="Add" x:Uid="PreviewPage_AddResource" Command="{x:Bind ViewModel.AddResourceCommand}" />
                 <AppBarSeparator />
-                <AppBarButton Icon="Accept" Label="Validate" Command="{x:Bind ViewModel.ValidateConfigurationCommand}" />
-                <AppBarButton Label="Test" Command="{x:Bind ViewModel.TestConfigurationCommand}">
+                <AppBarButton Icon="Accept" x:Uid="PreviewPage_Validate" Command="{x:Bind ViewModel.ValidateConfigurationCommand}" />
+                <AppBarButton x:Uid="PreviewPage_Test" Command="{x:Bind ViewModel.TestConfigurationCommand}">
                     <AppBarButton.Icon>
                         <FontIcon Glyph="&#xEC77;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Label="Apply" IsEnabled="{x:Bind ViewModel.CanApplyConfigurationOrViewResult, Mode=OneWay}">
+                <AppBarButton x:Uid="PreviewPage_Apply" IsEnabled="{x:Bind ViewModel.CanApplyConfigurationOrViewResult, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon x:Name="PulsingIcon" Glyph="&#xE768;" />
                     </AppBarButton.Icon>
@@ -144,14 +139,14 @@
                                                       Value="{x:Bind ViewModel.ActiveApplySet.TotalCompletedUnits, Mode=OneWay}"
                                                       Maximum="{x:Bind ViewModel.ActiveApplySet.TotalUnits}" />
                                         <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{x:Bind ViewModel.ActiveApplySet.Summary, Mode=OneWay}"/>
-                                        <Button Grid.Column="2" Content="View result" Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.ViewResultCommand}" />
+                                        <Button Grid.Column="2" x:Uid="PreviewFile_ViewResultButton" Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.ViewResultCommand}" />
                                     </Grid>
                                 </controls:Case>
                                 <controls:Case Value="False">
                                     <InfoBar Severity="Warning" IsOpen="True" IsClosable="False" Width="400" x:Uid="PreviewPage_ApplyInfoBar">
                                         <InfoBar.ActionButton>
                                             <Button Style="{StaticResource AccentButtonStyle}"
-                                                    Content="Apply"
+                                                    x:Uid="PreviewFile_ApplyButton"
                                                     Command="{x:Bind ViewModel.ApplyConfigurationCommand}" />
                                         </InfoBar.ActionButton>
                                     </InfoBar>
@@ -161,8 +156,8 @@
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarSeparator />
-                <AppBarButton Icon="Save" Label="Save" Command="{x:Bind ViewModel.SaveConfigurationCommand}" />
-                <AppBarButton Icon="Save" Label="Save as" Click="SaveConfigurationFileAs" IsEnabled="{x:Bind ViewModel.CanSaveConfigurationAs, Mode=OneWay}" />
+                <AppBarButton Icon="Save" x:Uid="PreviewPage_Save" Command="{x:Bind ViewModel.SaveConfigurationCommand}" />
+                <AppBarButton Icon="Save" x:Uid="PreviewPage_SaveAs" Click="SaveConfigurationFileAs" IsEnabled="{x:Bind ViewModel.CanSaveConfigurationAs, Mode=OneWay}" />
             </CommandBar>
         </StackPanel>
 
@@ -503,8 +498,8 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
-                                    <localControls:ResourceAutoSuggestBox Header="Resource type" Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}" />
-                                    <ComboBox Header="Security context"
+                                    <localControls:ResourceAutoSuggestBox x:Uid="PreviewFile_ResourceAutoSuggestBox" Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}" />
+                                    <ComboBox x:Uid="PreviewFile_SecurityContenxtComboBox"
                                               ItemsSource="{x:Bind ViewModel.SecurityContexts}"
                                               SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
                                               Grid.Column="1"
@@ -517,11 +512,11 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Header="Unique identifier"
+                                    <TextBox x:Uid="PreviewFile_ResourceNameTextBox"
                                              PlaceholderText="{x:Bind ViewModel.SelectedUnit.Item1.DefaultId, Mode=OneWay}"
                                              Text="{x:Bind ViewModel.SelectedUnit.Item2.Id, Mode=TwoWay}"
                                              Height="Auto" />
-                                    <Button Content="Dependencies" Grid.Column="1" VerticalAlignment="Bottom">
+                                    <Button x:Uid="PreviewFile_DependenciesButton" Grid.Column="1" VerticalAlignment="Bottom">
                                         <Button.Flyout>
                                             <Flyout>
                                                 <ListView ItemsSource="{x:Bind ViewModel.ConfigurationSet.Units, Mode=OneWay}"
@@ -542,8 +537,7 @@
                                          Height="Auto" />
 
                                 <!-- Properties -->
-                                <TextBox PlaceholderText="JSON content"
-                                         Grid.Row="3"
+                                <TextBox Grid.Row="3"
                                          Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsText, Mode=TwoWay}"
                                          AcceptsReturn="True" />
                             </Grid>
