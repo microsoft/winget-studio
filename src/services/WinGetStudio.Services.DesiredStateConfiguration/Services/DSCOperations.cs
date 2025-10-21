@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
@@ -87,7 +88,7 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public async Task GetUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -97,10 +98,11 @@ internal sealed class DSCOperations : IDSCOperations
 
         var result = await Task.Run(() => processor.GetUnitSettings(input));
         unit.Settings = result.Settings;
+        return new DSCGetUnitResult(result);
     }
 
     /// <inheritdoc />
-    public async Task SetUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -109,11 +111,11 @@ internal sealed class DSCOperations : IDSCOperations
         input.Type = unit.Type;
 
         var result = await Task.Run(() => processor.ApplyUnit(input));
-        System.Diagnostics.Debug.WriteLine($"SetUnit result: {result.PreviouslyInDesiredState}");
+        return new DSCApplyUnitResult(result);
     }
 
     /// <inheritdoc />
-    public async Task TestUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
@@ -121,28 +123,72 @@ internal sealed class DSCOperations : IDSCOperations
         input.Settings = unit.Settings;
         input.Type = unit.Type;
         var result = await Task.Run(() => processor.TestUnit(input));
-        System.Diagnostics.Debug.WriteLine($"TestUnit result: {result.TestResult}");
         unit.TestResult = result.TestResult == ConfigurationTestResult.Positive;
+        return new DSCTestUnitResult(result);
     }
 
     /// <inheritdoc />
     /// Currently broken due to bug in DSC
     /// https://github.com/PowerShell/DSC/issues/786
-    public async Task ExportUnit(ConfigurationUnitModel unit)
+    public async Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit)
     {
         ConfigurationStaticFunctions config = new();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
         var input = config.CreateConfigurationUnit();
         input.Type = unit.Type;
         input.Intent = ConfigurationUnitIntent.Inform;
-
         var result = processor.GetAllUnits(input);
-
         if (result.Units != null)
         {
-            System.Diagnostics.Debug.WriteLine(result.Units);
             unit.Settings = result.Units[0].Settings;
         }
+
+        return new DSCGetAllUnitsResult(result);
+    }
+
+    public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()
+    {
+        List<ResourceMetada> resources = [];
+        try
+        {
+            ConfigurationStaticFunctions config = new();
+            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+            var options = config.CreateFindUnitProcessorsOptions();
+            options.UnitDetailFlags = ConfigurationUnitDetailFlags.Local;
+
+            // Retry a few times to workaround this issue:
+            // https://github.com/PowerShell/DSC/issues/786
+            // ---------------------------------------------
+            // Find unit processors will call dsc.exe under the hood. This has
+            // a known bug that makes it fail fairly often. To work around
+            // this, we retry a few times. This is not a an ideal solution, but
+            // it will allow us for now to get the resources most of the time.
+            // Another downside of this approach is that if no resources are
+            // actually present the code will always attempt 10 times before
+            // giving up.
+            var maxRetries = 10;
+            IList<IConfigurationUnitProcessorDetails> units = [];
+            while (units.Count == 0 && maxRetries > 0)
+            {
+                units = await processor.FindUnitProcessorsAsync(options);
+                maxRetries--;
+            }
+
+            foreach (var unit in units)
+            {
+                resources.Add(new()
+                {
+                    Name = unit.UnitType,
+                    Version = unit.Version,
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get DSC v3 resources");
+        }
+
+        return resources;
     }
 
     /// <summary>

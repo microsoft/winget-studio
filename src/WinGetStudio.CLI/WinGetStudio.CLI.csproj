@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)ToolingVersions.props" />
+  <PropertyGroup>
+    <RootNamespace>WinGetStudio.CLI</RootNamespace>
+    <Platforms>x86;x64;arm64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NJsonSchema" />
+    <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="Microsoft.Windows.CsWin32">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\services\WinGetStudio.Services.Localization\WinGetStudio.Services.Localization.csproj" />
+    <ProjectReference Include="..\services\WinGetStudio.Services.Logging\WinGetStudio.Services.Logging.csproj" />
+    <ProjectReference Include="..\services\WinGetStudio.Services.Settings\WinGetStudio.Services.Settings.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\DscResources\microsoft.wingetstudio.*.dsc.resource.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+      <PackagePath>%(Filename)%(Extension)</PackagePath>
+    </Content>
+  </ItemGroup>
+</Project>

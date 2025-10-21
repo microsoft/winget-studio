@@ -22,7 +22,35 @@ internal sealed class UIFeedbackService : IUIFeedbackService
     }
 
     /// <inheritdoc/>
-    public void ShowOutcomeNotification(string title, string message, NotificationMessageSeverity severity)
+    public void ShowTimedNotification(string message, NotificationMessageSeverity severity, TimeSpan duration = default)
+    {
+        ShowTimedNotification(null, message, severity, duration);
+    }
+
+    /// <inheritdoc/>
+    public void ShowTimedNotification(string title, string message, NotificationMessageSeverity severity, TimeSpan duration = default)
+    {
+        duration = duration == default ? TimeSpan.FromSeconds(10) : duration;
+        Notification.Show(new()
+        {
+            Title = title,
+            Message = message,
+            Severity = severity,
+            Delivery = NotificationDelivery.Overlay,
+            DismissBehavior = NotificationDismissBehavior.Timeout,
+            ShownBehavior = NotificationShownBehavior.ClearOverlays,
+            Duration = duration,
+        });
+    }
+
+    /// <inheritdoc//>
+    public void ShowPersistentNotification(string message, NotificationMessageSeverity severity)
+    {
+        ShowPersistentNotification(null, message, severity);
+    }
+
+    /// <inheritdoc/>
+    public void ShowPersistentNotification(string title, string message, NotificationMessageSeverity severity)
     {
         Notification.Show(new()
         {
@@ -36,7 +64,7 @@ internal sealed class UIFeedbackService : IUIFeedbackService
     }
 
     /// <inheritdoc/>
-    public void ClearOverlayNotifications()
+    public void ClearNotifications()
     {
         Notification.Show(new()
         {

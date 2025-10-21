@@ -14,9 +14,16 @@ public class ThemeFeatureSettings : IFeatureSettingsService
     private readonly IThemeApplierService _themeApplier;
 
     /// <summary>
+    /// Event that is raised when the theme is applied.
+    /// </summary>
+    public event EventHandler<ElementTheme>? ThemeApplied;
+
+    /// <summary>
     /// Gets the current theme.
     /// </summary>
     public ElementTheme Theme => GetElementTheme(_userSettings.Current.Theme);
+
+    public ApplicationTheme DefaultAppTheme => App.Current.RequestedTheme;
 
     public ThemeFeatureSettings(IUserSettings userSettings, IThemeApplierService themeApplier)
     {
@@ -52,5 +59,6 @@ public class ThemeFeatureSettings : IFeatureSettingsService
     {
         var theme = GetElementTheme(newSettings.Theme);
         await _themeApplier.ApplyThemeAsync(theme);
+        ThemeApplied?.Invoke(this, theme);
     }
 }

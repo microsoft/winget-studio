@@ -8,9 +8,9 @@ namespace WinGetStudio.Activation;
 
 public class DefaultActivationHandler : ActivationHandler<LaunchActivatedEventArgs>
 {
-    private readonly IAppNavigationService _navigationService;
+    private readonly IAppFrameNavigationService _navigationService;
 
-    public DefaultActivationHandler(IAppNavigationService navigationService)
+    public DefaultActivationHandler(IAppFrameNavigationService navigationService)
     {
         _navigationService = navigationService;
     }

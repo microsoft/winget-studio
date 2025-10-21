@@ -44,4 +44,11 @@ public interface IUserSettings
     /// The provided <see cref="GeneralSettings"/> instance is preloaded with the current settings.</param>
     /// <returns>A task that represents the asynchronous save operation.</returns>
     Task SaveAsync(Action<GeneralSettings> changes);
+
+    /// <summary>
+    /// Saves the specified general settings.
+    /// </summary>
+    /// <param name="newSettings">The new general settings to save.</param>
+    /// <returns>A task that represents the asynchronous save operation.</returns>
+    Task SaveAsync(GeneralSettings newSettings);
 }

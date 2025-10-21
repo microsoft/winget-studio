@@ -9,9 +9,9 @@ namespace WinGetStudio.Activation;
 
 internal sealed class FileActivationHandler : ActivationHandler<FileActivatedEventArgs>
 {
-    private readonly IAppNavigationService _navigationService;
+    private readonly IAppFrameNavigationService _navigationService;
 
-    public FileActivationHandler(IAppNavigationService navigationService)
+    public FileActivationHandler(IAppFrameNavigationService navigationService)
     {
         _navigationService = navigationService;
     }

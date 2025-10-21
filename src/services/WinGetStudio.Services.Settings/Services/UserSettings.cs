@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Windows.Storage;
 using WinGetStudio.Services.Core.Contracts;
 using WinGetStudio.Services.Core.Helpers;
 using WinGetStudio.Services.Settings.Contracts;
@@ -26,10 +25,7 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
     private readonly SemaphoreSlim _lock = new(1, 1);
     private bool _disposedValue;
 
-    public const string ApplicationDataFolder = "WinGetStudio/ApplicationData";
-    public const string SettingsFile = "settings.json";
-
-    public string FullPath => Path.Combine(GetSettingsDirectory(), SettingsFile);
+    public string FullPath => RuntimeHelper.GetSettingsFilePath();
 
     public GeneralSettings Current => _settingsOptions.CurrentValue;
 
@@ -64,7 +60,12 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         ArgumentNullException.ThrowIfNull(changes);
         var newSettings = Current.Clone();
         changes(newSettings);
+        await SaveAsync(newSettings);
+    }
 
+    /// <inheritdoc/>
+    public async Task SaveAsync(GeneralSettings newSettings)
+    {
         if (_settingsOptions.CurrentValue.Equals(newSettings))
         {
             _logger.LogInformation("No changes detected in settings. Save operation skipped.");
@@ -73,13 +74,6 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         {
             await SaveInternalAsync(newSettings);
         }
-    }
-
-    public static string GetSettingsDirectory()
-    {
-        return RuntimeHelper.IsMSIX
-             ? ApplicationData.Current.LocalFolder.Path
-             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ApplicationDataFolder);
     }
 
     /// <summary>
@@ -132,13 +126,14 @@ internal sealed partial class UserSettings : IUserSettings, IDisposable
         await _lock.WaitAsync();
         try
         {
-            if (await _fileService.TrySaveJsonAsync(FullPath, newSettings, _serializerOptions))
+            var saveResult = await _fileService.TrySaveJsonAsync(FullPath, newSettings, _serializerOptions);
+            if (saveResult.Success)
             {
                 _logger.LogInformation("Settings saved successfully.");
             }
             else
             {
-                _logger.LogWarning("Failed to save settings. Falling back to default settings.");
+                _logger.LogWarning(saveResult.Error, $"Failed to save settings. Falling back to default settings.");
             }
         }
         finally

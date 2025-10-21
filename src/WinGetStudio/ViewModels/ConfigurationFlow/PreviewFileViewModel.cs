@@ -21,7 +21,7 @@ namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
 public partial class PreviewFileViewModel : ObservableRecipient, INavigationAware
 {
-    private readonly IConfigurationNavigationService _navigationService;
+    private readonly IConfigurationFrameNavigationService _navigationService;
     private readonly IDSC _dsc;
     private readonly IDSCSetBuilder _dscSetBuilder;
     private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
@@ -46,6 +46,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     public partial string FilePath { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsConfigurationLoaded))]
     public partial bool IsInEditMode { get; set; }
 
     [ObservableProperty]
@@ -55,7 +56,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
 
     public bool IsEditPanelVisible => SelectedUnit != null;
 
-    public bool IsConfigurationLoaded => ConfigurationUnits.Count > 0;
+    public bool IsConfigurationLoaded => ConfigurationUnits.Count > 0 || IsInEditMode;
 
     public string Content => DscFile == null ? string.Empty : DscFile.Content;
 
@@ -111,7 +112,7 @@ public partial class PreviewFileViewModel : ObservableRecipient, INavigationAwar
     }
 
     public PreviewFileViewModel(
-        IConfigurationNavigationService navigationService,
+        IConfigurationFrameNavigationService navigationService,
         IDSC dsc,
         IDSCSetBuilder setBuilder,
         IStringLocalizer<PreviewFileViewModel> localizer,

@@ -11,6 +11,7 @@
     telemetry file will be replaced during the build pipeline.
     -->
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>SA1413;SA1516;SA1300;SA1636;SA1513;SA1515</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

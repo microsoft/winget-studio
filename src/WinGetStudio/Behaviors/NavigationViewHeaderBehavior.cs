@@ -54,7 +54,7 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     {
         base.OnAttached();
 
-        var navigationService = App.GetService<IAppNavigationService>();
+        var navigationService = App.GetService<IAppFrameNavigationService>();
         navigationService.Navigated += OnNavigated;
 
         _current = this;
@@ -64,7 +64,7 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     {
         base.OnDetaching();
 
-        var navigationService = App.GetService<IAppNavigationService>();
+        var navigationService = App.GetService<IAppFrameNavigationService>();
         navigationService.Navigated -= OnNavigated;
     }
 

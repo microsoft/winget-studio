@@ -1,1 +1,1 @@
-﻿﻿GetCurrentPackageFullName
+GetCurrentPackageFullName

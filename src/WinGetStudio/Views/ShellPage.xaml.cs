@@ -18,6 +18,7 @@ namespace WinGetStudio.Views;
 
 public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
+    private const int MaxNotificationMessageLength = 512;
     private readonly IAppInfoService _appInfoService;
     private readonly IUIFeedbackService _uiFeedbackService;
     private readonly IUserSettings _userSettings;
@@ -31,7 +32,6 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         _userSettings = App.GetService<IUserSettings>();
         ViewModel = viewModel;
         InitializeComponent();
-        AddDebugShortcuts();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
@@ -94,34 +94,11 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 
     private static void OnKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        var navigationService = App.GetService<IAppNavigationService>();
+        var navigationService = App.GetService<IAppFrameNavigationService>();
 
         var result = navigationService.GoBack();
 
         args.Handled = result;
-    }
-
-    [Conditional("DEBUG")]
-    private void AddDebugShortcuts()
-    {
-        var logsItem = new NavigationViewItem()
-        {
-            SelectsOnInvoked = false,
-            Content = "Open Logs Folder",
-            Icon = new FontIcon() { Glyph = "\uEBE8" },
-        };
-        logsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_appInfoService.GetAppInstanceLogPath()));
-
-        var settingsItem = new NavigationViewItem()
-        {
-            SelectsOnInvoked = false,
-            Content = "Open Settings",
-            Icon = new FontIcon() { Glyph = "\uEBE8" },
-        };
-        settingsItem.Tapped += async (_, _) => await Launcher.LaunchUriAsync(new Uri(_userSettings.FullPath));
-        NavigationViewControl.FooterMenuItems.Insert(0, new NavigationViewItemSeparator());
-        NavigationViewControl.FooterMenuItems.Insert(0, logsItem);
-        NavigationViewControl.FooterMenuItems.Insert(0, settingsItem);
     }
 
     private void OnNotificationShown(object? sender, NotificationMessage message)
@@ -137,6 +114,13 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
             if (message.DismissBehavior == NotificationDismissBehavior.Timeout && message.Duration > TimeSpan.Zero)
             {
                 duration = message.Duration;
+            }
+
+            // Limit message length to avoid UI issues.
+            // TODO: We should add a link to open the logs for the full message.
+            if (message.Message.Length > MaxNotificationMessageLength)
+            {
+                message.Message = string.Concat(message.Message.AsSpan(0, MaxNotificationMessageLength), "…");
             }
 
             NotificationQueue.Show(new()

@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using WinGetStudio.Models;
+using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -24,15 +26,18 @@ public interface IDSC
     /// <inheritdoc cref="IDSCOperations.GetConfigurationUnitDetails" />
     public void GetConfigurationUnitDetails(IDSCSet dscSet);
 
-    /// <inheritdoc cref="IDSCOperations.Get" />
-    public Task DscGet(ConfigurationUnitModel unit);
+    /// <inheritdoc cref="IDSCOperations.GetUnitAsync" />
+    public Task<IDSCGetUnitResult> GetUnitAsync(ConfigurationUnitModel unit);
 
-    /// <inheritdoc cref="IDSCOperations.Set"/>
-    public Task DscSet(ConfigurationUnitModel unit);
+    /// <inheritdoc cref="IDSCOperations.SetUnitAsync"/>
+    public Task<IDSCApplyUnitResult> SetUnitAsync(ConfigurationUnitModel unit);
 
-    /// <inheritdoc cref="IDSCOperations.Test"/>
-    public Task DscTest(ConfigurationUnitModel unit);
+    /// <inheritdoc cref="IDSCOperations.TestUnitAsync"/>
+    public Task<IDSCTestUnitResult> TestUnitAsync(ConfigurationUnitModel unit);
 
-    /// <inheritdoc cref="IDSCOperations.Export"/>
-    public Task DscExport(ConfigurationUnitModel unit);
+    /// <inheritdoc cref="IDSCOperations.ExportUnitAsync"/>
+    public Task<IDSCGetAllUnitsResult> ExportUnitAsync(ConfigurationUnitModel unit);
+
+    /// <inheritdoc cref="IDSCOperations.GetDscV3ResourcesAsync"/>
+    public Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
 }

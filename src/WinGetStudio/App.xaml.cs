@@ -13,9 +13,11 @@ using WinGetStudio.Models;
 using WinGetStudio.Services;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WingetStudio.Services.Localization.Extensions;
 using WinGetStudio.Services.Logging.Extensions;
+using WinGetStudio.Services.Navigation;
 using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.Telemetry.Extensions;
@@ -76,14 +78,12 @@ public partial class App : Application
 
                 // Services
                 services.AddSingleton<IThemeApplierService, ThemeApplierService>();
-                services.AddTransient<INavigationViewService, NavigationViewService>();
+                services.AddTransient<IAppShellNavigationViewService, AppShellNavigationViewService>();
                 services.AddSingleton<IActivationService, ActivationService>();
                 services.AddSingleton<IAppPageService, AppPageService>();
                 services.AddSingleton<IConfigurationPageService, ConfigurationPageService>();
-                services.AddSingleton<IValidationPageService, ValidationPageService>();
-                services.AddSingleton<IAppNavigationService, AppNavigationService>();
-                services.AddSingleton<IConfigurationNavigationService, ConfigurationNavigationService>();
-                services.AddSingleton<IValidationNavigationService, ValidationNavigationService>();
+                services.AddSingleton<IAppFrameNavigationService, AppFrameNavigationService>();
+                services.AddSingleton<IConfigurationFrameNavigationService, ConfigurationFrameNavigationService>();
                 services.AddSingleton<IAppInfoService, AppInfoService>();
 
                 // Dispatcher Queue
@@ -98,6 +98,7 @@ public partial class App : Application
                 // Core Services
                 services.AddCore();
                 services.AddDSC();
+                services.AddDSCExplorer();
                 services.AddWinGet();
                 services.AddSettings();
                 services.AddTelemetry();
@@ -112,8 +113,6 @@ public partial class App : Application
                 services.AddTransient<ConfigurationPage>();
                 services.AddTransient<ValidationViewModel>();
                 services.AddTransient<ValidationPage>();
-                services.AddTransient<ValidationFrameViewModel>();
-                services.AddTransient<ValidationFramePage>();
                 services.AddTransient<MainViewModel>();
                 services.AddTransient<MainPage>();
                 services.AddTransient<ShellPage>();
@@ -124,12 +123,10 @@ public partial class App : Application
                 services.AddTransient<ApplyFileViewModel>();
                 services.AddTransient<NotificationPaneViewModel>();
                 services.AddTransient<LoadingProgressBarViewModel>();
+                services.AddTransient<ResourceExplorerViewModel>();
 
                 // Factories
                 services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));
-
-                // Configuration
-                services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
             })
             .Build();
 

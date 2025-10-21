@@ -9,10 +9,7 @@ namespace WinGetStudio.Views;
 
 public sealed partial class SettingsPage : Page, IView<SettingsViewModel>
 {
-    public SettingsViewModel ViewModel
-    {
-        get;
-    }
+    public SettingsViewModel ViewModel { get; }
 
     public SettingsPage()
     {
