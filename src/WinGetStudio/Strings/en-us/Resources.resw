@@ -416,6 +416,9 @@
   <data name="ValidationPage_ResultsText.Text" xml:space="preserve">
     <value>Results</value>
   </data>
+  <data name="ValidationPage_SettingsText.Text" xml:space="preserve">
+    <value>Settings</value>
+  </data>
   <data name="ValidationPage_TestResultHeader.Text" xml:space="preserve">
     <value>Test Result</value>
   </data>
@@ -797,4 +800,13 @@
   <data name="PreviewFile_ResourceNameTextBox.Header" xml:space="preserve">
     <value>Resource name</value>
   </data>
- </root>
+  <data name="MonacoEditor_OpenUriDialog.CloseButtonText" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="MonacoEditor_OpenUriDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="MonacoEditor_OpenUriDialog.Title" xml:space="preserve">
+    <value>Do you want WinGet Studio to open the external application?</value>
+  </data>
+</root>

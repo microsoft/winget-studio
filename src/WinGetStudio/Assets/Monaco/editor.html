@@ -1,0 +1,80 @@
+﻿<!doctype html>
+<html>
+<head>
+    <link rel="icon" href="data:,">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8" />
+    <title>WinGet Studio - Monaco Editor</title>
+    <style>
+        html, body, #container { height: 100%; width: 100%; margin: 0; overflow: hidden; }
+    </style>
+    <script src="/src/min/vs/loader.js"></script>
+</head>
+
+<body>
+    <!-- Container for the Monaco Editor -->
+    <div id="container"></div>
+
+    <script>
+        // Configure the base path for Monaco Editor
+        require.config({ paths: { 'vs': '/src/min/vs' } });
+
+        // Load and initialize the Monaco Editor
+        let editor;
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('container'), {
+                language: 'yaml',
+                automaticLayout: true,
+                minimap: { enabled: false }
+            });
+
+            // Notify host of content changes
+            editor.getModel().onDidChangeContent((event) => {
+                let contentChangedMsg = NewEditorMessage('contentChanged', editor.getValue() || '');
+                window.chrome.webview.postMessage(contentChangedMsg);
+            });
+
+            // Handle messages from the host
+            if (window.chrome?.webview) {
+                window.chrome.webview.addEventListener('message', e => {
+                    const msg = e.data || {};
+                    switch (msg.type) {
+                        case 'setText':
+                            editor.setValue(msg.value || '');
+                            break;
+                        case 'setLanguage':
+                            monaco.editor.setModelLanguage(editor.getModel(), msg.value || 'plaintext');
+                            break;
+                        case 'setTheme':
+                            monaco.editor.setTheme(msg.value || 'vs-dark');
+                            break;
+                        case 'setReadOnly':
+                            editor.updateOptions({ readOnly: msg.value || false });
+                            break;
+                    }
+                });
+            }
+
+            // Focus the editor when the window loads
+            editor.focus();
+        });
+
+        // Adjust layout on window resize
+        window.onresize = () => editor?.layout();
+
+        // Disable printing
+        window.print = () => { };
+        window.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+        }
+        });
+
+        // Helper function to create editor messages
+        function NewEditorMessage(type, value) {
+            return { type: type, value: value };
+        }
+    </script>
+</body>
+
+</html>

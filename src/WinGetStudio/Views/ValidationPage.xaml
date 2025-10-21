@@ -58,15 +58,19 @@
             <!-- Properties -->
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- Properties control -->
-                <TextBox AcceptsReturn="True" Text="{x:Bind ViewModel.SettingsText, Mode=TwoWay}" />
+                <!-- Settings header -->
+                <TextBlock x:Uid="ValidationPage_SettingsText" FontWeight="Bold"/>
+
+                <!-- Settings -->
+                <localControls:MonacoEditor Grid.Row="1" Text="{x:Bind ViewModel.SettingsText, Mode=TwoWay}" Syntax="yaml" />
 
                 <!-- DSC buttons -->
-                <controls:UniformGrid Grid.Row="1" Rows="1" Columns="3" ColumnSpacing="8">
+                <controls:UniformGrid Grid.Row="2" Rows="1" Columns="3" ColumnSpacing="8">
                     <controls:UniformGrid.Resources>
                         <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -93,10 +97,7 @@
 
                 <!-- Result output box -->
                 <Grid Grid.Row="1">
-                    <TextBox Text="{x:Bind ViewModel.OutputText, Mode=TwoWay}"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             IsReadOnly="True"/>
+                    <localControls:MonacoEditor Text="{x:Bind ViewModel.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
 
                     <!-- Copy button -->
                     <localControls:CopyButton Content="&#xE8C8;"
