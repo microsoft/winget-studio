@@ -454,10 +454,7 @@
                                   Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}"
                                   HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Auto">
-                        <TextBlock Padding="15"
-                                   FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                                   IsTextSelectionEnabled="True"
-                                   Text="{x:Bind ViewModel.ConfigurationSet.Code, Mode=OneWay}" />
+                        <localControls:MonacoEditor Text="{x:Bind ViewModel.ConfigurationSet.Code, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
                     </ScrollViewer>
                 </Grid>
 
@@ -536,10 +533,8 @@
                                          Text="{x:Bind ViewModel.SelectedUnit.Item2.Description, Mode=TwoWay}"
                                          Height="Auto" />
 
-                                <!-- Properties -->
-                                <TextBox Grid.Row="3"
-                                         Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsText, Mode=TwoWay}"
-                                         AcceptsReturn="True" />
+                                <!-- Settings -->
+                                <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsText, Mode=TwoWay}" Syntax="yaml" Grid.Row="3" />
                             </Grid>
                         </ScrollViewer>
 
