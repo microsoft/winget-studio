@@ -31,26 +31,34 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
 
             <!-- Presentation mode selector -->
-            <controls:Segmented SelectedIndex="0" x:Name="SegmentedModeView" HorizontalAlignment="Center">
-                <controls:SegmentedItem x:Name="SummaryView"
-                                        x:Uid="ResourceExplorer_SummaryView"
-                                        AutomationProperties.PositionInSet="1"
-                                        AutomationProperties.SizeOfSet="2" />
-                <controls:SegmentedItem x:Name="CodeView"
-                                        x:Uid="ResourceExplorer_CodeView"
-                                        AutomationProperties.PositionInSet="2"
-                                        AutomationProperties.SizeOfSet="2" />
-            </controls:Segmented>
-            
+            <CommandBar HorizontalAlignment="Left" DefaultLabelPosition="Right">
+                <AppBarButton x:Uid="ResourceExplorer_View" Icon="View">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <RadioMenuFlyoutItem x:Name="SummaryView" x:Uid="ResourceExplorer_SummaryView" IsChecked="True">
+                                <RadioMenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xF232;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+                                </RadioMenuFlyoutItem.Icon>
+                            </RadioMenuFlyoutItem>
+                            <RadioMenuFlyoutItem x:Name="CodeView" x:Uid="ResourceExplorer_CodeView">
+                                <RadioMenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE943;" />
+                                </RadioMenuFlyoutItem.Icon>
+                            </RadioMenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+                <AppBarButton Label="Copy as YAML" Icon="Copy" Click="OnCopyAsYaml" />
+            </CommandBar>
+
             <!-- Summary view -->
             <ListView Grid.Row="1"
                       ItemsSource="{x:Bind ViewModel.Properties, Mode=OneWay}"
                       SelectionMode="None"
-                      Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}"> 
+                      Visibility="{x:Bind SummaryView.IsChecked, Mode=OneWay}">
                 <ListView.Header>
                     <Grid Padding="{ThemeResource SectionPadding}" ColumnSpacing="{ThemeResource SectionSpacing}">
                         <Grid.ColumnDefinitions>
@@ -117,7 +125,7 @@
                                            FontFamily="{StaticResource CascadiaMonoFontFamily}"
                                            Text="{x:Bind GetOneLinerSyntax()}"/>
                             </ScrollViewer>
-                                
+
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -125,7 +133,7 @@
 
             <!-- Code view -->
             <ScrollViewer Grid.Row="1"
-                          Visibility="{x:Bind CodeView.IsSelected, Mode=OneWay}"
+                          Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay}"
                           HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto">
                 <TextBlock FontSize="{ThemeResource CaptionTextBlockFontSize}"
@@ -134,9 +142,6 @@
                            FontFamily="{StaticResource CascadiaMonoFontFamily}"
                            Text="{x:Bind ViewModel.ResourceSyntax, Mode=OneWay}" />
             </ScrollViewer>
-
-            <Button Style="{ThemeResource AccentButtonStyle}" Grid.Row="2" HorizontalAlignment="Right" Click="OnCopyAsYaml">Copy as YAML</Button>
         </Grid>
-
     </Grid>
 </ContentDialog>
