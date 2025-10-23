@@ -56,11 +56,12 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
         }
     }
 
-    public async Task<string> GetSampleYamlAsync(DSCResource resource)
+    /// <inheritdoc/>
+    public async Task<string> GenerateDefaultYamlAsync(DSCResource resource)
     {
         var provider = GetModuleProvider(resource.Source);
-        var schema = provider.GetResourceSchema(resource);
-        if (!string.IsNullOrEmpty(schema))
+        var schema = await provider.GetResourceSchemaAsync(resource);
+        if (schema != null)
         {
             return await _generator.GenerateDefaultYamlFromSchemaAsync(schema);
         }

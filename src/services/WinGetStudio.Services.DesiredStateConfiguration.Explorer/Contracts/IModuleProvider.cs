@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
+using NJsonSchema;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -25,5 +26,10 @@ public interface IModuleProvider
     /// <param name="dscModule">The DSC module to enrich.</param>
     Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
 
-    string GetResourceSchema(DSCResource resource);
+    /// <summary>
+    /// Gets the schema for the given DSC resource.
+    /// </summary>
+    /// <param name="resource">The DSC resource.</param>
+    /// <returns>The resource schema.</returns>
+    Task<JsonSchema> GetResourceSchemaAsync(DSCResource resource);
 }

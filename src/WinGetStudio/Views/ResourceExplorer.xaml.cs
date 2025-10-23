@@ -23,8 +23,7 @@ public sealed partial class ResourceExplorer : ContentDialog
     {
         _ui = App.GetService<IUIFeedbackService>();
         _localizer = App.GetService<IStringLocalizer<ResourceExplorer>>();
-        ViewModel = App.GetService<ResourceExplorerViewModel>();
-        ViewModel.SetResource(resource);
+        ViewModel = App.GetService<ResourceExplorerViewModelFactory>()(resource);
         InitializeComponent();
     }
 
@@ -58,7 +57,7 @@ public sealed partial class ResourceExplorer : ContentDialog
     private async void OnCopyAsYaml(object sender, RoutedEventArgs e)
     {
         var dataPackage = new DataPackage();
-        var sampleYaml = await ViewModel.GetSampleYamlAsync();
+        var sampleYaml = await ViewModel.GenerateDefaultYamlAsync();
         dataPackage.SetText(sampleYaml);
         Clipboard.SetContent(dataPackage);
         _ui.ShowTimedNotification(_localizer["ResourceExplorer_YamlCopied"], NotificationMessageSeverity.Success);

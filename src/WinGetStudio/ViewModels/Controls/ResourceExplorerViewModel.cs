@@ -7,46 +7,38 @@ using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.ViewModels.Controls;
 
+public delegate ResourceExplorerViewModel ResourceExplorerViewModelFactory(DSCResource resource);
+
 public sealed partial class ResourceExplorerViewModel : ObservableRecipient
 {
     private readonly IDSCExplorer _dscExplorer;
-    private DSCResource? _resource;
+    private readonly DSCResource _resource;
 
     /// <summary>
-    /// Gets or sets the properties of the resource.
+    /// Gets the properties of the resource.
     /// </summary>
-    [ObservableProperty]
-    public partial List<DSCProperty> Properties { get; set; }
+    public List<DSCProperty> Properties => _resource.Properties;
 
     /// <summary>
-    /// Gets or sets the syntax of the resource.
+    /// Gets the resource syntax.
     /// </summary>
-    [ObservableProperty]
-    public partial string ResourceSyntax { get; set; }
+    public string ResourceSyntax => _resource.Syntax;
 
-    public ResourceExplorerViewModel(IDSCExplorer explorer)
-    {
-        _dscExplorer = explorer;
-        Properties = [];
-        ResourceSyntax = string.Empty;
-    }
-
-    /// <summary>
-    /// Sets the resource to display.
-    /// </summary>
-    /// <param name="resource">The DSC resource.</param>
-    public void SetResource(DSCResource resource)
+    public ResourceExplorerViewModel(DSCResource resource, IDSCExplorer explorer)
     {
         _resource = resource;
-        Properties = [..resource.Properties];
-        ResourceSyntax = resource.Syntax;
+        _dscExplorer = explorer;
     }
 
-    public async Task<string?> GetSampleYamlAsync()
+    /// <summary>
+    /// Gets a sample YAML for the resource.
+    /// </summary>
+    /// <returns>The sample YAML.</returns>
+    public async Task<string?> GenerateDefaultYamlAsync()
     {
         if (_resource != null)
         {
-            return await _dscExplorer.GetSampleYamlAsync(_resource);
+            return await _dscExplorer.GenerateDefaultYamlAsync(_resource);
         }
 
         return null;

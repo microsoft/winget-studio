@@ -14,7 +14,7 @@ internal sealed partial class DSCProcess : IDSCProcess
 {
     private readonly ILogger<DSCProcess> _logger;
 
-    public DSCProcess(ILogger<DSCProcess> logger, IDSCResourceJsonSchemaDefaultGenerator generator)
+    public DSCProcess(ILogger<DSCProcess> logger)
     {
         _logger = logger;
     }

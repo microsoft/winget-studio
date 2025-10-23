@@ -21,7 +21,12 @@ internal interface IModuleCatalogRepository
     /// <param name="dscModule">The DSC module to enrich.</param>
     Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
 
-    Task<string> GetSampleYamlAsync(DSCResource resource);
+    /// <summary>
+    /// Generates default YAML configuration for the specified DSC resource.
+    /// </summary>
+    /// <param name="resource">The DSC resource.</param>
+    /// <returns>The generated default YAML configuration.</returns>
+    Task<string> GenerateDefaultYamlAsync(DSCResource resource);
 
     /// <summary>
     /// Clears the cache for all module catalogs.

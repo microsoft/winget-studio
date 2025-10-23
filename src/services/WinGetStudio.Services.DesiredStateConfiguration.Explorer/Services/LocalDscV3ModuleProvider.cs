@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using NJsonSchema;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
@@ -56,9 +57,10 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
         }
     }
 
-    public string GetResourceSchema(DSCResource resource)
+    /// <inheritdoc/>
+    public Task<JsonSchema> GetResourceSchemaAsync(DSCResource resource)
     {
-        return resource.Syntax;
+        return JsonSchema.FromJsonAsync(resource.Syntax);
     }
 
     /// <inheritdoc/>

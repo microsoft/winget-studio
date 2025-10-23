@@ -108,24 +108,19 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         }
     }
 
-    public string GetResourceSchema(DSCResource resource)
+    /// <inheritdoc/>
+    public Task<JsonSchema> GetResourceSchemaAsync(DSCResource resource)
     {
-        var properties = resource.Properties.Select(p => p.Name);
-        var schema = new JsonSchema
+        var schema = new JsonSchema { Type = JsonObjectType.Object };
+        foreach (var property in resource.Properties)
         {
-            Type = JsonObjectType.Object,
-            AllowAdditionalItems = false,
-        };
-
-        foreach (var propertyName in properties)
-        {
-            schema.Properties[propertyName] = new JsonSchemaProperty
+            schema.Properties[property.Name] = new JsonSchemaProperty
             {
                 Type = JsonObjectType.None,
             };
         }
 
-        return schema.ToJson();
+        return Task.FromResult(schema);
     }
 
     /// <summary>

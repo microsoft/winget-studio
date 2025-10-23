@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using NJsonSchema;
 using NJsonSchema.Generation;
@@ -28,7 +29,7 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
     /// </summary>
     /// <param name="jsonSchema">The JSON schema.</param>
     /// <returns>The generated default YAML.</returns>
-    public async Task<string> GenerateDefaultYamlFromSchemaAsync(string jsonSchema)
+    public async Task<string> GenerateDefaultYamlFromSchemaAsync(JsonSchema jsonSchema)
     {
         var json = await GenerateDefaultJsonFromSchemaAsync(jsonSchema);
         return DSCYamlHelper.JsonToYaml(json);
@@ -39,12 +40,13 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
     /// </summary>
     /// <param name="jsonSchema">The JSON schema.</param>
     /// <returns>The generated default JSON.</returns>
-    public async Task<string> GenerateDefaultJsonFromSchemaAsync(string jsonSchema)
+    public async Task<string> GenerateDefaultJsonFromSchemaAsync(JsonSchema jsonSchema)
     {
-        var schema = await JsonSchema.FromJsonAsync(jsonSchema);
-        RemoveReadOnlyProperties(schema);
+        jsonSchema = await JsonSchema.FromJsonAsync(jsonSchema.ToJson());
+        RemoveReadOnlyProperties(jsonSchema);
+        RemoveAllNullTypes(jsonSchema);
         var generator = new SampleJsonDataGenerator(_settings);
-        var sampleJson = generator.Generate(schema);
+        var sampleJson = generator.Generate(jsonSchema);
         return sampleJson.ToString();
     }
 
@@ -58,5 +60,111 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
         {
             schema.Properties.Remove(propertyName);
         }
+    }
+
+    private void RemoveAllNullTypes(JsonSchema root)
+    {
+        if (root != null)
+        {
+            foreach (var schema in GetAllSchemas(root))
+            {
+                RemoveNullTypes(schema);
+            }
+        }
+    }
+
+    private void RemoveNullTypes(JsonSchema schema)
+    {
+        // If the schema type includes Null, remove it.
+        if (schema.Type.HasFlag(JsonObjectType.Null))
+        {
+            schema.Type &= ~JsonObjectType.Null;
+        }
+
+        // Set IsNullableRaw to false to indicate the schema is not nullable.
+        schema.IsNullableRaw = false;
+
+        // Remove null-typed members from combinational schemas.
+        RemoveNullTypedMembers(schema.OneOf);
+        RemoveNullTypedMembers(schema.AllOf);
+        RemoveNullTypedMembers(schema.AnyOf);
+
+        // Remove "x-nullable" extension data if present.
+        schema.ExtensionData?.Remove("x-nullable");
+    }
+
+    private static void RemoveNullTypedMembers(ICollection<JsonSchema> schemas)
+    {
+        if (schemas?.Count == 0)
+        {
+            return;
+        }
+
+        var membersToRemove = schemas.Where(schema =>
+        {
+            schema = schema?.ActualSchema ?? schema;
+            if (schema == null)
+            {
+                return false;
+            }
+
+            var includesNull = schema.Type.HasFlag(JsonObjectType.Null);
+            var isExplicitlyNullable = schema.IsNullableRaw ?? false;
+            return includesNull || isExplicitlyNullable;
+        }).ToList();
+
+        foreach (var member in membersToRemove)
+        {
+            schemas.Remove(member);
+        }
+    }
+
+    private static List<JsonSchema> GetAllSchemas(JsonSchema root)
+    {
+        var result = new List<JsonSchema>();
+        var stack = new Stack<JsonSchema>();
+        var visited = new HashSet<JsonSchema>(ReferenceEqualityComparer.Instance);
+
+        stack.Push(root);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            if (current != null)
+            {
+                var schema = current.ActualSchema ?? current;
+                if (visited.Add(schema))
+                {
+                    result.Add(schema);
+                    foreach (var child in GetChildrenSchemas(schema))
+                    {
+                        stack.Push(child);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static List<JsonSchema> GetChildrenSchemas(JsonSchema root)
+    {
+        if (root == null)
+        {
+            return [];
+        }
+
+        return [..Enumerable.Empty<JsonSchema>()
+            .Concat(root.AllOf ?? [])
+            .Concat(root.AnyOf ?? [])
+            .Concat(root.OneOf ?? [])
+            .Append(root.Not)
+            .Append(root.Item)
+            .Concat(root.Items ?? [])
+            .Concat(root.Properties?.Values ?? [])
+            .Concat(root.PatternProperties?.Values ?? [])
+            .Append(root.AdditionalPropertiesSchema)
+            .Concat(root.Definitions?.Values ?? [])
+            .OfType<JsonSchema>()];
     }
 }
