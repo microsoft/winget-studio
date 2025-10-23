@@ -15,6 +15,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
 {
     private readonly ILogger<ModuleCatalogRepository> _logger;
+    private readonly IDSCResourceJsonSchemaDefaultGenerator _generator;
     private readonly IEnumerable<IModuleProvider> _moduleProviders;
     private readonly IModuleCatalogJsonFileCacheProvider _jsonCacheProvider;
     private readonly IModuleCatalogMemoryCacheProvider _memoryCacheProvider;
@@ -23,12 +24,14 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
         ILogger<ModuleCatalogRepository> logger,
         IEnumerable<IModuleProvider> moduleProviders,
         IModuleCatalogJsonFileCacheProvider jsonCacheProvider,
-        IModuleCatalogMemoryCacheProvider memoryCacheProvider)
+        IModuleCatalogMemoryCacheProvider memoryCacheProvider,
+        IDSCResourceJsonSchemaDefaultGenerator generator)
     {
         _logger = logger;
         _moduleProviders = moduleProviders;
         _jsonCacheProvider = jsonCacheProvider;
         _memoryCacheProvider = memoryCacheProvider;
+        _generator = generator;
     }
 
     /// <inheritdoc/>
@@ -44,12 +47,27 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     /// <inheritdoc/>
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
-        var provider = GetModuleProvider(dscModule);
+        var provider = GetModuleProvider(dscModule.Source);
         await provider.EnrichModuleWithResourceDetailsAsync(dscModule);
         if (_memoryCacheProvider.TryGet(provider.Name, out var inMemory))
         {
             _logger.LogInformation($"Updating cached module catalog for '{provider.Name}' after enriching module '{dscModule.Id}'.");
             await _jsonCacheProvider.SaveCacheAsync(inMemory);
+        }
+    }
+
+    public async Task<string> GetSampleYamlAsync(DSCResource resource)
+    {
+        var provider = GetModuleProvider(resource.Source);
+        var schema = provider.GetResourceSchema(resource);
+        if (!string.IsNullOrEmpty(schema))
+        {
+            return await _generator.GenerateDefaultYamlFromSchemaAsync(schema);
+        }
+        else
+        {
+            _logger.LogWarning($"No schema found for resource '{resource.Name}' from source '{resource.Source}'. Cannot generate sample YAML.");
+            return string.Empty;
         }
     }
 
@@ -126,16 +144,16 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     /// <summary>
     /// Gets the appropriate module provider for the specified DSC module.
     /// </summary>
-    /// <param name="dscModule">The DSC module to get the provider for.</param>
+    /// <param name="moduleSource">The source of the DSC module.</param>
     /// <returns>>The module provider instance.</returns>
-    private IModuleProvider GetModuleProvider(DSCModule dscModule)
+    private IModuleProvider GetModuleProvider(DSCModuleSource moduleSource)
     {
-        if (dscModule.Source == DSCModuleSource.PSGallery)
+        if (moduleSource == DSCModuleSource.PSGallery)
         {
             return GetModuleProvider<PowerShellGalleryModuleProvider>();
         }
 
-        if (dscModule.Source == DSCModuleSource.LocalDscV3)
+        if (moduleSource == DSCModuleSource.LocalDscV3)
         {
             return GetModuleProvider<LocalDscV3ModuleProvider>();
         }

@@ -32,6 +32,11 @@ internal sealed class DSCExplorer : IDSCExplorer
         await _repository.EnrichModuleWithResourceDetailsAsync(dscModule);
     }
 
+    public async Task<string> GetSampleYamlAsync(DSCResource resource)
+    {
+        return await _repository.GetSampleYamlAsync(resource);
+    }
+
     /// <inheritdoc/>
     public async Task ClearCacheAsync()
     {

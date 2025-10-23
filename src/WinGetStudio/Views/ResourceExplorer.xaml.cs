@@ -41,4 +41,12 @@ public sealed partial class ResourceExplorer : ContentDialog
     /// <param name="sender">The button that was clicked.</param>
     /// <param name="e">>The event data.</param>
     private void OnClose(object sender, RoutedEventArgs e) => Hide();
+
+    private async void OnCopyAsYaml(object sender, RoutedEventArgs e)
+    {
+        var dataPackage = new DataPackage();
+        var sampleYaml = await ViewModel.GetSampleYamlAsync();
+        dataPackage.SetText(sampleYaml);
+        Clipboard.SetContent(dataPackage);
+    }
 }

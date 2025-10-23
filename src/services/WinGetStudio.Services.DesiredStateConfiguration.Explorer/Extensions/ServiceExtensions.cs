@@ -31,6 +31,8 @@ public static class ServiceExtensions
         services.AddSingleton<INuGetDownloader, NuGetDownloader>();
         services.AddSingleton<IModuleCatalogMemoryCacheProvider, ModuleCatalogMemoryCacheProvider>();
         services.AddSingleton<IModuleCatalogRepository, ModuleCatalogRepository>();
+        services.AddSingleton<IDSCResourceJsonSchemaDefaultGenerator, DSCResourceJsonSchemaDefaultGenerator>();
+        services.AddSingleton<IDSCProcess, DSCProcess>();
         services.AddSingleton<IModuleCatalogJsonFileCacheProvider>(sp =>
         {
             return ActivatorUtilities.CreateInstance<ModuleCatalogJsonFileCacheProvider>(sp, jsonCacheDirectory);

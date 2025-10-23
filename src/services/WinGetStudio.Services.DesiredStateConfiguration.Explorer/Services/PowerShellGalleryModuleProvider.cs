@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Extensions.Logging;
+using NJsonSchema;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -70,7 +71,7 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
 
                     // Populate resources
                     var resourceNames = GetResourceNamesFromTags(moduleMetadata);
-                    dscModule.PopulateResources(resourceNames, DSCVersion.Unknown);
+                    dscModule.PopulateResources(resourceNames, DSCVersion.Unknown, DSCModuleSource.PSGallery);
 
                     // Add the module to the list
                     dscModules.TryAdd(dscModule.Id, dscModule);
@@ -102,9 +103,29 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
         if (!dscModule.IsEnriched)
         {
             var definitions = await GetResourceDefinitionsAsync(dscModule);
-            dscModule.PopulateResources(definitions, DSCVersion.Unknown);
+            dscModule.PopulateResources(definitions, DSCVersion.Unknown, DSCModuleSource.PSGallery);
             dscModule.IsEnriched = true;
         }
+    }
+
+    public string GetResourceSchema(DSCResource resource)
+    {
+        var properties = resource.Properties.Select(p => p.Name);
+        var schema = new JsonSchema
+        {
+            Type = JsonObjectType.Object,
+            AllowAdditionalItems = false,
+        };
+
+        foreach (var propertyName in properties)
+        {
+            schema.Properties[propertyName] = new JsonSchemaProperty
+            {
+                Type = JsonObjectType.None,
+            };
+        }
+
+        return schema.ToJson();
     }
 
     /// <summary>

@@ -1,0 +1,70 @@
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
+
+namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
+
+internal sealed partial class DSCProcess : IDSCProcess
+{
+    private readonly ILogger<DSCProcess> _logger;
+
+    public DSCProcess(ILogger<DSCProcess> logger, IDSCResourceJsonSchemaDefaultGenerator generator)
+    {
+        _logger = logger;
+    }
+
+    public Task<DSCProcessResult> GetResourceSchemaAsync(string resource)
+    {
+        _logger.LogInformation($"Getting schema for DSC resource: {resource}");
+        return ExecuteAsync("resource", "schema", "-r", resource, "-o", "json");
+    }
+
+    private async Task<DSCProcessResult> ExecuteAsync(params string[] args)
+    {
+        _logger.LogInformation($"Executing DSC command with arguments: dsc {string.Join(' ', args)}");
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "dsc.exe",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        // Add arguments
+        foreach (var arg in args)
+        {
+            startInfo.ArgumentList.Add(arg);
+        }
+
+        // Start the process
+        using var process = new Process { StartInfo = startInfo };
+        process.Start();
+
+        // Read output and errors (if any)
+        var output = process.StandardOutput.ReadToEnd();
+        var errors = process.StandardError.ReadToEnd();
+
+        // Wait for process to exit
+        await process.WaitForExitAsync();
+
+        // Log output and errors
+        if (!string.IsNullOrEmpty(output))
+        {
+            _logger.LogInformation($"DSC Processor Output: {output}");
+        }
+
+        if (!string.IsNullOrEmpty(errors))
+        {
+            _logger.LogError($"DSC Processor Error: {errors}");
+        }
+
+        return new(output, errors, process.ExitCode);
+    }
+}

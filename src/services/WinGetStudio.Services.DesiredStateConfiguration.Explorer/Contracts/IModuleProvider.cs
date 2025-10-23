@@ -24,4 +24,6 @@ public interface IModuleProvider
     /// </summary>
     /// <param name="dscModule">The DSC module to enrich.</param>
     Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
+
+    string GetResourceSchema(DSCResource resource);
 }

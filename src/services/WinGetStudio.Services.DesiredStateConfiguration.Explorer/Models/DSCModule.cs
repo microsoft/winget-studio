@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
@@ -49,7 +50,7 @@ public sealed partial class DSCModule
     /// Populates the resources dictionary with the given resource names.
     /// </summary>
     /// <param name="resourceNames">The resource names.</param>
-    public void PopulateResources(IEnumerable<string> resourceNames, DSCVersion dscVersion)
+    public void PopulateResources(IEnumerable<string> resourceNames, DSCVersion dscVersion, DSCModuleSource moduleSource)
     {
         lock (Resources)
         {
@@ -58,7 +59,7 @@ public sealed partial class DSCModule
             {
                 if (!Resources.ContainsKey(name))
                 {
-                    Resources[name] = CreateResource(name, dscVersion);
+                    Resources[name] = CreateResource(name, dscVersion, moduleSource);
                 }
             }
         }
@@ -68,7 +69,7 @@ public sealed partial class DSCModule
     /// Populates the resources dictionary with the given resource class definitions.
     /// </summary>
     /// <param name="classDefinitions">The resource class definitions.</param>
-    public void PopulateResources(IEnumerable<DSCResourceClassDefinition> classDefinitions, DSCVersion dscVersion)
+    public void PopulateResources(IEnumerable<DSCResourceClassDefinition> classDefinitions, DSCVersion dscVersion, DSCModuleSource moduleSource)
     {
         lock (Resources)
         {
@@ -77,7 +78,7 @@ public sealed partial class DSCModule
             {
                 if (!Resources.TryGetValue(definition.ClassName, out var resource))
                 {
-                    resource = CreateResource(definition.ClassName, dscVersion);
+                    resource = CreateResource(definition.ClassName, dscVersion, moduleSource);
                     Resources[definition.ClassName] = resource;
                 }
 
@@ -93,17 +94,48 @@ public sealed partial class DSCModule
     }
 
     /// <summary>
+    /// Populates a resource with the given schema.
+    /// </summary>
+    /// <param name="resourceName">The name of the resource.</param>
+    /// <param name="schema">The JSON schema of the resource.</param>
+    /// <param name="dscVersion">The DSC version.</param>
+    public void PopulateResourceFromSchema(string resourceName, JsonObject schema, DSCVersion dscVersion, DSCModuleSource moduleSource)
+    {
+        lock (Resources)
+        {
+            Resources ??= [];
+            if (!Resources.TryGetValue(resourceName, out var resource))
+            {
+                resource = CreateResource(resourceName, dscVersion, moduleSource);
+                Resources[resourceName] = resource;
+            }
+
+            if (schema?["properties"] is JsonObject properties)
+            {
+                resource.Syntax = schema.ToJsonString(new() { WriteIndented = false });
+                resource.Properties = [..properties.Select(p => new DSCProperty
+                {
+                    Name = p.Key,
+                    Type = p.Value.GetType().Name,
+                    Syntax = p.Value.ToJsonString(new() { WriteIndented = false }),
+                })];
+            }
+        }
+    }
+
+    /// <summary>
     /// Creates a new DSCResource.
     /// </summary>
     /// <param name="name">The name of the resource.</param>
     /// <returns>The created DSCResource.</returns>
-    private DSCResource CreateResource(string name, DSCVersion dscVersion)
+    private DSCResource CreateResource(string name, DSCVersion dscVersion, DSCModuleSource moduleSource)
     {
         return new DSCResource()
         {
             Name = name,
             Version = Version,
             DSCVersion = dscVersion,
+            Source = moduleSource,
         };
     }
 }

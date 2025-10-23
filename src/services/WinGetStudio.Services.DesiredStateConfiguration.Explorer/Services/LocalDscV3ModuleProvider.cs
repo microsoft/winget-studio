@@ -1,33 +1,64 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 
-public sealed class LocalDscV3ModuleProvider : IModuleProvider
+internal sealed class LocalDscV3ModuleProvider : IModuleProvider
 {
+    private readonly ILogger<LocalDscV3ModuleProvider> _logger;
     private readonly IDSC _dsc;
+    private readonly IDSCProcess _dscProcess;
+    private readonly IDSCResourceJsonSchemaDefaultGenerator _generator;
 
     /// <inheritdoc/>
     public string Name => nameof(DSCModuleSource.LocalDscV3);
 
-    /// <inheritdoc/>
-    public bool UseCache => false;
-
-    public LocalDscV3ModuleProvider(IDSC dsc)
+    public LocalDscV3ModuleProvider(
+        ILogger<LocalDscV3ModuleProvider> logger,
+        IDSC dsc,
+        IDSCProcess dscProcess,
+        IDSCResourceJsonSchemaDefaultGenerator generator)
     {
+        _logger = logger;
         _dsc = dsc;
+        _dscProcess = dscProcess;
+        _generator = generator;
     }
 
     /// <inheritdoc/>
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
-        // No additional details to enrich for local DSC v3 resources.
-        await Task.CompletedTask;
+        if (!dscModule.IsEnriched)
+        {
+            if (dscModule.Resources?.Count == 1)
+            {
+                var resource = dscModule.Resources.Values.First();
+                var schema = await GetResourceSchemaAsync(resource.Name);
+                if (schema != null)
+                {
+                    dscModule.PopulateResourceFromSchema(resource.Name, schema, DSCVersion.V3, DSCModuleSource.LocalDscV3);
+                    dscModule.IsEnriched = true;
+                }
+            }
+            else
+            {
+                _logger.LogWarning($"Module '{dscModule.Id}' does not have exactly one resource. Instead it has {dscModule.Resources?.Count ?? 0} resources. Skipping enrichment.");
+            }
+        }
+    }
+
+    public string GetResourceSchema(DSCResource resource)
+    {
+        return resource.Syntax;
     }
 
     /// <inheritdoc/>
@@ -44,7 +75,7 @@ public sealed class LocalDscV3ModuleProvider : IModuleProvider
                 Source = DSCModuleSource.LocalDscV3,
                 IsVirtual = true,
             };
-            module.PopulateResources([resource.Name], DSCVersion.V3);
+            module.PopulateResources([resource.Name], DSCVersion.V3, DSCModuleSource.LocalDscV3);
             catalog.Modules.TryAdd(resource.Name, module);
         }
 
@@ -59,5 +90,25 @@ public sealed class LocalDscV3ModuleProvider : IModuleProvider
             CanCache = cache,
             Catalog = catalog,
         };
+    }
+
+    private async Task<JsonObject> GetResourceSchemaAsync(string resourceName)
+    {
+        try
+        {
+            var result = await _dscProcess.GetResourceSchemaAsync(resourceName);
+            if (result.IsSuccess)
+            {
+                return (JsonObject)JsonNode.Parse(result.Output);
+            }
+
+            _logger.LogError($"Failed to get resource schema for {resourceName}. Error: {result.Errors}");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Exception occurred while getting resource schema for {resourceName}");
+            return null;
+        }
     }
 }
