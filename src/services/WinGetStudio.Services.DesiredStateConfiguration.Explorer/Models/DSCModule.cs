@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using Namotion.Reflection;
+using NJsonSchema;
+using NJsonSchema.Generation;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
@@ -99,26 +103,31 @@ public sealed partial class DSCModule
     /// <param name="resourceName">The name of the resource.</param>
     /// <param name="schema">The JSON schema of the resource.</param>
     /// <param name="dscVersion">The DSC version.</param>
-    public void PopulateResourceFromSchema(string resourceName, JsonObject schema, DSCVersion dscVersion, DSCModuleSource moduleSource)
+    public void PopulateResourceFromSchema(string resourceName, JsonSchema schema, DSCVersion dscVersion, DSCModuleSource moduleSource)
     {
+        DSCResource resource;
         lock (Resources)
         {
             Resources ??= [];
-            if (!Resources.TryGetValue(resourceName, out var resource))
+            if (!Resources.TryGetValue(resourceName, out resource))
             {
                 resource = CreateResource(resourceName, dscVersion, moduleSource);
                 Resources[resourceName] = resource;
             }
 
-            if (schema?["properties"] is JsonObject properties)
+            var schemaJson = schema.ToJson();
+            resource.Syntax = schemaJson;
+            resource.Properties = [];
+            var jsonSchema = JsonNode.Parse(schemaJson).AsObject();
+            foreach (var property in schema.ActualProperties)
             {
-                resource.Syntax = schema.ToJsonString(new() { WriteIndented = false });
-                resource.Properties = [..properties.Select(p => new DSCProperty
+                var propertyNode = jsonSchema?["properties"]?[property.Key] ?? new JsonObject();
+                resource.Properties.Add(new()
                 {
-                    Name = p.Key,
-                    Type = p.Value.GetType().Name,
-                    Syntax = p.Value.ToJsonString(new() { WriteIndented = false }),
-                })];
+                    Name = property.Key,
+                    Type = property.Value.Type.ToString(),
+                    Syntax = propertyNode.ToJsonString(new() { WriteIndented = true }),
+                });
             }
         }
     }

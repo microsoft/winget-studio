@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NJsonSchema;
@@ -94,14 +93,14 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
         };
     }
 
-    private async Task<JsonObject> GetResourceSchemaAsync(string resourceName)
+    private async Task<JsonSchema> GetResourceSchemaAsync(string resourceName)
     {
         try
         {
             var result = await _dscProcess.GetResourceSchemaAsync(resourceName);
             if (result.IsSuccess)
             {
-                return (JsonObject)JsonNode.Parse(result.Output);
+                return await JsonSchema.FromJsonAsync(result.Output);
             }
 
             _logger.LogError($"Failed to get resource schema for {resourceName}. Error: {result.Errors}");

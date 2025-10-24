@@ -815,4 +815,7 @@
   <data name="MonacoEditor_OpenUriDialog.Title" xml:space="preserve">
     <value>Do you want WinGet Studio to open the external application?</value>
   </data>
+  <data name="ExploreResource_Failed" xml:space="preserve">
+    <value>Failed to load resource details</value>
+  </data>
 </root>

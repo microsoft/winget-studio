@@ -22,7 +22,7 @@ internal sealed partial class DSCProcess : IDSCProcess
     public Task<DSCProcessResult> GetResourceSchemaAsync(string resource)
     {
         _logger.LogInformation($"Getting schema for DSC resource: {resource}");
-        return ExecuteAsync("resource", "schema", "-r", resource, "-o", "json");
+        return Task.Run(() => ExecuteAsync("resource", "schema", "-r", resource, "-o", "json"));
     }
 
     private async Task<DSCProcessResult> ExecuteAsync(params string[] args)

@@ -132,16 +132,13 @@
             </ListView>
 
             <!-- Code view -->
-            <ScrollViewer Grid.Row="1"
-                          Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay}"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Auto">
-                <TextBlock FontSize="{ThemeResource CaptionTextBlockFontSize}"
-                           Padding="15"
-                           IsTextSelectionEnabled="True"
-                           FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                           Text="{x:Bind ViewModel.ResourceSyntax, Mode=OneWay}" />
-            </ScrollViewer>
+            <localControls:MonacoEditor Grid.Row="1"
+                                        Height="400"
+                                        Padding="15"
+                                        Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay}"
+                                        Text="{x:Bind ViewModel.ResourceSyntax, Mode=OneWay}"
+                                        IsReadOnly="True"
+                                        Syntax="json"/>
         </Grid>
     </Grid>
 </ContentDialog>
