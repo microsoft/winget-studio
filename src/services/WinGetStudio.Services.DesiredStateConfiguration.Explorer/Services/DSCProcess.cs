@@ -10,6 +10,9 @@ using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 
+/// <summary>
+/// This class is responsible for interacting with the DSC process to perform various operations.
+/// </summary>
 internal sealed partial class DSCProcess : IDSCProcess
 {
     private readonly ILogger<DSCProcess> _logger;
@@ -19,12 +22,20 @@ internal sealed partial class DSCProcess : IDSCProcess
         _logger = logger;
     }
 
+    /// <inheritdoc/>
     public Task<DSCProcessResult> GetResourceSchemaAsync(string resource)
     {
+        // This implementation can potentially be removed once this issue is resolved:
+        // https://github.com/microsoft/winget-cli/issues/5829
         _logger.LogInformation($"Getting schema for DSC resource: {resource}");
         return Task.Run(() => ExecuteAsync("resource", "schema", "-r", resource, "-o", "json"));
     }
 
+    /// <summary>
+    /// Executes the DSC command with the specified arguments.
+    /// </summary>
+    /// <param name="args">The arguments to pass to the DSC command.</param>
+    /// <returns>>The result of the DSC process execution.</returns>
     private async Task<DSCProcessResult> ExecuteAsync(params string[] args)
     {
         _logger.LogInformation($"Executing DSC command with arguments: dsc {string.Join(' ', args)}");

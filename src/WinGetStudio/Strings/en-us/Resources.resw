@@ -704,6 +704,9 @@
   <data name="ResourceExplorer_View.Label" xml:space="preserve">
     <value>View</value>
   </data>
+  <data name="ResourceExplorer_CopyAsYaml.Label" xml:space="preserve">
+    <value>Copy as YAML</value>
+  </data>
   <data name="ResourceExplorer_SummaryView.Text" xml:space="preserve">
     <value>Summary view</value>
   </data>

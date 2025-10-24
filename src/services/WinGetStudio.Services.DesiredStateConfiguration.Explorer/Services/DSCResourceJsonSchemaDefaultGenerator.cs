@@ -42,12 +42,23 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
     /// <returns>The generated default JSON.</returns>
     public async Task<string> GenerateDefaultJsonFromSchemaAsync(JsonSchema jsonSchema)
     {
-        jsonSchema = await JsonSchema.FromJsonAsync(jsonSchema.ToJson());
-        RemoveReadOnlyProperties(jsonSchema);
-        RemoveAllNullTypes(jsonSchema);
-        var generator = new SampleJsonDataGenerator(_settings);
-        var sampleJson = generator.Generate(jsonSchema);
-        return sampleJson.ToString();
+        return await Task.Run(async () =>
+        {
+            // Clone the schema to avoid modifying the original.
+            jsonSchema = await JsonSchema.FromJsonAsync(jsonSchema.ToJson());
+
+            // The generated JSON should not include read-only properties.
+            RemoveReadOnlyProperties(jsonSchema);
+
+            // Remove all null types from schema properties and definitions 
+            // to ensure the generated JSON has a fully populated structure.
+            RemoveAllNullTypes(jsonSchema);
+
+            // Generate sample JSON data based on the modified schema.
+            var generator = new SampleJsonDataGenerator(_settings);
+            var sampleJson = generator.Generate(jsonSchema);
+            return sampleJson.ToString();
+        });
     }
 
     /// <summary>
@@ -62,18 +73,27 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
         }
     }
 
-    private void RemoveAllNullTypes(JsonSchema root)
+    /// <summary>
+    /// Remove all null types from the schema and its subschemas.
+    /// </summary>
+    /// <param name="root">The root JSON schema.</param>
+    private static void RemoveAllNullTypes(JsonSchema root)
     {
         if (root != null)
         {
-            foreach (var schema in GetAllSchemas(root))
+            var allSchemas = GetAllSchemas(root);
+            foreach (var schema in allSchemas)
             {
                 RemoveNullTypes(schema);
             }
         }
     }
 
-    private void RemoveNullTypes(JsonSchema schema)
+    /// <summary>
+    /// Remove all null types from the given schema.
+    /// </summary>
+    /// <param name="schema">The JSON schema.</param>
+    private static void RemoveNullTypes(JsonSchema schema)
     {
         // If the schema type includes Null, remove it.
         if (schema.Type.HasFlag(JsonObjectType.Null))
@@ -93,13 +113,18 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
         schema.ExtensionData?.Remove("x-nullable");
     }
 
+    /// <summary>
+    /// Remove members with null type from the given collection of schemas.
+    /// </summary>
+    /// <param name="schemas">The collection of JSON schemas.</param>
     private static void RemoveNullTypedMembers(ICollection<JsonSchema> schemas)
     {
-        if (schemas?.Count == 0)
+        if (schemas == null || schemas.Count == 0)
         {
             return;
         }
 
+        // Identify members to remove.
         var membersToRemove = schemas.Where(schema =>
         {
             schema = schema?.ActualSchema ?? schema;
@@ -108,25 +133,33 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
                 return false;
             }
 
+            // A member is considered null-typed if its type includes Null or
+            // it is explicitly marked as nullable.
             var includesNull = schema.Type.HasFlag(JsonObjectType.Null);
             var isExplicitlyNullable = schema.IsNullableRaw ?? false;
             return includesNull || isExplicitlyNullable;
         }).ToList();
 
+        // Remove null-typed members.
         foreach (var member in membersToRemove)
         {
             schemas.Remove(member);
         }
     }
 
+    /// <summary>
+    /// Get all schemas in the schema tree.
+    /// </summary>
+    /// <param name="root">The root JSON schema.</param>
+    /// <returns>>A list of all JSON schemas.</returns>
     private static List<JsonSchema> GetAllSchemas(JsonSchema root)
     {
         var result = new List<JsonSchema>();
         var stack = new Stack<JsonSchema>();
         var visited = new HashSet<JsonSchema>(ReferenceEqualityComparer.Instance);
 
+        // Traverse the schema tree using depth-first search.
         stack.Push(root);
-
         while (stack.Count > 0)
         {
             var current = stack.Pop();
@@ -136,9 +169,10 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
                 if (visited.Add(schema))
                 {
                     result.Add(schema);
-                    foreach (var child in GetChildrenSchemas(schema))
+                    var childrenSchemas = GetChildrenSchemas(schema);
+                    foreach (var childSchema in childrenSchemas)
                     {
-                        stack.Push(child);
+                        stack.Push(childSchema);
                     }
                 }
             }
@@ -147,6 +181,11 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
         return result;
     }
 
+    /// <summary>
+    /// Get the child schemas of the given schema.
+    /// </summary>
+    /// <param name="root">The JSON schema.</param>
+    /// <returns>A list of child JSON schemas.</returns>
     private static List<JsonSchema> GetChildrenSchemas(JsonSchema root)
     {
         if (root == null)

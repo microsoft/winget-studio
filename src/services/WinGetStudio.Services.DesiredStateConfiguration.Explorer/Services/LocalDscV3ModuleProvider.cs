@@ -39,6 +39,7 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
     {
         if (!dscModule.IsEnriched)
         {
+            // For local DSC v3 modules, we expect exactly one resource per module.
             if (dscModule.Resources?.Count == 1)
             {
                 var resource = dscModule.Resources.Values.First();
@@ -59,6 +60,7 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
     /// <inheritdoc/>
     public Task<JsonSchema> GetResourceSchemaAsync(DSCResource resource)
     {
+        // For local DSC v3 resources, the schema is the resource code itself.
         return JsonSchema.FromJsonAsync(resource.Code);
     }
 
@@ -93,6 +95,11 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
         };
     }
 
+    /// <summary>
+    /// Gets the resource schema for a given resource name.
+    /// </summary>
+    /// <param name="resourceName">The name of the resource.</param>
+    /// <returns>The JSON schema of the resource.</returns>
     private async Task<JsonSchema> GetResourceSchemaAsync(string resourceName)
     {
         try

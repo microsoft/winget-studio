@@ -111,6 +111,9 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     /// <inheritdoc/>
     public Task<JsonSchema> GetResourceSchemaAsync(DSCResource resource)
     {
+        // For PowerShell resources, we generate a basic schema where all properties
+        // are set to type 'none'. In the future, we may enhance this by inferring
+        // property types for more detailed schemas.
         var schema = new JsonSchema { Type = JsonObjectType.Object };
         foreach (var property in resource.Properties)
         {
