@@ -446,11 +446,18 @@ public sealed partial class MonacoEditor : UserControl
     /// <param name="uri">The URI to open.</param>
     private async Task ShowOpenUriDialogAsync(Uri uri)
     {
-        OpenUriDialog.Content = uri.ToString();
-        var result = await OpenUriDialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
+        try
         {
-            await Launcher.LaunchUriAsync(uri);
+            OpenUriDialog.Content = uri.ToString();
+            var result = await OpenUriDialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                await Launcher.LaunchUriAsync(uri);
+            }
+        }
+        catch
+        {
+            // No-op
         }
     }
 

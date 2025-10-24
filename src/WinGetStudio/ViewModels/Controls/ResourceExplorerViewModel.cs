@@ -20,6 +20,11 @@ public sealed partial class ResourceExplorerViewModel : ObservableRecipient
     public List<DSCProperty> Properties => _resource.Properties;
 
     /// <summary>
+    /// Gets the resource code.
+    /// </summary>
+    public string ResourceCode => _resource.Code;
+
+    /// <summary>
     /// Gets the resource syntax.
     /// </summary>
     public string ResourceSyntax => _resource.Syntax;

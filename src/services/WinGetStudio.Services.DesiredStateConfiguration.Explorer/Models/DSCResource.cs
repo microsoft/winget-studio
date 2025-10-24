@@ -27,6 +27,12 @@ public sealed class DSCResource
     public string Syntax { get; set; }
 
     /// <summary>
+    /// Gets or sets the syntax of the resource.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; }
+
+    /// <summary>
     /// Gets or sets the resource source.
     /// </summary>
     [JsonPropertyName("source")]

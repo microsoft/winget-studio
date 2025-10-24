@@ -59,7 +59,7 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
     /// <inheritdoc/>
     public Task<JsonSchema> GetResourceSchemaAsync(DSCResource resource)
     {
-        return JsonSchema.FromJsonAsync(resource.Syntax);
+        return JsonSchema.FromJsonAsync(resource.Code);
     }
 
     /// <inheritdoc/>

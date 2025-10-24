@@ -713,14 +713,17 @@
   <data name="ResourceExplorer_YamlCopied" xml:space="preserve">
     <value>YAML copied to clipboard</value>
   </data>
+  <data name="ResourceExplorer_YamlCopyFailed" xml:space="preserve">
+    <value>Failed to copy YAML to clipboard</value>
+  </data>
   <data name="ResourceExplorer_Name.Text" xml:space="preserve">
     <value>Name</value>
   </data>
   <data name="ResourceExplorer_Type.Text" xml:space="preserve">
     <value>Type</value>
   </data>
-  <data name="ResourceExplorer_Syntax.Text" xml:space="preserve">
-    <value>Syntax</value>
+  <data name="ResourceExplorer_Code.Text" xml:space="preserve">
+    <value>Code</value>
   </data>
   <data name="Settings_Resources.Text" xml:space="preserve">
     <value>Resources</value>

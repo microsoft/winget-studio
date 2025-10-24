@@ -21,19 +21,19 @@ public sealed partial class DSCProperty
     public string Type { get; set; }
 
     /// <summary>
-    /// Gets or sets the syntax representation of the object.
+    /// Gets or sets the code syntax for the property.
     /// </summary>
-    [JsonPropertyName("syntax")]
-    public string Syntax { get; set; }
+    [JsonPropertyName("code")]
+    public string Code { get; set; }
 
     /// <summary>
-    /// Converts the syntax string into a single-line format by removing
+    /// Converts the code syntax string into a single-line format by removing
     /// whitespace and combining segments.
     /// </summary>
-    /// <returns>A single-line syntax representation.</returns>
-    public string GetOneLinerSyntax()
+    /// <returns>A single-line code syntax representation.</returns>
+    public string GetOneLinerCode()
     {
-        var split = Syntax.Split(['\r', '\n', '\t'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        return string.Join(" ", split);
+        var split = Code?.Split(['\r', '\n', '\t'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return string.Join(" ", split ?? []);
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
@@ -16,6 +17,7 @@ public sealed partial class ResourceExplorer : ContentDialog
 {
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ResourceExplorer> _localizer;
+    private readonly ILogger<ResourceExplorer> _logger;
 
     public ResourceExplorerViewModel ViewModel { get; }
 
@@ -23,6 +25,7 @@ public sealed partial class ResourceExplorer : ContentDialog
     {
         _ui = App.GetService<IUIFeedbackService>();
         _localizer = App.GetService<IStringLocalizer<ResourceExplorer>>();
+        _logger = App.GetService<ILogger<ResourceExplorer>>();
         ViewModel = App.GetService<ResourceExplorerViewModelFactory>()(resource);
         InitializeComponent();
     }
@@ -56,11 +59,22 @@ public sealed partial class ResourceExplorer : ContentDialog
     /// <param name="e">>The event data.</param>
     private async void OnCopyAsYaml(object sender, RoutedEventArgs e)
     {
-        var dataPackage = new DataPackage();
-        var sampleYaml = await ViewModel.GenerateDefaultYamlAsync();
-        dataPackage.SetText(sampleYaml);
-        Clipboard.SetContent(dataPackage);
-        _ui.ShowTimedNotification(_localizer["ResourceExplorer_YamlCopied"], NotificationMessageSeverity.Success);
-        Hide();
+        try
+        {
+            var dataPackage = new DataPackage();
+            var sampleYaml = await ViewModel.GenerateDefaultYamlAsync();
+            dataPackage.SetText(sampleYaml);
+            Clipboard.SetContent(dataPackage);
+            _ui.ShowTimedNotification(_localizer["ResourceExplorer_YamlCopied"], NotificationMessageSeverity.Success);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to copy sample YAML to clipboard.");
+            _ui.ShowTimedNotification(_localizer["ResourceExplorer_YamlCopyFailed"], NotificationMessageSeverity.Error);
+        }
+        finally
+        {
+            Hide();
+        }
     }
 }

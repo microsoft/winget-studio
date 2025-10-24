@@ -5,10 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using Namotion.Reflection;
 using NJsonSchema;
-using NJsonSchema.Generation;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
@@ -86,12 +83,13 @@ public sealed partial class DSCModule
                     Resources[definition.ClassName] = resource;
                 }
 
-                resource.Syntax = definition.ClassAst.Extent.Text;
+                resource.Code = definition.ClassAst.Extent.Text;
+                resource.Syntax = "powershell";
                 resource.Properties = [.. definition.Properties.Select(prop => new DSCProperty
                 {
                     Name = prop.Name,
                     Type = prop.PropertyType.TypeName.Name,
-                    Syntax = prop.Extent.Text,
+                    Code = prop.Extent.Text,
                 })];
             }
         }
@@ -116,7 +114,8 @@ public sealed partial class DSCModule
             }
 
             var schemaJson = schema.ToJson();
-            resource.Syntax = schemaJson;
+            resource.Code = schemaJson;
+            resource.Syntax = "json";
             resource.Properties = [];
             var jsonSchema = JsonNode.Parse(schemaJson).AsObject();
             foreach (var property in schema.ActualProperties)
@@ -126,7 +125,7 @@ public sealed partial class DSCModule
                 {
                     Name = property.Key,
                     Type = property.Value.Type.ToString(),
-                    Syntax = propertyNode.ToJsonString(new() { WriteIndented = true }),
+                    Code = propertyNode.ToJsonString(new() { WriteIndented = true }),
                 });
             }
         }

@@ -14,7 +14,7 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Services;
 internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResourceJsonSchemaDefaultGenerator
 {
     private readonly SampleJsonDataGeneratorSettings _settings;
-    private readonly HashSet<string> _readOnlyProperties = ["_inDesiredState"];
+    private readonly HashSet<string> _readOnlyProperties = ["_inDesiredState", "SID"];
 
     public DSCResourceJsonSchemaDefaultGenerator()
     {

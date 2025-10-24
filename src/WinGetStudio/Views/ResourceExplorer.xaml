@@ -56,7 +56,7 @@
 
             <!-- Summary view -->
             <ListView Grid.Row="1"
-                      ItemsSource="{x:Bind ViewModel.Properties, Mode=OneWay}"
+                      ItemsSource="{x:Bind ViewModel.Properties}"
                       SelectionMode="None"
                       Visibility="{x:Bind SummaryView.IsChecked, Mode=OneWay}">
                 <ListView.Header>
@@ -67,13 +67,13 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Name | Type | Syntax-->
+                        <!-- Name | Type | Code -->
                         <TextBlock x:Uid="ResourceExplorer_Name"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock x:Uid="ResourceExplorer_Type"
                                    Grid.Column="1"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Uid="ResourceExplorer_Syntax"
+                        <TextBlock x:Uid="ResourceExplorer_Code"
                                    Grid.Column="2"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Grid>
@@ -116,14 +116,14 @@
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis" />
 
-                            <!-- Property syntax -->
+                            <!-- Property Code -->
                             <ScrollViewer Grid.Column="2"
                                           HorizontalScrollBarVisibility="Auto"
                                           HorizontalScrollMode="Auto">
                                 <TextBlock IsTextSelectionEnabled="True"
                                            VerticalAlignment="Center"
                                            FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                                           Text="{x:Bind GetOneLinerSyntax()}"/>
+                                           Text="{x:Bind GetOneLinerCode()}"/>
                             </ScrollViewer>
 
                         </Grid>
@@ -136,9 +136,9 @@
                                         Height="400"
                                         Padding="15"
                                         Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay}"
-                                        Text="{x:Bind ViewModel.ResourceSyntax, Mode=OneWay}"
+                                        Text="{x:Bind ViewModel.ResourceCode}"
                                         IsReadOnly="True"
-                                        Syntax="json"/>
+                                        Syntax="{x:Bind ViewModel.ResourceSyntax}"/>
         </Grid>
     </Grid>
 </ContentDialog>
