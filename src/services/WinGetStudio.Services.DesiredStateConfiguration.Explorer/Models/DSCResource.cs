@@ -35,8 +35,8 @@ public sealed class DSCResource
     /// <summary>
     /// Gets or sets the resource source.
     /// </summary>
-    [JsonPropertyName("source")]
-    public DSCModuleSource Source { get; set; }
+    [JsonPropertyName("module_source")]
+    public DSCModuleSource ModuleSource { get; set; }
 
     /// <summary>
     /// Gets or sets the properties of the resource.

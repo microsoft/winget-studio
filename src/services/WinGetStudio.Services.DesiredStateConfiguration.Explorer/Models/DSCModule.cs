@@ -125,7 +125,7 @@ public sealed partial class DSCModule
             Name = name,
             DSCVersion = dscVersion,
             Version = Version,
-            Source = Source,
+            ModuleSource = Source,
         };
     }
 }

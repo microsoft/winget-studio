@@ -59,7 +59,7 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     /// <inheritdoc/>
     public async Task<string> GenerateDefaultYamlAsync(DSCResource resource)
     {
-        var provider = GetModuleProvider(resource.Source);
+        var provider = GetModuleProvider(resource.ModuleSource);
         var schema = await provider.GetResourceSchemaAsync(resource);
         if (schema != null)
         {
@@ -67,7 +67,7 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
         }
         else
         {
-            _logger.LogWarning($"No schema found for resource '{resource.Name}' from source '{resource.Source}'. Cannot generate sample YAML.");
+            _logger.LogWarning($"No schema found for resource '{resource.Name}' from source '{resource.ModuleSource}'. Cannot generate sample YAML.");
             return string.Empty;
         }
     }
