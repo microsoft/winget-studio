@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using NJsonSchema;
 
@@ -48,86 +48,68 @@ public sealed partial class DSCModule
     public bool IsVirtual { get; set; }
 
     /// <summary>
-    /// Populates the resources dictionary with the given resource names.
+    /// Adds a new resource to the module.
     /// </summary>
-    /// <param name="resourceNames">The resource names.</param>
-    public void PopulateResources(IEnumerable<string> resourceNames, DSCVersion dscVersion, DSCModuleSource moduleSource)
+    /// <param name="resourceName">The name of the resource.</param>
+    /// <param name="dscVersion">The DSC version.</param>
+    /// <returns>True if the resource was added; otherwise, false.</returns>
+    public bool AddResource(string resourceName, DSCVersion dscVersion)
     {
         lock (Resources)
         {
             Resources ??= [];
-            foreach (var name in resourceNames)
-            {
-                if (!Resources.ContainsKey(name))
-                {
-                    Resources[name] = CreateResource(name, dscVersion, moduleSource);
-                }
-            }
+            return Resources.TryAdd(resourceName, CreateResource(resourceName, dscVersion));
         }
     }
 
     /// <summary>
-    /// Populates the resources dictionary with the given resource class definitions.
+    /// Enriches an existing resource with class definition details.
     /// </summary>
-    /// <param name="classDefinitions">The resource class definitions.</param>
-    public void PopulateResources(IEnumerable<DSCResourceClassDefinition> classDefinitions, DSCVersion dscVersion, DSCModuleSource moduleSource)
+    /// <param name="resourceName">The name of the resource.</param>
+    /// <param name="classDefinition">The class definition.</param>
+    /// <returns>True if the resource was enriched; otherwise, false.</returns>
+    public bool EnrichResource(string resourceName, DSCResourceClassDefinition classDefinition)
     {
         lock (Resources)
         {
-            Resources ??= [];
-            foreach (var definition in classDefinitions)
+            if (Resources.TryGetValue(resourceName, out var resource))
             {
-                if (!Resources.TryGetValue(definition.ClassName, out var resource))
-                {
-                    resource = CreateResource(definition.ClassName, dscVersion, moduleSource);
-                    Resources[definition.ClassName] = resource;
-                }
-
-                resource.Code = definition.ClassAst.Extent.Text;
-                resource.Syntax = "powershell";
-                resource.Properties = [.. definition.Properties.Select(prop => new DSCProperty
+                Debug.Assert(resource.DSCVersion != DSCVersion.V3, "DSC v3 resources should be enriched using JSON schema.");
+                resource.Code = classDefinition.ClassAst.Extent.Text;
+                resource.Properties = [.. classDefinition.Properties.Select(prop => new DSCProperty
                 {
                     Name = prop.Name,
                     Type = prop.PropertyType.TypeName.Name,
                     Code = prop.Extent.Text,
                 })];
             }
+
+            return resource != null;
         }
     }
 
     /// <summary>
-    /// Populates a resource with the given schema.
+    /// Enriches an existing resource with JSON schema details.
     /// </summary>
     /// <param name="resourceName">The name of the resource.</param>
-    /// <param name="schema">The JSON schema of the resource.</param>
-    /// <param name="dscVersion">The DSC version.</param>
-    public void PopulateResourceFromSchema(string resourceName, JsonSchema schema, DSCVersion dscVersion, DSCModuleSource moduleSource)
+    /// <param name="schema">The JSON schema.</param>
+    /// <returns>True if the resource was enriched; otherwise, false.</returns>
+    public bool EnrichResource(string resourceName, JsonSchema schema)
     {
-        DSCResource resource;
         lock (Resources)
         {
-            Resources ??= [];
-            if (!Resources.TryGetValue(resourceName, out resource))
+            if (Resources.TryGetValue(resourceName, out var resource))
             {
-                resource = CreateResource(resourceName, dscVersion, moduleSource);
-                Resources[resourceName] = resource;
+                Debug.Assert(resource.DSCVersion == DSCVersion.V3, "Only DSC v3 resources should be enriched using JSON schema.");
+                resource.Code = schema.ToJson();
+                resource.Properties = [..schema.ActualProperties?.Select(prop => new DSCProperty
+                {
+                    Name = prop.Key,
+                    Type = prop.Value.Type.ToString(),
+                })];
             }
 
-            var schemaJson = schema.ToJson();
-            resource.Code = schemaJson;
-            resource.Syntax = "json";
-            resource.Properties = [];
-            var jsonSchema = JsonNode.Parse(schemaJson).AsObject();
-            foreach (var property in schema.ActualProperties)
-            {
-                var propertyNode = jsonSchema?["properties"]?[property.Key] ?? new JsonObject();
-                resource.Properties.Add(new()
-                {
-                    Name = property.Key,
-                    Type = property.Value.Type.ToString(),
-                    Code = propertyNode.ToJsonString(new() { WriteIndented = true }),
-                });
-            }
+            return resource != null;
         }
     }
 
@@ -136,14 +118,14 @@ public sealed partial class DSCModule
     /// </summary>
     /// <param name="name">The name of the resource.</param>
     /// <returns>The created DSCResource.</returns>
-    private DSCResource CreateResource(string name, DSCVersion dscVersion, DSCModuleSource moduleSource)
+    private DSCResource CreateResource(string name, DSCVersion dscVersion)
     {
         return new DSCResource()
         {
             Name = name,
-            Version = Version,
             DSCVersion = dscVersion,
-            Source = moduleSource,
+            Version = Version,
+            Source = Source,
         };
     }
 }

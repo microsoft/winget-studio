@@ -71,7 +71,17 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
 
                     // Populate resources
                     var resourceNames = GetResourceNamesFromTags(moduleMetadata);
-                    dscModule.PopulateResources(resourceNames, DSCVersion.Unknown, DSCModuleSource.PSGallery);
+                    foreach (var resourceName in resourceNames)
+                    {
+                        if (dscModule.AddResource(resourceName, DSCVersion.Unknown))
+                        {
+                            _logger.LogInformation($"Added resource '{resourceName}' to module '{dscModule.Id}' from tags.");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Resource '{resourceName}' already exists in module '{dscModule.Id}'. Skipping addition from tags.");
+                        }
+                    }
 
                     // Add the module to the list
                     dscModules.TryAdd(dscModule.Id, dscModule);
@@ -102,9 +112,19 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     {
         if (!dscModule.IsEnriched)
         {
-            var definitions = await GetResourceDefinitionsAsync(dscModule);
-            dscModule.PopulateResources(definitions, DSCVersion.Unknown, DSCModuleSource.PSGallery);
             dscModule.IsEnriched = true;
+            var definitions = await GetResourceDefinitionsAsync(dscModule);
+            foreach (var definition in definitions)
+            {
+                if (dscModule.EnrichResource(definition.ClassName, definition))
+                {
+                    _logger.LogInformation($"Enriched module '{dscModule.Id}' with resource details for resource '{definition.ClassName}'.");
+                }
+                else
+                {
+                    _logger.LogWarning($"Resource '{definition.ClassName}' not found in module '{dscModule.Id}' during enrichment.");
+                }
+            }
         }
     }
 

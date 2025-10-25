@@ -50,7 +50,7 @@ internal sealed partial class DSCResourceJsonSchemaDefaultGenerator : IDSCResour
             // The generated JSON should not include read-only properties.
             RemoveReadOnlyProperties(jsonSchema);
 
-            // Remove all null types from schema properties and definitions 
+            // Remove all null types from schema properties and definitions
             // to ensure the generated JSON has a fully populated structure.
             RemoveAllNullTypes(jsonSchema);
 

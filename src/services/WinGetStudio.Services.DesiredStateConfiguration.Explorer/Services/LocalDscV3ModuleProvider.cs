@@ -39,6 +39,8 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
     {
         if (!dscModule.IsEnriched)
         {
+            dscModule.IsEnriched = true;
+
             // For local DSC v3 modules, we expect exactly one resource per module.
             if (dscModule.Resources?.Count == 1)
             {
@@ -46,8 +48,14 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
                 var schema = await GetResourceSchemaAsync(resource.Name);
                 if (schema != null)
                 {
-                    dscModule.PopulateResourceFromSchema(resource.Name, schema, DSCVersion.V3, DSCModuleSource.LocalDscV3);
-                    dscModule.IsEnriched = true;
+                    if (dscModule.EnrichResource(resource.Name, schema))
+                    {
+                        _logger.LogInformation($"Enriched module '{dscModule.Id}' with resource details for resource '{resource.Name}'.");
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Resource '{resource.Name}' not found in module '{dscModule.Id}' during enrichment.");
+                    }
                 }
             }
             else
@@ -78,7 +86,7 @@ internal sealed class LocalDscV3ModuleProvider : IModuleProvider
                 Source = DSCModuleSource.LocalDscV3,
                 IsVirtual = true,
             };
-            module.PopulateResources([resource.Name], DSCVersion.V3, DSCModuleSource.LocalDscV3);
+            module.AddResource(resource.Name, DSCVersion.V3);
             catalog.Modules.TryAdd(resource.Name, module);
         }
 

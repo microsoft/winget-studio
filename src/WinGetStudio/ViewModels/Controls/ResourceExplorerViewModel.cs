@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
@@ -13,6 +14,12 @@ public sealed partial class ResourceExplorerViewModel : ObservableRecipient
 {
     private readonly IDSCExplorer _dscExplorer;
     private readonly DSCResource _resource;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSummaryView))]
+    public partial bool IsCodeView { get; set; }
+
+    public bool IsSummaryView => !IsCodeView;
 
     /// <summary>
     /// Gets the properties of the resource.
@@ -28,6 +35,11 @@ public sealed partial class ResourceExplorerViewModel : ObservableRecipient
     /// Gets the resource syntax.
     /// </summary>
     public string ResourceSyntax => _resource.Syntax;
+
+    /// <summary>
+    /// Gets a value indicating whether the schema can be viewed.
+    /// </summary>
+    public bool CanShowJsonSchema => _resource.DSCVersion == DSCVersion.V3;
 
     public ResourceExplorerViewModel(DSCResource resource, IDSCExplorer explorer)
     {
@@ -47,5 +59,11 @@ public sealed partial class ResourceExplorerViewModel : ObservableRecipient
         }
 
         return null;
+    }
+
+    [RelayCommand]
+    private void OnShowJsonSchema()
+    {
+        IsCodeView = true;
     }
 }

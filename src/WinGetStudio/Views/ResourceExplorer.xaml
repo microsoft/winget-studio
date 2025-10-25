@@ -22,7 +22,7 @@
         <GridLength x:Key="TypeColumnWidth">150</GridLength>
     </ContentDialog.Resources>
 
-    <Grid>
+    <Grid x:Name="PageRoot" Tag="{x:Bind}">
         <!-- Close button -->
         <Button Style="{ThemeResource AlternateCloseButtonStyle}" Click="OnClose" />
 
@@ -38,12 +38,12 @@
                 <AppBarButton x:Uid="ResourceExplorer_View" Icon="View">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <RadioMenuFlyoutItem x:Name="SummaryView" x:Uid="ResourceExplorer_SummaryView" IsChecked="True">
+                            <RadioMenuFlyoutItem x:Name="SummaryView" x:Uid="ResourceExplorer_SummaryView" IsChecked="{x:Bind ViewModel.IsSummaryView, Mode=OneWay}">
                                 <RadioMenuFlyoutItem.Icon>
                                     <FontIcon Glyph="&#xF232;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
                                 </RadioMenuFlyoutItem.Icon>
                             </RadioMenuFlyoutItem>
-                            <RadioMenuFlyoutItem x:Name="CodeView" x:Uid="ResourceExplorer_CodeView">
+                            <RadioMenuFlyoutItem x:Name="CodeView" x:Uid="ResourceExplorer_CodeView" IsChecked="{x:Bind ViewModel.IsCodeView, Mode=TwoWay}">
                                 <RadioMenuFlyoutItem.Icon>
                                     <FontIcon Glyph="&#xE943;" />
                                 </RadioMenuFlyoutItem.Icon>
@@ -120,12 +120,18 @@
                             <ScrollViewer Grid.Column="2"
                                           HorizontalScrollBarVisibility="Auto"
                                           HorizontalScrollMode="Auto">
-                                <TextBlock IsTextSelectionEnabled="True"
-                                           VerticalAlignment="Center"
-                                           FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                                           Text="{x:Bind GetOneLinerCode()}"/>
+                                <controls:SwitchPresenter Value="{Binding ElementName=PageRoot, Path=Tag.ViewModel.CanShowJsonSchema}" TargetType="x:Boolean">
+                                    <controls:Case Value="True">
+                                        <HyperlinkButton x:Uid="ResourceExplorer_ViewJsonSchema" Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.ShowJsonSchemaCommand}" />
+                                    </controls:Case>
+                                    <controls:Case Value="False">
+                                        <TextBlock IsTextSelectionEnabled="True"
+                                                   VerticalAlignment="Center"
+                                                   FontFamily="{StaticResource CascadiaMonoFontFamily}"
+                                                   Text="{x:Bind GetOneLinerCode()}"/>
+                                    </controls:Case>
+                                </controls:SwitchPresenter>
                             </ScrollViewer>
-
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
