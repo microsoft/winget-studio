@@ -16,19 +16,16 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
 {
     private readonly ILogger<ModuleCatalogRepository> _logger;
     private readonly IEnumerable<IModuleProvider> _moduleProviders;
-    private readonly IModuleCatalogJsonFileCacheProvider _jsonCacheProvider;
-    private readonly IModuleCatalogMemoryCacheProvider _memoryCacheProvider;
+    private readonly IModuleCatalogCacheManager _cacheManager;
 
     public ModuleCatalogRepository(
         ILogger<ModuleCatalogRepository> logger,
         IEnumerable<IModuleProvider> moduleProviders,
-        IModuleCatalogJsonFileCacheProvider jsonCacheProvider,
-        IModuleCatalogMemoryCacheProvider memoryCacheProvider)
+        IModuleCatalogCacheManager cacheManager)
     {
         _logger = logger;
         _moduleProviders = moduleProviders;
-        _jsonCacheProvider = jsonCacheProvider;
-        _memoryCacheProvider = memoryCacheProvider;
+        _cacheManager = cacheManager;
     }
 
     /// <inheritdoc/>
@@ -46,11 +43,7 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     {
         var provider = GetModuleProvider(dscModule);
         await provider.EnrichModuleWithResourceDetailsAsync(dscModule);
-        if (_memoryCacheProvider.TryGet(provider.Name, out var inMemory))
-        {
-            _logger.LogInformation($"Updating cached module catalog for '{provider.Name}' after enriching module '{dscModule.Id}'.");
-            await _jsonCacheProvider.SaveCacheAsync(inMemory);
-        }
+        await _cacheManager.UpdateCacheAsync(provider);
     }
 
     /// <inheritdoc/>
@@ -58,19 +51,8 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     {
         await Parallel.ForEachAsync(_moduleProviders, async (provider, _) =>
         {
-            await ClearCacheAsync(provider);
+            await _cacheManager.ClearCacheAsync(provider);
         });
-    }
-
-    /// <summary>
-    /// Clears the cache for a specific module provider.
-    /// </summary>
-    /// <param name="moduleProvider">The module provider to clear the cache for.</param>
-    private async Task ClearCacheAsync(IModuleProvider moduleProvider)
-    {
-        _logger.LogInformation($"Clearing cache for module catalog '{moduleProvider.Name}'.");
-        _memoryCacheProvider.Remove(moduleProvider.Name);
-        await _jsonCacheProvider.ClearCacheAsync(moduleProvider.Name);
     }
 
     /// <summary>
@@ -81,32 +63,21 @@ internal sealed class ModuleCatalogRepository : IModuleCatalogRepository
     private async Task<DSCModuleCatalog> GetModuleCatalogAsync(string catalogName)
     {
         var moduleProvider = GetModuleProvider(catalogName);
-
-        // 1 Check in-memory cache first
-        if (_memoryCacheProvider.TryGet(catalogName, out var inMemory))
+        var cachedCatalog = await _cacheManager.GetCacheAsync(moduleProvider);
+        if (cachedCatalog != null)
         {
-            _logger.LogInformation($"Using in-memory cached module catalog for '{catalogName}'.");
-            return inMemory;
+            _logger.LogInformation($"Using cached module catalog for '{catalogName}'.");
+            return cachedCatalog;
         }
 
-        // 2 Check JSON file cache next
-        var jsonCatalog = await _jsonCacheProvider.GetModuleCatalogAsync(catalogName);
-        if (jsonCatalog != null)
-        {
-            _logger.LogInformation($"Using JSON cached module catalog for '{catalogName}'.");
-            _memoryCacheProvider.Set(jsonCatalog);
-            return jsonCatalog;
-        }
-
-        // 3. Fetch from provider
+        // If no cache, fetch from provider
         _logger.LogInformation($"Fetching module catalog for '{catalogName}' from provider.");
         var result = await moduleProvider.GetModuleCatalogAsync();
 
         // 4. Save to cache if enabled
-        if (result?.CanCache ?? false)
+        if (result.CanCache)
         {
-            _memoryCacheProvider.Set(result.Catalog);
-            await _jsonCacheProvider.SaveCacheAsync(result.Catalog);
+            await _cacheManager.SaveCacheAsync(result.Catalog);
         }
 
         return result.Catalog;

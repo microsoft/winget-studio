@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
-using WinGetStudio.Services.Core.Contracts;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.Core.Helpers;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -31,6 +30,7 @@ public static class ServiceExtensions
         services.AddSingleton<INuGetDownloader, NuGetDownloader>();
         services.AddSingleton<IModuleCatalogMemoryCacheProvider, ModuleCatalogMemoryCacheProvider>();
         services.AddSingleton<IModuleCatalogRepository, ModuleCatalogRepository>();
+        services.AddSingleton<IModuleCatalogCacheManager, ModuleCatalogCacheManager>();
         services.AddSingleton<IModuleCatalogJsonFileCacheProvider>(sp =>
         {
             return ActivatorUtilities.CreateInstance<ModuleCatalogJsonFileCacheProvider>(sp, jsonCacheDirectory);
