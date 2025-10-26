@@ -306,7 +306,6 @@ public sealed partial class MonacoEditor : UserControl
         SetIsLoading(false);
         SetEditorText(Text);
         Editor.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
-        Editor.Focus(FocusState.Programmatic);
     }
 
     /// <summary>
