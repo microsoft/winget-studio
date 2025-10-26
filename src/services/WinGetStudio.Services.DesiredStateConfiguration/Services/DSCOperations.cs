@@ -4,11 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
-using Windows.Foundation;
 using Windows.Storage.Streams;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
@@ -27,65 +26,82 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc/>
-    public async Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file)
+    public async Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file, CancellationToken ct = default)
     {
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-        var outOfProcResult = await OpenConfigurationSetAsync(file, processor);
+        var outOfProcResult = await OpenConfigurationSetInternalAsync(file, processor, ct);
         return new DSCSet(processor, outOfProcResult);
     }
 
     /// <inheritdoc />
-    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ValidateSetAsync(IDSCSet inputSet)
+    public async Task<IDSCApplySetResult> ValidateSetAsync(IDSCSet inputSet, IProgress<IDSCSetChangeData> progress = null, CancellationToken ct = default)
     {
         if (inputSet is not DSCSet dscSet)
         {
             throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
         }
 
-        return AsyncInfo.Run<IDSCApplySetResult, IDSCSetChangeData>(async (cancellationToken, progress) =>
+        try
         {
             _logger.LogInformation("Starting to validate configuration set");
-            var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.PerformConsistencyCheckOnly);
+            var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.PerformConsistencyCheckOnly, ct).ConfigureAwait(false);
             _logger.LogInformation($"Validate configuration finished.");
             return inProcResult;
-        });
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Validate configuration operation was canceled.");
+            throw;
+        }
     }
 
     /// <inheritdoc />
-    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet inputSet)
+    public async Task<IDSCApplySetResult> ApplySetAsync(IDSCSet inputSet, IProgress<IDSCSetChangeData> progress = null, CancellationToken ct = default)
     {
         if (inputSet is not DSCSet dscSet)
         {
             throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
         }
 
-        return AsyncInfo.Run<IDSCApplySetResult, IDSCSetChangeData>(async (cancellationToken, progress) =>
+        try
         {
             _logger.LogInformation("Starting to apply configuration set");
-            var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.None);
+            var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.None, ct).ConfigureAwait(false);
             _logger.LogInformation($"Apply configuration finished.");
             return inProcResult;
-        });
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Apply configuration operation was canceled.");
+            throw;
+        }
     }
 
     /// <inheritdoc/>
-    public IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet)
+    public async Task<IDSCTestSetResult> TestSetAsync(IDSCSet inputSet, IProgress<IDSCTestUnitResult> progress = null, CancellationToken ct = default)
     {
         if (inputSet is not DSCSet dscSet)
         {
             throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
         }
 
-        return AsyncInfo.Run<IDSCTestSetResult, IDSCTestUnitResult>(async (cancellationToken, progress) =>
+        try
         {
             _logger.LogInformation("Starting to test configuration set");
+            ct.ThrowIfCancellationRequested();
             var task = dscSet.Processor.TestSetAsync(dscSet.ConfigSet);
-            task.Progress += (sender, args) => progress.Report(new DSCTestUnitResult(args));
-            var outOfProcResult = await task;
+            task.Progress += (sender, args) => progress?.Report(new DSCTestUnitResult(args));
+            using var reg = ct.Register(task.Cancel);
+            var outOfProcResult = await task.AsTask(ct).ConfigureAwait(false);
             var result = new DSCTestSetResult(outOfProcResult);
             _logger.LogInformation($"Test configuration finished with result: {result.TestResult}");
             return result;
-        });
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Test configuration operation was canceled.");
+            throw;
+        }
     }
 
     /// <inheritdoc />
@@ -122,45 +138,81 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public async Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit inputUnit)
+    public async Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit inputUnit, CancellationToken ct = default)
     {
         if (inputUnit is not DSCUnit dscUnit)
         {
             throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
         }
 
-        ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-        var result = await Task.Run(() => processor.GetUnitSettings(dscUnit.ConfigUnit));
-        return new DSCGetUnitResult(result);
+        try
+        {
+            _logger.LogInformation($"Getting unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
+            ct.ThrowIfCancellationRequested();
+            ConfigurationStaticFunctions config = new();
+            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+            var task = processor.GetUnitSettingsAsync(dscUnit.ConfigUnit);
+            using var reg = ct.Register(task.Cancel);
+            var result = await task.AsTask(ct).ConfigureAwait(false);
+            return new DSCGetUnitResult(result);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Get unit operation was canceled.");
+            throw;
+        }
     }
 
     /// <inheritdoc />
-    public async Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit inputUnit)
+    public async Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit inputUnit, CancellationToken ct = default)
     {
         if (inputUnit is not DSCUnit dscUnit)
         {
             throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
         }
 
-        ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-        var result = await Task.Run(() => processor.ApplyUnit(dscUnit.ConfigUnit));
-        return new DSCApplyUnitResult(result);
+        try
+        {
+            _logger.LogInformation($"Setting unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
+            ct.ThrowIfCancellationRequested();
+            ConfigurationStaticFunctions config = new();
+            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+            var task = processor.ApplyUnitAsync(dscUnit.ConfigUnit);
+            using var reg = ct.Register(task.Cancel);
+            var result = await task.AsTask(ct).ConfigureAwait(false);
+            return new DSCApplyUnitResult(result);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Set unit operation was canceled.");
+            throw;
+        }
     }
 
     /// <inheritdoc />
-    public async Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit inputUnit)
+    public async Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit inputUnit, CancellationToken ct = default)
     {
         if (inputUnit is not DSCUnit dscUnit)
         {
             throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
         }
 
-        ConfigurationStaticFunctions config = new();
-        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-        var result = await Task.Run(() => processor.TestUnit(dscUnit.ConfigUnit));
-        return new DSCTestUnitResult(result);
+        try
+        {
+            _logger.LogInformation($"Testing unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
+            ct.ThrowIfCancellationRequested();
+            ConfigurationStaticFunctions config = new();
+            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+            var task = processor.TestUnitAsync(dscUnit.ConfigUnit);
+            using var reg = ct.Register(task.Cancel);
+            var result = await task.AsTask(ct).ConfigureAwait(false);
+            return new DSCTestUnitResult(result);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Test unit operation was canceled.");
+            throw;
+        }
     }
 
     public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()
@@ -229,25 +281,37 @@ internal sealed class DSCOperations : IDSCOperations
     /// Open a configuration set using DSC configuration API
     /// </summary>
     /// <param name="file">Configuration file</param>
+    /// <param name="ct">Cancellation token</param>
     /// <returns>Configuration set</returns>
     /// <exception cref="OpenConfigurationSetException">Thrown when the configuration set cannot be opened</exception>
-    private async Task<ConfigurationSet> OpenConfigurationSetAsync(IDSCFile file, ConfigurationProcessor processor)
+    private async Task<ConfigurationSet> OpenConfigurationSetInternalAsync(IDSCFile file, ConfigurationProcessor processor, CancellationToken ct)
     {
-        var inputStream = await StringToStreamAsync(file.Content);
-        var openConfigResult = processor.OpenConfigurationSet(inputStream);
-        var configSet = openConfigResult.Set ?? throw new OpenConfigurationSetException(openConfigResult);
-
-        // Set input file path in the configuration set to inform the
-        // processor about the working directory when applying the
-        // configuration
-        if (file.FileInfo != null)
+        try
         {
-            configSet.Name = file.FileInfo.Name;
-            configSet.Origin = file.FileInfo.Directory.FullName;
-            configSet.Path = file.FileInfo.FullName;
-        }
+            ct.ThrowIfCancellationRequested();
+            var inputStream = await StringToStreamAsync(file.Content);
+            var task = processor.OpenConfigurationSetAsync(inputStream);
+            using var reg = ct.Register(task.Cancel);
+            var result = await task.AsTask(ct).ConfigureAwait(false);
+            var configSet = result.Set ?? throw new OpenConfigurationSetException(result);
 
-        return configSet;
+            // Set input file path in the configuration set to inform the
+            // processor about the working directory when applying the
+            // configuration
+            if (file.FileInfo != null)
+            {
+                configSet.Name = file.FileInfo.Name;
+                configSet.Origin = file.FileInfo.Directory.FullName;
+                configSet.Path = file.FileInfo.FullName;
+            }
+
+            return configSet;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Open configuration operation was canceled.");
+            throw;
+        }
     }
 
     /// <summary>
@@ -331,11 +395,17 @@ internal sealed class DSCOperations : IDSCOperations
     /// <param name="dscSet">Configuration set to apply</param>
     /// <param name="flags">Apply flags</param>
     /// <returns>Apply result</returns>
-    private async Task<DSCApplySetResult> ApplySetInternalAsync(IProgress<IDSCSetChangeData> progress, DSCSet dscSet, ApplyConfigurationSetFlags flags)
+    private async Task<DSCApplySetResult> ApplySetInternalAsync(
+        IProgress<IDSCSetChangeData> progress,
+        DSCSet dscSet,
+        ApplyConfigurationSetFlags flags,
+        CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var task = dscSet.Processor.ApplySetAsync(dscSet.ConfigSet, flags);
-        task.Progress += (sender, args) => progress.Report(new DSCSetChangeData(args));
-        var outOfProcResult = await task;
+        task.Progress += (sender, args) => progress?.Report(new DSCSetChangeData(args));
+        using var reg = ct.Register(task.Cancel);
+        var outOfProcResult = await task.AsTask(ct).ConfigureAwait(false);
         var result = new DSCApplySetResult(dscSet, outOfProcResult);
         return result.IsOk ? result : throw new ApplyConfigurationSetException(result);
     }

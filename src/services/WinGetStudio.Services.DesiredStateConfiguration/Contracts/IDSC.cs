@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -11,35 +12,35 @@ namespace WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 public interface IDSC
 {
     /// <inheritdoc cref="IDSCDeployment.IsUnstubbedAsync" />
-    public Task<bool> IsUnstubbedAsync();
+    Task<bool> IsUnstubbedAsync();
 
     /// <inheritdoc cref="IDSCDeployment.UnstubAsync" />
-    public Task<bool> UnstubAsync();
+    Task<bool> UnstubAsync();
 
     /// <inheritdoc cref="IDSCOperations.OpenConfigurationSetAsync" />
-    public Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file);
+    Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file, CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.ValidateSetAsync" />/>
-    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ValidateSetAsync(IDSCSet dscSet);
+    Task<IDSCApplySetResult> ValidateSetAsync(IDSCSet dscSet, IProgress<IDSCSetChangeData> progress = null, CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.ApplySetAsync" />
-    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet dscSet);
+    Task<IDSCApplySetResult> ApplySetAsync(IDSCSet dscSet, IProgress<IDSCSetChangeData> progress = null, CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.TestSetAsync" />
-    public IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet);
+    Task<IDSCTestSetResult> TestSetAsync(IDSCSet inputSet, IProgress<IDSCTestUnitResult> progress = null,  CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.GetConfigurationUnitDetails" />
-    public void GetConfigurationUnitDetails(IDSCSet dscSet);
+    void GetConfigurationUnitDetails(IDSCSet dscSet);
 
     /// <inheritdoc cref="IDSCOperations.GetUnitAsync" />
-    public Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit unit);
+    Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit unit, CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.SetUnitAsync"/>
-    public Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit unit);
+    Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit unit, CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.TestUnitAsync"/>
-    public Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit unit);
+    Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit unit, CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.GetDscV3ResourcesAsync"/>
-    public Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
+    Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
 }
