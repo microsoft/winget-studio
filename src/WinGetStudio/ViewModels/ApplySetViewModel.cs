@@ -67,6 +67,10 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
         Units = new(_units);
     }
 
+    /// <summary>
+    /// Applies the configuration set asynchronously.
+    /// </summary>
+    /// <returns>The result of the apply operation.</returns>
     public async Task<IDSCApplySetResult> ApplyAsync()
     {
         try
@@ -82,6 +86,9 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Cancels the apply operation.
+    /// </summary>
     [RelayCommand(CanExecute = nameof(CanCancel))]
     private async Task OnCancelAsync()
     {
