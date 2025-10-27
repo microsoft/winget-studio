@@ -815,4 +815,13 @@
   <data name="MonacoEditor_OpenUriDialog.Title" xml:space="preserve">
     <value>Do you want WinGet Studio to open the external application?</value>
   </data>
+  <data name="ApplyFile_CancelDialog.CloseButtonText" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="ApplyFile_CancelDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="ApplyFile_CancelDialog.Title" xml:space="preserve">
+    <value>Are you sure you want to cancel applying the configuration?</value>
+  </data>
 </root>

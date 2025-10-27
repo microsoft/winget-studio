@@ -14,6 +14,7 @@
     mc:Ignorable="d">
     <Page.Resources>
         <converters:StringVisibilityConverter x:Key="StringVisibilityConverter" />
+        <x:Double x:Key="ActionButtonMinWidth">120</x:Double>
     </Page.Resources>
 
     <i:Interaction.Behaviors>
@@ -103,14 +104,27 @@
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
         </ScrollView>
+
+        <!-- Action buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-            <Button x:Uid="ApplyFile_BackButton" MinWidth="120" Command="{x:Bind ViewModel.BackCommand}" />
-            <Button x:Uid="ApplyFile_CancelButton" MinWidth="120" Command="{x:Bind ViewModel.ApplySet.CancelCommand, Mode=OneWay}" />
+            <Button x:Uid="ApplyFile_BackButton"
+                    MinWidth="{StaticResource ActionButtonMinWidth}"
+                    Command="{x:Bind ViewModel.BackCommand}" />
+            <Button x:Uid="ApplyFile_CancelButton"
+                    MinWidth="{StaticResource ActionButtonMinWidth}"
+                    IsEnabled="{x:Bind ViewModel.ApplySet.CanCancel, Mode=OneWay}"
+                    Click="CancelButton_Click" />
             <Button x:Uid="ApplyFile_DoneButton"
                     Style="{ThemeResource AccentButtonStyle}"
-                    MinWidth="120"
+                    MinWidth="{StaticResource ActionButtonMinWidth}"
                     IsEnabled="{x:Bind ViewModel.ApplySet.IsDone, Mode=OneWay}"
                     Command="{x:Bind ViewModel.DoneCommand}" />
         </StackPanel>
+
+        <!-- Cancel confirmation dialog -->
+        <ContentDialog x:Name="CancelDialog"
+                       x:Uid="ApplyFile_CancelDialog"
+                       PrimaryButtonCommand="{x:Bind ViewModel.ApplySet.CancelCommand, Mode=OneWay}"
+                       PrimaryButtonStyle="{ThemeResource AccentButtonStyle}" />
     </Grid>
 </Page>
