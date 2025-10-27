@@ -791,6 +791,12 @@
   <data name="ApplyFile_BackButton.Content" xml:space="preserve">
     <value>Back</value>
   </data>
+  <data name="ApplyFile_CancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ApplyFile_ApplyOperationCanceledMessage" xml:space="preserve">
+    <value>Apply operation canceled</value>
+  </data>
   <data name="PreviewFile_ResourceAutoSuggestBox.Header" xml:space="preserve">
     <value>Resource type</value>
   </data>
