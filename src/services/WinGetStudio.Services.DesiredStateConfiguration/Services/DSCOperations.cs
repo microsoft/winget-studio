@@ -97,6 +97,7 @@ internal sealed class DSCOperations : IDSCOperations
         }
 
         _logger.LogInformation("Getting configuration set details");
+        ct.ThrowIfCancellationRequested();
         var task = dscSet.Processor.GetSetDetailsAsync(dscSet.ConfigSet, ConfigurationUnitDetailFlags.ReadOnly);
         task.Progress += (sender, args) => progress?.Report(new DSCGetUnitDetailsResult(args));
         using var reg = ct.Register(task.Cancel);
@@ -115,6 +116,7 @@ internal sealed class DSCOperations : IDSCOperations
         }
 
         _logger.LogInformation("Getting configuration unit details");
+        ct.ThrowIfCancellationRequested();
         var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
         var task = processor.GetUnitDetailsAsync(dscUnit.ConfigUnit, ConfigurationUnitDetailFlags.ReadOnly);
         using var reg = ct.Register(task.Cancel);

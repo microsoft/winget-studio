@@ -30,10 +30,10 @@ public interface IDSC
     /// <inheritdoc cref="IDSCOperations.TestSetAsync" />
     IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet);
 
-    /// <inheritdoc cref="IDSCOperations.GetSetDetailsAsync
+    /// <inheritdoc cref="IDSCOperations.GetSetDetailsAsync" />
     Task<IDSCGetSetDetailsResult> GetSetDetailsAsync(IDSCSet dscSet, IProgress<IDSCGetUnitDetailsResult> progress = null, CancellationToken ct = default);
 
-    /// <inheritdoc cref="IDSCOperations.GetUnitDetailsAsync
+    /// <inheritdoc cref="IDSCOperations.GetUnitDetailsAsync" />
     Task<IDSCGetUnitDetailsResult> GetUnitDetailsAsync(IDSCUnit unit, CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.GetUnitAsync" />
