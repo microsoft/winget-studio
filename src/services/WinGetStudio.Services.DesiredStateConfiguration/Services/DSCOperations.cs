@@ -41,18 +41,10 @@ internal sealed class DSCOperations : IDSCOperations
             throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
         }
 
-        try
-        {
-            _logger.LogInformation("Starting to validate configuration set");
-            var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.PerformConsistencyCheckOnly, ct).ConfigureAwait(false);
-            _logger.LogInformation($"Validate configuration finished.");
-            return inProcResult;
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Validate configuration operation was canceled.");
-            throw;
-        }
+        _logger.LogInformation("Starting to validate configuration set");
+        var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.PerformConsistencyCheckOnly, ct).ConfigureAwait(false);
+        _logger.LogInformation($"Validate configuration finished.");
+        return inProcResult;
     }
 
     /// <inheritdoc />
@@ -63,18 +55,10 @@ internal sealed class DSCOperations : IDSCOperations
             throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
         }
 
-        try
-        {
-            _logger.LogInformation("Starting to apply configuration set");
-            var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.None, ct).ConfigureAwait(false);
-            _logger.LogInformation($"Apply configuration finished.");
-            return inProcResult;
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Apply configuration operation was canceled.");
-            throw;
-        }
+        _logger.LogInformation("Starting to apply configuration set");
+        var inProcResult = await ApplySetInternalAsync(progress, dscSet, ApplyConfigurationSetFlags.None, ct).ConfigureAwait(false);
+        _logger.LogInformation($"Apply configuration finished.");
+        return inProcResult;
     }
 
     /// <inheritdoc/>
@@ -85,23 +69,15 @@ internal sealed class DSCOperations : IDSCOperations
             throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
         }
 
-        try
-        {
-            _logger.LogInformation("Starting to test configuration set");
-            ct.ThrowIfCancellationRequested();
-            var task = dscSet.Processor.TestSetAsync(dscSet.ConfigSet);
-            task.Progress += (sender, args) => progress?.Report(new DSCTestUnitResult(args));
-            using var reg = ct.Register(task.Cancel);
-            var outOfProcResult = await task.AsTask(ct).ConfigureAwait(false);
-            var result = new DSCTestSetResult(outOfProcResult);
-            _logger.LogInformation($"Test configuration finished with result: {result.TestResult}");
-            return result;
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Test configuration operation was canceled.");
-            throw;
-        }
+        _logger.LogInformation("Starting to test configuration set");
+        ct.ThrowIfCancellationRequested();
+        var task = dscSet.Processor.TestSetAsync(dscSet.ConfigSet);
+        task.Progress += (sender, args) => progress?.Report(new DSCTestUnitResult(args));
+        using var reg = ct.Register(task.Cancel);
+        var outOfProcResult = await task.AsTask(ct).ConfigureAwait(false);
+        var result = new DSCTestSetResult(outOfProcResult);
+        _logger.LogInformation($"Test configuration finished with result: {result.TestResult}");
+        return result;
     }
 
     /// <inheritdoc />
@@ -145,22 +121,13 @@ internal sealed class DSCOperations : IDSCOperations
             throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
         }
 
-        try
-        {
-            _logger.LogInformation($"Getting unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
-            ct.ThrowIfCancellationRequested();
-            ConfigurationStaticFunctions config = new();
-            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-            var task = processor.GetUnitSettingsAsync(dscUnit.ConfigUnit);
-            using var reg = ct.Register(task.Cancel);
-            var result = await task.AsTask(ct).ConfigureAwait(false);
-            return new DSCGetUnitResult(result);
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Get unit operation was canceled.");
-            throw;
-        }
+        _logger.LogInformation($"Getting unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
+        ct.ThrowIfCancellationRequested();
+        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var task = processor.GetUnitSettingsAsync(dscUnit.ConfigUnit);
+        using var reg = ct.Register(task.Cancel);
+        var result = await task.AsTask(ct).ConfigureAwait(false);
+        return new DSCGetUnitResult(result);
     }
 
     /// <inheritdoc />
@@ -171,22 +138,13 @@ internal sealed class DSCOperations : IDSCOperations
             throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
         }
 
-        try
-        {
-            _logger.LogInformation($"Setting unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
-            ct.ThrowIfCancellationRequested();
-            ConfigurationStaticFunctions config = new();
-            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-            var task = processor.ApplyUnitAsync(dscUnit.ConfigUnit);
-            using var reg = ct.Register(task.Cancel);
-            var result = await task.AsTask(ct).ConfigureAwait(false);
-            return new DSCApplyUnitResult(result);
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Set unit operation was canceled.");
-            throw;
-        }
+        _logger.LogInformation($"Setting unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
+        ct.ThrowIfCancellationRequested();
+        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var task = processor.ApplyUnitAsync(dscUnit.ConfigUnit);
+        using var reg = ct.Register(task.Cancel);
+        var result = await task.AsTask(ct).ConfigureAwait(false);
+        return new DSCApplyUnitResult(result);
     }
 
     /// <inheritdoc />
@@ -197,22 +155,13 @@ internal sealed class DSCOperations : IDSCOperations
             throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
         }
 
-        try
-        {
-            _logger.LogInformation($"Testing unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
-            ct.ThrowIfCancellationRequested();
-            ConfigurationStaticFunctions config = new();
-            var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
-            var task = processor.TestUnitAsync(dscUnit.ConfigUnit);
-            using var reg = ct.Register(task.Cancel);
-            var result = await task.AsTask(ct).ConfigureAwait(false);
-            return new DSCTestUnitResult(result);
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Test unit operation was canceled.");
-            throw;
-        }
+        _logger.LogInformation($"Testing unit settings for unit with ModuleName={inputUnit.ModuleName}, Type={inputUnit.Type}");
+        ct.ThrowIfCancellationRequested();
+        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var task = processor.TestUnitAsync(dscUnit.ConfigUnit);
+        using var reg = ct.Register(task.Cancel);
+        var result = await task.AsTask(ct).ConfigureAwait(false);
+        return new DSCTestUnitResult(result);
     }
 
     public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()
@@ -286,32 +235,24 @@ internal sealed class DSCOperations : IDSCOperations
     /// <exception cref="OpenConfigurationSetException">Thrown when the configuration set cannot be opened</exception>
     private async Task<ConfigurationSet> OpenConfigurationSetInternalAsync(IDSCFile file, ConfigurationProcessor processor, CancellationToken ct)
     {
-        try
-        {
-            ct.ThrowIfCancellationRequested();
-            var inputStream = await StringToStreamAsync(file.Content);
-            var task = processor.OpenConfigurationSetAsync(inputStream);
-            using var reg = ct.Register(task.Cancel);
-            var result = await task.AsTask(ct).ConfigureAwait(false);
-            var configSet = result.Set ?? throw new OpenConfigurationSetException(result);
+        ct.ThrowIfCancellationRequested();
+        var inputStream = await StringToStreamAsync(file.Content);
+        var task = processor.OpenConfigurationSetAsync(inputStream);
+        using var reg = ct.Register(task.Cancel);
+        var result = await task.AsTask(ct).ConfigureAwait(false);
+        var configSet = result.Set ?? throw new OpenConfigurationSetException(result);
 
-            // Set input file path in the configuration set to inform the
-            // processor about the working directory when applying the
-            // configuration
-            if (file.FileInfo != null)
-            {
-                configSet.Name = file.FileInfo.Name;
-                configSet.Origin = file.FileInfo.Directory.FullName;
-                configSet.Path = file.FileInfo.FullName;
-            }
-
-            return configSet;
-        }
-        catch (OperationCanceledException)
+        // Set input file path in the configuration set to inform the
+        // processor about the working directory when applying the
+        // configuration
+        if (file.FileInfo != null)
         {
-            _logger.LogInformation("Open configuration operation was canceled.");
-            throw;
+            configSet.Name = file.FileInfo.Name;
+            configSet.Origin = file.FileInfo.Directory.FullName;
+            configSet.Path = file.FileInfo.FullName;
         }
+
+        return configSet;
     }
 
     /// <summary>
