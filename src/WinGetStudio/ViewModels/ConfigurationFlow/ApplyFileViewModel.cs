@@ -52,10 +52,10 @@ public partial class ApplyFileViewModel : ObservableRecipient
     [RelayCommand]
     private async Task OnLoadedAsync()
     {
-        if (CanRestoreState())
+        if (_manager.ActiveSetApplyState.CanRestoreState())
         {
             _logger.LogInformation("Restoring previous apply configuration set state");
-            RestoreState();
+            _manager.ActiveSetApplyState.RestoreState(this);
         }
         else
         {
@@ -78,7 +78,7 @@ public partial class ApplyFileViewModel : ObservableRecipient
             var dscFile = activeSet.GetLatestDSCFile();
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             ApplySet = new ApplySetViewModel(_localizer, dscSet);
-            CaptureState();
+            _manager.ActiveSetApplyState.CaptureState(this);
             var applySetTask = _dsc.ApplySetAsync(dscSet);
             applySetTask.Progress += (_, data) => OnDataChanged(ApplySet, data);
             await applySetTask;
@@ -112,7 +112,7 @@ public partial class ApplyFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(IsReadyToCompleted))]
     private void OnDone()
     {
-        ClearState();
+        _manager.ActiveSetApplyState.ClearState();
         _navigationService.NavigateToDefaultPage();
     }
 
@@ -120,23 +120,6 @@ public partial class ApplyFileViewModel : ObservableRecipient
     private void OnBack()
     {
         _navigationService.NavigateToDefaultPage();
-    }
-
-    private bool CanRestoreState() => _manager.ActiveSetApplyState.ActiveApplySet != null;
-
-    private void CaptureState()
-    {
-        _manager.ActiveSetApplyState.ActiveApplySet = ApplySet;
-    }
-
-    private void RestoreState()
-    {
-        ApplySet = _manager.ActiveSetApplyState.ActiveApplySet;
-    }
-
-    private void ClearState()
-    {
-        _manager.ActiveSetApplyState.ActiveApplySet = null;
     }
 
     partial void OnApplySetChanged(ApplySetViewModel? oldValue, ApplySetViewModel? newValue)
