@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
@@ -14,8 +13,6 @@ internal sealed class DSCUnit : IDSCUnit
 {
     private const string DescriptionMetadataKey = "description";
     private const string ModuleMetadataKey = "module";
-    private readonly IDSCUnitDetails _defaultDetails;
-    private Task<IDSCUnitDetails> _loadDetailsTask;
 
     /// <inheritdoc/>
     public string Type { get; }
@@ -47,6 +44,9 @@ internal sealed class DSCUnit : IDSCUnit
     /// <inheritdoc/>
     public DSCPropertySet Metadata { get; }
 
+    /// <inheritdoc/>
+    public IDSCUnitDetails Details { get; }
+
     internal ConfigurationUnit ConfigUnit { get; }
 
     public DSCUnit(ConfigurationUnit unit)
@@ -77,25 +77,8 @@ internal sealed class DSCUnit : IDSCUnit
         // Get module name from metadata
         ModuleName = Metadata.FirstOrDefault(m => m.Key == ModuleMetadataKey).Value?.ToString() ?? string.Empty;
 
-        // Build default details
-        _defaultDetails = unit.Details == null ? new DSCUnitDetails(ModuleName) : new DSCUnitDetails(unit.Details);
-        _loadDetailsTask = Task.FromResult(_defaultDetails);
-    }
-
-    /// <inheritdoc/>
-    public async Task<IDSCUnitDetails> GetDetailsAsync()
-    {
-        var loadedDetails = await _loadDetailsTask;
-        return loadedDetails ?? _defaultDetails;
-    }
-
-    /// <summary>
-    /// Set an asynchronous task to load the details for the unit in the background.
-    /// </summary>
-    /// <param name="loadDetailsTask">Task to load the details</param>
-    internal void SetLoadDetailsTask(Task<IDSCUnitDetails> loadDetailsTask)
-    {
-        _loadDetailsTask = loadDetailsTask;
+        // Get details if available
+        Details = unit.Details == null ? null : new DSCUnitDetails(unit.Details);
     }
 
     /// <summary>

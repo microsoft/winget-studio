@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -39,10 +41,19 @@ internal interface IDSCOperations
     public IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet);
 
     /// <summary>
-    /// Get details of configuration units in a set
+    /// Gets the details for all configuration units in the specified set.
     /// </summary>
     /// <param name="set">Configuration set to get details for</param>
-    public void GetConfigurationUnitDetails(IDSCSet set);
+    /// <param name="progress">Progress callback</param>
+    /// <param name="ct">Cancellation token</param>
+    Task<IDSCGetSetDetailsResult> GetSetDetailsAsync(IDSCSet set, IProgress<IDSCGetUnitDetailsResult> progress = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets the details for the specified configuration unit.
+    /// </summary>
+    /// <param name="unit">Unit to get details for</param>
+    /// <param name="ct">Cancellation token</param>
+    Task<IDSCGetUnitDetailsResult> GetUnitDetailsAsync(IDSCUnit unit, CancellationToken ct = default);
 
     /// <summary>
     /// Get details for the specified configuration unit.

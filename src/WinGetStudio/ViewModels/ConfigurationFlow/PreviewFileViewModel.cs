@@ -29,6 +29,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private readonly IAppFrameNavigationService _appNavigation;
     private readonly IConfigurationFrameNavigationService _configNavigation;
     private readonly IConfigurationManager _manager;
+    private readonly SetViewModelFactory _setFactory;
+    private readonly UnitViewModelFactory _unitFactory;
 
     public IReadOnlyList<UnitSecurityContext> SecurityContexts => UnitSecurityContext.All;
 
@@ -107,7 +109,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
         IDSC dsc,
         IAppFrameNavigationService appNavigation,
         IConfigurationFrameNavigationService configNavigation,
-        IConfigurationManager manager)
+        IConfigurationManager manager,
+        UnitViewModelFactory unitFactory,
+        SetViewModelFactory setFactory)
     {
         _logger = logger;
         _localizer = localizer;
@@ -116,6 +120,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _appNavigation = appNavigation;
         _configNavigation = configNavigation;
         _manager = manager;
+        _unitFactory = unitFactory;
+        _setFactory = setFactory;
     }
 
     /// <summary>
@@ -131,11 +137,10 @@ public partial class PreviewFileViewModel : ObservableRecipient
             IsEditMode = false;
             IsConfigurationLoading = true;
             SelectedUnit = null;
-            ConfigurationSet = new SetViewModel(_logger, _localizer);
+            ConfigurationSet = _setFactory();
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             await ConfigurationSet.UseAsync(dscSet, dscFile);
-            _dsc.GetConfigurationUnitDetails(dscSet);
         }
         catch (OpenConfigurationSetException ex)
         {
@@ -202,7 +207,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             _ui.ShowTaskProgress();
             _logger.LogInformation($"Creating new configuration set");
             SelectedUnit = null;
-            ConfigurationSet = new SetViewModel(_logger, _localizer);
+            ConfigurationSet = _setFactory();
             await AddResourceAsync();
         }
         catch (DSCUnitValidationException ex)
@@ -473,7 +478,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            var unit = new UnitViewModel(_localizer) { Title = "Module/Resource" };
+            var unit = _unitFactory();
+            unit.Title = "Module/Resource";
             await ConfigurationSet.AddAsync(unit);
             await EditUnitAsync(unit);
         }

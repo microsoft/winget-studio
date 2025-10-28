@@ -5,6 +5,7 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
@@ -15,9 +16,14 @@ using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.Configurati
 
 namespace WinGetStudio.ViewModels;
 
+public delegate UnitViewModel UnitViewModelFactory();
+
 public partial class UnitViewModel : ObservableObject
 {
-    private readonly IStringLocalizer _localizer;
+    private readonly IStringLocalizer<UnitViewModel> _localizer;
+    private readonly ILogger<UnitViewModel> _logger;
+    private readonly IDSC _dsc;
+    private readonly UnitViewModelFactory _unitFactory;
 
     public IDSCUnit? Unit { get; set; }
 
@@ -26,14 +32,14 @@ public partial class UnitViewModel : ObservableObject
     public string DefaultId { get; } = Guid.NewGuid().ToString();
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowDetails))]
+    [NotifyPropertyChangedFor(nameof(CanShowDetails))]
     public partial UnitDetailsViewModel? Details { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowDetails))]
+    [NotifyPropertyChangedFor(nameof(CanShowDetails))]
     public partial bool AreDetailsLoading { get; set; }
 
-    public bool ShowDetails => Details != null || AreDetailsLoading;
+    public bool CanShowDetails => Details != null || AreDetailsLoading;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IdOrDefault))]
@@ -72,9 +78,16 @@ public partial class UnitViewModel : ObservableObject
 
     public IList<KeyValuePair<string, object>>? MetadataList => Metadata?.ToList();
 
-    public UnitViewModel(IStringLocalizer localizer)
+    public UnitViewModel(
+        IStringLocalizer<UnitViewModel> localizer,
+        ILogger<UnitViewModel> logger,
+        IDSC dsc,
+        UnitViewModelFactory unitFactory)
     {
         _localizer = localizer;
+        _logger = logger;
+        _dsc = dsc;
+        _unitFactory = unitFactory;
         SelectedSecurityContext = UnitSecurityContext.Default;
         Dependencies = [];
         Settings = [];
@@ -152,20 +165,6 @@ public partial class UnitViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Loads the details of the configuration unit.
-    /// </summary>
-    public async Task LoadDetailsAsync()
-    {
-        if (Unit != null)
-        {
-            AreDetailsLoading = true;
-            var result = await Unit.GetDetailsAsync();
-            Details = new UnitDetailsViewModel(result);
-            AreDetailsLoading = false;
-        }
-    }
-
-    /// <summary>
     /// Copies the properties from another instance.
     /// </summary>
     /// <param name="source">The source instance.</param>
@@ -180,6 +179,7 @@ public partial class UnitViewModel : ObservableObject
         Intent = source.Intent;
         Dependencies = source.Dependencies?.ToList();
         SettingsText = source.SettingsText;
+        Details = source.Details;
 
         // Re-parse the settings text to ensure we have an up-to-date object.
         (Metadata, Settings) = await Task.Run(() =>
@@ -199,7 +199,13 @@ public partial class UnitViewModel : ObservableObject
         Description = unit.Description;
         SelectedSecurityContext = UnitSecurityContext.FromEnum(unit.SecurityContext);
         Intent = unit.Intent;
-        Dependencies = [..unit.Dependencies.Select(id => new UnitViewModel(_localizer) { Id = id })];
+        Details = unit.Details == null ? null : new(unit.Details);
+        Dependencies = [..unit.Dependencies.Select(id =>
+        {
+            var unit = _unitFactory();
+            unit.Id = id;
+            return unit;
+        })];
         (Settings, SettingsText, Metadata) = await Task.Run(() =>
         {
             var m = unit.Metadata.DeepCopy();
@@ -238,11 +244,46 @@ public partial class UnitViewModel : ObservableObject
     /// <returns>A copy of this instance.</returns>
     public async Task<UnitViewModel> CloneAsync()
     {
-        var clone = new UnitViewModel(_localizer);
+        var clone = _unitFactory();
         await clone.CopyFromAsync(this);
         return clone;
     }
 
     [RelayCommand]
-    private async Task OnLoadedAsync() => await LoadDetailsAsync();
+    private async Task OnExpandingAsync()
+    {
+        await LoadDetailsAsync();
+    }
+
+    /// <summary>
+    /// Loads the unit details asynchronously.
+    /// </summary>
+    private async Task LoadDetailsAsync()
+    {
+        if (!AreDetailsLoading && Details == null && Unit != null)
+        {
+            AreDetailsLoading = true;
+            try
+            {
+                var result = await _dsc.GetUnitDetailsAsync(Unit);
+                if (result.UnitDetails != null && (result.ResultInformation?.IsOk ?? true))
+                {
+                    _logger.LogInformation($"Loaded unit details for unit {IdOrDefault}");
+                    Details = new UnitDetailsViewModel(result.UnitDetails);
+                }
+                else
+                {
+                    _logger.LogError(result.ResultInformation?.ResultCode, $"Failed to load unit details for unit {IdOrDefault}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while loading unit details for unit {IdOrDefault}");
+            }
+            finally
+            {
+                AreDetailsLoading = false;
+            }
+        }
+    }
 }

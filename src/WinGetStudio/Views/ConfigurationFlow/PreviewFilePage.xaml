@@ -223,13 +223,14 @@
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:UnitViewModel">
                                     <Expander IsExpanded="False"
+                                              x:Name="UnitExpander"
                                               Tag="{x:Bind Id, Mode=OneWay}"
                                               HorizontalContentAlignment="Left"
                                               HorizontalAlignment="Stretch">
 
                                         <i:Interaction.Behaviors>
-                                            <i:EventTriggerBehavior EventName="Loaded">
-                                                <i:InvokeCommandAction Command="{x:Bind LoadedCommand}" />
+                                            <i:EventTriggerBehavior EventName="Expanding">
+                                                <i:InvokeCommandAction Command="{x:Bind ExpandingCommand}" />
                                             </i:EventTriggerBehavior>
                                         </i:Interaction.Behaviors>
 
@@ -400,7 +401,7 @@
                                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                     BorderThickness="{StaticResource BorderThicknessThin}"
                                                     CornerRadius="{StaticResource CornerRadiusMedium}"
-                                                    Visibility="{x:Bind ShowDetails, Mode=OneWay}">
+                                                    Visibility="{x:Bind CanShowDetails, Mode=OneWay}">
                                                     <StackPanel Spacing="{StaticResource SectionSpacing}">
                                                         <TextBlock
                                                             x:Uid="ConfigurationUnit_Details"

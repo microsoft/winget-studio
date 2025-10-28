@@ -14,10 +14,13 @@ using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.Configurati
 
 namespace WinGetStudio.ViewModels;
 
+public delegate SetViewModel SetViewModelFactory();
+
 public sealed partial class SetViewModel : ObservableObject
 {
-    private readonly ILogger _logger;
-    private readonly IStringLocalizer _localizer;
+    private readonly ILogger<SetViewModel> _logger;
+    private readonly IStringLocalizer<SetViewModel> _localizer;
+    private readonly UnitViewModelFactory _unitFactory;
     private readonly ObservableCollection<UnitViewModel> _units;
 
     public ReadOnlyObservableCollection<UnitViewModel> Units { get; }
@@ -40,10 +43,11 @@ public sealed partial class SetViewModel : ObservableObject
         remove => _units.CollectionChanged -= value;
     }
 
-    public SetViewModel(ILogger logger, IStringLocalizer localizer)
+    public SetViewModel(ILogger<SetViewModel> logger, IStringLocalizer<SetViewModel> localizer, UnitViewModelFactory unitFactory)
     {
         _logger = logger;
         _localizer = localizer;
+        _unitFactory = unitFactory;
         _units = [];
         Units = new(_units);
     }
@@ -59,7 +63,7 @@ public sealed partial class SetViewModel : ObservableObject
         var units = dscSet?.Units ?? [];
         var tasks = units.Select(async unit =>
         {
-            UnitViewModel vm = new(_localizer);
+            var vm = _unitFactory();
             await vm.CopyFromAsync(unit);
             return vm;
         });

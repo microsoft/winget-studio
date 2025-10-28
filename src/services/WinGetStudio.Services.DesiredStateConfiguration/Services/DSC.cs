@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
@@ -39,7 +41,10 @@ internal sealed class DSC : IDSC
     public IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet) => _dscOperations.TestSetAsync(inputSet);
 
     /// <inheritdoc/>
-    public void GetConfigurationUnitDetails(IDSCSet set) => _dscOperations.GetConfigurationUnitDetails(set);
+    public Task<IDSCGetSetDetailsResult> GetSetDetailsAsync(IDSCSet dscSet, IProgress<IDSCGetUnitDetailsResult> progress = null, CancellationToken ct = default) => _dscOperations.GetSetDetailsAsync(dscSet, progress, ct);
+
+    /// <inheritdoc/>
+    public Task<IDSCGetUnitDetailsResult> GetUnitDetailsAsync(IDSCUnit unit, CancellationToken ct = default) => _dscOperations.GetUnitDetailsAsync(unit, ct);
 
     /// <inheritdoc/>
     public async Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit unit) => await _dscOperations.GetUnitAsync(unit);

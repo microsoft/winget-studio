@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
@@ -89,36 +89,39 @@ internal sealed class DSCOperations : IDSCOperations
     }
 
     /// <inheritdoc />
-    public void GetConfigurationUnitDetails(IDSCSet inputSet)
+    public async Task<IDSCGetSetDetailsResult> GetSetDetailsAsync(IDSCSet inputSet, IProgress<IDSCGetUnitDetailsResult> progress = null, CancellationToken ct = default)
     {
         if (inputSet is not DSCSet dscSet)
         {
             throw new ArgumentException($"{nameof(inputSet)} must be of type {nameof(DSCSet)}", nameof(inputSet));
         }
 
-        _logger.LogInformation("Getting configuration unit details");
-        var detailsOperation = dscSet.Processor.GetSetDetailsAsync(dscSet.ConfigSet, ConfigurationUnitDetailFlags.ReadOnly);
-        var detailsOperationTask = detailsOperation.AsTask();
+        _logger.LogInformation("Getting configuration set details");
+        var task = dscSet.Processor.GetSetDetailsAsync(dscSet.ConfigSet, ConfigurationUnitDetailFlags.ReadOnly);
+        task.Progress += (sender, args) => progress?.Report(new DSCGetUnitDetailsResult(args));
+        using var reg = ct.Register(task.Cancel);
+        var outOfProcResult = await task.AsTask(ct).ConfigureAwait(false);
+        var result = new DSCGetSetDetailsResult(outOfProcResult);
+        _logger.LogInformation("Get configuration set details finished");
+        return result;
+    }
 
-        // For each DSC unit, create a task to get the details asynchronously
-        // in the background
-        foreach (var unit in dscSet.UnitsInternal)
+    /// <inheritdoc />
+    public async Task<IDSCGetUnitDetailsResult> GetUnitDetailsAsync(IDSCUnit inputUnit, CancellationToken ct = default)
+    {
+        if (inputUnit is not DSCUnit dscUnit)
         {
-            unit.SetLoadDetailsTask(Task.Run<IDSCUnitDetails>(async () =>
-            {
-                try
-                {
-                    await detailsOperationTask;
-                    _logger.LogInformation($"Settings details for unit {unit.InstanceId}");
-                    return GetCompleteUnitDetails(dscSet.ConfigSet, unit.InstanceId);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Failed to get details for unit {unit.InstanceId}");
-                    return null;
-                }
-            }));
+            throw new ArgumentException($"{nameof(inputUnit)} must be of type {nameof(DSCUnit)}", nameof(inputUnit));
         }
+
+        _logger.LogInformation("Getting configuration unit details");
+        var processor = await CreateConfigurationProcessorAsync(DSCv3DynamicRuntimeHandlerIdentifier);
+        var task = processor.GetUnitDetailsAsync(dscUnit.ConfigUnit, ConfigurationUnitDetailFlags.ReadOnly);
+        using var reg = ct.Register(task.Cancel);
+        var outOfProcResult = await task.AsTask(ct).ConfigureAwait(false);
+        var result = new DSCGetUnitDetailsResult(outOfProcResult);
+        _logger.LogInformation("Get configuration unit details finished");
+        return result;
     }
 
     /// <inheritdoc />
@@ -296,32 +299,6 @@ internal sealed class DSCOperations : IDSCOperations
 
         result.Seek(0);
         return result;
-    }
-
-    /// <summary>
-    /// Gets the complete details for a unit if available.
-    /// </summary>
-    /// <param name="configSet">Configuration set</param>
-    /// <param name="instanceId">Unit instance ID</param>
-    /// <returns>Complete unit details if available, otherwise null</returns>
-    private DSCUnitDetails GetCompleteUnitDetails(ConfigurationSet configSet, Guid instanceId)
-    {
-        var unitFound = configSet.Units.FirstOrDefault(u => u.InstanceIdentifier == instanceId);
-        if (unitFound == null)
-        {
-            _logger.LogWarning($"Unit {instanceId} not found in the configuration set. No further details will be available to the unit.");
-            return null;
-        }
-
-        if (unitFound.Details == null)
-        {
-            _logger.LogWarning($"Details for unit {instanceId} not found. No further details will be available to the unit.");
-            return null;
-        }
-
-        // After GetSetDetailsAsync completes, the Details property will be
-        // populated if the details were found.
-        return new DSCUnitDetails(unitFound.Details);
     }
 
     /// <summary>
