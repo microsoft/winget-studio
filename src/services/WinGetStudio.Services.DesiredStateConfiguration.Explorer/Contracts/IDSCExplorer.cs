@@ -18,6 +18,9 @@ public interface IDSCExplorer
     /// <inheritdoc cref="IModuleCatalogRepository.EnrichModuleWithResourceDetailsAsync(DSCModule)"/>
     Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule);
 
+    /// <inheritdoc cref="IModuleCatalogRepository.GenerateDefaultYamlAsync(DSCResource)"/>
+    Task<string> GenerateDefaultYamlAsync(DSCResource resource);
+
     /// <inheritdoc cref="IModuleCatalogRepository.ClearCacheAsync"/>
     Task ClearCacheAsync();
 }

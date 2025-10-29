@@ -2,18 +2,13 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Text.Json;
 using Windows.Foundation.Collections;
-using YamlDotNet.Serialization;
+using WinGetStudio.Services.DesiredStateConfiguration.Helpers;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
 
 public sealed partial class DSCPropertySet : Dictionary<string, object>
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
-    private static readonly ISerializer _yamlSerializer = new SerializerBuilder().DisableAliases().WithQuotingNecessaryStrings().Build();
-    private static readonly IDeserializer _yamlDeserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
-
     public DSCPropertySet()
         : this(null)
     {
@@ -28,15 +23,18 @@ public sealed partial class DSCPropertySet : Dictionary<string, object>
     /// Deep copy the property set.
     /// </summary>
     /// <returns>A deep copy of the property set.</returns>
-    public DSCPropertySet DeepCopy()
-    {
-        var yaml = ToYaml();
-        return FromYaml(yaml);
-    }
+    public DSCPropertySet DeepCopy() => DSCYamlHelper.DeepCopy(this);
 
-    public string ToJson() => JsonSerializer.Serialize(this, _jsonOptions);
+    /// <summary>
+    /// Converts the current object to its YAML representation.
+    /// </summary>
+    /// <returns>A string containing the YAML representation of the current object.</returns>
+    public string ToYaml() => DSCYamlHelper.ToYaml(this);
 
-    public string ToYaml() => _yamlSerializer.Serialize(this);
-
-    public static DSCPropertySet FromYaml(string input) => _yamlDeserializer.Deserialize<DSCPropertySet>(input);
+    /// <summary>
+    /// Creates an instance of DSCPropertySet from a YAML string.
+    /// </summary>
+    /// <param name="input">The YAML string representation of a DSCPropertySet.</param>
+    /// <returns>>An instance of DSCPropertySet.</returns>
+    public static DSCPropertySet FromYaml(string input) => DSCYamlHelper.FromYaml<DSCPropertySet>(input);
 }

@@ -182,16 +182,16 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand]
     private void OnLoaded()
     {
-        if (_manager.ActiveSetPreviewState.ActiveSet != null)
+        if (_manager.ActiveSetPreviewState.CanRestoreState())
         {
-            RestoreState();
+            _manager.ActiveSetPreviewState.RestoreState(this);
         }
     }
 
     [RelayCommand]
     private void OnUnloaded()
     {
-        CaptureState();
+        _manager.ActiveSetPreviewState.CaptureState(this);
     }
 
     [RelayCommand(CanExecute = nameof(CanCreateNewConfiguration))]
@@ -409,7 +409,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (!IsApplyInProgress)
         {
-            CaptureState();
+            _manager.ActiveSetPreviewState.CaptureState(this);
             _configNavigation.NavigateTo<ApplyFileViewModel>();
         }
     }
@@ -505,29 +505,5 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
         // Notify save as
         OnPropertyChanged(nameof(CanSaveConfigurationAs));
-    }
-
-    /// <summary>
-    /// Captures the current state to the configuration manager.
-    /// </summary>
-    private void CaptureState()
-    {
-        _logger.LogInformation("Capturing active configuration set");
-        _manager.ActiveSetPreviewState.ActiveSet = ConfigurationSet;
-        _manager.ActiveSetPreviewState.IsCodeView = IsCodeView;
-        _manager.ActiveSetPreviewState.IsEditMode = IsEditMode;
-        _manager.ActiveSetPreviewState.SelectedUnit = SelectedUnit;
-    }
-
-    /// <summary>
-    /// Restores the state from the configuration manager.
-    /// </summary>
-    private void RestoreState()
-    {
-        _logger.LogInformation("Restoring active configuration set");
-        ConfigurationSet = _manager.ActiveSetPreviewState.ActiveSet;
-        IsCodeView = _manager.ActiveSetPreviewState.IsCodeView;
-        IsEditMode = _manager.ActiveSetPreviewState.IsEditMode;
-        SelectedUnit = _manager.ActiveSetPreviewState.SelectedUnit;
     }
 }

@@ -21,10 +21,22 @@ public sealed class DSCResource
     public string Version { get; set; }
 
     /// <summary>
+    /// Gets the syntax of the resource.
+    /// </summary>
+    [JsonIgnore]
+    public string Syntax => DSCVersion == DSCVersion.V3 ? "json" : "powershell";
+
+    /// <summary>
     /// Gets or sets the syntax of the resource.
     /// </summary>
-    [JsonPropertyName("syntax")]
-    public string Syntax { get; set; }
+    [JsonPropertyName("code")]
+    public string Code { get; set; }
+
+    /// <summary>
+    /// Gets or sets the resource source.
+    /// </summary>
+    [JsonPropertyName("module_source")]
+    public DSCModuleSource ModuleSource { get; set; }
 
     /// <summary>
     /// Gets or sets the properties of the resource.
