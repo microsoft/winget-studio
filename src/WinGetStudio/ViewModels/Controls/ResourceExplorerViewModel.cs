@@ -2,31 +2,68 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
 namespace WinGetStudio.ViewModels.Controls;
 
+public delegate ResourceExplorerViewModel ResourceExplorerViewModelFactory(DSCResource resource);
+
 public sealed partial class ResourceExplorerViewModel : ObservableRecipient
 {
-    /// <summary>
-    /// Gets or sets the properties of the resource.
-    /// </summary>
+    private readonly IDSCExplorer _dscExplorer;
+    private readonly DSCResource _resource;
+
     [ObservableProperty]
-    public partial List<DSCProperty> Properties { get; set; }
+    [NotifyPropertyChangedFor(nameof(IsSummaryView))]
+    public partial bool IsCodeView { get; set; }
+
+    public bool IsSummaryView => !IsCodeView;
 
     /// <summary>
-    /// Gets or sets the syntax of the resource.
+    /// Gets the properties of the resource.
     /// </summary>
-    [ObservableProperty]
-    public partial string ResourceSyntax { get; set; }
+    public List<DSCProperty> Properties => _resource.Properties;
 
     /// <summary>
-    /// Sets the resource to display.
+    /// Gets the resource code.
     /// </summary>
-    /// <param name="resource">The DSC resource.</param>
-    public void SetResource(DSCResource resource)
+    public string ResourceCode => _resource.Code;
+
+    /// <summary>
+    /// Gets the resource syntax.
+    /// </summary>
+    public string ResourceSyntax => _resource.Syntax;
+
+    /// <summary>
+    /// Gets a value indicating whether the schema can be viewed.
+    /// </summary>
+    public bool CanShowJsonSchema => _resource.DSCVersion == DSCVersion.V3;
+
+    public ResourceExplorerViewModel(DSCResource resource, IDSCExplorer explorer)
     {
-        Properties = [..resource.Properties];
-        ResourceSyntax = resource.Syntax;
+        _resource = resource;
+        _dscExplorer = explorer;
+    }
+
+    /// <summary>
+    /// Gets a sample YAML for the resource.
+    /// </summary>
+    /// <returns>The sample YAML.</returns>
+    public async Task<string?> GenerateDefaultYamlAsync()
+    {
+        if (_resource != null)
+        {
+            return await _dscExplorer.GenerateDefaultYamlAsync(_resource);
+        }
+
+        return null;
+    }
+
+    [RelayCommand]
+    private void OnShowJsonSchema()
+    {
+        IsCodeView = true;
     }
 }

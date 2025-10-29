@@ -65,10 +65,11 @@
                             <Expander.Content>
                                 <controls:SwitchPresenter Value="{x:Bind IsLoading, Mode=OneWay}" TargetType="x:Boolean">
                                     <controls:Case Value="True">
-                                        <StackPanel Spacing="8">
-                                            <labs:Shimmer />
-                                            <labs:Shimmer />
-                                        </StackPanel>
+                                        <localControls:ShimmerRepeater ItemCount="2">
+                                            <localControls:ShimmerRepeater.Resources>
+                                                <StaticResource x:Key="ShimmerHeight" ResourceKey="BodyTextBlockFontSize" />
+                                            </localControls:ShimmerRepeater.Resources>
+                                        </localControls:ShimmerRepeater>
                                     </controls:Case>
                                     <controls:Case Value="False">
                                         <StackPanel Spacing="8">

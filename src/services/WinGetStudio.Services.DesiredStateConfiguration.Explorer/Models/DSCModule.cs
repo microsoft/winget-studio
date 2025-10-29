@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json.Serialization;
+using NJsonSchema;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
@@ -46,49 +48,68 @@ public sealed partial class DSCModule
     public bool IsVirtual { get; set; }
 
     /// <summary>
-    /// Populates the resources dictionary with the given resource names.
+    /// Adds a new resource to the module.
     /// </summary>
-    /// <param name="resourceNames">The resource names.</param>
-    public void PopulateResources(IEnumerable<string> resourceNames, DSCVersion dscVersion)
+    /// <param name="resourceName">The name of the resource.</param>
+    /// <param name="dscVersion">The DSC version.</param>
+    /// <returns>True if the resource was added; otherwise, false.</returns>
+    public bool AddResource(string resourceName, DSCVersion dscVersion)
     {
         lock (Resources)
         {
             Resources ??= [];
-            foreach (var name in resourceNames)
-            {
-                if (!Resources.ContainsKey(name))
-                {
-                    Resources[name] = CreateResource(name, dscVersion);
-                }
-            }
+            return Resources.TryAdd(resourceName, CreateResource(resourceName, dscVersion));
         }
     }
 
     /// <summary>
-    /// Populates the resources dictionary with the given resource class definitions.
+    /// Enriches an existing resource with class definition details.
     /// </summary>
-    /// <param name="classDefinitions">The resource class definitions.</param>
-    public void PopulateResources(IEnumerable<DSCResourceClassDefinition> classDefinitions, DSCVersion dscVersion)
+    /// <param name="resourceName">The name of the resource.</param>
+    /// <param name="classDefinition">The class definition.</param>
+    /// <returns>True if the resource was enriched; otherwise, false.</returns>
+    public bool EnrichResource(string resourceName, DSCResourceClassDefinition classDefinition)
     {
         lock (Resources)
         {
-            Resources ??= [];
-            foreach (var definition in classDefinitions)
+            if (Resources.TryGetValue(resourceName, out var resource))
             {
-                if (!Resources.TryGetValue(definition.ClassName, out var resource))
-                {
-                    resource = CreateResource(definition.ClassName, dscVersion);
-                    Resources[definition.ClassName] = resource;
-                }
-
-                resource.Syntax = definition.ClassAst.Extent.Text;
-                resource.Properties = [.. definition.Properties.Select(prop => new DSCProperty
+                Debug.Assert(resource.DSCVersion != DSCVersion.V3, "DSC v3 resources should be enriched using JSON schema.");
+                resource.Code = classDefinition.ClassAst.Extent.Text;
+                resource.Properties = [.. classDefinition.Properties.Select(prop => new DSCProperty
                 {
                     Name = prop.Name,
                     Type = prop.PropertyType.TypeName.Name,
-                    Syntax = prop.Extent.Text,
+                    Code = prop.Extent.Text,
                 })];
             }
+
+            return resource != null;
+        }
+    }
+
+    /// <summary>
+    /// Enriches an existing resource with JSON schema details.
+    /// </summary>
+    /// <param name="resourceName">The name of the resource.</param>
+    /// <param name="schema">The JSON schema.</param>
+    /// <returns>True if the resource was enriched; otherwise, false.</returns>
+    public bool EnrichResource(string resourceName, JsonSchema schema)
+    {
+        lock (Resources)
+        {
+            if (Resources.TryGetValue(resourceName, out var resource))
+            {
+                Debug.Assert(resource.DSCVersion == DSCVersion.V3, "Only DSC v3 resources should be enriched using JSON schema.");
+                resource.Code = schema.ToJson();
+                resource.Properties = [..schema.ActualProperties?.Select(prop => new DSCProperty
+                {
+                    Name = prop.Key,
+                    Type = prop.Value.Type.ToString(),
+                })];
+            }
+
+            return resource != null;
         }
     }
 
@@ -102,8 +123,9 @@ public sealed partial class DSCModule
         return new DSCResource()
         {
             Name = name,
-            Version = Version,
             DSCVersion = dscVersion,
+            Version = Version,
+            ModuleSource = Source,
         };
     }
 }

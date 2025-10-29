@@ -190,19 +190,8 @@
                     <!-- Summary view -->
                     <Grid Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
                         <!-- Loading state -->
-                        <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsConfigurationLoading, Mode=OneWay}">
-                            <StackPanel.Resources>
-                                <Style TargetType="labs:Shimmer">
-                                    <Setter Property="Height" Value="50" />
-                                </Style>
-                            </StackPanel.Resources>
-                            <labs:Shimmer />
-                            <labs:Shimmer />
-                            <labs:Shimmer />
-                            <labs:Shimmer />
-                            <labs:Shimmer />
-                            <labs:Shimmer />
-                        </StackPanel>
+                        <localControls:ShimmerRepeater ItemCount="6"
+                                                       Visibility="{x:Bind ViewModel.IsConfigurationLoading, Mode=OneWay}" />
 
                         <!-- Loaded content -->
                         <ListView ItemsSource="{x:Bind ViewModel.ConfigurationSet.Units, Mode=OneWay}"
@@ -408,20 +397,12 @@
                                                             Style="{ThemeResource BodyStrongTextBlockStyle}" />
 
                                                         <!-- Shimmers -->
-                                                        <StackPanel Spacing="4" Visibility="{x:Bind AreDetailsLoading, Mode=OneWay}">
-                                                            <StackPanel.Resources>
-                                                                <Style TargetType="labs:Shimmer">
-                                                                    <Setter Property="Margin" Value="0" />
-                                                                    <Setter Property="Height" Value="{StaticResource ShimmerHeight}" />
-                                                                    <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusSmall}" />
-                                                                </Style>
-                                                            </StackPanel.Resources>
-                                                            <labs:Shimmer />
-                                                            <labs:Shimmer />
-                                                            <labs:Shimmer />
-                                                            <labs:Shimmer />
-                                                            <labs:Shimmer />
-                                                        </StackPanel>
+                                                        <localControls:ShimmerRepeater ItemCount="4"
+                                                                                       Visibility="{x:Bind AreDetailsLoading, Mode=OneWay}">
+                                                            <localControls:ShimmerRepeater.Resources>
+                                                                <StaticResource x:Key="ShimmerHeight" ResourceKey="BodyTextBlockFontSize" />
+                                                            </localControls:ShimmerRepeater.Resources>
+                                                        </localControls:ShimmerRepeater>
 
                                                         <!-- Loaded details -->
                                                         <ListView ItemTemplate="{StaticResource KeyValueTemplate}" Style="{ThemeResource KeyValueSubList}">

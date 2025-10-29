@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
@@ -30,6 +27,12 @@ internal sealed class DSCExplorer : IDSCExplorer
     public async Task EnrichModuleWithResourceDetailsAsync(DSCModule dscModule)
     {
         await _repository.EnrichModuleWithResourceDetailsAsync(dscModule);
+    }
+
+    /// <inheritdoc/>
+    public async Task<string> GenerateDefaultYamlAsync(DSCResource resource)
+    {
+        return await _repository.GenerateDefaultYamlAsync(resource);
     }
 
     /// <inheritdoc/>

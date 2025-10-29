@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using NuGet.Packaging;
 using WinGetStudio.Models;
@@ -22,6 +23,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     private readonly ConcurrentDictionary<string, ResourceSuggestionViewModel> _allSuggestions;
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ResourceAutoSuggestBoxViewModel> _localizer;
+    private readonly ILogger<ResourceAutoSuggestBoxViewModel> _logger;
     private readonly IDSCExplorer _explorer;
 
     private bool _isSearchTextSubmitted;
@@ -35,10 +37,15 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
 
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
 
-    public ResourceAutoSuggestBoxViewModel(IUIFeedbackService ui, IStringLocalizer<ResourceAutoSuggestBoxViewModel> localizer, IDSCExplorer explorer)
+    public ResourceAutoSuggestBoxViewModel(
+        IUIFeedbackService ui,
+        IStringLocalizer<ResourceAutoSuggestBoxViewModel> localizer,
+        IDSCExplorer explorer,
+        ILogger<ResourceAutoSuggestBoxViewModel> logger)
     {
         _ui = ui;
         _localizer = localizer;
+        _logger = logger;
         _explorer = explorer;
         _noResultsSuggestion = new();
         _allSuggestions = [];
@@ -182,6 +189,12 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
                 }
             }
 
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while exploring the DSC resource.");
+            _ui.ShowTimedNotification(_localizer["ExploreResource_Failed"], NotificationMessageSeverity.Error);
             return null;
         }
         finally

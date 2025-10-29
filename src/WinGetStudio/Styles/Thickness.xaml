@@ -42,7 +42,6 @@
     <CornerRadius x:Key="CornerRadiusSmall">4</CornerRadius>
     <CornerRadius x:Key="CornerRadiusMedium">8</CornerRadius>
 
-    <x:Double x:Key="ShimmerHeight">20</x:Double>
     <x:Double x:Key="MaxSettingsHeight">200</x:Double>
     <x:Double x:Key="SectionSpacing">16</x:Double>
 
