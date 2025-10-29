@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 
@@ -29,16 +28,16 @@ internal sealed class DSC : IDSC
     public async Task<bool> UnstubAsync() => await _dscDeployment.UnstubAsync();
 
     /// <inheritdoc/>
-    public Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file) => _dscOperations.OpenConfigurationSetAsync(file);
+    public Task<IDSCSet> OpenConfigurationSetAsync(IDSCFile file, CancellationToken ct = default) => _dscOperations.OpenConfigurationSetAsync(file, ct);
 
     /// <inheritdoc/>
-    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ValidateSetAsync(IDSCSet set) => _dscOperations.ValidateSetAsync(set);
+    public Task<IDSCApplySetResult> ValidateSetAsync(IDSCSet set, IProgress<IDSCSetChangeData> progress = null, CancellationToken ct = default) => _dscOperations.ValidateSetAsync(set, progress, ct);
 
     /// <inheritdoc/>
-    public IAsyncOperationWithProgress<IDSCApplySetResult, IDSCSetChangeData> ApplySetAsync(IDSCSet set) => _dscOperations.ApplySetAsync(set);
+    public Task<IDSCApplySetResult> ApplySetAsync(IDSCSet set, IProgress<IDSCSetChangeData> progress = null, CancellationToken ct = default) => _dscOperations.ApplySetAsync(set, progress, ct);
 
     /// <inheritdoc/>
-    public IAsyncOperationWithProgress<IDSCTestSetResult, IDSCTestUnitResult> TestSetAsync(IDSCSet inputSet) => _dscOperations.TestSetAsync(inputSet);
+    public Task<IDSCTestSetResult> TestSetAsync(IDSCSet inputSet, IProgress<IDSCTestUnitResult> progress = null, CancellationToken ct = default) => _dscOperations.TestSetAsync(inputSet, progress, ct);
 
     /// <inheritdoc/>
     public Task<IDSCGetSetDetailsResult> GetSetDetailsAsync(IDSCSet dscSet, IProgress<IDSCGetUnitDetailsResult> progress = null, CancellationToken ct = default) => _dscOperations.GetSetDetailsAsync(dscSet, progress, ct);
@@ -47,13 +46,13 @@ internal sealed class DSC : IDSC
     public Task<IDSCGetUnitDetailsResult> GetUnitDetailsAsync(IDSCUnit unit, CancellationToken ct = default) => _dscOperations.GetUnitDetailsAsync(unit, ct);
 
     /// <inheritdoc/>
-    public async Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit unit) => await _dscOperations.GetUnitAsync(unit);
+    public async Task<IDSCGetUnitResult> GetUnitAsync(IDSCUnit unit, CancellationToken ct) => await _dscOperations.GetUnitAsync(unit, ct);
 
     /// <inheritdoc/>
-    public async Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit unit) => await _dscOperations.SetUnitAsync(unit);
+    public async Task<IDSCApplyUnitResult> SetUnitAsync(IDSCUnit unit, CancellationToken ct) => await _dscOperations.SetUnitAsync(unit, ct);
 
     /// <inheritdoc/>
-    public async Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit unit) => await _dscOperations.TestUnitAsync(unit);
+    public async Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit unit, CancellationToken ct) => await _dscOperations.TestUnitAsync(unit, ct);
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync() => await _dscOperations.GetDscV3ResourcesAsync();

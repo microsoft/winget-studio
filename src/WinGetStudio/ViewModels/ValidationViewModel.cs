@@ -18,8 +18,6 @@ using WingetStudio.Services.VisualFeedback.Models;
 
 namespace WinGetStudio.ViewModels;
 
-public delegate ValidationViewModel ValidationViewModelFactory();
-
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IDSC _dsc;

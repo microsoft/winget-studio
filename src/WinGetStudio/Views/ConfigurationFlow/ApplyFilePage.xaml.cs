@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Text;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
 using WinGetStudio.Contracts.Views;
@@ -40,5 +41,15 @@ public sealed partial class ApplyFilePage : Page, IView<ApplyFileViewModel>
             dataPackage.SetText(outputText.ToString());
             Clipboard.SetContent(dataPackage);
         }
+    }
+
+    /// <summary>
+    /// Handle Cancel button click event.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private async void CancelButton_Click(object sender, RoutedEventArgs e)
+    {
+        await CancelDialog.ShowAsync();
     }
 }

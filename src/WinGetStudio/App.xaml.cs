@@ -122,11 +122,11 @@ public partial class App : Application
                 services.AddTransient<ApplyFileViewModel>();
                 services.AddTransient<NotificationPaneViewModel>();
                 services.AddTransient<LoadingProgressBarViewModel>();
-                services.AddTransient<ResourceExplorerViewModel>();
                 services.AddTransient<ResourceAutoSuggestBoxViewModel>();
 
                 // Factories
-                services.AddSingleton<ValidationViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<ValidationViewModel>(sp));
+                services.AddTransient<ApplySetViewModelFactory>(sp => applySet => ActivatorUtilities.CreateInstance<ApplySetViewModel>(sp, applySet));
+                services.AddTransient<ResourceExplorerViewModelFactory>(sp => resource => ActivatorUtilities.CreateInstance<ResourceExplorerViewModel>(sp, resource));
                 services.AddTransient<UnitViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<UnitViewModel>(sp));
                 services.AddTransient<SetViewModelFactory>(sp => () => ActivatorUtilities.CreateInstance<SetViewModel>(sp));
             })

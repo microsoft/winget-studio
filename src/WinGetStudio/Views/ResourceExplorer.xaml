@@ -22,7 +22,7 @@
         <GridLength x:Key="TypeColumnWidth">150</GridLength>
     </ContentDialog.Resources>
 
-    <Grid>
+    <Grid x:Name="PageRoot" Tag="{x:Bind}">
         <!-- Close button -->
         <Button Style="{ThemeResource AlternateCloseButtonStyle}" Click="OnClose" />
 
@@ -34,22 +34,31 @@
             </Grid.RowDefinitions>
 
             <!-- Presentation mode selector -->
-            <controls:Segmented SelectedIndex="0" x:Name="SegmentedModeView" HorizontalAlignment="Center">
-                <controls:SegmentedItem x:Name="SummaryView"
-                                        x:Uid="ResourceExplorer_SummaryView"
-                                        AutomationProperties.PositionInSet="1"
-                                        AutomationProperties.SizeOfSet="2" />
-                <controls:SegmentedItem x:Name="CodeView"
-                                        x:Uid="ResourceExplorer_CodeView"
-                                        AutomationProperties.PositionInSet="2"
-                                        AutomationProperties.SizeOfSet="2" />
-            </controls:Segmented>
-            
+            <CommandBar HorizontalAlignment="Left" DefaultLabelPosition="Right">
+                <AppBarButton x:Uid="ResourceExplorer_View" Icon="View">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <RadioMenuFlyoutItem x:Name="SummaryView" x:Uid="ResourceExplorer_SummaryView" IsChecked="{x:Bind ViewModel.IsSummaryView, Mode=OneWay}">
+                                <RadioMenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xF232;" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+                                </RadioMenuFlyoutItem.Icon>
+                            </RadioMenuFlyoutItem>
+                            <RadioMenuFlyoutItem x:Name="CodeView" x:Uid="ResourceExplorer_CodeView" IsChecked="{x:Bind ViewModel.IsCodeView, Mode=TwoWay}">
+                                <RadioMenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE943;" />
+                                </RadioMenuFlyoutItem.Icon>
+                            </RadioMenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+                <AppBarButton x:Uid="ResourceExplorer_CopyAsYaml" Icon="Copy" Click="OnCopyAsYaml" />
+            </CommandBar>
+
             <!-- Summary view -->
             <ListView Grid.Row="1"
-                      ItemsSource="{x:Bind ViewModel.Properties, Mode=OneWay}"
+                      ItemsSource="{x:Bind ViewModel.Properties}"
                       SelectionMode="None"
-                      Visibility="{x:Bind SummaryView.IsSelected, Mode=OneWay}"> 
+                      Visibility="{x:Bind SummaryView.IsChecked, Mode=OneWay}">
                 <ListView.Header>
                     <Grid Padding="{ThemeResource SectionPadding}" ColumnSpacing="{ThemeResource SectionSpacing}">
                         <Grid.ColumnDefinitions>
@@ -58,13 +67,13 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Name | Type | Syntax-->
+                        <!-- Name | Type | Code -->
                         <TextBlock x:Uid="ResourceExplorer_Name"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock x:Uid="ResourceExplorer_Type"
                                    Grid.Column="1"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Uid="ResourceExplorer_Syntax"
+                        <TextBlock x:Uid="ResourceExplorer_Code"
                                    Grid.Column="2"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Grid>
@@ -107,32 +116,34 @@
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis" />
 
-                            <!-- Property syntax -->
+                            <!-- Property code -->
                             <ScrollViewer Grid.Column="2"
                                           HorizontalScrollBarVisibility="Auto"
                                           HorizontalScrollMode="Auto">
-                                <TextBlock IsTextSelectionEnabled="True"
-                                           VerticalAlignment="Center"
-                                           FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                                           Text="{x:Bind GetOneLinerSyntax()}"/>
+                                <controls:SwitchPresenter Value="{Binding ElementName=PageRoot, Path=Tag.ViewModel.CanShowJsonSchema}" TargetType="x:Boolean">
+                                    <controls:Case Value="True">
+                                        <HyperlinkButton x:Uid="ResourceExplorer_ViewJsonSchema" Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.ShowJsonSchemaCommand}" />
+                                    </controls:Case>
+                                    <controls:Case Value="False">
+                                        <TextBlock IsTextSelectionEnabled="True"
+                                                   VerticalAlignment="Center"
+                                                   FontFamily="{StaticResource CascadiaMonoFontFamily}"
+                                                   Text="{x:Bind GetOneLinerCode()}"/>
+                                    </controls:Case>
+                                </controls:SwitchPresenter>
                             </ScrollViewer>
-                                
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
 
             <!-- Code view -->
-            <ScrollViewer Grid.Row="1"
-                          Visibility="{x:Bind CodeView.IsSelected, Mode=OneWay}"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Auto">
-                <TextBlock FontSize="{ThemeResource CaptionTextBlockFontSize}"
-                           Padding="15"
-                           IsTextSelectionEnabled="True"
-                           FontFamily="{StaticResource CascadiaMonoFontFamily}"
-                           Text="{x:Bind ViewModel.ResourceSyntax, Mode=OneWay}" />
-            </ScrollViewer>
+            <localControls:MonacoEditor Grid.Row="1"
+                                        Height="500"
+                                        Visibility="{x:Bind CodeView.IsChecked, Mode=OneWay}"
+                                        Text="{x:Bind ViewModel.ResourceCode}"
+                                        IsReadOnly="True"
+                                        Syntax="{x:Bind ViewModel.ResourceSyntax}"/>
         </Grid>
     </Grid>
 </ContentDialog>

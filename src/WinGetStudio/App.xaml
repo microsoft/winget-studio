@@ -17,6 +17,7 @@
                 <!-- Local controls -->
                 <ResourceDictionary Source="/Views/Controls/CopyButton.xaml" />
                 <ResourceDictionary Source="/Views/Controls/EmptyStateControl.xaml" />
+                <ResourceDictionary Source="/Views/Controls/ShimmerRepeater.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

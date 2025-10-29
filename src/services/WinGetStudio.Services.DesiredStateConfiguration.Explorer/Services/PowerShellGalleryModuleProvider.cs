@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Extensions.Logging;
+using NJsonSchema;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
@@ -70,7 +71,17 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
 
                     // Populate resources
                     var resourceNames = GetResourceNamesFromTags(moduleMetadata);
-                    dscModule.PopulateResources(resourceNames, DSCVersion.Unknown);
+                    foreach (var resourceName in resourceNames)
+                    {
+                        if (dscModule.AddResource(resourceName, DSCVersion.Unknown))
+                        {
+                            _logger.LogInformation($"Added resource '{resourceName}' to module '{dscModule.Id}' from tags.");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Resource '{resourceName}' already exists in module '{dscModule.Id}'. Skipping addition from tags.");
+                        }
+                    }
 
                     // Add the module to the list
                     dscModules.TryAdd(dscModule.Id, dscModule);
@@ -101,10 +112,38 @@ internal sealed class PowerShellGalleryModuleProvider : IModuleProvider
     {
         if (!dscModule.IsEnriched)
         {
-            var definitions = await GetResourceDefinitionsAsync(dscModule);
-            dscModule.PopulateResources(definitions, DSCVersion.Unknown);
             dscModule.IsEnriched = true;
+            var definitions = await GetResourceDefinitionsAsync(dscModule);
+            foreach (var definition in definitions)
+            {
+                if (dscModule.EnrichResource(definition.ClassName, definition))
+                {
+                    _logger.LogInformation($"Enriched module '{dscModule.Id}' with resource details for resource '{definition.ClassName}'.");
+                }
+                else
+                {
+                    _logger.LogWarning($"Resource '{definition.ClassName}' not found in module '{dscModule.Id}' during enrichment.");
+                }
+            }
         }
+    }
+
+    /// <inheritdoc/>
+    public Task<JsonSchema> GetResourceSchemaAsync(DSCResource resource)
+    {
+        // For PowerShell resources, we generate a basic schema where all properties
+        // are set to type 'none'. In the future, we may enhance this by inferring
+        // property types for more detailed schemas.
+        var schema = new JsonSchema { Type = JsonObjectType.Object };
+        foreach (var property in resource.Properties)
+        {
+            schema.Properties[property.Name] = new JsonSchemaProperty
+            {
+                Type = JsonObjectType.None,
+            };
+        }
+
+        return Task.FromResult(schema);
     }
 
     /// <summary>

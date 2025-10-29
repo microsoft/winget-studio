@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using WinGetStudio.Services.DesiredStateConfiguration.Helpers;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
-using YamlDotNet.Serialization;
 using ConfigurationV3Resource = WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3.Json6;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Extensions;
@@ -22,9 +22,6 @@ public static class ConfigurationExtensions
     private const string IdentifierMetadataKey = "identifier";
     private const string SecurityContextMetadataKey = "securityContext";
     private const string DSCv3MetadataValue = "dscv3";
-
-    private static readonly ISerializer _yamlSerializer = new SerializerBuilder().DisableAliases().WithQuotingNecessaryStrings().Build();
-    private static readonly IDeserializer _yamlDeserializer = new DeserializerBuilder().WithAttemptingUnquotedStringTypeDeserialization().Build();
 
     /// <summary>
     /// Adds WinGet metadata to the configuration.
@@ -100,7 +97,7 @@ public static class ConfigurationExtensions
     public static string ToYaml(this ConfigurationV3 config)
     {
         var json = config.ToJson();
-        return ConfigurationToYaml(json);
+        return DSCYamlHelper.JsonToYaml(json);
     }
 
     /// <summary>
@@ -113,20 +110,6 @@ public static class ConfigurationExtensions
     private static string ConfigurationToJson<T>(T config, JsonSerializerOptions options)
     {
         return JsonSerializer.Serialize(config, options);
-    }
-
-    /// <summary>
-    /// Converts JSON string to YAML string.
-    /// </summary>
-    /// <param name="json">The JSON string.</param>
-    /// <returns>The YAML string.</returns>
-    private static string ConfigurationToYaml(string json)
-    {
-        // Parse JSON as YAML (JSON is a subset of YAML)
-        var intermediate = _yamlDeserializer.Deserialize<object>(json);
-
-        // Serialize as YAML
-        return _yamlSerializer.Serialize(intermediate);
     }
 
     /// <summary>
