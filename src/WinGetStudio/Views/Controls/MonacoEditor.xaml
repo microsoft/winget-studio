@@ -9,7 +9,7 @@
     mc:Ignorable="d">
     <Grid>
         <ProgressRing x:Name="LoadingProgressRing" />
-        <WebView2 x:Name="Editor" Loaded="Editor_Loaded" Unloaded="Editor_Unloaded" />
+        <WebView2 x:Name="Editor" Loaded="Editor_Loaded" />
         <ContentDialog
             x:Uid="MonacoEditor_OpenUriDialog"
             x:Name="OpenUriDialog"
