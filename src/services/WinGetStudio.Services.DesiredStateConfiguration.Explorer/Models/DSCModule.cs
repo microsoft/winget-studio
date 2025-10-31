@@ -75,6 +75,7 @@ public sealed partial class DSCModule
             if (Resources.TryGetValue(resourceName, out var resource))
             {
                 Debug.Assert(resource.DSCVersion != DSCVersion.V3, "DSC v3 resources should be enriched using JSON schema.");
+                resource.IsEnriched = true;
                 resource.Code = classDefinition.ClassAst.Extent.Text;
                 resource.Properties = [.. classDefinition.Properties.Select(prop => new DSCProperty
                 {
@@ -101,6 +102,7 @@ public sealed partial class DSCModule
             if (Resources.TryGetValue(resourceName, out var resource))
             {
                 Debug.Assert(resource.DSCVersion == DSCVersion.V3, "Only DSC v3 resources should be enriched using JSON schema.");
+                resource.IsEnriched = true;
                 resource.Code = schema.ToJson();
                 resource.Properties = [..schema.ActualProperties?.Select(prop => new DSCProperty
                 {

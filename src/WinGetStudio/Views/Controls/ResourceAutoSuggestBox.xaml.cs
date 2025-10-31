@@ -50,8 +50,8 @@ public sealed partial class ResourceAutoSuggestBox : UserControl
         var resource = await ViewModel.OnExploreAsync();
         if (resource != null)
         {
-            ResourceExplorer dialog = new(resource) { XamlRoot = XamlRoot };
-            await dialog.ShowAsync();
+            ResourceExplorerDialog.Resource = resource;
+            await ResourceExplorerDialog.ShowAsync();
         }
     }
 }

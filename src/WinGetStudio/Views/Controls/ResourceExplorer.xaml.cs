@@ -11,23 +11,44 @@ using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels.Controls;
 
-namespace WinGetStudio.Views;
+namespace WinGetStudio.Views.Controls;
 
 public sealed partial class ResourceExplorer : ContentDialog
 {
+    public static readonly DependencyProperty ResourceProperty = DependencyProperty.Register(nameof(Resource), typeof(DSCResource), typeof(ResourceExplorer), new PropertyMetadata(null, OnResourcePropertyChanged));
+
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ResourceExplorer> _localizer;
     private readonly ILogger<ResourceExplorer> _logger;
 
+    public DSCResource? Resource
+    {
+        get => (DSCResource?)GetValue(ResourceProperty);
+        set => SetValue(ResourceProperty, value);
+    }
+
     public ResourceExplorerViewModel ViewModel { get; }
 
-    public ResourceExplorer(DSCResource resource)
+    public ResourceExplorer()
     {
         _ui = App.GetService<IUIFeedbackService>();
         _localizer = App.GetService<IStringLocalizer<ResourceExplorer>>();
         _logger = App.GetService<ILogger<ResourceExplorer>>();
-        ViewModel = App.GetService<ResourceExplorerViewModelFactory>()(resource);
+        ViewModel = App.GetService<ResourceExplorerViewModel>();
         InitializeComponent();
+    }
+
+    /// <summary>
+    /// Handle changes to the Resource dependency property.
+    /// </summary>
+    /// <param name="d">The dependency object.</param>
+    /// <param name="e">The event args.</param>
+    private static void OnResourcePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is ResourceExplorer dialog && e.NewValue is DSCResource resource)
+        {
+            dialog.ViewModel.Resource = resource;
+        }
     }
 
     /// <summary>

@@ -29,11 +29,14 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     private bool _isSearchTextSubmitted;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanExplore))]
     public partial string? SearchResourceText { get; set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ReloadCommand))]
     public partial bool CanReload { get; set; }
+
+    public bool CanExplore => !string.IsNullOrWhiteSpace(SearchResourceText);
 
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
 
@@ -113,7 +116,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
         // Find suggestions that match the search text
         var suggestionsResult = await Task.Run(() => _allSuggestions.Values
             .Where(s => s.DisplayName.Contains(SearchResourceText, StringComparison.OrdinalIgnoreCase))
-            .Take(10)
+            .Take(100)
             .ToList()
             .Select(s =>
             {
@@ -174,8 +177,8 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
                         await _explorer.EnrichModuleWithResourceDetailsAsync(selectedSuggestion.Module);
                     }
 
-                    // If the module is still not enriched, show a warning and return null
-                    if (!selectedSuggestion.Module.IsEnriched)
+                    // If the module or resource is still not enriched, show a warning and return null
+                    if (!selectedSuggestion.Module.IsEnriched || !selectedSuggestion.Resource.IsEnriched)
                     {
                         _ui.ShowTimedNotification(_localizer["ResourceInfoNotFoundMessage"], NotificationMessageSeverity.Warning);
                         return null;

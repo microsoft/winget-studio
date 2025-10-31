@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
-    xmlns:vm="using:WinGetStudio.ViewModels"
+    xmlns:vm="using:WinGetStudio.ViewModels.Controls"
     xmlns:localConverters="using:WinGetStudio.Converters"
     mc:Ignorable="d">
 
@@ -112,12 +112,14 @@
         </AutoSuggestBox>
         <!-- Action buttons-->
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
-            <Button Click="ExploreResource_Click" VerticalAlignment="Stretch" Padding="8">
+            <Button Click="ExploreResource_Click" VerticalAlignment="Stretch" Padding="8" IsEnabled="{x:Bind ViewModel.CanExplore, Mode=OneWay}">
                 <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE946;" />
             </Button>
-            <Button  Command="{x:Bind ViewModel.ReloadCommand}" Padding="8">
+            <Button Command="{x:Bind ViewModel.ReloadCommand}" Padding="8">
                 <FontIcon FontSize="{ThemeResource ContentControlFontSize}" Glyph="&#xE72C;" />
             </Button>
         </StackPanel>
+        <!-- Resource explorer dialog -->
+        <local:ResourceExplorer x:Name="ResourceExplorerDialog" />
     </Grid>
 </UserControl>

@@ -21,12 +21,6 @@ public sealed class DSCResource
     public string Version { get; set; }
 
     /// <summary>
-    /// Gets the syntax of the resource.
-    /// </summary>
-    [JsonIgnore]
-    public string Syntax => DSCVersion == DSCVersion.V3 ? "json" : "powershell";
-
-    /// <summary>
     /// Gets or sets the syntax of the resource.
     /// </summary>
     [JsonPropertyName("code")]
@@ -49,4 +43,10 @@ public sealed class DSCResource
     /// </summary>
     [JsonPropertyName("dsc_version")]
     public DSCVersion DSCVersion { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this resource has been enriched with details.
+    /// </summary>
+    [JsonPropertyName("is_enriched")]
+    public bool IsEnriched { get; set; }
 }

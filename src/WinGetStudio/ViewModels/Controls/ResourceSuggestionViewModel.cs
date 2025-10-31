@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
-namespace WinGetStudio.ViewModels;
+namespace WinGetStudio.ViewModels.Controls;
 
 public sealed partial class ResourceSuggestionViewModel : ObservableObject
 {

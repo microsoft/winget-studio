@@ -731,6 +731,9 @@
   <data name="ResourceExplorer_ViewJsonSchema.Content" xml:space="preserve">
     <value>View JSON schema</value>
   </data>
+  <data name="ResourceExplorer_NoPropertiesMessage.Text" xml:space="preserve">
+    <value>No properties to display</value>
+  </data>
   <data name="Settings_Resources.Text" xml:space="preserve">
     <value>Resources</value>
   </data>
