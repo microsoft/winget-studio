@@ -1,12 +1,17 @@
 # WinGet Studio
 
-This repository contains the source code for [WinGet Studio](https://github.com/microsoft/winget-studio).
+This repository contains the source code for [WinGet Studio (Experimental)](https://github.com/microsoft/winget-studio).
+
+> [!WARNING]  
+> This software should be considered experimental.
 
 [![Build Status](https://microsoft.visualstudio.com/Apps/_apis/build/status%2FApp%20Installer%2FWinGet-Studio%20-%20Dev?repoName=microsoft%2Fwinget-studio&branchName=main)](https://microsoft.visualstudio.com/Apps/_build/latest?definitionId=179787&repoName=microsoft%2Fwinget-studio&branchName=main)
 
 ## Overview
 
-WinGet Studio is designed to help users create and modify WinGet Configuration files. It also includes the ability to use "get", "set", and "test" for any installed Desired State Configuration (DSC) resources.
+Building WinGet Configuration files (Configuration as Code with Microsoft (DSC) Desired State Configuration) is a complex undertaking for folks who are not already familiar with the technolgy stack. WinGet Studio is an experiment to see how we can help make it easier to author configuration files and build or test DSC resources.
+
+WinGet Studio is designed to help users create and modify WinGet Configuration files. It also includes the ability to use "get", "set", and "test" for any **installed** Desired State Configuration (DSC) resources.
 
 ## Installation
 
