@@ -10,7 +10,7 @@ WinGet Studio is designed to help users create and modify WinGet Configuration f
 
 ## Installation
 
-The **WinGet Studio** is available for download from the [winget-studio](https://github.com/microsoft/winget-studio/releases) repository.  To install the package, simply click the the MSIX file in your browser.  Once it has downloaded, click open.
+**WinGet Studio** is available for download from the [winget-studio](https://github.com/microsoft/winget-studio/releases) repository.  To install the package, simply click the link and download the MSIX file using your browser.  Once it has downloaded, click to open the package and follow the prompts to install it.
 
 ## Building from source
 
@@ -62,6 +62,8 @@ If you build the application yourself the instrumentation will not be enabled an
 The WinGet Studio application respects machine wide privacy settings and users can opt-out on their device, as documented in the Microsoft Windows privacy statement [here](https://support.microsoft.com/help/4468236/diagnostics-feedback-and-privacy-in-windows-10-microsoft-privacy).
 
 In short to opt-out, do one of the following:
+
+**WinGet Studio Settings**: Launch `WinGet Studio`, then select `Settings` and turn on `Disable Telemetry`
 
 **Windows 11**: Go to `Start`, then select `Settings` > `Privacy & security` > `Diagnostics & feedback` > `Diagnostic data` and unselect `Send optional diagnostic data`.
 
