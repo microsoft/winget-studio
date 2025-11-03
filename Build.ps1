@@ -92,7 +92,7 @@ Try {
         if ($IsRelease) {
             $buildRing = "Stable"
             $packageName = "Microsoft.Windows.WinGetStudio"
-            $packageDisplayName = "WinGet Studio (Preview)"
+            $packageDisplayName = "WinGet Studio (Experimental)"
             $appDisplayNameResource = "ms-resource:AppDisplayNameStable"
         }
 
