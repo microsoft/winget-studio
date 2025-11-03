@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using WinGetStudio.Services.Core.Helpers;
 using WinGetStudio.Services.DesiredStateConfiguration.Helpers;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Models.Schemas.ConfigurationV3;
@@ -97,7 +98,8 @@ public static class ConfigurationExtensions
     public static string ToYaml(this ConfigurationV3 config)
     {
         var json = config.ToJson();
-        return DSCYamlHelper.JsonToYaml(json);
+        var yaml = DSCYamlHelper.JsonToYaml(json);
+        return AddYamlHeaderComment(yaml);
     }
 
     /// <summary>
@@ -148,7 +150,7 @@ public static class ConfigurationExtensions
     /// <param name="dict">The parent dictionary.</param>
     /// <param name="key">The key to check.</param>
     /// <returns>The dictionary object.</returns>
-    public static IDictionary<string, object> EnsureObjectDict(IDictionary<string, object> dict, string key)
+    private static IDictionary<string, object> EnsureObjectDict(IDictionary<string, object> dict, string key)
     {
         if (!dict.TryGetValue(key, out var obj) || obj is not IDictionary<string, object> value)
         {
@@ -157,5 +159,17 @@ public static class ConfigurationExtensions
         }
 
         return value;
+    }
+
+    /// <summary>
+    /// Adds a YAML header comment indicating the tool and version used to
+    /// create the configuration.
+    /// </summary>
+    /// <param name="yaml">The YAML string.</param>
+    /// <returns>The YAML string with the header comment.</returns>
+    private static string AddYamlHeaderComment(string yaml)
+    {
+        var headerComment = $"# Created with WinGet Studio - v{RuntimeHelper.GetAppVersion()}";
+        return headerComment + Environment.NewLine + Environment.NewLine + yaml;
     }
 }
