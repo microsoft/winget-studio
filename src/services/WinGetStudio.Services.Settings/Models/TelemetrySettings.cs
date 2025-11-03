@@ -13,6 +13,6 @@ public class TelemetrySettings
     public TelemetrySettings()
     {
         // Initialize with default values
-        Disable = false;
+        Disable = true;
     }
 }
