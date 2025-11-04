@@ -169,11 +169,11 @@ You can use the Settings resource in WinGet Configuration files:
 
 ### Microsoft DSC 3.x format
 
+<!-- markdownlint-disable MD013 -->
+
 ```yaml
 # configuration.dsc.yaml
-$schema: >-
-  https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/
-  2023/08/config/document.json
+$schema: https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
 resources:
   - name: Configure WinGet Studio
     type: Microsoft.WinGetStudio/Settings
@@ -183,6 +183,8 @@ resources:
         telemetry:
           disable: true
 ```
+
+<!-- markdownlint-enable MD013 -->
 
 Apply the configuration:
 
