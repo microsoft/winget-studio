@@ -175,7 +175,7 @@
     <value>https://github.com/microsoft/winget-studio/blob/main/PRIVACY.md</value>
   </data>
   <data name="SettingsPage_VersionButton.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Copy to clipboard</value>
+    <value>Copy version information to clipboard</value>
   </data>
   <data name="ConfigurationFileWarning.Title" xml:space="preserve">
     <value>Configuration file warning</value>
