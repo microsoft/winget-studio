@@ -96,7 +96,10 @@
             <!-- About -->
             <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                <TextBlock Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" Style="{ThemeResource BodyTextBlockStyle}" />
+                <!-- Make the version text clickable to copy to clipboard -->
+                <HyperlinkButton Content="{x:Bind ViewModel.VersionDescription, Mode=OneWay}"
+                                 Click="CopyVersionToClipboard"
+                                 Margin="0,0,0,0" />
 
                 <TextBlock
                     x:Uid="Settings_AboutDescription"
