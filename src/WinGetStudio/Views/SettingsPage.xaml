@@ -99,7 +99,7 @@
                 <!-- Make the version text clickable to copy to clipboard -->
                 <HyperlinkButton Content="{x:Bind ViewModel.VersionDescription, Mode=OneWay}"
                                  Click="CopyVersionToClipboard"
-                                 Margin="0,0,0,0" />
+                                 Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
 
                 <TextBlock
                     x:Uid="Settings_AboutDescription"
