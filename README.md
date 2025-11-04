@@ -1,28 +1,52 @@
 # WinGet Studio
 
-This repository contains the source code for [WinGet Studio (Experimental)](https://github.com/microsoft/winget-studio).
+This repository contains the source code for [WinGet Studio (Experimental)][winget-studio-main].
 
 > [!WARNING]  
 > This software should be considered experimental.
 
-[![Build Status](https://microsoft.visualstudio.com/Apps/_apis/build/status%2FApp%20Installer%2FWinGet-Studio%20-%20Dev?repoName=microsoft%2Fwinget-studio&branchName=main)](https://microsoft.visualstudio.com/Apps/_build/latest?definitionId=179787&repoName=microsoft%2Fwinget-studio&branchName=main)
+[![Build Status][build-badge]][build-link]
 
 ## Overview
 
-Building WinGet Configuration files (Configuration as Code with Microsoft (DSC) Desired State Configuration) is a complex undertaking for folks who are not already familiar with the technolgy stack. WinGet Studio is an experiment to see how we can help make it easier to author configuration files and build or test DSC resources.
+Building WinGet Configuration files (Configuration as Code with Microsoft (DSC) Desired State
+Configuration) is a complex undertaking for folks who are not already familiar with the technology
+stack. WinGet Studio is an experiment to see how we can help make it easier to author configuration
+files and build or test DSC resources.
 
-WinGet Studio is designed to help users create and modify WinGet Configuration files. It also includes the ability to use "get", "set", and "test" for any **installed** Desired State Configuration (DSC) resources.
+WinGet Studio is designed to help users create and modify WinGet Configuration files. It also
+includes the ability to use "get", "set", and "test" for any **installed** Desired State
+Configuration (DSC) resources.
+
+## Documentation
+
+Learn more about WinGet Studio and how to use it:
+
+- [Overview][docs-overview] - Introduction to WinGet Studio's features and capabilities
+- [Getting Started][docs-getting-started] - Quick start guide for new users
+- [Configuration Versions][docs-config-versions] - Understanding 0.2.0 vs Microsoft DSC 3.x formats
+- [Migrate to DSC 3.x][docs-migration] - Step-by-step guide to upgrade your configurations
+- [Understanding Resources][docs-resources] - Learn about DSC resources and PowerShell Gallery
+- [Customize Configuration][docs-customize] - Advanced configuration customization techniques
+- [CLI Reference - DSC Commands][docs-cli-dsc] - Command-line interface for DSC operations
+- [CLI Reference - Settings Commands][docs-cli-settings] - Command-line interface for settings
+- [Changelog][docs-changelog] - Release notes and version history
 
 ## Installation
 
-**WinGet Studio** is available for download from the [winget-studio](https://github.com/microsoft/winget-studio/releases) repository.  To install the package, simply click the link and download the MSIX file using your browser.  Once it has downloaded, click to open the package and follow the prompts to install it.
+**WinGet Studio** is available for download from the
+[WinGet Studio releases][winget-studio-releases] repository. To install the package, simply click
+the link and download the MSIX file using your browser. Once it has downloaded, click to open the
+package and follow the prompts to install it.
 
 ## Building from source
 
 ### Apply the WinGet configuration file
-To configure your machine for WinGet Studio, apply the WinGet configuration file containing the necessary settings for building the application.
 
-```ps
+To configure your machine for WinGet Studio, apply the WinGet configuration file containing the
+necessary settings for building the application.
+
+```powershell
 git clone 'https://github.com/microsoft/winget-studio'
 cd 'winget-studio'
 winget configure '.\.config\configuration.winget'
@@ -31,15 +55,17 @@ winget configure '.\.config\configuration.winget'
 ### Build the application
 
 #### Option 1: Visual Studio
-Open [./src/WinGetStudio.sln](./src/WinGetStudio.sln) in Visual Studio and build.
+
+Open [./src/WinGetStudio.sln][solution-file] in Visual Studio and build.
 
 #### Option 2: PowerShell Script
+
 Open a PowerShell terminal and run the build script.
 
 > [!TIP]
 > Certificate signing requires admin privileges.  To sign, run the following as admin.
 
-```ps
+```powershell
 .\Build.ps1
 ```
 
@@ -47,31 +73,61 @@ Open a PowerShell terminal and run the build script.
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com. More
-information is available in our [CONTRIBUTING.md](/CONTRIBUTING.md) file.
+the rights to use your contribution. For details, visit the [Microsoft CLA site][ms-cla]. More
+information is available in our [CONTRIBUTING.md][contributing-file] file.
 
 When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the
+instructions provided by the bot. You will only need to do this once across all repos using our
+CLA.
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information, please refer to the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+This project has adopted the [Microsoft Open Source Code of Conduct][ms-code-of-conduct]. For more
+information, please refer to the [Code of Conduct FAQ][code-of-conduct-faq] or contact
+[opencode@microsoft.com][opencode-email] with any additional questions or comments.
 
 ## Data/Telemetry
 
-The WinGet Studio application is instrumented to collect usage and diagnostic (error) data and sends it to Microsoft to help improve the product.
+The WinGet Studio application is instrumented to collect usage and diagnostic (error) data and
+sends it to Microsoft to help improve the product.
 
-If you build the application yourself the instrumentation will not be enabled and no data will be sent to Microsoft.
+If you build the application yourself the instrumentation will not be enabled and no data will be
+sent to Microsoft.
 
-The WinGet Studio application respects machine wide privacy settings and users can opt-out on their device, as documented in the Microsoft Windows privacy statement [here](https://support.microsoft.com/help/4468236/diagnostics-feedback-and-privacy-in-windows-10-microsoft-privacy).
+The WinGet Studio application respects machine wide privacy settings and users can opt-out on their
+device, as documented in the [Microsoft Windows privacy statement][ms-privacy-statement].
 
 In short to opt-out, do one of the following:
 
-**WinGet Studio Settings**: Launch `WinGet Studio`, then select `Settings` and turn on `Disable Telemetry`
+**WinGet Studio Settings**: Launch `WinGet Studio`, then select `Settings` and turn on
+`Disable Telemetry`
 
-**Windows 11**: Go to `Start`, then select `Settings` > `Privacy & security` > `Diagnostics & feedback` > `Diagnostic data` and unselect `Send optional diagnostic data`.
+**Windows 11**: Go to `Start`, then select `Settings` > `Privacy & security` >
+`Diagnostics & feedback` > `Diagnostic data` and unselect `Send optional diagnostic data`.
 
-**Windows 10**: Go to `Start`, then select `Settings` > `Privacy` > `Diagnostics & feedback`, and select `Required diagnostic data`.
+**Windows 10**: Go to `Start`, then select `Settings` > `Privacy` > `Diagnostics & feedback`, and
+select `Required diagnostic data`.
 
-See the [privacy statement](/PRIVACY.md) for more details.
+See the [privacy statement][privacy-file] for more details.
+
+<!-- Link reference definitions -->
+[winget-studio-main]: https://github.com/microsoft/winget-studio
+[winget-studio-releases]: https://github.com/microsoft/winget-studio/releases
+[build-badge]: https://microsoft.visualstudio.com/Apps/_apis/build/status%2FApp%20Installer%2FWinGet-Studio%20-%20Dev?repoName=microsoft%2Fwinget-studio&branchName=main
+[build-link]: https://microsoft.visualstudio.com/Apps/_build/latest?definitionId=179787&repoName=microsoft%2Fwinget-studio&branchName=main
+[solution-file]: ./src/WinGetStudio.sln
+[ms-cla]: https://cla.opensource.microsoft.com
+[contributing-file]: /CONTRIBUTING.md
+[ms-code-of-conduct]: https://opensource.microsoft.com/codeofconduct/
+[code-of-conduct-faq]: https://opensource.microsoft.com/codeofconduct/faq/
+[opencode-email]: mailto:opencode@microsoft.com
+[ms-privacy-statement]: https://support.microsoft.com/help/4468236/diagnostics-feedback-and-privacy-in-windows-10-microsoft-privacy
+[privacy-file]: /PRIVACY.md
+[docs-overview]: /docs/overview.md
+[docs-getting-started]: /docs/get-started/index.md
+[docs-config-versions]: /docs/concepts/configuration-versions.md
+[docs-migration]: /docs/how-to/migrate-configuration-to-dsc3.md
+[docs-resources]: /docs/concepts/understanding-resources.md
+[docs-customize]: /docs/how-to/customize-exported-configuration.md
+[docs-cli-dsc]: /docs/reference/cli/dsc.md
+[docs-cli-settings]: /docs/reference/cli/settings.md
+[docs-changelog]: /docs/changelog.md
