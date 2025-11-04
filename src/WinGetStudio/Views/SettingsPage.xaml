@@ -97,9 +97,11 @@
             <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource XSmallTopMargin}">
                 <!-- Make the version text clickable to copy to clipboard -->
-                <HyperlinkButton Content="{x:Bind ViewModel.VersionDescription, Mode=OneWay}"
-                                 Click="CopyVersionToClipboard"
-                                 Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
+                <HyperlinkButton
+                    x:Uid="SettingsPage_VersionButton"
+                    Content="{x:Bind ViewModel.VersionDescription, Mode=OneWay}"
+                    Click="CopyVersionToClipboard"
+                    Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
 
                 <TextBlock
                     x:Uid="Settings_AboutDescription"
