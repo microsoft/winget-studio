@@ -45,7 +45,7 @@ steps:
         -BuildStep "msix" `
         -IsRelease:$${{ parameters.IsRelease }} `
         -OutputDir "${{ parameters.OutputDir }}" `
-        -IsAzurePipelineBuild
+        -Verbose
 
   - pwsh: |
       Move-Item `
