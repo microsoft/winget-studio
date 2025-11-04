@@ -19,6 +19,10 @@ A DSC resource represents a standardized interface for managing a specific compo
 on a system. Resources can manage anything from files and registry keys to installed software
 and system settings.
 
+DSC resources are designed to be [idempotent][07], meaning they can be applied multiple times
+without changing the result beyond the initial application. This ensures that configurations are
+safe to run repeatedly.
+
 ### Resource characteristics
 
 Each DSC resource typically provides:
@@ -451,3 +455,4 @@ In your configuration, document required modules:
 [04]: ../get-started/index.md
 [05]: https://learn.microsoft.com/powershell/dsc/concepts/resources/overview
 [06]: https://learn.microsoft.com/en-us/powershell/dsc/overview?view=dsc-3.0#differences-from-powershell-dsc
+[07]: https://learn.microsoft.com/en-us/powershell/dsc/overview/dscforengineers?view=dsc-1.1

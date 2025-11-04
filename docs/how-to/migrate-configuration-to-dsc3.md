@@ -220,6 +220,14 @@ adapter.
 - The adapter's `properties` contains a `resources` array
 - Each nested resource follows the same structure with `name`, `type`, and `properties`
 
+> [!TIP]
+> You can directly reference PowerShell DSC v2 resources by their type name without wrapping them
+> in an adapter (e.g., `type: Microsoft.Windows.Settings/WindowsSettings`). However, this approach
+> has a performance cost: DSC must determine which adapter to use and build up the adapter cache
+> each time. For better performance, especially in production, explicitly wrap PowerShell DSC v2
+> resources in the appropriate adapter (`Microsoft.Windows/WindowsPowerShell` or
+> `Microsoft.DSC/PowerShell`).
+
 ## Step 4: Handle directives and metadata
 
 Directives in 0.2.0 become metadata or configuration properties in Microsoft DSC 3.x.
