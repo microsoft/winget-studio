@@ -1,32 +1,7 @@
 ---
 description: >-
   Step-by-step guide to migrate your WinGet Configuration file from the 0.2.0 schema to the
-  Mi            va#### After (Microsoft DSC 3.x) - Assertions
-
-<!-- markdownlint-disable MD013 -->
-
-```yaml
-resources:
-  - name: Registry Setting Assertion
-    type: Microsoft.DSC/AssertionGroup
-    properties:
-      $schema: https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
-      resources:
-        - name: Verify registry setting
-          type: Microsoft.Windows/Registry
-          properties:
-            keyPath: HKCU\Software\MyApp
-            valueName: Setting
-            valueData: Enabled
-```
-
-<!-- markdownlint-enable MD013 -->
-```
-
-#### After (Microsoft DSC 3.x) - Assertions
-
-```yaml
-resources: DSC 3.x format, including schema updates, syntax changes, and module requirements.
+  Microsoft DSC 3.x format, including schema updates, syntax changes, and module requirements.
 ms.date: 11/04/2025
 ms.topic: how-to-article
 title: Migrate from 0.2.0 to Microsoft DSC 3.x
@@ -444,16 +419,16 @@ winget configure --file path\to\your-config.dsc.yaml
 
 ```powershell
 # Validate the configuration syntax
-winget-studio dsc validate --file path\to\your-config.dsc.yaml
+wingetstudio dsc validate --file path\to\your-config.dsc.yaml
 
 # Test the configuration (dry run)
-winget-studio dsc test --file path\to\your-config.dsc.yaml
+wingetstudio dsc test --file path\to\your-config.dsc.yaml
 
 # Apply the configuration
-winget-studio dsc set --file path\to\your-config.dsc.yaml
+wingetstudio dsc set --file path\to\your-config.dsc.yaml
 
 # Get the current state of resources in the configuration
-winget-studio dsc get --file path\to\your-config.dsc.yaml
+wingetstudio dsc get --file path\to\your-config.dsc.yaml
 ```
 
 ## Common migration issues

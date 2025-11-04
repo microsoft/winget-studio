@@ -19,7 +19,7 @@ migrating configuration files in WinGet Studio.
 ### WinGet Configuration 0.2.0
 
 The 0.2.0 format is the original WinGet Configuration format that integrates with PowerShell
-Desired State Configuration (DSC) version 2. This format uses a specific schema and relies on
+Desired State Configuration (PSDSC) version 2. This format uses a specific schema and relies on
 WinGet to automatically discover and load PowerShell DSC modules.
 
 **Key characteristics:**
@@ -27,7 +27,7 @@ WinGet to automatically discover and load PowerShell DSC modules.
 - Uses schema: `https://aka.ms/configuration-dsc-schema/0.2`
 - Configuration version: `0.2.0`
 - PowerShell modules are automatically discovered by WinGet
-- Uses PowerShell DSC v2 resources
+- Uses PSDSC v2 resources
 - Resources are defined with the `resource` keyword
 - Supports directives for resource behavior
 
@@ -74,11 +74,12 @@ explicit PowerShell 7 and module installation.
 
 **Example configuration:**
 
+<!-- markdownlint-disable MD013 -->
+
 ```yaml
 # yaml-language-server:
 # $schema=https://aka.ms/dsc/schemas/v3/bundled/config/document.vscode.json
-$schema:
-  https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
+$schema: https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
 metadata:
   Microsoft.WinGet.Studio:
     version: 0.1.0
@@ -101,6 +102,8 @@ resources:
             id: Microsoft.VisualStudio.2022.Community
             source: winget
 ```
+
+<!-- markdownlint-enable MD013 -->
 
 ## Key differences
 
@@ -134,9 +137,9 @@ resources:
 
 In the Microsoft DSC 3.x format, PowerShell DSC resources are accessed through adapter resources:
 
-- **`Microsoft.Windows/WindowsPowerShell`**: Invokes PowerShell DSC v2 resources in Windows
-  PowerShell 5.1
-- **`Microsoft.DSC/PowerShell`**: Invokes PowerShell DSC v2 resources in PowerShell 7+
+- **`Microsoft.Windows/WindowsPowerShell`**: Invokes PowerShell DSC v2 script-based or class-based
+  resources in Windows PowerShell 5.1
+- **`Microsoft.DSC/PowerShell`**: Invokes PowerShell DSC v2 class-based resources in PowerShell 7+
 
 These adapters enable the use of classic PowerShell DSC v2 resources within the new Microsoft
 DSC 3.x framework.

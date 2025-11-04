@@ -26,9 +26,10 @@ The exported file includes:
 
 ### Example exported configuration
 
+<!-- markdownlint-disable MD013 -->
+
 ```yaml
-$schema:
-  https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
+$schema: https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
 metadata:
   Microsoft.WinGet.Studio:
     version: 0.1.0
@@ -44,6 +45,8 @@ resources:
             source: winget
 ```
 
+<!-- markdownlint-enable MD013 -->
+
 ## Common customizations
 
 ### Adding parameters
@@ -53,9 +56,10 @@ parameters to customize values without modifying the configuration logic.
 
 **Add a parameters section:**
 
+<!-- markdownlint-disable MD013 -->
+
 ```yaml
-$schema:
-  https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
+$schema: https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
 parameters:
   packageId:
     type: string
@@ -79,6 +83,8 @@ resources:
             id: "[parameters('packageId')]"
             source: "[parameters('packageSource')]"
 ```
+
+<!-- markdownlint-enable MD013 -->
 
 **Using parameters:**
 

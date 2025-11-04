@@ -26,6 +26,12 @@ Each DSC resource typically provides:
 - **Get operation**: Retrieves the current state of the managed component
 - **Set operation**: Enforces the desired state of the component
 - **Test operation**: Checks if the component is in the desired state
+- **Export operation**: Generates configuration from current state (Microsoft DSC v3 only)
+
+> [!NOTE]
+> The Export operation is newly introduced in Microsoft DSC v3. It allows resources to enumerate
+> all instances of a managed component and generate a configuration document representing the
+> current state. This feature is not available in PowerShell DSC v2 resources.
 
 ### Resource examples
 
@@ -166,6 +172,8 @@ You can search for DSC resources directly on PowerShell Gallery:
 
 #### Using PowerShell
 
+**PowerShell 5.1 with PowerShellGet:**
+
 ```powershell
 # Find modules with DSC resources
 Find-Module -Tag dscresource
@@ -176,6 +184,28 @@ Find-Module -Tag PSDscResource_WinGetPackage
 # Get module details
 Find-Module -Name Microsoft.WinGet.DSC | Select-Object -ExpandProperty Tags
 ```
+
+**PowerShell 7+ with Microsoft.PowerShell.PSResourceGet:**
+
+```powershell
+# Find modules with DSC resources
+Find-PSResource -Tag dscresource
+
+# Search for specific resource
+Find-PSResource -Tag PSDscResource_WinGetPackage
+
+# Get module details
+Find-PSResource -Name Microsoft.WinGet.DSC | Select-Object -Property Name, Version, Tags
+
+# Install using PSResourceGet
+Install-PSResource -Name Microsoft.WinGet.DSC
+```
+
+> [!TIP]
+> PowerShell 7+ users should use `Find-PSResource` and `Install-PSResource` from the
+> `Microsoft.PowerShell.PSResourceGet` module, which provides improved performance and features
+> over the older `PowerShellGet` module. It's also installed by default when installing PowerShell
+> 7.2+ or above.
 
 #### Using WinGet Studio
 
@@ -208,6 +238,8 @@ Major.Minor.Patch[-Prerelease]
 Resource versions typically match their containing module version. When you reference a resource,
 you can specify a module version to ensure consistency:
 
+**Using PowerShellGet (PowerShell 5.1+):**
+
 ```powershell
 # Install specific module version
 Install-Module -Name Microsoft.WinGet.DSC -RequiredVersion 1.2.0
@@ -217,6 +249,19 @@ Install-Module -Name Microsoft.WinGet.DSC
 
 # Install latest (including prerelease)
 Install-Module -Name Microsoft.WinGet.DSC -AllowPrerelease
+```
+
+**Using PSResourceGet (PowerShell 7+):**
+
+```powershell
+# Install specific module version
+Install-PSResource -Name Microsoft.WinGet.DSC -Version 1.2.0
+
+# Install latest stable version
+Install-PSResource -Name Microsoft.WinGet.DSC
+
+# Install latest (including prerelease)
+Install-PSResource -Name Microsoft.WinGet.DSC -Prerelease
 ```
 
 ### Version compatibility
@@ -334,6 +379,8 @@ Select resources that:
 
 Before using a resource:
 
+**Using PowerShellGet:**
+
 ```powershell
 # Check if module is installed
 Get-Module -ListAvailable -Name Microsoft.WinGet.DSC
@@ -342,26 +389,32 @@ Get-Module -ListAvailable -Name Microsoft.WinGet.DSC
 Install-Module -Name Microsoft.WinGet.DSC -Scope CurrentUser
 ```
 
+**Using PSResourceGet (PowerShell 7+):**
+
+```powershell
+# Check if module is installed
+Get-PSResource -Name Microsoft.WinGet.DSC
+
+# Install if missing
+Install-PSResource -Name Microsoft.WinGet.DSC -Scope CurrentUser
+```
+
 ### Use specific versions in production
 
 For production configurations, specify exact module versions:
+
+**Using PowerShellGet:**
 
 ```powershell
 # Install specific version
 Install-Module -Name Microsoft.WinGet.DSC -RequiredVersion 1.2.0 -Force
 ```
 
-### Test resources before deployment
-
-Always test resources in a non-production environment:
+**Using PSResourceGet (PowerShell 7+):**
 
 ```powershell
-# Test resource get operation
-wingetstudio dsc get --resource Microsoft.WinGet.DSC/WinGetPackage `
-  --input '{"id":"Git.Git","source":"winget"}'
-
-# Test configuration
-dsc config test --file configuration.dsc.yaml
+# Install specific version
+Install-PSResource -Name Microsoft.WinGet.DSC -Version 1.2.0 -TrustRepository
 ```
 
 ### Document resource dependencies
@@ -373,9 +426,13 @@ In your configuration, document required modules:
 # - Microsoft.WinGet.DSC (v1.2.0+)
 # - PSDesiredStateConfiguration (v2.0.5+)
 #
-# Install with:
+# Install with PowerShellGet:
 # Install-Module Microsoft.WinGet.DSC -Scope CurrentUser
 # Install-Module PSDesiredStateConfiguration -Scope CurrentUser
+#
+# Or with PSResourceGet (PowerShell 7+):
+# Install-PSResource Microsoft.WinGet.DSC -Scope CurrentUser
+# Install-PSResource PSDesiredStateConfiguration -Scope CurrentUser
 ```
 
 ## Related content
