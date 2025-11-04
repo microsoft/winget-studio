@@ -105,8 +105,6 @@ resources:
 - **`Microsoft.Windows/WindowsPowerShell`**: Uses Windows PowerShell 5.1
 - **`Microsoft.DSC/PowerShell`**: Uses PowerShell 7+
 
-
-
 ## PowerShell Gallery as a resource source
 
 The PowerShell Gallery is the primary public repository for PowerShell modules, including those
