@@ -216,9 +216,10 @@ Install-PSResource -Name Microsoft.WinGet.DSC
 WinGet Studio provides a built-in resource catalog:
 
 1. Open WinGet Studio
-1. Navigate to the resource catalog
+1. Edit or validate a resource
 1. Search for resources by name or module
-1. View resource details and properties
+1. View resource details and properties by clicking on the ℹ️ icon
+   1. ⚠️ This step is currently not supported for script-based resources
 1. Add resources to your configuration
 
 ## Module and resource versioning
@@ -289,7 +290,6 @@ The resource catalog includes:
 - **Resource list**: All resources provided by each module
 - **Resource properties**: Detailed property schemas for each resource
 - **DSC version**: Whether the resource is v2 or v3
-- **Metadata**: Description, author, and other module information
 
 ### Catalog sources
 
@@ -315,14 +315,8 @@ To update the resource catalog in WinGet Studio:
 
 1. Open WinGet Studio
 1. Navigate to Settings
-1. Select "Refresh Resource Catalog"
-1. Wait for the catalog to update
-
-Or use the CLI:
-
-```powershell
-wingetstudio dsc catalog refresh
-```
+1. Click "Clear cache" button under "Resources" section
+1. Next time you browse a module or resource, the data will be reloaded
 
 ## Working with resource schemas
 
@@ -334,7 +328,8 @@ Each resource defines a schema that describes its configurable properties.
 
 1. Browse the resource catalog
 1. Select a resource
-1. View the "Properties" tab to see available settings
+1. Click the ℹ️ icon to view the resource properties
+   1. ⚠️ This is currently not supported for script-based resources
 
 **Using CLI:**
 

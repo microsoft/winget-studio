@@ -53,8 +53,8 @@ Download and install WinGet Studio from the [GitHub releases page][01]:
    - The main window displays the configuration editor
 
 1. **Create a new configuration**
-   - Click "New Configuration" or press `Ctrl+N`
-   - WinGet Studio creates an empty configuration
+   - Click "New nonfiguration"
+   - WinGet Studio creates a new configuration with a placeholder resource
 
 1. **Add resources from the catalog**
    - Click "Add Resource" in the toolbar
@@ -80,7 +80,7 @@ Download and install WinGet Studio from the [GitHub releases page][01]:
    - Fix any errors or warnings
 
 1. **Save the configuration**
-   - Click "Save" or press `Ctrl+S`
+   - Click "Save", or "Save as" if you want to create a new file
    - Choose a location and filename (e.g., `dev-setup.dsc.yaml`)
    - WinGet Studio exports in Microsoft DSC 3.x format by default
 
@@ -128,8 +128,8 @@ WinGet Studio maintains a catalog of available DSC resources.
    - View resource details and properties
 
 1. **Refresh the catalog**
-   - Click "Settings" > "Refresh Resource Catalog"
-   - WinGet Studio updates the catalog from PowerShell Gallery
+   - Click "Settings" > "Clear resources cache" > Clear cache
+   - WinGet Studio updates the catalog from PowerShell Gallery and local DSC v3 resources
 
 ### Understanding resource sources
 
@@ -201,16 +201,6 @@ dsc config set --file dev-setup.dsc.yaml
 
 ## Exporting configurations
 
-### Export from WinGet Studio
-
-1. Open your configuration in WinGet Studio
-1. Click "File" > "Export" or press `Ctrl+E`
-1. Choose export format (YAML or JSON)
-1. Select destination and filename
-1. Click "Save"
-
-WinGet Studio exports configurations in Microsoft DSC 3.x format by default.
-
 ### Export using CLI
 
 ```powershell
@@ -222,19 +212,12 @@ wingetstudio dsc export --resource Microsoft.WinGet.DSC/WinGetPackage
 
 ### Open in WinGet Studio GUI
 
-1. Click "File" > "Open" or press `Ctrl+O`
+1. Click "Open configuration"
 1. Browse to your configuration file
-1. Select the file (`.winget`, `.dsc.yaml`, or `.dsc.config.yaml`)
+1. Select the file (`.winget`, `.dsc.yaml`, or `.dsc.yml`)
 1. Click "Open"
 
 WinGet Studio detects whether it's 0.2.0 or Microsoft DSC 3.x format automatically.
-
-### Open from command line
-
-```powershell
-# Open configuration with WinGet Studio
-wingetstudio open dev-setup.dsc.yaml
-```
 
 ## Managing dependencies
 
@@ -242,7 +225,7 @@ Resources can depend on other resources to ensure correct execution order.
 
 ### Add dependencies in GUI
 
-1. Select a resource in your configuration
+1. Select a resource in edit mode
 1. Open the "Dependencies" panel
 1. Select resources that must run first
 1. WinGet Studio adds `dependsOn` references
