@@ -2,11 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.System.Profile;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Services.Core.Helpers;
 using WinGetStudio.ViewModels;
