@@ -255,11 +255,13 @@ instream
 insufficientmemory
 Intelli
 INTRESOURCE
+INu
 invalidparameter
 ishelp
 ISQ
 ISVs
 iswgp
+IUI
 itr
 iwgc
 IWIC
@@ -335,6 +337,7 @@ microsoftentraid
 microsoftentraidforazureblobstorage
 midl
 minidump
+minkernel
 MINORVERSION
 missingdependency
 mkgmtime

@@ -1,3 +1,4 @@
+Abi
 ACTIONDATA
 ACTIONSTART
 activatable
@@ -54,6 +55,7 @@ createnew
 createpintable
 createportabletable
 createtables
+cred
 CRTDECL
 CRYPTPROTECT
 CTLs
@@ -139,6 +141,7 @@ IInspectable
 inapplicabilities
 inheritdoc
 inno
+INPROC
 Inq
 installertype
 Installeruniqueness
@@ -156,6 +159,7 @@ IPortable
 ISAPPROVEDFOROUTPUT
 IUnknown
 JDKs
+Kristensen
 langutil
 lastwritetime
 LCIDTo
@@ -167,6 +171,7 @@ logsql
 logto
 LPCGUID
 LPCSTR
+ltsc
 Luid
 makeappx
 MAKEINTRESOURCE
@@ -194,6 +199,7 @@ msixtest
 msrc
 Multifile
 Multimatch
+Mvvm
 ncacn
 Nelon
 netstandard
@@ -246,6 +252,7 @@ portableindex
 powertoys
 pplx
 ppv
+PInvoke
 PRECONFIG
 preindexed
 prepareforpackaging
@@ -297,6 +304,7 @@ Screenshot
 screenshots
 SCROLLVIEWER
 seinfo
+Serilog
 SERVICEPACKMAJOR
 SERVICEPACKMINOR
 setschemaversion

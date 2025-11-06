@@ -146,7 +146,7 @@ public partial class UnitViewModel : ObservableObject
         // Add resource metadata
         if (Metadata != null && Metadata.Count > 0)
         {
-            config.Resources[0].AddMetdata(Metadata.DeepCopy());
+            config.Resources[0].AddMetadata(Metadata.DeepCopy());
         }
 
         // Add security context metadata if specified and not default.

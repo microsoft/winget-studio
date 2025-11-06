@@ -1,6 +1,6 @@
 # dsc command
 
-The **dsc** command is the entry point for using DSC (Desired State Coonfiguration) with WinGet Studio.
+The **dsc** command is the entry point for using DSC (Desired State Configuration) with WinGet Studio.
 
 ## Usage
 

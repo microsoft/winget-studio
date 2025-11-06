@@ -815,7 +815,7 @@
   <data name="PreviewFile_ResourceAutoSuggestBox.Header" xml:space="preserve">
     <value>Resource type</value>
   </data>
-  <data name="PreviewFile_SecurityContenxtComboBox.Header" xml:space="preserve">
+  <data name="PreviewFile_SecurityContextComboBox.Header" xml:space="preserve">
     <value>Security context</value>
   </data>
   <data name="PreviewFile_ResourceNameTextBox.Header" xml:space="preserve">

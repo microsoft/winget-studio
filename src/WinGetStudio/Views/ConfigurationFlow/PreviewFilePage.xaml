@@ -478,7 +478,7 @@
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
                                     <localControls:ResourceAutoSuggestBox x:Uid="PreviewFile_ResourceAutoSuggestBox" Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}" />
-                                    <ComboBox x:Uid="PreviewFile_SecurityContenxtComboBox"
+                                    <ComboBox x:Uid="PreviewFile_SecurityContextComboBox"
                                               ItemsSource="{x:Bind ViewModel.SecurityContexts}"
                                               SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
                                               Grid.Column="1"
