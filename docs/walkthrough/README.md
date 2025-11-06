@@ -100,7 +100,7 @@ YAML" to load the default properties and their values into your clipboard. You w
 indication on the top right hand side of the Validate a resource page letting you know the YAML
 has been copied to the clipboard.
 
-Click in the editor under "Settings" and paste the YAML from your clipboard [Ctrl]+[v]. All available settings (from the Microsoft.WinGet/Package resource) and default values have been inserted.
+Click in the editor under "Settings" and paste the YAML from your clipboard <kbd>Ctrl</kbd>+<kbd>v</kbd>. All available settings (from the Microsoft.WinGet/Package resource) and default values have been inserted.
 
 ![Local Image][13]
 
