@@ -44,6 +44,18 @@ installed Microsoft DSC 3.0 resources, and to the right of that is the version o
 the image below all resources with "winget" are displayed. In this case, they are all DSC 3.0
 resources.
 
+> [!TIP]
+> If you do not see any resources in the dropdown list after you've entered "winget", then the
+> configuration system hasn't be provisioned on your device. One of the easiest ways to make sure
+> you have all the prerequisites is to run WinGet Configuration Export. This may take a couple of > minutes.
+>
+> `winget configure export --all -o config.winget`
+>
+> You may need to enable the configuration engine. WinGet will prompt with instructions on how to
+> enable configuration if it's necessary. Once the export is completed, all the necessary software
+> will be available on your device. The last step is to use the "refresh" (circular arrow) to
+> load the locally available DSC resources into WinGet Studio.
+
 ![Local Image][06]
 
 ## Get Information on a Resource
@@ -166,8 +178,8 @@ desired state".
 ![Local Image][19]
 
 For the sake of completeness, add "version: "0"" (the version is a string so it should be in
-quites) to the settings. Run "Test" again to see what it looks like when the device is not in
-the desired state.
+quotation marks) to the settings. Run "Test" again to see what it looks like when the device is
+not in the desired state.
 
 ![Local Image][20]
 
@@ -178,23 +190,35 @@ way to know what's not installed on your device), it's time to try a different r
 
 > [!WARNING]
 > You could use the "_exist:" setting to ensure a package is uninstalled using "Set" for the
-> Microsoft.WinGet/Package resource by setting the value to "false" . I suggest caution since
+> Microsoft.WinGet/Package resource by setting the value to "false". I suggest caution since
 > uninstalling the Microsoft.AppInstaller package could lead to the device ending up in a bad
 > state.
 
 In the resource input field, search for the "Microsoft.WinGet/UserSettingsFile" and select that
 resource. If you take a look at the information for the resource (using the circled "i" button)
 and then "View" the JSON schema for the resource, you might notice "settings:" is a required
-property. Ensure the only Settings you have configured is an empty "settings:" property and then
-click the "Get" button.
+property (currently line 6 shows required properties). 
+
+Ensure the only properties you have specified under "Settings" is an empty "settings:" property in the editor. Then click the "Get" button.
+
+> [!TIP]
+> If you copy the YAML under the results and save it somewhere, you can easily restore those
+> settings using "Set" when you're finished with this walk through. You can also open the
+> WinGet Settings file by running `winget settings`. It's a JSON file, and I have Visual
+> Studio Code as my default JSON editor to make it easier to work with.
 
 Most users haven't customized their WinGet settings, but I happen to prefer the rainbow progress
 bar in WinGet as well as having Sixels (icons rendered as images in the terminal) enabled. The
-image below is the result on my machine.
+image below is the result on my machine. On your machine, the settings will include anything
+you have configured with WinGet, or it could be a pair of empty curly braces ("settings {}") for
+the settings property under "Results".
+
 
 ![Local Image][21]
 
-If you want to experiment with these settings, I'd suggest trying out the progress bar settings and Sixels.
+Try changing a couple of your WinGet settings, I'd suggest trying out the rainbow progress bar
+setting and enabling Sixels. I've included the sample "Settings" in YAML below. You can
+copy and paste these settings into the editor under "Settings".
 
 ```YAML
 settings:
@@ -204,15 +228,22 @@ settings:
   $schema: https://aka.ms/winget-settings.schema.json
 ```
 
-The other progressBar values are:
+The other progressBar values you could try are:
 * accent
 * retro
 * sixel
 * disabled
 
-You can open up the [WinGet Settings Schema][22] to see what other settings you might want. The "action:" property in the Microsoft.WinGet/UserSettingsFile resource determines whether to only
-"set" the values specified in Settings ("Partial") or to perform a "Full" overwrite with the
-settings you specify.
+> [!TIP]
+> You can open up the raw [WinGet Settings Schema][22] to see what other WinGet settings you might
+> want. 
+
+> [!IMPORTANT]
+> The "action:" property in the Microsoft.WinGet/UserSettingsFile resource determines
+> whether to only "set" the values specified in Settings ("Partial") or to perform a "Full"
+> overwrite with the settings you specify. For example, if you specify "action: Full" and you only
+> provide one setting and "Set", all other settings will get removed. If you specify
+> "action: Partial" the other settings will remain.
 
 Once you've specified the settings you want, it's time to press the "Set" button.
 
@@ -221,6 +252,10 @@ Once you've specified the settings you want, it's time to press the "Set" button
 To see the results of the WinGet settings you've modified, run `winget show GitHub.GitHubDesktop`
 as an example of a package with an icon rendered as a Sixel (and you should see the modified
 progress bar).
+
+When you're done, you can restore your WinGet settings by either using "Set" with the results
+captured earlier when you called "Get", or if you like your new settings, you can just continue
+with the walk through.
 
 ![Local Image][24]
 
