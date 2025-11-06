@@ -240,10 +240,11 @@ The other progressBar values you could try are:
 
 > [!IMPORTANT]
 > The "action:" property in the Microsoft.WinGet/UserSettingsFile resource determines
-> whether to only "set" the values specified in Settings ("Partial") or to perform a "Full"
-> overwrite with the settings you specify. For example, if you specify "action: Full" and you only
-> provide one setting and "Set", all other settings will get removed. If you specify
-> "action: Partial" the other settings will remain.
+> how the WinGet Settings file is to be modified. The default behavior is "Partial" if you
+> do not specify anything. Think of this like merging your settings under "Settings" with
+> what ever is in the settings file. It's just going to change the values you provided.
+> If you use "action: Full" you will be erasing all settings with the exception of those
+> you specified.
 
 Once you've specified the settings you want, it's time to press the "Set" button.
 
