@@ -155,6 +155,7 @@ DYAML
 ecfr
 ecfrbrowse
 EFGH
+EFile
 ENDSESSION
 EQU
 ERANGE
@@ -363,6 +364,7 @@ NESTEDINSTALLER
 netlify
 NETSDK
 Newtonsoft
+NJson
 nlohmann
 NNS
 NOAGGREGATION
@@ -378,6 +380,7 @@ nonterminated
 NOREMOVE
 normer
 NOSEARCH
+NSwag
 notalostreference
 NOTIMPL
 NOTRACK
@@ -391,6 +394,7 @@ objidl
 ofile
 oid
 omus
+onebranchF
 onefuzz
 oop
 opensource
@@ -511,8 +515,10 @@ servercertificate
 setmetadatabymanifestid
 SETTINGCHANGE
 SETTINGMAPPING
+SFBS
 sfs
 sfsclient
+SHAREVIOLATION
 SHCONTF
 shellapi
 SHGDN
@@ -529,7 +535,7 @@ SMTO
 SNAME
 sortof
 sourceforge
-SOURCESDIRECTORY    
+SOURCESDIRECTORY
 sourceversion
 spamming
 SPAPI
@@ -561,7 +567,6 @@ temppath
 testexampleinstaller
 thiscouldbeapc
 threehundred
-Timespan
 timespan
 Tlg
 TLSCAs
@@ -583,6 +588,7 @@ uec
 Uid
 UIEx
 ULONGLONG
+Unadvise
 UNAVAIL
 uninitialize
 unins
@@ -590,11 +596,13 @@ uninstallation
 uninstaller
 uninstallprevious
 uninstalls
+uninstantiated
 unknwn
 Unknwnbase
 UNMARSHALING
 unparsable
 unstub
+unstubbing
 Unregisters
 unvirtualized
 UParse
@@ -615,6 +623,7 @@ vns
 vsconfig
 vstest
 VSTHRD
+vswhere
 WAACTIVE
 WAINACTIVE
 waitable
@@ -673,10 +682,8 @@ XName
 XNamespace
 XPLATSTR
 XRESOURCEZORO
-XSMALL
 XSmall
 xsi
-XTOKEN
 XToken
 yamato
 yao
