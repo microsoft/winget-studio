@@ -119,7 +119,7 @@ the package is available in.
 Remove the settings other than "id:" and "source:". Specify "Microsoft.AppInstaller" for the "id:"
 and specify "winget" for the "source:".
 
-> [!NOTE]
+> [!IMPORTANT]
 > YAML is sensitive to spaces. Be sure to include a space after the colon for each setting.
 
 ![Local Image][15]
