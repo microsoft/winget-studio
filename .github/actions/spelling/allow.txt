@@ -1,4 +1,3 @@
-Abi
 ACTIONDATA
 ACTIONSTART
 activatable
@@ -38,7 +37,6 @@ cguid
 checkbox
 cla
 CLASSN
-CLSCTX
 clsids
 cmake
 CNG
@@ -57,7 +55,6 @@ createnew
 createpintable
 createportabletable
 createtables
-cred
 credprovider
 CRTDECL
 CRYPTPROTECT
@@ -149,7 +146,6 @@ IInspectable
 inapplicabilities
 inheritdoc
 inno
-INPROC
 Inq
 instadev
 installertype
@@ -261,7 +257,6 @@ PII
 pinnable
 pinningindex
 pipssource
-Pkcs
 portableindex
 powertoys
 pplx
@@ -382,6 +377,7 @@ testsettingname
 TEXTFORMAT
 TEXTINCLUDE
 threadpool
+Timespan
 tpl
 TRACELOGGING
 triaged
