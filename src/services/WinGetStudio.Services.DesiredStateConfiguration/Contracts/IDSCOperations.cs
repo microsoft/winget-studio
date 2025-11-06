@@ -89,5 +89,5 @@ internal interface IDSCOperations
     /// Gets the list of available DSC v3 resources on the system.
     /// </summary>
     /// <returns>List of available DSC v3 resources.</returns>
-    Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
+    Task<IReadOnlyList<ResourceMetadata>> GetDscV3ResourcesAsync();
 }

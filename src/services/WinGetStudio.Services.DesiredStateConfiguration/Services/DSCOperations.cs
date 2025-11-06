@@ -168,9 +168,9 @@ internal sealed class DSCOperations : IDSCOperations
         return new DSCTestUnitResult(result);
     }
 
-    public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync()
+    public async Task<IReadOnlyList<ResourceMetadata>> GetDscV3ResourcesAsync()
     {
-        List<ResourceMetada> resources = [];
+        List<ResourceMetadata> resources = [];
         try
         {
             ConfigurationStaticFunctions config = new();
