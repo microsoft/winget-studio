@@ -62,8 +62,7 @@ changes in this release, see the [diff on GitHub][compare-v0.100.302.0].
   </details>
 
 - Added support for cancellation tokens throughout the application. You can now cancel long-running
-  operations such as configuration validation, testing, and application to improve responsiveness
-  and user experience.
+  applying a configuration set operation.
 
   <details><summary>Related work items</summary>
 
@@ -72,8 +71,7 @@ changes in this release, see the [diff on GitHub][compare-v0.100.302.0].
 
   </details>
 
-- Added shimmer loading control to provide visual feedback during asynchronous operations. This
-  improves the user experience by showing clear loading states throughout the interface.
+- Added shimmer loading control to provide visual feedback during asynchronous operations.
 
   <details><summary>Related work items</summary>
 
@@ -82,9 +80,8 @@ changes in this release, see the [diff on GitHub][compare-v0.100.302.0].
 
   </details>
 
-- Added default schema generator support for DSC resources. This feature automatically generates
-  JSON schemas for resources that don't provide their own, making it easier to work with a wider
-  variety of DSC resources in the configuration editor.
+- Added default schema generator support for DSC resources. This feature automatically generates  
+  a default YAML input based on the schema for DSC resources.
 
   <details><summary>Related work items</summary>
 
