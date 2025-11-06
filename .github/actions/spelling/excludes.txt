@@ -99,4 +99,5 @@
 ^cgmanifest\.json$
 ^Localization/
 ^NOTICE
+^src/WinGetStudio/Assets/Monaco/
 ignore$
