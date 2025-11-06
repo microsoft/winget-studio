@@ -183,7 +183,7 @@ internal sealed class DSCOperations : IDSCOperations
             // ---------------------------------------------
             // Find unit processors will call dsc.exe under the hood. This has
             // a known bug that makes it fail fairly often. To work around
-            // this, we retry a few times. This is not a an ideal solution, but
+            // this, we retry a few times. This is not an ideal solution, but
             // it will allow us for now to get the resources most of the time.
             // Another downside of this approach is that if no resources are
             // actually present the code will always attempt 10 times before
