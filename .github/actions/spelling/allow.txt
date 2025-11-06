@@ -250,11 +250,14 @@ Pathto
 PBYTE
 pch
 PCWSTR
+pdsc
 pelikhan
 PEVENT
 pfns
 pfp
+PICKFOLDERS
 Pii
+PII
 pinnable
 pinningindex
 pipssource
@@ -304,6 +307,7 @@ resx
 rethrowing
 roadmap
 robuffer
+roslyn
 rowcount
 rowids
 rubengustorage

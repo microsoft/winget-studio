@@ -519,6 +519,7 @@ SHGDN
 SHOWNORMAL
 sid
 Sideload
+SIGDN
 SIGNATUREHASH
 silentpreferred
 Skipx
@@ -528,7 +529,7 @@ SMTO
 SNAME
 sortof
 sourceforge
-SOURCESDIRECTORY
+SOURCESDIRECTORY    
 sourceversion
 spamming
 SPAPI
@@ -544,6 +545,7 @@ STRRET
 stylecop
 subdir
 subkey
+substringof
 Sudarshan
 superstring
 swgus
@@ -554,10 +556,12 @@ Tagit
 TARG
 taskhostw
 tcs
+TELEMETRYEVENTSOURCE
 temppath
 testexampleinstaller
 thiscouldbeapc
 threehundred
+Timespan
 timespan
 Tlg
 TLSCAs
@@ -577,6 +581,7 @@ ucnv
 udwgp
 uec
 Uid
+UIEx
 ULONGLONG
 UNAVAIL
 uninitialize
@@ -669,10 +674,13 @@ XNamespace
 XPLATSTR
 XRESOURCEZORO
 XSMALL
+XSmall
 xsi
 XTOKEN
+XToken
 yamato
 yao
 Zanollo
 ZIPHASH
+ZIndex
 zoro
