@@ -305,10 +305,11 @@ it's a value that should not be set.
 ![Local Image][28]
 
 If you have any properties under "Settings" in the editor, clear them out at this point. Then go
-ahead and press the "Get" button. The results will indicate the "SystemColorMode:",
-"AppColorMode", "TaskbarAlignment", and the state of "DeveloperMode" on your machine. You may
-notice the "SID:" setting is returned as a blank value. Copy all the results over to settings
-and remove the line with "SID:" since there was a comment in the code stating it should not be set.
+ahead and press the "Get" button. The results will indicate the settings for "SystemColorMode:",
+"DeveloperMode", "TaskbarAlignment", and "AppColorMode" as they are currently configured on your
+machine. You may notice the "SID:" setting is returned as a blank value. Copy all the results over
+to settings and remove the line with "SID:" since there was a comment in the code stating it
+should not be set.
 
 > [!NOTE]
 > The "DeveloperMode:" setting requires elevation to modify. The exception thrown when the resource
