@@ -1,9 +1,12 @@
+Abi
 Allman
 appsettings
 Argb
 BSODs
 buildtransitive
+CLSCTX
 contentfiles
+Cred
 DFX
 dic
 dsc
@@ -14,6 +17,7 @@ github
 hwnd
 IDSC
 iid
+INPROC
 Insta
 INu
 IUI
