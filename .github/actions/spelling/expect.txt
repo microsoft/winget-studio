@@ -614,6 +614,7 @@ wingdi
 wingetconfigroot
 wingetcreate
 wingetdev
+wingetstudio
 wingetutil
 winreg
 winrtact
