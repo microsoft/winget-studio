@@ -12,6 +12,7 @@ admx
 AFAIK
 aicli
 AICLIC
+allman
 allusers
 alreadyinstalled
 AMap
@@ -28,9 +29,11 @@ appdata
 appinstallertest
 applic
 appname
+appsettings
 appshutdown
 APPTERMINATION
 archs
+argb
 ARMNT
 arp
 arphelper
@@ -107,6 +110,7 @@ countryregion
 Cov
 CPIL
 createmanifestmetadata
+cred
 crt
 cswinrt
 ctc
@@ -140,7 +144,9 @@ dnld
 Dns
 Dobbeleer
 DONOT
+dpi
 dsc
+dscresource
 dustojnikhummer
 dvinns
 dwgs
@@ -265,13 +271,15 @@ JObject
 jpalardy
 JREs
 jrsoftware
-jsoncpp
+jsoncp
+jsonschema
 JToken
 JValue
 Kaido
 KNOWNFOLDERID
 kool
 ktf
+launchsettings
 LCID
 learnxinyminutes
 LEBOM
@@ -552,6 +560,7 @@ TLSCAs
 tombstoned
 transitioning
 trimstart
+tsaoptions
 ttl
 twgc
 twgus

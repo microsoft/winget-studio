@@ -110,6 +110,7 @@ jobs:
             cspell:filetypes/filetypes.txt
             cspell:cpp/stdlib-c.txt
             cspell:dotnet/dotnet.txt
+            cspell:dotnet/allowed-terms.txt
             cspell:cpp/compiler-msvc.txt
             cspell:html/html.txt
             cspell:powershell/powershell.txt
@@ -118,6 +119,9 @@ jobs:
             cspell:cpp/ecosystem.txt
             cspell:cpp/lang-keywords.txt
             cspell:cpp/lang-jargon.txt
+            cspell:cpp/cpp.txt
+            cspell:cpp/cpp3.txt
+            cspell::win32/generator/win32.txt
 
   comment-pr:
     name: Report (PR)

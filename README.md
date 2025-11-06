@@ -9,7 +9,7 @@ This repository contains the source code for [WinGet Studio (Experimental)](http
 
 ## Overview
 
-Building WinGet Configuration files (Configuration as Code with Microsoft (DSC) Desired State Configuration) is a complex undertaking for folks who are not already familiar with the technolgy stack. WinGet Studio is an experiment to see how we can help make it easier to author configuration files and build or test DSC resources.
+Building WinGet Configuration files (Configuration as Code with Microsoft (DSC) Desired State Configuration) is a complex undertaking for folks who are not already familiar with the technology stack. WinGet Studio is an experiment to see how we can help make it easier to author configuration files and build or test DSC resources.
 
 WinGet Studio is designed to help users create and modify WinGet Configuration files. It also includes the ability to use "get", "set", and "test" for any **installed** Desired State Configuration (DSC) resources.
 
@@ -64,7 +64,7 @@ The WinGet Studio application is instrumented to collect usage and diagnostic (e
 
 If you build the application yourself the instrumentation will not be enabled and no data will be sent to Microsoft.
 
-The WinGet Studio application respects machine wide privacy settings and users can opt-out on their device, as documented in the [Microsoft Windows privacy statement](https://support.microsoft.com/help/4468236/diagnostics-feedback-and-privacy-in-windows-10-microsoft-privacy).
+The WinGet Studio application respects machine wide privacy settings and users can opt-out on their device, as documented in the [pdscMicrosoft Windows privacy statement](https://support.microsoft.com/help/4468236/diagnostics-feedback-and-privacy-in-windows-10-microsoft-privacy).
 
 In short to opt-out, do one of the following:
 
