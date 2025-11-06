@@ -64,7 +64,7 @@ The WinGet Studio application is instrumented to collect usage and diagnostic (e
 
 If you build the application yourself the instrumentation will not be enabled and no data will be sent to Microsoft.
 
-The WinGet Studio application respects machine wide privacy settings and users can opt-out on their device, as documented in the [pdscMicrosoft Windows privacy statement](https://support.microsoft.com/help/4468236/diagnostics-feedback-and-privacy-in-windows-10-microsoft-privacy).
+The WinGet Studio application respects machine wide privacy settings and users can opt-out on their device, as documented in the [Microsoft Windows privacy statement](https://support.microsoft.com/help/4468236/diagnostics-feedback-and-privacy-in-windows-10-microsoft-privacy).
 
 In short to opt-out, do one of the following:
 
