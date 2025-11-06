@@ -165,3 +165,9 @@ E2E
 
 # PowerShell Aliases defined in .cs files (not those in AliasesToExport in psd1 files)
 \[Alias\("[a-z]+"\)\]
+
+# Newline characters followed by word characters
+\\n\w+\b
+
+# Ignore using statements
+^[uU]sing\s.+;$

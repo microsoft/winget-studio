@@ -9,6 +9,7 @@ addportablefile
 addstore
 admins
 AFX
+APeriod
 appinstaller
 appmodel
 appxbundle
@@ -22,6 +23,7 @@ Asn
 aspirational
 Authenticode
 AUTOLISTEN
+azurecr
 azureedge
 binlog
 binver
@@ -56,8 +58,10 @@ createpintable
 createportabletable
 createtables
 cred
+credprovider
 CRTDECL
 CRYPTPROTECT
+csclient
 CTLs
 curated
 CURSORPOSITON
@@ -80,6 +84,7 @@ DISMAPI
 distro
 dllmain
 dotnet
+dotquad
 downloaders
 dsx
 DWORDLONG
@@ -113,13 +118,16 @@ FILEFLAGSMASK
 FILEOS
 FILESINUSE
 FILESUBTYPE
+FILESYSPATH
 FILEVERSION
+FILTERSPEC
 florelis
 FLUSHEACHLINE
 fnt
 forcerestart
 gdi
 genai
+hashset
 HCCE
 hcertstore
 HCRYPTMSG
@@ -143,6 +151,7 @@ inheritdoc
 inno
 INPROC
 Inq
+instadev
 installertype
 Installeruniqueness
 installlocation
@@ -200,6 +209,7 @@ msrc
 Multifile
 Multimatch
 Mvvm
+MVVM
 ncacn
 Nelon
 netstandard
@@ -207,6 +217,7 @@ newid
 NOCASE
 NOCLOSEPROCESS
 nodiscard
+nodoc
 NOMINMAX
 nonexistentsetting
 norestart
