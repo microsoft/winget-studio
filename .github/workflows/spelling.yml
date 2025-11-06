@@ -121,7 +121,6 @@ jobs:
             cspell:cpp/lang-jargon.txt
             cspell:cpp/cpp.txt
             cspell:cpp/cpp3.txt
-            cspell::win32/generator/win32.txt
 
   comment-pr:
     name: Report (PR)

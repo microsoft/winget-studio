@@ -100,4 +100,5 @@
 ^Localization/
 ^NOTICE
 ^src/WinGetStudio/Assets/Monaco/
+^src/exclusion.dic$
 ignore$

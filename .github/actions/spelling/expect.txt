@@ -12,7 +12,7 @@ admx
 AFAIK
 aicli
 AICLIC
-allman
+Allman
 allusers
 alreadyinstalled
 AMap
@@ -33,7 +33,7 @@ appsettings
 appshutdown
 APPTERMINATION
 archs
-argb
+Argb
 ARMNT
 arp
 arphelper
@@ -175,6 +175,7 @@ FECAFEB
 fedorapeople
 fileinuse
 filemode
+FILEOPENDIALOGOPTIONS 
 Filetime
 Filtercriteria
 Finalizers
@@ -571,6 +572,7 @@ UChars
 ucnv
 udwgp
 uec
+Uid
 ULONGLONG
 UNAVAIL
 uninitialize

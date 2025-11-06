@@ -34,10 +34,12 @@ cfr
 cguid
 checkbox
 cla
-CLASSNOTAVAILABLE
+CLASSN
+CLSCTX
 clsids
 cmake
 CNG
+COMDLG
 COMMANDBARFLYOUT
 COMMONDATA
 comparand
