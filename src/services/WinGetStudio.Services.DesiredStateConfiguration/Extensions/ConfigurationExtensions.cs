@@ -55,7 +55,7 @@ public static class ConfigurationExtensions
     /// </summary>
     /// <param name="resource">The resource to add metadata to.</param>
     /// <param name="metadata">The metadata to add.</param>
-    public static void AddMetdata(this ConfigurationV3Resource resource, DSCPropertySet metadata)
+    public static void AddMetadata(this ConfigurationV3Resource resource, DSCPropertySet metadata)
     {
         resource.AdditionalProperties ??= new Dictionary<string, object>();
         resource.AdditionalProperties[MetadataKey] = metadata;

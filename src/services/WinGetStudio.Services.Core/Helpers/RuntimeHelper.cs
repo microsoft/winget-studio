@@ -5,8 +5,10 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Windows.ApplicationModel;
 using Windows.Storage;
+using Windows.System.Profile;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
@@ -80,6 +82,58 @@ public static class RuntimeHelper
         }
 
         return Assembly.GetExecutingAssembly().GetName().Version!;
+    }
+
+    /// <summary>
+    /// Gets the OS version.
+    /// </summary>
+    public static bool TryGetOSVersion(out Version osVersion)
+    {
+        try
+        {
+            var deviceFamilyVersion = AnalyticsInfo.VersionInfo.DeviceFamilyVersion;
+            if (!string.IsNullOrEmpty(deviceFamilyVersion) && ulong.TryParse(deviceFamilyVersion, out var v))
+            {
+                var major = (v >> 48) & 0xffff;
+                var minor = (v >> 32) & 0xffff;
+                var build = (v >> 16) & 0xffff;
+                var revision = v & 0xffff;
+                osVersion = new Version((int)major, (int)minor, (int)build, (int)revision);
+                return true;
+            }
+            else
+            {
+                // Fallback to Environment.OSVersion if parsing fails
+                osVersion = Environment.OSVersion.Version;
+                return true;
+            }
+        }
+        catch
+        {
+            // Ignore and fall through to failure
+        }
+
+        osVersion = new Version(); // Use the default constructor to represent an unknown version
+        return false;
+    }
+
+    /// <summary>
+    /// Gets the OS architecture.
+    /// </summary>
+    public static bool TryGetOSArchitecture(out Architecture osArch)
+    {
+        try
+        {
+            osArch = RuntimeInformation.OSArchitecture;
+            return true;
+        }
+        catch
+        {
+            // Ignore and fall through to failure
+        }
+
+        osArch = Architecture.X64; // Default to x64 on failure
+        return false;
     }
 
     /// <summary>
