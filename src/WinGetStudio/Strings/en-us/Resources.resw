@@ -121,7 +121,7 @@
     <value>WinGet Studio (Dev)</value>
   </data>
   <data name="AppDisplayNameStable" xml:space="preserve">
-    <value>WinGet Studio (Preview)</value>
+    <value>WinGet Studio (Experimental)</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
     <value>WinGet Studio</value>

@@ -72,3 +72,6 @@
 *.7z             binary
 *.tar            binary
 *.gz             binary
+
+# GitHub Linguist
+*.winget         linguist-language=yaml

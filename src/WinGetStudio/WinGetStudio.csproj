@@ -23,13 +23,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Ensure Dev and Preview directories are not packaged -->
+    <!-- Ensure Dev, Preview and Experimental directories are not packaged -->
     <Content Remove="Assets\Icons\Dev\**" />
     <Content Remove="Assets\Icons\Preview\**" />
+    <Content Remove="Assets\Icons\Experimental\**" />
 
-    <!-- Copy icons from Dev or Preview into the expected directory -->
+    <!-- Copy icons from Dev or Experimental into the expected directory -->
     <Content Condition="'$(BuildRing)' == 'Dev'" Include="Assets\Icons\Dev\**" Link="Assets\Icons\%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
-    <Content Condition="'$(BuildRing)' == 'Stable'" Include="Assets\Icons\Preview\**" Link="Assets\Icons\%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
+    <Content Condition="'$(BuildRing)' == 'Stable'" Include="Assets\Icons\Experimental\**" Link="Assets\Icons\%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
@@ -99,7 +100,7 @@
   <Target Name="PrepareAppIcon" BeforeTargets="BeforeBuild">
     <ItemGroup>
       <SourceIcon Include="Assets\Icons\Dev\WinGetStudio.ico" Condition="'$(BuildRing)' == 'Dev'" />
-      <SourceIcon Include="Assets\Icons\Preview\WinGetStudio.ico" Condition="'$(BuildRing)' == 'Stable'" />
+      <SourceIcon Include="Assets\Icons\Experimental\WinGetStudio.ico" Condition="'$(BuildRing)' == 'Stable'" />
     </ItemGroup>
     <Copy SourceFiles="@(SourceIcon)" DestinationFiles="Assets\Icons\WinGetStudio.ico" />
   </Target>
