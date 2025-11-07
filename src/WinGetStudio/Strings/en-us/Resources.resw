@@ -800,6 +800,10 @@
   <data name="PreviewFile_DependenciesButton.Content" xml:space="preserve">
     <value>Dependencies</value>
   </data>
+  <data name="PreviewFile_UntitledFileName.Text" xml:space="preserve">
+    <value>Untitled.winget</value>
+    <comment>{Locked=".winget"} Default file name with '.winget' extension</comment>
+  </data>
   <data name="ApplyFile_DoneButton.Content" xml:space="preserve">
     <value>Done</value>
   </data>
