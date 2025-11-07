@@ -77,4 +77,18 @@ public sealed class DSCFile : IDSCFile
 
         await File.WriteAllTextAsync(FileInfo.FullName, Content);
     }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is DSCFile other)
+        {
+            var fileInfoEqual = string.Equals(FileInfo?.FullName, other.FileInfo?.FullName, System.StringComparison.OrdinalIgnoreCase);
+            var contentEqual = string.Equals(Content, other.Content, System.StringComparison.Ordinal);
+            return fileInfoEqual && contentEqual;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode() => $"{FileInfo?.FullName}|{Content}".GetHashCode();
 }
