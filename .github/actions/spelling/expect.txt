@@ -4,6 +4,7 @@ appsettings
 Argb
 BSODs
 buildtransitive
+clickable
 CLSCTX
 contentfiles
 Cred
@@ -24,6 +25,7 @@ IUI
 jsonschema
 launchsettings
 minkernel
+MOF
 msstore
 NBLGGH
 Newtonsoft
@@ -33,6 +35,7 @@ NSwag
 onebranchF
 oss
 powershellgallery
+PSDSC
 secureobject
 securestring
 SFBS
@@ -60,6 +63,7 @@ VSTHRD
 vswhere
 WAACTIVE
 WAINACTIVE
+whatif
 windowex
 wingetstudio
 winrtact

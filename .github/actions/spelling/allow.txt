@@ -20,6 +20,7 @@ ARRAYSIZE
 artifactstagingdirectory
 Asn
 aspirational
+atx
 Authenticode
 AUTOLISTEN
 azurecr
@@ -164,10 +165,12 @@ IPortable
 ISAPPROVEDFOROUTPUT
 IUnknown
 JDKs
+keepachangelog
 Kristensen
 langutil
 lastwritetime
 LCIDTo
+linting
 lnk
 LOGONLYONERROR
 LOGPATH
@@ -183,6 +186,7 @@ MAKEINTRESOURCE
 makemsix
 MANIFESTSCHEMA
 MANIFESTVERSION
+markdownlint
 mcp
 Memberwise
 meme
@@ -317,6 +321,7 @@ seinfo
 Serilog
 SERVICEPACKMAJOR
 SERVICEPACKMINOR
+setext
 setschemaversion
 setupexitcodes
 setvariable
@@ -335,6 +340,7 @@ simpletest
 sixel
 sixels
 sln
+sourced
 sqlbuilder
 sqliteicu
 sqliteindex
