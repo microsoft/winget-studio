@@ -7,6 +7,7 @@
     xmlns:xaml="using:Microsoft.UI.Xaml"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:ct="using:CommunityToolkit.WinUI.Controls"
+    xmlns:localControls="using:WinGetStudio.Views.Controls"
     mc:Ignorable="d">
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
@@ -96,7 +97,19 @@
             <!-- About -->
             <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                <TextBlock Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" Style="{ThemeResource BodyTextBlockStyle}" />
+                <!-- Make the version text clickable to copy to clipboard -->
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}"
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        VerticalAlignment="Center"
+                    />
+                    <localControls:CopyButton Content="&#xE8C8;"
+                        Margin="{ThemeResource XSmallLeftMargin}"
+                        Click="CopyVersionToClipboard"
+                        Background="Transparent"
+                        BorderThickness="0"
+                    />
+                </StackPanel>
 
                 <TextBlock
                     x:Uid="Settings_AboutDescription"
