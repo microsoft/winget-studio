@@ -30,4 +30,12 @@ properties:
         productId: Microsoft.VisualStudio.Product.Professional
         channelId: VisualStudio.17.Release
         vsConfigFile: '${WinGetConfigRoot}\..\src\.vsconfig'
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: dotnetSdk
+      directives:
+        description: Install .NET 9.0 SDK (required for building)
+        securityContext: elevated
+      settings:
+        id: Microsoft.DotNet.SDK.9
+        source: winget
   configurationVersion: 0.2.0

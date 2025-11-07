@@ -33,6 +33,9 @@ steps:
         versionSpec: '6.14.0'
 
   - task: NuGetAuthenticate@1
+    displayName: 'Authenticate NuGet feeds'
+    inputs:
+      forceReinstallCredentialProvider: true
 
   - task: PowerShell@2
     displayName: Build Msix

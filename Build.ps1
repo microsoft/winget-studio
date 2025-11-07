@@ -66,19 +66,18 @@ if ([string]::IsNullOrEmpty($OutputDir))
     $OutputDir = $env:Build_RootDirectory
 }
 
-# Install NuGet Cred Provider
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-Expression "& { $(Invoke-RestMethod https://aka.ms/install-artifacts-credprovider.ps1) } -AddNetfx"
-
 if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
 {
-    $xmlElements = Get-XmlElement -Path (Join-Path $env:Build_RootDirectory 'src' 'WinGetStudio' 'Package.appxmanifest')
+    $appxManifestPath = (Join-Path $env:Build_RootDirectory 'src' 'WinGetStudio' 'Package.appxmanifest')
+    $xmlElements = Get-XmlElement -Path $appxManifestPath
+
+    $appxmanifest = [System.Xml.Linq.XDocument]::Load($appxManifestPath)
 
     # Cache current (dev) values
-    $devVersion = $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value
-    $devPackageName = $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value
-    $devPackageDisplayName = $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value
-    $devAppDisplayNameResource = $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value
+    $devVersion = $appxManifest.Root.Element($xmlElements.Identity).Attribute("Version").Value
+    $devPackageName = $appxManifest.Root.Element($xmlElements.Identity).Attribute("Name").Value
+    $devPackageDisplayName = $appxManifest.Root.Element($xmlElements.Properties).Element($xmlElements.DisplayName).Value
+    $devAppDisplayNameResource = $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute("DisplayName").Value
 
     # For dev build, use the cached values
     $buildRing = "Dev"
@@ -103,6 +102,9 @@ if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
         $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute("DisplayName").Value = $appDisplayNameResource
         $appxManifest.Save($appxmanifestPath)
 
+        $solutionPath = Join-Path $env:Build_RootDirectory "src" "WinGetStudio.sln"
+        Restore-Nuget -SolutionPath $solutionPath -UseInternal:([bool]$env:TF_BUILD)
+
         foreach ($platform in $env:Build_Platform)
         {
             foreach ($configuration in $env:Build_Configuration)
@@ -110,11 +112,11 @@ if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
                 $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
                 Invoke-MSBuildPackage `
                     -MsBuildPath $msbuildPath `
-                    -SolutionPath (Join-Path $env:Build_RootDirectory "src\WinGetStudio.sln") `
+                    -SolutionPath $solutionPath `
                     -Platform $platform.ToLower() `
                     -Configuration $configuration.ToLower() `
                     -OutputDir $appxPackageDir `
-                    -BuildRing $buildRing 
+                    -BuildRing $buildRing
             }
         }
     } 

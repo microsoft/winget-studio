@@ -1,21 +1,25 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-function Invoke-SignPackage([string]$Path) {
-    if (-not($Path)) {
+function Invoke-SignPackage([string]$Path)
+{
+    if (-not($Path))
+    {
         Write-Information "Path parameter cannot be empty"
         return
     }
 
-    if (-not(Test-Path $Path -PathType Leaf)) {
+    if (-not(Test-Path $Path -PathType Leaf))
+    {
         Write-Information "File not found at path: $Path"
         return
     }
 
     $certName = "Microsoft.WinGetStudio"
-    $cert = Get-ChildItem 'Cert:\CurrentUser\My' | Where-Object {$_.FriendlyName -match $certName} | Select-Object -First 1
+    $cert = Get-ChildItem 'Cert:\CurrentUser\My' | Where-Object { $_.FriendlyName -match $certName } | Select-Object -First 1
 
-    if ($cert) {
+    if ($cert)
+    {
         $expiration = $cert.NotAfter
         $now = Get-Date
         if ( $expiration -lt $now)
@@ -26,14 +30,18 @@ function Invoke-SignPackage([string]$Path) {
         }
     }
 
-    if (-not($cert)) {
+    if (-not($cert))
+    {
         Write-Information "No certificate found. Creating a new certificate for signing."
         $cert = & New-SelfSignedCertificate -Type Custom -Subject "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" -KeyUsage DigitalSignature -FriendlyName $certName -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
     }
 
-    SignTool sign /fd SHA256 /sha1 $($cert.Thumbprint) $Path
+    $signToolPath = Get-SignToolPath
 
-    if (-not(Test-Path Cert:\LocalMachine\TrustedPeople\$($cert.Thumbprint))) {
+    & $signToolPath sign /fd SHA256 /sha1 $($cert.Thumbprint) $Path
+
+    if (-not(Test-Path Cert:\LocalMachine\TrustedPeople\$($cert.Thumbprint)))
+    {
         Export-Certificate -Cert $cert -FilePath "$($PSScriptRoot)\Microsoft.WinGetStudio.cer" -Type CERT
         Import-Certificate -FilePath "$($PSScriptRoot)\Microsoft.WinGetStudio.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople    
         Remove-Item -Path "$($PSScriptRoot)\Microsoft.WinGetStudio.cer"
@@ -41,12 +49,79 @@ function Invoke-SignPackage([string]$Path) {
     }
 }
 
-function Remove-WinGetStudioCertificates() {
-    Get-ChildItem 'Cert:\CurrentUser\My' | Where-Object {$_.FriendlyName -match 'Microsoft.WinGetStudio'} | Remove-Item
-    Get-ChildItem 'Cert:\LocalMachine\TrustedPeople' | Where-Object {$_.FriendlyName -match 'Microsoft.WinGetStudio'} | Remove-Item
+function Get-SignToolPath
+{
+    <#
+    .SYNOPSIS
+        Locates SignTool.exe in the Windows SDK installation.
+
+    .DESCRIPTION
+        The Get-SignToolPath function searches for SignTool.exe in the Windows SDK
+        installation directory. It automatically detects the latest SDK version and
+        returns the path to SignTool.exe.
+
+    .EXAMPLE
+        $signToolPath = Get-SignToolPath
+        & $signToolPath sign /fd SHA256 /sha1 $thumbprint $package
+
+    .OUTPUTS
+        System.String
+        Returns the full path to SignTool.exe
+
+    .NOTES
+        Requires Windows SDK to be installed.
+        Searches x64 and x86 directories for SignTool.exe.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    process
+    {
+        $sdkBasePath = Join-Path ${env:ProgramFiles(x86)} "Windows Kits\10\bin"
+
+        if (-not (Test-Path $sdkBasePath))
+        {
+            throw "Windows SDK not found at '$sdkBasePath'. Please install the Windows SDK."
+        }
+
+        Write-Verbose "Searching for SignTool.exe in Windows SDK..."
+
+        # Find all SDK versions and sort to get the latest
+        $sdkVersions = Get-ChildItem -Path $sdkBasePath -Directory | 
+            Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+            Sort-Object { [version]$_.Name } -Descending
+
+        foreach ($sdkVersion in $sdkVersions)
+        {
+            # Check x64 first, then x86
+            $paths = @(
+                (Join-Path $sdkVersion.FullName "x64\SignTool.exe"),
+                (Join-Path $sdkVersion.FullName "x86\SignTool.exe")
+            )
+
+            foreach ($path in $paths)
+            {
+                if (Test-Path $path -PathType Leaf)
+                {
+                    Write-Verbose "Found SignTool.exe at: $path"
+                    return $path
+                }
+            }
+        }
+
+        throw "Could not find SignTool.exe in any Windows SDK version. Please install the Windows SDK."
+    }
 }
 
-function New-BuildInfo {
+function Remove-WinGetStudioCertificates()
+{
+    Get-ChildItem 'Cert:\CurrentUser\My' | Where-Object { $_.FriendlyName -match 'Microsoft.WinGetStudio' } | Remove-Item
+    Get-ChildItem 'Cert:\LocalMachine\TrustedPeople' | Where-Object { $_.FriendlyName -match 'Microsoft.WinGetStudio' } | Remove-Item
+}
+
+function New-BuildInfo
+{
     <#
     .SYNOPSIS
         Creates a build version string in MSIX-compatible format.
@@ -111,7 +186,8 @@ function New-BuildInfo {
         [bool]$IsAzurePipelineBuild = $false
     )
 
-    begin {
+    begin
+    {
         Write-Verbose "Starting build info creation"
         
         # Define epoch date
@@ -119,7 +195,8 @@ function New-BuildInfo {
         Write-Verbose "Epoch date: $epoch"
     }
 
-    process {
+    process
+    {
         # Initialize default version components
         $Major = "0"
         $Minor = "1"
@@ -127,50 +204,61 @@ function New-BuildInfo {
         $Elapsed = $null
         $Build = $null
 
-        if (-not [string]::IsNullOrWhiteSpace($Version)) {
+        if (-not [string]::IsNullOrWhiteSpace($Version))
+        {
             $versionSplit = $Version.Split(".")
             Write-Verbose "Parsing version string: $Version (split into $($versionSplit.Length) parts)"
 
-            if ($versionSplit.Length -gt 3) {
+            if ($versionSplit.Length -gt 3)
+            {
                 $Build = $versionSplit[3]
                 Write-Verbose "Build from version string: $Build"
             }
 
-            if ($versionSplit.Length -gt 2) {
+            if ($versionSplit.Length -gt 2)
+            {
                 $Elapsed = $versionSplit[2]
                 Write-Verbose "Elapsed from version string: $Elapsed"
             }
 
-            if ($versionSplit.Length -gt 1) {
-                if ($versionSplit[1].Length -gt 2) {
+            if ($versionSplit.Length -gt 1)
+            {
+                if ($versionSplit[1].Length -gt 2)
+                {
                     $Minor = $versionSplit[1].Substring(0, $versionSplit[1].Length - 2)
                     $Patch = $versionSplit[1].Substring($versionSplit[1].Length - 2, 2)
                     Write-Verbose "Minor and Patch from concatenated string: Minor=$Minor, Patch=$Patch"
                 }
-                else {
+                else
+                {
                     $Minor = $versionSplit[1]
                     Write-Verbose "Minor from version string: $Minor"
                 }
             }
 
-            if ($versionSplit.Length -gt 0) {
+            if ($versionSplit.Length -gt 0)
+            {
                 $Major = $versionSplit[0]
                 Write-Verbose "Major from version string: $Major"
             }
         }
 
         $now = (Get-Date).ToUniversalTime()
-        if ([string]::IsNullOrWhiteSpace($Elapsed)) {
+        if ([string]::IsNullOrWhiteSpace($Elapsed))
+        {
             $Elapsed = (New-TimeSpan -Start $epoch -End $now).Days
             Write-Verbose "Computed Elapsed days since epoch: $Elapsed"
         }
 
-        if ([string]::IsNullOrWhiteSpace($Build)) {
-            if ($IsAzurePipelineBuild) {
+        if ([string]::IsNullOrWhiteSpace($Build))
+        {
+            if ($IsAzurePipelineBuild)
+            {
                 $Build = "0"
                 Write-Verbose "Azure Pipeline build - Build number set to: $Build"
             }
-            else {
+            else
+            {
                 $version_h = $now.Hour
                 $version_m = $now.Minute
                 $Build = ($version_h * 100 + $version_m).ToString()
@@ -187,24 +275,29 @@ function New-BuildInfo {
         return $resultVersion
     }
 
-    end {
+    end
+    {
         Write-Verbose "Build info creation completed"
     }
 }
 
-function Test-IsAdmin {
+function Test-IsAdmin
+{
     return ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')
 }
 
-function Get-MSBuildPath {
+function Get-MSBuildPath
+{
     $msbuildPath = &"${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
-    if (-not($msbuildPath)) {
+    if (-not($msbuildPath))
+    {
         throw "MSBuild.exe not found. Please ensure that Visual Studio with MSBuild component is installed."
     }
     return $msbuildPath
 }
 
-function Get-XmlElement {
+function Get-XmlElement
+{
     <#
     .SYNOPSIS
         Loads an APPX manifest XML file and returns parsed elements.
@@ -244,26 +337,31 @@ function Get-XmlElement {
         )]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({
-            if (Test-Path $_ -PathType Leaf) {
-                $true
-            }
-            else {
-                throw "The specified path '$_' does not exist or is not a file."
-            }
-        })]
+                if (Test-Path $_ -PathType Leaf)
+                {
+                    $true
+                }
+                else
+                {
+                    throw "The specified path '$_' does not exist or is not a file."
+                }
+            })]
         [string]$Path
     )
 
-    process {
+    process
+    {
         Write-Verbose "Loading XML from path: $Path"
 
         [void][Reflection.Assembly]::LoadWithPartialName("System.Xml.Linq")
 
-        try {
+        try
+        {
             $appxmanifest = [System.Xml.Linq.XDocument]::Load($Path)
             Write-Verbose "Successfully loaded XML document"
         }
-        catch {
+        catch
+        {
             throw "Failed to load XML document from '$Path': $_"
         }
 
@@ -283,7 +381,34 @@ function Get-XmlElement {
     }
 }
 
-function Invoke-MSBuildPackage {
+function Restore-NuGet
+{
+    [CmdletBinding()]
+    param (
+        [string]$SolutionPath,
+        [switch]$UseInternal
+    )
+
+    $nugetConfig = Join-Path (Split-Path $SolutionPath -Parent) "nuget.config"
+
+    if ($UseInternal)
+    {
+        Write-Verbose "Using internal NuGet configuration"
+        $nugetConfig = Join-Path (Split-Path $SolutionPath -Parent) "nuget.internal.config"
+    }
+
+    $dotNetPath = (Get-Command "dotnet" -CommandType Application -ErrorAction SilentlyContinue).Source
+
+    if (!$dotNetPath)
+    {
+        throw "dotnet CLI not found. Please ensure that .NET SDK is installed and 'dotnet' is in the system PATH."
+    }
+
+    & dotnet restore $SolutionPath --configfile $nugetConfig
+}
+
+function Invoke-MSBuildPackage
+{
     <#
     .SYNOPSIS
         Builds an MSIX package using MSBuild for a specific platform and configuration.
@@ -329,9 +454,9 @@ function Invoke-MSBuildPackage {
         )]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({
-            if (Test-Path $_ -PathType Leaf) { $true }
-            else { throw "Solution file '$_' does not exist." }
-        })]
+                if (Test-Path $_ -PathType Leaf) { $true }
+                else { throw "Solution file '$_' does not exist." }
+            })]
         [string]$SolutionPath,
 
         [Parameter(
@@ -370,21 +495,24 @@ function Invoke-MSBuildPackage {
         )]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({
-            if (Test-Path $_ -PathType Leaf) { $true }
-            else { throw "MSBuild.exe not found at '$_'." }
-        })]
+                if (Test-Path $_ -PathType Leaf) { $true }
+                else { throw "MSBuild.exe not found at '$_'." }
+            })]
         [string]$MSBuildPath
     )
 
-    begin {
+    begin
+    {
         Write-Verbose "Starting MSBuild package build"
         Write-Verbose "Platform: $Platform, Configuration: $Configuration"
         Write-Verbose "Output Directory: $OutputDirectory"
         Write-Verbose "Build Ring: $BuildRing"
     }
 
-    process {
-        if (-not (Test-Path $OutputDirectory)) {
+    process
+    {
+        if (-not (Test-Path $OutputDirectory))
+        {
             Write-Verbose "Creating output directory: $OutputDirectory"
             New-Item -Path $OutputDirectory -ItemType Directory -Force | Out-Null
         }
@@ -396,56 +524,66 @@ function Invoke-MSBuildPackage {
             $SolutionPath,
             "/p:Platform=$Platform",
             "/p:Configuration=$Configuration",
-            "/restore",
+            "/p:RestorePackages=false"
             "/binaryLogger:WinGetStudio.$Platform.$Configuration.binlog",
             "/p:AppxPackageOutput=$packagePath",
             "/p:AppxPackageSigningEnabled=false",
-            "/p:GenerateAppxPackageOnBuild=true",
+            # "/p:GenerateAppxPackageOnBuild=true",
             "/p:BuildRing=$BuildRing"
         )
 
         Write-Verbose "MSBuild arguments: $($msbuildArgs -join ' ')"
 
-        try {
+        try
+        {
             Write-Verbose "Building $Platform-$Configuration package..."
-            & $MSBuildPath $msbuildArgs
+            & dotnet build $msbuildArgs
 
-            if ($LASTEXITCODE -ne 0) {
+            if ($LASTEXITCODE -ne 0)
+            {
                 throw "MSBuild failed with exit code $LASTEXITCODE"
             }
 
             Write-Verbose "MSBuild completed successfully"
         }
-        catch {
+        catch
+        {
             Write-Error "Failed to build package: $_"
             throw
         }
 
-        if (-not $env:TF_BUILD -and (Test-IsAdmin)) {
+        if (-not $env:TF_BUILD -and (Test-IsAdmin))
+        {
             Write-Verbose "Signing package (local admin build)"
-            try {
+            try
+            {
                 Invoke-SignPackage -Path $packagePath
                 Write-Verbose "Successfully signed: $packagePath"
             }
-            catch {
+            catch
+            {
                 Write-Warning "Failed to sign package: $_"
             }
         }
-        elseif (-not $env:TF_BUILD -and -not (Test-IsAdmin)) {
+        elseif (-not $env:TF_BUILD -and -not (Test-IsAdmin))
+        {
             Write-Warning "Package signing skipped (administrator privileges required)"
         }
-        elseif ($env:TF_BUILD) {
+        elseif ($env:TF_BUILD)
+        {
             Write-Verbose "Package signing skipped (Azure Pipeline build)"
         }
     }
 
-    end {
+    end
+    {
         Write-Verbose "MSBuild package build completed"
     }
 }
 
-function New-AppxBundle {
-  <#
+function New-AppxBundle
+{
+    <#
   .SYNOPSIS
     Creates an MSIX/APPX bundle from individual platform packages.
 
@@ -480,178 +618,197 @@ function New-AppxBundle {
     Requires Windows SDK to be installed for MakeAppx.exe.
     The function searches for the latest SDK version automatically if MakeAppxPath is not specified.
   #>
-  [CmdletBinding()]
-  param(
-    [Parameter(
-      Mandatory = $true,
-      Position = 0,
-      HelpMessage = "Base name for input .appx/.msix files"
-    )]
-    [ValidateNotNullOrEmpty()]
-    [string]$ProjectName,
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            HelpMessage = "Base name for input .appx/.msix files"
+        )]
+        [ValidateNotNullOrEmpty()]
+        [string]$ProjectName,
 
-    [Parameter(
-      Mandatory = $true,
-      Position = 1,
-      HelpMessage = "Appx Bundle Version"
-    )]
-    [ValidateNotNull()]
-    [version]$BundleVersion,
+        [Parameter(
+            Mandatory = $true,
+            Position = 1,
+            HelpMessage = "Appx Bundle Version"
+        )]
+        [ValidateNotNull()]
+        [version]$BundleVersion,
 
-    [Parameter(
-      Mandatory = $true,
-      Position = 2,
-      HelpMessage = "Path under which to locate appx/msix files"
-    )]
-    [ValidateNotNullOrEmpty()]
-    [ValidateScript({
-      if (Test-Path $_ -PathType Container) { $true }
-      else { throw "Input path '$_' does not exist or is not a directory." }
-    })]
-    [string]$InputPath,
-
-    [Parameter(
-      Mandatory = $true,
-      Position = 3,
-      HelpMessage = "Output path for the bundle file"
-    )]
-    [ValidateNotNullOrEmpty()]
-    [string]$OutputPath,
-
-    [Parameter(
-      HelpMessage = "Path to makeappx.exe (auto-detected if not specified)"
-    )]
-    [ValidateScript({
-      if ([string]::IsNullOrWhiteSpace($_) -or (Test-Path $_ -PathType Leaf)) { $true }
-      else { throw "MakeAppx.exe not found at '$_'." }
-    })]
-    [string]$MakeAppxPath
-  )
-
-  begin {
-    Write-Verbose "Starting APPX bundle creation"
-    Write-Verbose "Project Name: $ProjectName"
-    Write-Verbose "Bundle Version: $BundleVersion"
-    Write-Verbose "Input Path: $InputPath"
-    Write-Verbose "Output Path: $OutputPath"
-
-    # Function to find MakeAppx.exe in Windows SDK
-    function Find-MakeAppxPath {
-      [CmdletBinding()]
-      [OutputType([string])]
-      param()
-
-      $sdkBasePath = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
-      
-      if (-not (Test-Path $sdkBasePath)) {
-        throw "Windows SDK not found at '$sdkBasePath'. Please install the Windows SDK or specify -MakeAppxPath."
-      }
-
-      Write-Verbose "Searching for MakeAppx.exe in Windows SDK..."
-
-      # Find all SDK versions and sort to get the latest
-      $sdkVersions = Get-ChildItem -Path $sdkBasePath -Directory | 
-        Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
-        Sort-Object { [version]$_.Name } -Descending
-
-      foreach ($sdkVersion in $sdkVersions) {
-        # Check x64 first, then x86
-        $paths = @(
-          (Join-Path $sdkVersion.FullName "x64\MakeAppx.exe"),
-          (Join-Path $sdkVersion.FullName "x86\MakeAppx.exe")
-        )
-
-        foreach ($path in $paths) {
-          if (Test-Path $path -PathType Leaf) {
-            Write-Verbose "Found MakeAppx.exe at: $path"
-            return $path
-          }
-        }
-      }
-
-      throw "Could not find MakeAppx.exe in any Windows SDK version. Please install the Windows SDK or specify -MakeAppxPath."
-    }
-
-    # Function to create bundle mapping file
-    function New-AppxBundleMapping {
-      [CmdletBinding()]
-      [OutputType([System.IO.FileInfo])]
-      param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(
+            Mandatory = $true,
+            Position = 2,
+            HelpMessage = "Path under which to locate appx/msix files"
+        )]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                if (Test-Path $_ -PathType Container) { $true }
+                else { throw "Input path '$_' does not exist or is not a directory." }
+            })]
         [string]$InputPath,
 
-        [Parameter(Mandatory = $true)]
-        [string]$ProjectName
-      )
+        [Parameter(
+            Mandatory = $true,
+            Position = 3,
+            HelpMessage = "Output path for the bundle file"
+        )]
+        [ValidateNotNullOrEmpty()]
+        [string]$OutputPath,
 
-      Write-Verbose "Creating bundle mapping file"
-      Write-Verbose "Searching for packages matching '*$ProjectName*' in: $InputPath"
+        [Parameter(
+            HelpMessage = "Path to makeappx.exe (auto-detected if not specified)"
+        )]
+        [ValidateScript({
+                if ([string]::IsNullOrWhiteSpace($_) -or (Test-Path $_ -PathType Leaf)) { $true }
+                else { throw "MakeAppx.exe not found at '$_'." }
+            })]
+        [string]$MakeAppxPath
+    )
 
-      $lines = @("[Files]")
-      $packages = Get-ChildItem -Path $InputPath -Recurse -Filter "*$ProjectName*" -Include *.appx, *.msix
+    begin
+    {
+        Write-Verbose "Starting APPX bundle creation"
+        Write-Verbose "Project Name: $ProjectName"
+        Write-Verbose "Bundle Version: $BundleVersion"
+        Write-Verbose "Input Path: $InputPath"
+        Write-Verbose "Output Path: $OutputPath"
 
-      if ($packages.Count -eq 0) {
-        throw "No .appx or .msix files found matching '*$ProjectName*' in '$InputPath'"
-      }
+        # Function to find MakeAppx.exe in Windows SDK
+        function Find-MakeAppxPath
+        {
+            [CmdletBinding()]
+            [OutputType([string])]
+            param()
 
-      Write-Verbose "Found $($packages.Count) package(s) to bundle:"
-      foreach ($package in $packages) {
-        $lines += ("`"{0}`" `"{1}`"" -f ($package.FullName, $package.Name))
-        Write-Verbose "  - $($package.Name)"
-      }
+            $sdkBasePath = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
+      
+            if (-not (Test-Path $sdkBasePath))
+            {
+                throw "Windows SDK not found at '$sdkBasePath'. Please install the Windows SDK or specify -MakeAppxPath."
+            }
 
-      $mappingFile = New-TemporaryFile
-      $lines | Out-File -Encoding ASCII $mappingFile
-      Write-Verbose "Bundle mapping file created at: $($mappingFile.FullName)"
+            Write-Verbose "Searching for MakeAppx.exe in Windows SDK..."
 
-      return $mappingFile
+            # Find all SDK versions and sort to get the latest
+            $sdkVersions = Get-ChildItem -Path $sdkBasePath -Directory | 
+            Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+            Sort-Object { [version]$_.Name } -Descending
+
+            foreach ($sdkVersion in $sdkVersions)
+            {
+                # Check x64 first, then x86
+                $paths = @(
+                    (Join-Path $sdkVersion.FullName "x64\MakeAppx.exe"),
+                    (Join-Path $sdkVersion.FullName "x86\MakeAppx.exe")
+                )
+
+                foreach ($path in $paths)
+                {
+                    if (Test-Path $path -PathType Leaf)
+                    {
+                        Write-Verbose "Found MakeAppx.exe at: $path"
+                        return $path
+                    }
+                }
+            }
+
+            throw "Could not find MakeAppx.exe in any Windows SDK version. Please install the Windows SDK or specify -MakeAppxPath."
+        }
+
+        # Function to create bundle mapping file
+        function New-AppxBundleMapping
+        {
+            [CmdletBinding()]
+            [OutputType([System.IO.FileInfo])]
+            param(
+                [Parameter(Mandatory = $true)]
+                [string]$InputPath,
+
+                [Parameter(Mandatory = $true)]
+                [string]$ProjectName
+            )
+
+            Write-Verbose "Creating bundle mapping file"
+            Write-Verbose "Searching for packages matching '*$ProjectName*' in: $InputPath"
+
+            $lines = @("[Files]")
+            $packages = Get-ChildItem -Path $InputPath -Recurse -Filter "*$ProjectName*" -Include *.appx, *.msix
+
+            if ($packages.Count -eq 0)
+            {
+                throw "No .appx or .msix files found matching '*$ProjectName*' in '$InputPath'"
+            }
+
+            Write-Verbose "Found $($packages.Count) package(s) to bundle:"
+            foreach ($package in $packages)
+            {
+                $lines += ("`"{0}`" `"{1}`"" -f ($package.FullName, $package.Name))
+                Write-Verbose "  - $($package.Name)"
+            }
+
+            $mappingFile = New-TemporaryFile
+            $lines | Out-File -Encoding ASCII $mappingFile
+            Write-Verbose "Bundle mapping file created at: $($mappingFile.FullName)"
+
+            return $mappingFile
+        }
     }
-  }
 
-  process {
-    try {
-      if ([string]::IsNullOrWhiteSpace($MakeAppxPath)) {
-        $MakeAppxPath = Find-MakeAppxPath
-      }
-      else {
-        Write-Verbose "Using specified MakeAppx.exe path: $MakeAppxPath"
-      }
+    process
+    {
+        try
+        {
+            if ([string]::IsNullOrWhiteSpace($MakeAppxPath))
+            {
+                $MakeAppxPath = Find-MakeAppxPath
+            }
+            else
+            {
+                Write-Verbose "Using specified MakeAppx.exe path: $MakeAppxPath"
+            }
 
-      if (-not (Test-Path $MakeAppxPath -PathType Leaf)) {
-        throw "MakeAppx.exe not found at '$MakeAppxPath'"
-      }
+            if (-not (Test-Path $MakeAppxPath -PathType Leaf))
+            {
+                throw "MakeAppx.exe not found at '$MakeAppxPath'"
+            }
 
-      $mappingFile = New-AppxBundleMapping -InputPath $InputPath -ProjectName $ProjectName
+            $mappingFile = New-AppxBundleMapping -InputPath $InputPath -ProjectName $ProjectName
 
-      $outputDir = Split-Path $OutputPath -Parent
-      if (-not [string]::IsNullOrWhiteSpace($outputDir) -and -not (Test-Path $outputDir)) {
-        Write-Verbose "Creating output directory: $outputDir"
-        New-Item -Path $outputDir -ItemType Directory -Force | Out-Null
-      }
+            $outputDir = Split-Path $OutputPath -Parent
+            if (-not [string]::IsNullOrWhiteSpace($outputDir) -and -not (Test-Path $outputDir))
+            {
+                Write-Verbose "Creating output directory: $outputDir"
+                New-Item -Path $outputDir -ItemType Directory -Force | Out-Null
+            }
 
-      Write-Information "Creating bundle: $OutputPath" -InformationAction Continue
-      Write-Verbose "Executing: $MakeAppxPath bundle /v /bv $($BundleVersion.ToString()) /f $($mappingFile.FullName) /p $OutputPath"
+            Write-Information "Creating bundle: $OutputPath" -InformationAction Continue
+            Write-Verbose "Executing: $MakeAppxPath bundle /v /bv $($BundleVersion.ToString()) /f $($mappingFile.FullName) /p $OutputPath"
 
-      & $MakeAppxPath bundle /v /bv $BundleVersion.ToString() /f $mappingFile.FullName /p $OutputPath
+            & $MakeAppxPath bundle /v /bv $BundleVersion.ToString() /f $mappingFile.FullName /p $OutputPath
 
-      if ($LASTEXITCODE -ne 0) {
-        throw "MakeAppx.exe failed with exit code $LASTEXITCODE"
-      }
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "MakeAppx.exe failed with exit code $LASTEXITCODE"
+            }
 
-      Write-Information "Successfully created bundle: $OutputPath" -InformationAction Continue
+            Write-Information "Successfully created bundle: $OutputPath" -InformationAction Continue
 
-      if (Test-Path $mappingFile.FullName) {
-        Remove-Item $mappingFile.FullName -Force -ErrorAction SilentlyContinue
-        Write-Verbose "Cleaned up temporary mapping file"
-      }
+            if (Test-Path $mappingFile.FullName)
+            {
+                Remove-Item $mappingFile.FullName -Force -ErrorAction SilentlyContinue
+                Write-Verbose "Cleaned up temporary mapping file"
+            }
+        }
+        catch
+        {
+            Write-Error "Failed to create bundle: $_"
+            throw
+        }
     }
-    catch {
-      Write-Error "Failed to create bundle: $_"
-      throw
-    }
-  }
 
-  end {
-    Write-Verbose "Bundle creation completed"
-  }
+    end
+    {
+        Write-Verbose "Bundle creation completed"
+    }
 }
