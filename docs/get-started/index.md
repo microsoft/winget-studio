@@ -53,7 +53,7 @@ Download and install WinGet Studio from the [GitHub releases page][01]:
    - The main window displays the configuration editor
 
 1. **Create a new configuration**
-   - Click "New nonfiguration"
+   - Click "New configuration"
    - WinGet Studio creates a new configuration with a placeholder resource
 
 1. **Add resources from the catalog**
