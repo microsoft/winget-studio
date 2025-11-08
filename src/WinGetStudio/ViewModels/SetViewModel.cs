@@ -27,15 +27,23 @@ public sealed partial class SetViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSave))]
+    [NotifyPropertyChangedFor(nameof(FilePath))]
+    [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
     private partial IDSCFile? OriginalDscFile { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
     private partial IDSCFile? CurrentDscFile { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
     public partial string? Code { get; set; }
 
     public bool CanSave => OriginalDscFile?.CanSave ?? false;
+
+    public bool HasUnsavedChanges => !OriginalDscFile?.Equals(CurrentDscFile) ?? true;
+
+    public string? FilePath => OriginalDscFile?.FileInfo?.FullName;
 
     public event NotifyCollectionChangedEventHandler? UnitsCollectionChanged
     {
@@ -153,19 +161,27 @@ public sealed partial class SetViewModel : ObservableObject
         var dscFile = GetLatestDSCFile();
         if (dscFile.CanSave)
         {
-            await dscFile.SaveAsync(_localizer);
+            await SaveInternalAsync(dscFile);
         }
     }
 
     public async Task SaveAsAsync(string filePath)
     {
-        OriginalDscFile = DSCFile.CreateVirtual(filePath, Code);
-        await OriginalDscFile.SaveAsync(_localizer);
+        var dscFile = DSCFile.CreateVirtual(filePath, Code);
+        await SaveInternalAsync(dscFile);
     }
 
     partial void OnOriginalDscFileChanged(IDSCFile? oldValue, IDSCFile? newValue)
     {
         // When the original DSC file changes, reset the current DSC file to match it.
         CurrentDscFile = newValue;
+    }
+
+    private async Task SaveInternalAsync(IDSCFile dscFile)
+    {
+        Debug.Assert(dscFile.CanSave, $"DSC file should be savable before calling {nameof(SaveInternalAsync)}.");
+        OriginalDscFile = dscFile;
+        await dscFile.SaveAsync(_localizer);
+        OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 }
