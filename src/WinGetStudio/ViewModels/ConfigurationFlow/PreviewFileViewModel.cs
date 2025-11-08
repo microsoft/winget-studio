@@ -141,6 +141,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             var dscFile = await DSCFile.LoadAsync(file.Path);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             await ConfigurationSet.UseAsync(dscSet, dscFile);
+            SaveConfigurationCommand.NotifyCanExecuteChanged();
         }
         catch (OpenConfigurationSetException ex)
         {
