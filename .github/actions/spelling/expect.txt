@@ -43,6 +43,7 @@ SHAREVIOLATION
 SIGDN
 sku
 substringof
+Taskbar
 tcs
 TELEMETRYEVENTSOURCE
 Tlg
@@ -65,6 +66,7 @@ WAACTIVE
 WAINACTIVE
 whatif
 windowex
+windowssettings
 wingetstudio
 winrtact
 WMACTIVATE
