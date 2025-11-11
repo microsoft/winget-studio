@@ -197,7 +197,7 @@ Click **Done** to return to the Manage a configuration file experience.
 
 ## View the Configuration file as YAML
 
-Click the **Code** botton to toggle between the graphical resource view and the code view to see
+Click the **Code** button to toggle between the graphical resource view and the code view to see
 the raw YAML configuration file.
 
 ![Code Button][25]
@@ -218,7 +218,7 @@ convenient if you don't have another preferred location to save the file.
 
 WinGet Studio will inform you once the file has been saved.
 
-![Configuration saved succesfully][28]
+![Configuration saved successfully][28]
 
 
 <!-- Link reference definitions -->
