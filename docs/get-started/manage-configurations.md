@@ -218,7 +218,7 @@ convenient if you don't have another preferred location to save the file.
 
 WinGet Studio will inform you once the file has been saved.
 
-![Save As Button][28]
+![Configuration saved succesfully][28]
 
 
 <!-- Link reference definitions -->
