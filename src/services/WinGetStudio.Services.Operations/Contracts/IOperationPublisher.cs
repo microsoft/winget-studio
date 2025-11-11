@@ -25,9 +25,10 @@ internal interface IOperationPublisher
     EventStream<OperationNotification> Notifications { get; }
 
     /// <summary>
-    /// Publishes the current operation snapshots.
+    /// Publishes the given operation snapshots.
     /// </summary>
-    void PublishSnapshots();
+    /// <param name="snapshots">The snapshots to publish.</param>
+    void PublishSnapshots(IReadOnlyList<OperationSnapshot> snapshots);
 
     /// <summary>
     /// Publishes an operation notification.

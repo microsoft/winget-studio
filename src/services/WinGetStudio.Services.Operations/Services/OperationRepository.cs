@@ -30,7 +30,7 @@ internal sealed class OperationRepository : IOperationRepository
     public void Add(OperationContext operation) => _operations.TryAdd(operation.Id, operation);
 
     /// <inheritdoc/>
-    public void Remove(Guid id) => _operations.TryRemove(id, out _);
+    public void Remove(OperationContext operation) => _operations.TryRemove(operation.Id, out _);
 
     /// <inheritdoc/>
     public bool TryGetOperation(Guid id, out OperationContext? operation) => _operations.TryGetValue(id, out operation);

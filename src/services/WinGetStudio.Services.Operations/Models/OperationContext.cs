@@ -15,7 +15,7 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
 {
     private readonly object _lock = new();
     private readonly ILogger<OperationContext> _logger;
-    private readonly IOperationPublisher _publisher;
+    private readonly IOperationManager _manager;
     private readonly CancellationTokenSource _cts;
     private OperationSnapshot _currentSnapshot;
     private bool _disposedValue;
@@ -29,10 +29,12 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
     /// <inheritdoc/>
     public OperationSnapshot CurrentSnapshot => _currentSnapshot;
 
-    public OperationContext(ILogger<OperationContext> logger, IOperationPublisher publisher)
+    public OperationContext(
+        ILogger<OperationContext> logger,
+        IOperationManager manager)
     {
         _logger = logger;
-        _publisher = publisher;
+        _manager = manager;
         _cts = new();
         _currentSnapshot = OperationSnapshot.Empty with
         {
@@ -42,10 +44,11 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
     }
 
     /// <inheritdoc/>
-    public void Update(Func<OperationProperties, OperationProperties> mutate)
+    public void CommitSnapshot(Func<OperationProperties, OperationProperties> mutate)
     {
         if (!_disposedValue)
         {
+            OperationProperties props;
             lock (_lock)
             {
                 _currentSnapshot = _currentSnapshot with
@@ -53,14 +56,15 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
                     Properties = mutate(_currentSnapshot.Properties),
                     UpdatedAt = DateTimeOffset.UtcNow,
                 };
+                props = _currentSnapshot.Properties;
             }
 
-            _logger.LogDebug($"Operation {Id} updated: {_currentSnapshot.Properties}. Publishing snapshots.");
-            _publisher.PublishSnapshots();
+            _logger.LogDebug($"Operation {Id} snapshot committed: {props}. Publishing snapshots.");
+            _manager.PublishSnapshots();
         }
     }
 
-    public void Notify(Func<OperationProperties, OperationProperties>? mutate = null)
+    public void PublishNotification(Func<OperationProperties, OperationProperties>? mutate = null)
     {
         if (!_disposedValue)
         {
@@ -73,7 +77,7 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
             }
 
             _logger.LogDebug($"Operation {Id} notification: {notificationProps.Properties}. Publishing notification.");
-            _publisher.PublishNotification(notificationProps);
+            _manager.PublishNotification(notificationProps);
         }
     }
 
@@ -85,6 +89,12 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
             _cts.Cancel();
         }
     }
+
+    /// <inheritdoc/>
+    public void Publish() => _manager.Publish(this);
+
+    /// <inheritdoc/>
+    public void Unpublish() => _manager.Unpublish(this);
 
     private void Dispose(bool disposing)
     {

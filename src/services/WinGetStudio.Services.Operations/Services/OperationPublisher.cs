@@ -11,8 +11,6 @@ namespace WinGetStudio.Services.Operations.Services;
 
 internal sealed partial class OperationPublisher : IOperationPublisher
 {
-    private readonly IOperationRepository _repository;
-
     /// <inheritdoc/>
     public EventStream<IReadOnlyList<OperationSnapshot>> Snapshots { get; } = new();
 
@@ -22,16 +20,11 @@ internal sealed partial class OperationPublisher : IOperationPublisher
     /// <inheritdoc/>
     public EventStream<OperationNotification> Notifications { get; } = new();
 
-    public OperationPublisher(IOperationRepository repository)
-    {
-        _repository = repository;
-    }
-
     /// <inheritdoc/>
-    public void PublishSnapshots()
+    public void PublishSnapshots(IReadOnlyList<OperationSnapshot> snapshots)
     {
-        Snapshots.Publish(_repository.Snapshots);
-        PublishGlobalActivity();
+        Snapshots.Publish(snapshots);
+        PublishGlobalActivity(snapshots);
     }
 
     /// <inheritdoc/>
@@ -40,24 +33,25 @@ internal sealed partial class OperationPublisher : IOperationPublisher
     /// <summary>
     /// Publishes the global activity based on the current running operations.
     /// </summary>
-    private void PublishGlobalActivity()
+    /// <param name="snapshots">The current operation snapshots.</param>
+    private void PublishGlobalActivity(IReadOnlyList<OperationSnapshot> snapshots)
     {
-        List<OperationContext> runningOps = [.._repository.Operations.Where(op => op.CurrentSnapshot.Properties.Status == OperationStatus.Running)];
-        if (runningOps.Count == 0)
+        List<OperationSnapshot> inProgress = [..snapshots.Where(os => os.Properties.Status == OperationStatus.Running)];
+        if (inProgress.Count == 0)
         {
             // If no operations are running, publish zero progress
             GlobalActivity.Publish(new(Percent: null, InProgressCount: 0));
         }
-        else if (runningOps.Count == 1)
+        else if (inProgress.Count == 1)
         {
             // If exactly one operation is running, publish its progress
-            var props = runningOps[0].CurrentSnapshot.Properties;
+            var props = inProgress[0].Properties;
             GlobalActivity.Publish(new(Percent: props.Percent, InProgressCount: 1));
         }
         else
         {
             // If multiple operations are running, publish null progress with the count
-            GlobalActivity.Publish(new(Percent: null, InProgressCount: runningOps.Count));
+            GlobalActivity.Publish(new(Percent: null, InProgressCount: inProgress.Count));
         }
     }
 }

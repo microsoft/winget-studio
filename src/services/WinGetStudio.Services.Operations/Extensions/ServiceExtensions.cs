@@ -11,13 +11,14 @@ namespace WinGetStudio.Services.Operations.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddLogging(this IServiceCollection services, string appSettingsFileName)
+    public static IServiceCollection AddOperations(this IServiceCollection services)
     {
         services.AddCore();
         services.AddSingleton<IOperationHub, OperationHub>();
         services.AddSingleton<IOperationExecutor, OperationExecutor>();
         services.AddSingleton<IOperationPublisher, OperationPublisher>();
         services.AddSingleton<IOperationRepository, OperationRepository>();
+        services.AddSingleton<IOperationManager, OperationManager>();
 
         // Factories
         services.AddTransient<OperationContextFactory>(sp => () => ActivatorUtilities.CreateInstance<OperationContext>(sp));

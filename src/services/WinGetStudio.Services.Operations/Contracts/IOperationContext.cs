@@ -28,19 +28,27 @@ public interface IOperationContext
     OperationSnapshot CurrentSnapshot { get; }
 
     /// <summary>
-    /// Updates the operation properties by applying the provided mutation function.
+    /// Commits a mutation to the current snapshot of the operation and
+    /// publishes to the snapshot stream.
     /// </summary>
     /// <param name="mutate">The mutation function to apply.</param>
-    void Update(Func<OperationProperties, OperationProperties> mutate);
+    void CommitSnapshot(Func<OperationProperties, OperationProperties> mutate);
 
     /// <summary>
-    /// Notifies observers of the current operation state, optionally applying a mutation function.
+    /// Publishes the current snapshot of the operation with an optional mutation.
     /// </summary>
+    /// <remarks>The mutation is not committed to the operation's state.</remarks>
     /// <param name="mutate">The optional mutation function to apply.</param>
-    void Notify(Func<OperationProperties, OperationProperties>? mutate = null);
+    void PublishNotification(Func<OperationProperties, OperationProperties>? mutate = null);
 
     /// <summary>
     /// Cancels the operation.
     /// </summary>
     void Cancel();
+
+    /// <inheritdoc cref="IOperationManager.Publish(Models.OperationContext)" />
+    void Publish();
+
+    /// <inheritdoc cref="IOperationManager.Unpublish(Models.OperationContext)" />
+    void Unpublish();
 }

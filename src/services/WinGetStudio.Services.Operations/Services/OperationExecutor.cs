@@ -12,15 +12,10 @@ namespace WinGetStudio.Services.Operations.Services;
 internal sealed class OperationExecutor : IOperationExecutor
 {
     private readonly ILogger<OperationExecutor> _logger;
-    private readonly IOperationRepository _repository;
     private readonly OperationContextFactory _contextFactory;
 
-    public OperationExecutor(
-        ILogger<OperationExecutor> logger,
-        IOperationRepository repository,
-        OperationContextFactory contextFactory)
+    public OperationExecutor(ILogger<OperationExecutor> logger, OperationContextFactory contextFactory)
     {
-        _repository = repository;
         _logger = logger;
         _contextFactory = contextFactory;
     }
@@ -34,7 +29,6 @@ internal sealed class OperationExecutor : IOperationExecutor
         using var ctx = _contextFactory();
         try
         {
-            _repository.Add(ctx);
             _logger.LogInformation($"Starting operation {ctx.Id}");
             await operation(ctx);
             _logger.LogInformation($"Operation {ctx.Id} completed");
@@ -46,8 +40,7 @@ internal sealed class OperationExecutor : IOperationExecutor
         }
         finally
         {
-            _logger.LogInformation($"Cleaning up operation {ctx.Id}");
-            _repository.Remove(ctx.Id);
+            _logger.LogInformation($"Disposing operation {ctx.Id}");
         }
     }
 }

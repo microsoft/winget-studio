@@ -27,10 +27,10 @@ internal interface IOperationRepository
     void Add(OperationContext operation);
 
     /// <summary>
-    /// Removes an operation by ID.
+    /// Removes an operation.
     /// </summary>
-    /// <param name="id">The ID of the operation to remove.</param>
-    void Remove(Guid id);
+    /// <param name="operation">The operation to remove.</param>
+    void Remove(OperationContext operation);
 
     /// <summary>
     /// Tries to get an operation by ID.
