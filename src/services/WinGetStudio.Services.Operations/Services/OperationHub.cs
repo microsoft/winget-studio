@@ -18,7 +18,7 @@ internal sealed partial class OperationHub : IOperationHub
     public IEventStream<IReadOnlyList<OperationSnapshot>> Snapshots => _publisher.Snapshots;
 
     /// <inheritdoc/>
-    public IEventStream<OperationProperties> Events => _publisher.Events;
+    public IEventStream<OperationNotification> Notifications => _publisher.Notifications;
 
     /// <inheritdoc/>
     public IEventStream<GlobalActivity> GlobalActivity => _publisher.GlobalActivity;

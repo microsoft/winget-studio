@@ -20,7 +20,7 @@ internal sealed partial class OperationPublisher : IOperationPublisher
     public EventStream<GlobalActivity> GlobalActivity { get; } = new();
 
     /// <inheritdoc/>
-    public EventStream<OperationProperties> Events { get; } = new();
+    public EventStream<OperationNotification> Notifications { get; } = new();
 
     public OperationPublisher(IOperationRepository repository)
     {
@@ -35,7 +35,7 @@ internal sealed partial class OperationPublisher : IOperationPublisher
     }
 
     /// <inheritdoc/>
-    public void PublishEvent(OperationProperties properties) => Events.Publish(properties);
+    public void PublishNotification(OperationNotification notification) => Notifications.Publish(notification);
 
     /// <summary>
     /// Publishes the global activity based on the current running operations.

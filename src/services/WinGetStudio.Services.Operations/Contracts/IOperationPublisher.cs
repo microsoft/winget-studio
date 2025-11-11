@@ -20,9 +20,9 @@ internal interface IOperationPublisher
     EventStream<GlobalActivity> GlobalActivity { get; }
 
     /// <summary>
-    /// Gets the operation events event stream.
+    /// Gets the operation notifications event stream.
     /// </summary>
-    EventStream<OperationProperties> Events { get; }
+    EventStream<OperationNotification> Notifications { get; }
 
     /// <summary>
     /// Publishes the current operation snapshots.
@@ -30,8 +30,8 @@ internal interface IOperationPublisher
     void PublishSnapshots();
 
     /// <summary>
-    /// Publishes an operation event.
+    /// Publishes an operation notification.
     /// </summary>
-    /// <param name="properties">The operation properties.</param>
-    void PublishEvent(OperationProperties properties);
+    /// <param name="notification">The notification to publish.</param>
+    void PublishNotification(OperationNotification notification);
 }

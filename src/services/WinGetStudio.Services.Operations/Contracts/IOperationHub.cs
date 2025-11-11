@@ -13,8 +13,8 @@ public interface IOperationHub
     /// <inheritdoc cref="IOperationPublisher.Snapshots"/>
     IEventStream<IReadOnlyList<OperationSnapshot>> Snapshots { get; }
 
-    /// <inheritdoc cref="IOperationPublisher.Events"/>
-    IEventStream<OperationProperties> Events { get; }
+    /// <inheritdoc cref="IOperationPublisher.Notifications"/>
+    IEventStream<OperationNotification> Notifications { get; }
 
     /// <inheritdoc cref="IOperationPublisher.GlobalActivity"/>
     IEventStream<GlobalActivity> GlobalActivity { get; }

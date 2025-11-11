@@ -34,6 +34,12 @@ public interface IOperationContext
     void Update(Func<OperationProperties, OperationProperties> mutate);
 
     /// <summary>
+    /// Notifies observers of the current operation state, optionally applying a mutation function.
+    /// </summary>
+    /// <param name="mutate">The optional mutation function to apply.</param>
+    void Notify(Func<OperationProperties, OperationProperties>? mutate = null);
+
+    /// <summary>
     /// Cancels the operation.
     /// </summary>
     void Cancel();
