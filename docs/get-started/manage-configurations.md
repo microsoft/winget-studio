@@ -30,11 +30,19 @@ To install PowerShell 7 if needed:
 winget install Microsoft.PowerShell
 ```
 
+> [!IMPORTANT]
+> If you are not already familiar with Microsoft Desired State Configuration and PowerShell DSC
+> 2.0, you should first complete the [resource validation guide][06].
+
 ## What you'll learn
 
 In this tutorial, you'll learn how to:
 
 - Navigate to the Manage a configuration file page
+- Create a new WinGet Configuration file
+  - Add a resource to a configuration
+  - Specify dependencies for sequencing in a configuration
+  - Specify a resource requires elevation
 - View an existing WinGet Configuration file
 - Validate, Test, and Apply a WinGet Configuration file
 
@@ -50,6 +58,13 @@ Select **Manage Configuration** to open the configuration management page.
 
 The Configuration Management page provides tools to work with WinGet Configuration files. Once a
 file has been created or opened you will be abe to edit, validate, test, apply, or save the file.
+
+In this step-by-step example, you are going to author a new WinGet configuration file to ensure
+a package is installed, and modify a setting for that package requiring elevation. The WinGet 
+package "Microsoft.AppInstaller" from the community repository will be used (it should already be
+installed on your system). 
+
+## New Configuration
 
 Start a new configuration by clicking on **New configuration**
 
@@ -69,10 +84,67 @@ If you are already familiar with the ![Validate a resource][06] experience in Wi
 may look familiar, but there are extra fields related to how this instance of a resource is
 included in the configuration file.
 
-Expand the "Module/Resource" by clicking the arror to the right of the "Edit" button next to the "Module/Resource" on the left side of the editor. This will open up a visual view of the resource instance in the
-configuration file.
+Expand the "Module/Resource" by clicking the arror to the right of the "Edit" button next to the "Module/Resource" on the left side of the editor. This will open up a visual view of the resource instance in the configuration file.
 
 ![Expand Resource view on left side][07]
+
+In the "Resource type" field, enter `winget`. WinGet Studio will perform a search to find any
+matching resources. This should look familiar to the "Validate a resource" experience. Available
+resources will be displayed on the left side of the drop down and their types and DSC versions will
+be displayed on the right side.
+
+Select the **Microsoft.WinGet/Package** resource from the drop down menu.
+
+![Entering winget in the Resource type field on the right side][08]
+
+The **Resource name** field is used to uniquely identify an instance of a resource being used in a
+WinGet Configuration file. This value is used to map dependnecies to gurantee sequencing in your
+configuration. Short descriptive values for name are often the best. 
+
+Since WinGet is installed via the Microsoft.AppInstaller package, update the **Resource name** to
+`Install WinGet`. The **Description** field is an optional field where you can put a more verbose
+explantation of what this resource instance is doing. Update the **Description** to `Ensure WinGet
+is installed`
+
+![Resource name "install WinGet" description "Ensure WinGet is installed"][09]
+
+Click the **ℹ️** button to the right of the **Microsoft.WinGet/Package**.
+
+![Information button to the right of the resource][10]
+
+The resource properties will be displayed. 
+
+![Microsoft.WinGet/Package Resource properties][11]
+
+Click **Copy as YAML**
+
+![Copy as YAML highlighted in the resource properties display][12]
+
+Paste the results in the editor below the description field as shown below. This method of copying
+the properties will include default values for each setting. 
+
+![YAML pasted into properties under Description field][13]
+
+In this example, we only need two properties. Modify the properties such that you are specifying
+the **id** and **source** are displayed below.
+
+```YAML
+id: Microsoft.AppInstaller
+source: winget
+```
+
+![Microsoft.AppInstaller package specified from the winget source][14]
+
+Now, click the "Update" botton on the lower right corner of WinGet Studio.
+
+![Update the resource instance in the configuration file][15]
+
+Notice the visual resource display on the left has been updated and a notification was displayed
+on the top right stating "Configuration unit updated".
+
+![Visual display on the left has been updated][16]
+
+
 
 <!-- Link reference definitions -->
 [01]: https://github.com/microsoft/winget-studio/releases
@@ -82,3 +154,12 @@ configuration file.
 [05]: .././images/studio/0.100.302.0/Manage-New-Configuration-Template.png
 [06]: ./validate-resources.md
 [07]: .././images/studio/0.100.302.0/Manage-Configuration-Expand-Resource.png
+[08]: .././images/studio/0.100.302.0/Manage-Configuration-winget.png
+[09]: .././images/studio/0.100.302.0/Manage-Configuration-resource-name-description.png
+[10]: .././images/studio/0.100.302.0/Manage-Configuration-resource-info.png
+[11]: .././images/studio/0.100.302.0/Manage-Configuration-winget-info.png
+[12]: .././images/studio/0.100.302.0/Manage-Configuration-resource-YAML.png
+[13]: .././images/studio/0.100.302.0/Manage-Configuration-resource-properties.png
+[14]: .././images/studio/0.100.302.0/Manage-Configuration-AppInstaller.png
+[15]: .././images/studio/0.100.302.0/Manage-Configuration-Update-AppInstaller.png
+[16]: .././images/studio/0.100.302.0/Manage-Configuration-AppInstaller-updated.png
