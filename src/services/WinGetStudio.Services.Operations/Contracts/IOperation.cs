@@ -5,7 +5,14 @@ using System.Threading.Tasks;
 
 namespace WinGetStudio.Services.Operations.Contracts;
 
+/// <summary>
+/// Represents an operation that can be executed.
+/// </summary>
 public interface IOperation
 {
-    Task ExecuteAsync(IOperationContext ctx);
+    /// <summary>
+    /// Executes the operation asynchronously.
+    /// </summary>
+    /// <param name="context">The operation context.</param>
+    Task ExecuteAsync(IOperationContext context);
 }

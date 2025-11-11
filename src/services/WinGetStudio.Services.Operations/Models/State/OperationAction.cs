@@ -6,4 +6,10 @@ using System.Threading.Tasks;
 
 namespace WinGetStudio.Services.Operations.Models.State;
 
+/// <summary>
+/// Represents an action that can be taken for an operation.
+/// </summary>
+/// <param name="Text">The text to display for the action.</param>
+/// <param name="IsPrimary">Whether the action is a primary action.</param>
+/// <param name="Action">The action to perform.</param>
 public sealed record class OperationAction(string Text, bool IsPrimary, Func<Task> Action);

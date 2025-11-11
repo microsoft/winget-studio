@@ -32,25 +32,68 @@ public static partial class OperationContextExtensions
 
     public static void Complete(this IOperationContext ctx, Func<OperationProperties, OperationProperties>? mutate = null)
     {
-        ctx.UpdateInternal(props => props with { Status = OperationStatus.Completed, Percent = 100 }, mutate);
+        ctx.UpdateInternal(
+            props => props with
+            {
+                Status = OperationStatus.Completed,
+                Percent = 100,
+                Actions = [],
+            },
+            mutate);
     }
 
     public static void Success(this IOperationContext ctx, Func<OperationProperties, OperationProperties>? mutate = null)
     {
-        ctx.UpdateInternal(props => props with { Status = OperationStatus.Completed, Percent = 100, Severity = OperationSeverity.Success }, mutate);
+        ctx.UpdateInternal(
+            props => props with
+            {
+                Status = OperationStatus.Completed,
+                Percent = 100,
+                Severity = OperationSeverity.Success,
+                Actions = [],
+            },
+            mutate);
     }
 
     public static void Fail(this IOperationContext ctx, Func<OperationProperties, OperationProperties>? mutate = null)
     {
-        ctx.UpdateInternal(props => props with { Status = OperationStatus.Completed, Percent = 100, Severity = OperationSeverity.Error }, mutate);
+        ctx.UpdateInternal(
+            props => props with
+            {
+                Status = OperationStatus.Completed,
+                Percent = 100,
+                Severity = OperationSeverity.Error,
+                Actions = [],
+            },
+            mutate);
+    }
+
+    public static void CancelAndUpdate(this IOperationContext ctx, Func<OperationProperties, OperationProperties>? mutate = null)
+    {
+        ctx.Cancel();
+        ctx.UpdateInternal(
+            props => props with
+            {
+                Status = OperationStatus.Canceled,
+                Percent = 0,
+                Severity = OperationSeverity.Warning,
+                Actions = [],
+            },
+            mutate);
     }
 
     public static void AddCancelAction(this IOperationContext ctx, string text, bool isPrimary = true)
     {
-        var cancelAction = new OperationAction(text, isPrimary, () => Task.FromResult(ctx.Cancel));
+        var cancelAction = new OperationAction(text, isPrimary, () => Task.FromResult(ctx.CancelAndUpdate));
         ctx.Update(props => props with { Actions = [.. props.Actions, cancelAction] });
     }
 
+    /// <summary>
+    /// Update with optional user mutate.
+    /// </summary>
+    /// <param name="ctx">The operation context.</param>
+    /// <param name="updateMutate">The update mutate.</param>
+    /// <param name="userMutate">The user mutate.</param>
     private static void UpdateInternal(this IOperationContext ctx, Func<OperationProperties, OperationProperties> updateMutate, Func<OperationProperties, OperationProperties>? userMutate)
     {
         if (userMutate != null)

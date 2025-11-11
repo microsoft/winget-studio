@@ -5,26 +5,31 @@ using System;
 using System.Threading;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Models.State;
-using WinGetStudio.Services.Operations.Services;
 
 namespace WinGetStudio.Services.Operations.Models;
 
+internal delegate OperationContext OperationContextFactory();
+
 internal sealed partial class OperationContext : IOperationContext, IDisposable
 {
-    private readonly OperationManager _manager;
+    private readonly object _lock = new();
+    private readonly IOperationPublisher _publisher;
     private readonly CancellationTokenSource _cts;
     private OperationSnapshot _currentSnapshot;
     private bool _disposedValue;
 
+    /// <inheritdoc/>
     public Guid Id => _currentSnapshot.Id;
 
+    /// <inheritdoc/>
     public CancellationToken CancellationToken => _cts.Token;
 
+    /// <inheritdoc/>
     public OperationSnapshot CurrentSnapshot => _currentSnapshot;
 
-    public OperationContext(OperationManager manager)
+    public OperationContext(IOperationPublisher publisher)
     {
-        _manager = manager;
+        _publisher = publisher;
         _cts = new();
         _currentSnapshot = OperationSnapshot.Empty with
         {
@@ -33,25 +38,30 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
         };
     }
 
+    /// <inheritdoc/>
     public void Update(Func<OperationProperties, OperationProperties> mutate)
     {
-        if (_disposedValue)
+        if (!_disposedValue)
         {
-            _currentSnapshot = _currentSnapshot with
+            lock (_lock)
             {
-                Properties = mutate(_currentSnapshot.Properties),
-                UpdatedAt = DateTimeOffset.UtcNow,
-            };
-            _manager.PublishSnapshot(Id);
+                _currentSnapshot = _currentSnapshot with
+                {
+                    Properties = mutate(_currentSnapshot.Properties),
+                    UpdatedAt = DateTimeOffset.UtcNow,
+                };
+            }
+
+            _publisher.PublishSnapshots();
         }
     }
 
+    /// <inheritdoc/>
     public void Cancel()
     {
         if (!_disposedValue)
         {
             _cts.Cancel();
-            Update(props => props with { Status = OperationStatus.Canceled });
         }
     }
 
