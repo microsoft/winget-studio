@@ -144,6 +144,26 @@ on the top right stating "Configuration unit updated".
 
 ![Visual display on the left has been updated][16]
 
+The next step is to **Validate** the configuration. When you click the "Validate" button for the
+configuration file, WinGet Studio will check for syntax correctness.
+
+![Validate the configuration button highlighted][17]
+
+If the configuration file is valid, WinGet studio will notify you that the "Configuration code
+is valid".
+
+![Configuration code is valid][18]
+
+Next, click the **Test** button next to the **Validate** button you just clicked.
+
+![Test button next to Validate Button][19]
+
+This will execute the "Test" method on the entire configuration file. No changes will be made to
+your system when you run "Test". If your system is in the desired state (which it should be for
+this example), WinGet Studio will inform you "Machine is in the desired state".
+
+![Machine is in the desired state][20]
+
 
 
 <!-- Link reference definitions -->
@@ -163,3 +183,7 @@ on the top right stating "Configuration unit updated".
 [14]: .././images/studio/0.100.302.0/Manage-Configuration-AppInstaller.png
 [15]: .././images/studio/0.100.302.0/Manage-Configuration-Update-AppInstaller.png
 [16]: .././images/studio/0.100.302.0/Manage-Configuration-AppInstaller-updated.png
+[17]: .././images/studio/0.100.302.0/Manage-Configuration-Validate.png
+[18]: .././images/studio/0.100.302.0/Manage-Configuration-Validated.png
+[19]: .././images/studio/0.100.302.0/Manage-Configuration-Test.png
+[20]: .././images/studio/0.100.302.0/Manage-Configuration-Tested.png
