@@ -57,7 +57,7 @@ Select **Manage Configuration** to open the configuration management page.
 ![The Manage a Configuration file page with New configuration and Open configuration buttons][03]
 
 The Configuration Management page provides tools to work with WinGet Configuration files. Once a
-file has been created or opened you will be abe to edit, validate, test, apply, or save the file.
+file has been created or opened you will be able to edit, validate, test, apply, or save the file.
 
 In this step-by-step example, you are going to author a new WinGet configuration file to ensure
 a package is installed, and modify a setting for that package requiring elevation. The WinGet 
@@ -84,7 +84,7 @@ If you are already familiar with the ![Validate a resource][06] experience in Wi
 may look familiar, but there are extra fields related to how this instance of a resource is
 included in the configuration file.
 
-Expand the "Module/Resource" by clicking the arror to the right of the "Edit" button next to the "Module/Resource" on the left side of the editor. This will open up a visual view of the resource instance in the configuration file.
+Expand the "Module/Resource" by clicking the arrow to the right of the "Edit" button next to the "Module/Resource" on the left side of the editor. This will open up a visual view of the resource instance in the configuration file.
 
 ![Expand Resource view on left side][07]
 
@@ -100,7 +100,7 @@ Select the **Microsoft.WinGet/Package** resource from the drop down menu.
 ![Entering winget in the Resource type field on the right side][08]
 
 The **Resource name** field is used to uniquely identify an instance of a resource being used in a
-WinGet Configuration file. This value is used to map dependnecies to gurantee sequencing in your
+WinGet Configuration file. This value is used to map dependencies to guarantee sequencing in your
 configuration. Short descriptive values for name are often the best. 
 
 Since WinGet is installed via the Microsoft.AppInstaller package, update the **Resource name** to
@@ -137,7 +137,7 @@ source: winget
 
 ![Microsoft.AppInstaller package specified from the winget source][14]
 
-Now, click the "Update" botton on the lower right corner of WinGet Studio.
+Now, click the "Update" button on the lower right corner of WinGet Studio.
 
 ![Update the resource instance in the configuration file][15]
 
