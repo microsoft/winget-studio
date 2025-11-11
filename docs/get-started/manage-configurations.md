@@ -88,6 +88,8 @@ Expand the "Module/Resource" by clicking the arror to the right of the "Edit" bu
 
 ![Expand Resource view on left side][07]
 
+## Modifying an Instance of a Resource
+
 In the "Resource type" field, enter `winget`. WinGet Studio will perform a search to find any
 matching resources. This should look familiar to the "Validate a resource" experience. Available
 resources will be displayed on the left side of the drop down and their types and DSC versions will
@@ -144,6 +146,8 @@ on the top right stating "Configuration unit updated".
 
 ![Visual display on the left has been updated][16]
 
+## Validate a WinGet Configuration File
+
 The next step is to **Validate** the configuration. When you click the "Validate" button for the
 configuration file, WinGet Studio will check for syntax correctness.
 
@@ -153,6 +157,8 @@ If the configuration file is valid, WinGet studio will notify you that the "Conf
 is valid".
 
 ![Configuration code is valid][18]
+
+## Test a WinGet Configuration File 
 
 Next, click the **Test** button next to the **Validate** button you just clicked.
 
@@ -167,6 +173,8 @@ this example), WinGet Studio will inform you "Machine is in the desired state".
 Given your machine is already in the desired state as we saw in the previous step, DSC will not
 perform any action to change anything on your system when you apply the configuration. DSC always
 performs "Test" before "Set".
+
+## Apply a WinGet Configuration File
 
 For the sake of completeness, go ahead and hit the **Apply** button next to the **Test** button.
 
@@ -186,6 +194,31 @@ Once the configuration has completed, the results are visible.
 ![Configuration applied][24]
 
 Click **Done** to return to the Manage a configuration file experience.
+
+## View the Configuration file as YAML
+
+Click the **Code** botton to toggle between the graphical resource view and the code view to see
+the raw YAML configuration file.
+
+![Code Button][25]
+
+Notice the graphical representation of the configuration on the left side of the editor is now
+displaying the raw YAML configuration file.
+
+![Code Button][26]
+
+Click the **Code** button again to return to the visual representation.
+
+Now is a good time to save the configuration file. Since this configuration file was built using
+the **New configuration** button, the **Save** button has been disabled. Use the **Save As** button
+to save the file. I'd suggest using "tutorial.winget" as the file name, and chosing your desktop is
+convenient if you don't have another preferred location to save the file.
+
+![Save As Button][27]
+
+WinGet Studio will inform you once the file has been saved.
+
+![Save As Button][28]
 
 
 <!-- Link reference definitions -->
@@ -213,3 +246,7 @@ Click **Done** to return to the Manage a configuration file experience.
 [22]: .././images/studio/0.100.302.0/Manage-Configuration-Apply-Terms.png
 [23]: .././images/studio/0.100.302.0/Manage-Configuration-Applying.png
 [24]: .././images/studio/0.100.302.0/Manage-Configuration-Applied.png
+[25]: .././images/studio/0.100.302.0/Manage-Configuration-Code.png
+[26]: .././images/studio/0.100.302.0/Manage-Configuration-Code-View.png
+[27]: .././images/studio/0.100.302.0/Manage-Configuration-SaveAs.png
+[28]: .././images/studio/0.100.302.0/Manage-Configuration-Saved.png
