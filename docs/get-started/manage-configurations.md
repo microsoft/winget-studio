@@ -164,6 +164,28 @@ this example), WinGet Studio will inform you "Machine is in the desired state".
 
 ![Machine is in the desired state][20]
 
+Given your machine is already in the desired state as we saw in the previous step, DSC will not
+perform any action to change anything on your system when you apply the configuration. DSC always
+performs "Test" before "Set".
+
+For the sake of completeness, go ahead and hit the **Apply** button next to the **Test** button.
+
+![Apply is highlighted next to Test][21]
+
+You will see a warning displayed any time you run a configuration file. If you agree, click the
+**Apply** button below the warning.
+
+![WinGet Configuration Terms / Warning][22]
+
+WinGet Studio will display progress while the configuration is running.
+
+![Applying the Configuration][23]
+
+Once the configuration has completed, the results are visible.
+
+![Configuration applied][24]
+
+Click **Done** to return to the Manage a configuration file experience.
 
 
 <!-- Link reference definitions -->
@@ -187,3 +209,7 @@ this example), WinGet Studio will inform you "Machine is in the desired state".
 [18]: .././images/studio/0.100.302.0/Manage-Configuration-Validated.png
 [19]: .././images/studio/0.100.302.0/Manage-Configuration-Test.png
 [20]: .././images/studio/0.100.302.0/Manage-Configuration-Tested.png
+[21]: .././images/studio/0.100.302.0/Manage-Configuration-Apply.png
+[22]: .././images/studio/0.100.302.0/Manage-Configuration-Apply-Terms.png
+[23]: .././images/studio/0.100.302.0/Manage-Configuration-Applying.png
+[24]: .././images/studio/0.100.302.0/Manage-Configuration-Applied.png
