@@ -220,12 +220,12 @@ WinGet Studio will inform you once the file has been saved.
 
 ![Configuration saved successfully][28]
 
-## Add a Resource Instance to a Configuraion
+## Add a Resource Instance to a Configuration
 
 The configuration you've been building up to this point only contains a single resource instance.
 Next, you're going to add another resource to this configuration. The new resource is going to
 have a dependency on the resource in the configuration, and it is going to require elevation 
-(administrator priveledge) to run.
+(administrator privilege) to run.
 
 Click the **Add resource** button.
 
@@ -252,7 +252,7 @@ the following image.
 
 Now, select **Elevated** from the **Security Context** drop down. 
 
-![Selectng Elevated from the Security Context][31]
+![Selecting Elevated from the Security Context][31]
 
 Click the **Update** button to update the resource settings. Notice the shield icon in the visual
 view for the resource on the left side of the editor.
@@ -267,7 +267,7 @@ to configure the WinGet Administrator Settings if WinGet wasn't installed on you
 > to an IDE. You would need to ensure the IDE was installed on the machine before attempting to
 > configure it.
 
-Click the **Dependenies** button, and check the box next to "Install WinGet".
+Click the **Dependencies** button, and check the box next to "Install WinGet".
 
 ![Set Install WinGet as a dependency][33]
 
