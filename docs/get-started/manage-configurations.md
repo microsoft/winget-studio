@@ -220,6 +220,62 @@ WinGet Studio will inform you once the file has been saved.
 
 ![Configuration saved successfully][28]
 
+## Add a Resource Instance to a Configuraion
+
+The configuration you've been building up to this point only contains a single resource instance.
+Next, you're going to add another resource to this configuration. The new resource is going to
+have a dependency on the resource in the configuration, and it is going to require elevation 
+(administrator priveledge) to run.
+
+Click the **Add resource** button.
+
+![Add Resource Button][29]
+
+Follow the same process as before. In the **Resource type** search for `winget`. Select the
+"Microsoft.WinGet/AdminSettings" resource. Use `Configure WinGet` for the **Resource name**.
+Use `Ensure WinGet Local Manifests are Enabled` for the **Description**. Use the following
+YAML in the editor below the Description:
+
+```YAML
+settings:
+  LocalManifestFiles: true
+```
+
+> [!IMPORTANT]
+> YAML is whitespace sensitive. For the Microsoft.WinGet/AdminSettings properties you need
+> two spaces on the second line before "LocalManifestFiles".
+
+Once you've entered everything, click the update button, and WinGet Studio should look like
+the following image.
+
+![WinGet Admin Settings Configured in WinGet Studio][30]
+
+Now, select **Elevated** from the **Security Context** drop down. 
+
+![Selectng Elevated from the Security Context][31]
+
+Click the **Update** button to update the resource settings. Notice the shield icon in the visual
+view for the resource on the left side of the editor.
+
+![Elevated Resource with a Shield][32]
+
+The next step is to specify the dependency for this resource instance. It wouldn't make sense
+to configure the WinGet Administrator Settings if WinGet wasn't installed on your system. 
+
+> [!NOTE]
+> Another common scenario for resource dependencies would be adding an extension or a workload
+> to an IDE. You would need to ensure the IDE was installed on the machine before attempting to
+> configure it.
+
+Click the **Dependenies** button, and check the box next to "Install WinGet".
+
+![Set Install WinGet as a dependency][33]
+
+Click the **Update** button to save your changes. Then expand the visual view of the resource
+on the left side of the editor. The location of the expander is indicated by the red arrow in
+the following image. You will see the Dependencies now includes "Install WinGet".
+
+![Dependencies include Install WinGet][34]
 
 <!-- Link reference definitions -->
 [01]: https://github.com/microsoft/winget-studio/releases
@@ -250,3 +306,9 @@ WinGet Studio will inform you once the file has been saved.
 [26]: .././images/studio/0.100.302.0/Manage-Configuration-Code-View.png
 [27]: .././images/studio/0.100.302.0/Manage-Configuration-SaveAs.png
 [28]: .././images/studio/0.100.302.0/Manage-Configuration-Saved.png
+[29]: .././images/studio/0.100.302.0/Manage-Configuration-Add-Resource.png
+[30]: .././images/studio/0.100.302.0/Manage-Configuration-WinGet-Admin.png
+[31]: .././images/studio/0.100.302.0/Manage-Configuration-Security-Context.png
+[32]: .././images/studio/0.100.302.0/Manage-Configuration-Elevated.png
+[33]: .././images/studio/0.100.302.0/Manage-Configuration-Dependency.png
+[34]: .././images/studio/0.100.302.0/Manage-Configuration-View-Dependency.png
