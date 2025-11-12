@@ -24,4 +24,7 @@ public interface IOperationHub
 
     /// <inheritdoc cref="IOperationExecutor.ExecuteAsync(Func{IOperationContext, Task})"/>
     Task ExecuteAsync(Func<IOperationContext, Task> operation);
+
+    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync{T}(Func{IOperationContext, Task{T}})"/>
+    Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation);
 }

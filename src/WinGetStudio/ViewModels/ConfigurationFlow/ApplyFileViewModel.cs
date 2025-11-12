@@ -9,8 +9,8 @@ using Microsoft.Extensions.Logging;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using WingetStudio.Services.VisualFeedback.Contracts;
-using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
@@ -19,7 +19,7 @@ public partial class ApplyFileViewModel : ObservableRecipient
     private readonly IStringLocalizer<ApplyFileViewModel> _localizer;
     private readonly IConfigurationFrameNavigationService _navigationService;
     private readonly IDSC _dsc;
-    private readonly IUIFeedbackService _ui;
+    private readonly IOperationHub _operationHub;
     private readonly ILogger _logger;
     private readonly IConfigurationManager _manager;
     private readonly ApplySetViewModelFactory _applySetFactory;
@@ -30,7 +30,7 @@ public partial class ApplyFileViewModel : ObservableRecipient
     public ApplyFileViewModel(
         IConfigurationFrameNavigationService navigationService,
         IDSC dsc,
-        IUIFeedbackService ui,
+        IOperationHub operationHub,
         IStringLocalizer<ApplyFileViewModel> localizer,
         ILogger<ApplyFileViewModel> logger,
         IConfigurationManager manager,
@@ -40,7 +40,7 @@ public partial class ApplyFileViewModel : ObservableRecipient
         _dsc = dsc;
         _logger = logger;
         _localizer = localizer;
-        _ui = ui;
+        _operationHub = operationHub;
         _manager = manager;
         _applySetFactory = applySetFactory;
     }
@@ -67,40 +67,40 @@ public partial class ApplyFileViewModel : ObservableRecipient
     {
         var activeSet = _manager.ActiveSetPreviewState.ActiveSet;
         Debug.Assert(activeSet != null, "ActiveSet should not be null when applying configuration set.");
-        try
+        await _operationHub.ExecuteAsync(async ctx =>
         {
-            _ui.ShowTaskProgress();
-            _logger.LogInformation($"Applying configuration set started");
-            var dscFile = activeSet.GetLatestDSCFile();
-            var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-            ApplySet = _applySetFactory(dscSet);
-            _manager.ActiveSetApplyState.CaptureState(this);
-            await ApplySet.ApplyAsync();
-        }
-        catch (OpenConfigurationSetException ex)
-        {
-            _logger.LogError(ex, $"Opening configuration set failed during apply");
-            _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
-        }
-        catch (ApplyConfigurationSetException ex)
-        {
-            _logger.LogError(ex, $"Applying configuration set failed");
-            _ui.ShowTimedNotification(ex.GetSetErrorMessage(_localizer), NotificationMessageSeverity.Error);
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Applying configuration set was canceled by user");
-            _ui.ShowTimedNotification(_localizer["ApplyFile_ApplyOperationCanceledMessage"], NotificationMessageSeverity.Warning);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Unknown error while validating configuration code");
-            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-        }
-        finally
-        {
-            _ui.HideTaskProgress();
-        }
+            try
+            {
+                ctx.Publish();
+                ctx.Start();
+                _logger.LogInformation($"Applying configuration set started");
+                var dscFile = activeSet.GetLatestDSCFile();
+                var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+                ApplySet = _applySetFactory(dscSet);
+                _manager.ActiveSetApplyState.CaptureState(this);
+                await ApplySet.ApplyAsync();
+            }
+            catch (OpenConfigurationSetException ex)
+            {
+                _logger.LogError(ex, $"Opening configuration set failed during apply");
+                ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
+            }
+            catch (ApplyConfigurationSetException ex)
+            {
+                _logger.LogError(ex, $"Applying configuration set failed");
+                ctx.Fail(props => props with { Message = ex.GetSetErrorMessage(_localizer) });
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Applying configuration set was canceled by user");
+                ctx.Canceled(props => props with { Message = _localizer["ApplyFile_ApplyOperationCanceledMessage"] });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Unknown error while validating configuration code");
+                ctx.Fail(props => props with { Message = ex.Message });
+            }
+        });
     }
 
     [RelayCommand]

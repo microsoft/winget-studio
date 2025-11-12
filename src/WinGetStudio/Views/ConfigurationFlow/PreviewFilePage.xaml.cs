@@ -8,8 +8,8 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using WinGetStudio.Common.Windows.FileDialog;
 using WinGetStudio.Contracts.Views;
-using WingetStudio.Services.VisualFeedback.Contracts;
-using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
 
@@ -18,14 +18,14 @@ namespace WinGetStudio.Views.ConfigurationFlow;
 public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 {
     private readonly IStringLocalizer<PreviewFilePage> _localizer;
-    private readonly IUIFeedbackService _ui;
+    private readonly IOperationHub _operationHub;
 
     public PreviewFileViewModel ViewModel { get; }
 
     public PreviewFilePage()
     {
         _localizer = App.GetService<IStringLocalizer<PreviewFilePage>>();
-        _ui = App.GetService<IUIFeedbackService>();
+        _operationHub = App.GetService<IOperationHub>();
         ViewModel = App.GetService<PreviewFileViewModel>();
         InitializeComponent();
     }
@@ -52,39 +52,45 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 
     private async void OpenConfigurationFile(object sender, RoutedEventArgs e)
     {
-        try
+        await _operationHub.ExecuteAsync(async ctx =>
         {
-            var filePicker = new WindowOpenFileDialog();
-            string[] fileExts = [".winget", ".yaml", ".yml"];
-            filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], fileExts);
-            var selectedFile = await filePicker.ShowAsync(App.MainWindow);
-            if (selectedFile != null)
+            try
             {
-                await ViewModel.OpenConfigurationFileAsync(selectedFile);
+                var filePicker = new WindowOpenFileDialog();
+                string[] fileExts = [".winget", ".yaml", ".yml"];
+                filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], fileExts);
+                var selectedFile = await filePicker.ShowAsync(App.MainWindow);
+                if (selectedFile != null)
+                {
+                    await ViewModel.OpenConfigurationFileAsync(selectedFile);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-        }
+            catch (Exception ex)
+            {
+                ctx.Fail(props => props with { Message = ex.Message });
+            }
+        });
     }
 
     private async void SaveConfigurationFileAs(object sender, RoutedEventArgs e)
     {
-        try
+        await _operationHub.ExecuteAsync(async ctx =>
         {
-            var filePicker = new WindowSaveFileDialog();
-            filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], ".winget");
-            var selectedFile = filePicker.Show(App.MainWindow);
-            if (!string.IsNullOrEmpty(selectedFile))
+            try
             {
-                await ViewModel.SaveConfigurationAsAsync(selectedFile);
+                var filePicker = new WindowSaveFileDialog();
+                filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], ".winget");
+                var selectedFile = filePicker.Show(App.MainWindow);
+                if (!string.IsNullOrEmpty(selectedFile))
+                {
+                    await ViewModel.SaveConfigurationAsAsync(selectedFile);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-        }
+            catch (Exception ex)
+            {
+                ctx.Fail(props => props with { Message = ex.Message });
+            }
+        });
     }
 
     private void SelectedUnitDependencyChanged(object sender, SelectionChangedEventArgs e)

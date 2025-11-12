@@ -3,20 +3,19 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.WinUI;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Navigation;
 using WinGetStudio.Contracts.Services;
-using WingetStudio.Services.VisualFeedback.Contracts;
-using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Models.State;
 using WinGetStudio.Views;
 
 namespace WinGetStudio.ViewModels;
 
-public partial class ShellViewModel : ObservableRecipient
+public partial class ShellViewModel : ObservableRecipient, IDisposable
 {
-    private readonly IUIFeedbackService _uiFeedbackService;
-    private readonly DispatcherQueue _dispatcherQueue;
+    private readonly IOperationHub _ops;
+    private readonly IDisposable _activitySubscription;
+    private bool _disposedValue;
 
     [ObservableProperty]
     public partial bool IsBackEnabled { get; set; }
@@ -37,13 +36,13 @@ public partial class ShellViewModel : ObservableRecipient
     public ShellViewModel(
         IAppFrameNavigationService navigationService,
         IAppShellNavigationViewService navigationViewService,
-        IUIFeedbackService uiFeedbackService)
+        IOperationHub ops)
     {
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
-        _uiFeedbackService = uiFeedbackService;
-        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        _ops = ops;
+        _activitySubscription = _ops.GlobalActivity.Subscribe(OnGlobalActivity);
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
@@ -66,15 +65,11 @@ public partial class ShellViewModel : ObservableRecipient
     [RelayCommand]
     private void OnLoaded()
     {
-        _uiFeedbackService.Notification.NotificationRead += OnNotificationRead;
-        _uiFeedbackService.Notification.NotificationShown += OnNotificationShown;
     }
 
     [RelayCommand]
     private void OnUnloaded()
     {
-        _uiFeedbackService.Notification.NotificationRead -= OnNotificationRead;
-        _uiFeedbackService.Notification.NotificationShown -= OnNotificationShown;
     }
 
     [RelayCommand]
@@ -83,26 +78,28 @@ public partial class ShellViewModel : ObservableRecipient
         IsNotificationPaneOpen = !IsNotificationPaneOpen;
     }
 
-    public void MarkAsRead(NotificationMessage message)
+    private void OnGlobalActivity(GlobalActivity activity)
     {
-        _uiFeedbackService.Notification.MarkAsRead(message);
+        UnreadNotificationsCount = activity.InProgressCount;
     }
 
-    private async void OnNotificationRead(object? sender, NotificationMessage message)
+    protected virtual void Dispose(bool disposing)
     {
-        await UpdateUnreadNotificationsCount();
-    }
-
-    private async void OnNotificationShown(object? sender, NotificationMessage message)
-    {
-        await UpdateUnreadNotificationsCount();
-    }
-
-    private async Task UpdateUnreadNotificationsCount()
-    {
-        await _dispatcherQueue.EnqueueAsync(() =>
+        if (!_disposedValue)
         {
-            UnreadNotificationsCount = _uiFeedbackService.Notification.UnreadCount;
-        });
+            if (disposing)
+            {
+                _activitySubscription.Dispose();
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

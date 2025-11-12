@@ -34,4 +34,7 @@ internal sealed partial class OperationHub : IOperationHub
 
     /// <inheritdoc/>
     public Task ExecuteAsync(Func<IOperationContext, Task> operation) => _executor.ExecuteAsync(operation);
+
+    /// <inheritdoc/>
+    public Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation) => _executor.ExecuteAsync(operation);
 }

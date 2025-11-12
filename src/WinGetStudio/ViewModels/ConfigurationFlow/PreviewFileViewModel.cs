@@ -15,8 +15,8 @@ using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
-using WingetStudio.Services.VisualFeedback.Contracts;
-using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
@@ -24,7 +24,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
 {
     private readonly ILogger<PreviewFileViewModel> _logger;
     private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
-    private readonly IUIFeedbackService _ui;
+    private readonly IOperationHub _operationHub;
     private readonly IDSC _dsc;
     private readonly IAppFrameNavigationService _appNavigation;
     private readonly IConfigurationFrameNavigationService _configNavigation;
@@ -105,7 +105,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public PreviewFileViewModel(
         ILogger<PreviewFileViewModel> logger,
         IStringLocalizer<PreviewFileViewModel> localizer,
-        IUIFeedbackService ui,
+        IOperationHub operationHub,
         IDSC dsc,
         IAppFrameNavigationService appNavigation,
         IConfigurationFrameNavigationService configNavigation,
@@ -115,7 +115,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         _logger = logger;
         _localizer = localizer;
-        _ui = ui;
+        _operationHub = operationHub;
         _dsc = dsc;
         _appNavigation = appNavigation;
         _configNavigation = configNavigation;
@@ -130,58 +130,65 @@ public partial class PreviewFileViewModel : ObservableRecipient
     /// <param name="file">The configuration file to open.</param>
     public async Task OpenConfigurationFileAsync(StorageFile file)
     {
-        try
+        await _operationHub.ExecuteAsync(async ctx =>
         {
-            _ui.ShowTaskProgress();
-            _logger.LogInformation($"Selected file: {file.Path}");
-            IsEditMode = false;
-            IsConfigurationLoading = true;
-            SelectedUnit = null;
-            ConfigurationSet = _setFactory();
-            var dscFile = await DSCFile.LoadAsync(file.Path);
-            var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-            await ConfigurationSet.UseAsync(dscSet, dscFile);
-            SaveConfigurationCommand.NotifyCanExecuteChanged();
-        }
-        catch (OpenConfigurationSetException ex)
-        {
-            _logger.LogError(ex, $"Opening configuration set failed");
-            _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Unknown error while opening configuration set");
-            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-        }
-        finally
-        {
-            IsConfigurationLoading = false;
-            _ui.HideTaskProgress();
-        }
+            try
+            {
+                ctx.Publish();
+                ctx.Start();
+                _logger.LogInformation($"Selected file: {file.Path}");
+                IsEditMode = false;
+                IsConfigurationLoading = true;
+                SelectedUnit = null;
+                ConfigurationSet = _setFactory();
+                var dscFile = await DSCFile.LoadAsync(file.Path);
+                var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+                await ConfigurationSet.UseAsync(dscSet, dscFile);
+                SaveConfigurationCommand.NotifyCanExecuteChanged();
+                ctx.Complete();
+            }
+            catch (OpenConfigurationSetException ex)
+            {
+                _logger.LogError(ex, $"Opening configuration set failed");
+                ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Unknown error while opening configuration set");
+                ctx.Fail(props => props with { Message = ex.Message });
+            }
+            finally
+            {
+                IsConfigurationLoading = false;
+            }
+        });
     }
 
     public async Task SaveConfigurationAsAsync(string filePath)
     {
         if (IsConfigurationLoaded)
         {
-            try
+            await _operationHub.ExecuteAsync(async ctx =>
             {
-                _ui.ShowTaskProgress();
-                _logger.LogInformation($"Saving configuration set as {filePath}");
-                await ConfigurationSet.SaveAsAsync(filePath);
-                _ui.ShowTimedNotification(_localizer["PreviewFile_SavedSuccessfully"], NotificationMessageSeverity.Success);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Saving configuration set failed");
-                _ui.ShowTimedNotification(_localizer["PreviewFile_SaveFailed", ex.Message], NotificationMessageSeverity.Error);
-            }
-            finally
-            {
-                // After saving as a new file, re-evaluate if saving is possible
-                SaveConfigurationCommand.NotifyCanExecuteChanged();
-                _ui.HideTaskProgress();
-            }
+                try
+                {
+                    ctx.Publish();
+                    ctx.Start();
+                    _logger.LogInformation($"Saving configuration set as {filePath}");
+                    await ConfigurationSet.SaveAsAsync(filePath);
+                    ctx.Success(props => props with { Message = _localizer["PreviewFile_SavedSuccessfully"] });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Saving configuration set failed");
+                    ctx.Fail(props => props with { Message = _localizer["PreviewFile_SaveFailed", ex.Message] });
+                }
+                finally
+                {
+                    // After saving as a new file, re-evaluate if saving is possible
+                    SaveConfigurationCommand.NotifyCanExecuteChanged();
+                }
+            });
         }
     }
 
@@ -203,28 +210,29 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanCreateNewConfiguration))]
     private async Task OnNewConfigurationAsync()
     {
-        try
+        await _operationHub.ExecuteAsync(async ctx =>
         {
-            _ui.ShowTaskProgress();
-            _logger.LogInformation($"Creating new configuration set");
-            SelectedUnit = null;
-            ConfigurationSet = _setFactory();
-            await AddResourceAsync();
-        }
-        catch (DSCUnitValidationException ex)
-        {
-            _logger.LogError(ex, "Validation of the new configuration unit failed");
-            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Creating new configuration set failed");
-            _ui.ShowTimedNotification(_localizer["PreviewFile_CreateNewConfigurationFailed", ex.Message], NotificationMessageSeverity.Error);
-        }
-        finally
-        {
-            _ui.HideTaskProgress();
-        }
+            try
+            {
+                ctx.Publish();
+                ctx.Start();
+                _logger.LogInformation($"Creating new configuration set");
+                SelectedUnit = null;
+                ConfigurationSet = _setFactory();
+                await AddResourceAsync();
+                ctx.Complete();
+            }
+            catch (DSCUnitValidationException ex)
+            {
+                _logger.LogError(ex, "Validation of the new configuration unit failed");
+                ctx.Fail(props => props with { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Creating new configuration set failed");
+                ctx.Fail(props => props with { Message = _localizer["PreviewFile_CreateNewConfigurationFailed", ex.Message] });
+            }
+        });
     }
 
     [RelayCommand(CanExecute = nameof(CanSaveConfiguration))]
@@ -232,22 +240,22 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            try
+            await _operationHub.ExecuteAsync(async ctx =>
             {
-                _ui.ShowTaskProgress();
-                _logger.LogInformation($"Saving configuration set");
-                await ConfigurationSet.SaveAsync();
-                _ui.ShowTimedNotification(_localizer["PreviewFile_SaveSuccessfulMessage"], NotificationMessageSeverity.Success);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Saving configuration set failed");
-                _ui.ShowTimedNotification(_localizer["PreviewFile_SaveFailedMessage", ex.Message], NotificationMessageSeverity.Error);
-            }
-            finally
-            {
-                _ui.HideTaskProgress();
-            }
+                try
+                {
+                    ctx.Publish();
+                    ctx.Start();
+                    _logger.LogInformation($"Saving configuration set");
+                    await ConfigurationSet.SaveAsync();
+                    ctx.Success(props => props with { Message = _localizer["PreviewFile_SaveSuccessfulMessage"] });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Saving configuration set failed");
+                    ctx.Fail(props => props with { Message = _localizer["PreviewFile_SaveFailedMessage", ex.Message] });
+                }
+            });
         }
     }
 
@@ -275,54 +283,54 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded && SelectedUnit != null)
         {
-            try
+            await _operationHub.ExecuteAsync(async ctx =>
             {
-                _ui.ShowTaskProgress();
-                _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
-                await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
-                SelectedUnit = null;
-                _ui.ShowTimedNotification(_localizer["PreviewFile_DeleteSuccessfulMessage"], NotificationMessageSeverity.Success);
-            }
-            catch (DSCUnitValidationException ex)
-            {
-                _logger.LogError(ex, "Validation of configuration units failed after deletion");
-                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Deleting configuration unit failed");
-                _ui.ShowTimedNotification(_localizer["PreviewFile_DeleteFailedMessage", ex.Message], NotificationMessageSeverity.Error);
-            }
-            finally
-            {
-                _ui.HideTaskProgress();
-            }
+                try
+                {
+                    ctx.Publish();
+                    ctx.Start();
+                    _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
+                    await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
+                    SelectedUnit = null;
+                    ctx.Success(props => props with { Message = _localizer["PreviewFile_DeleteSuccessfulMessage"] });
+                }
+                catch (DSCUnitValidationException ex)
+                {
+                    _logger.LogError(ex, "Validation of configuration units failed after deletion");
+                    ctx.Fail(props => props with { Message = ex.Message });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Deleting configuration unit failed");
+                    ctx.Fail(props => props with { Message = _localizer["PreviewFile_DeleteFailedMessage", ex.Message] });
+                }
+            });
         }
     }
 
     [RelayCommand(CanExecute = nameof(CanAddUnit))]
     private async Task OnAddResourceAsync()
     {
-        try
+        await _operationHub.ExecuteAsync(async ctx =>
         {
-            _ui.ShowTaskProgress();
-            _logger.LogInformation($"Adding new resource");
-            await AddResourceAsync();
-        }
-        catch (DSCUnitValidationException ex)
-        {
-            _logger.LogError(ex, "Validation of the added configuration unit failed");
-            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Adding new resource failed");
-            _ui.ShowTimedNotification(_localizer["PreviewFile_AddResourceFailedMessage", ex.Message], NotificationMessageSeverity.Error);
-        }
-        finally
-        {
-            _ui.HideTaskProgress();
-        }
+            try
+            {
+                ctx.Publish();
+                ctx.Start();
+                _logger.LogInformation($"Adding new resource");
+                await AddResourceAsync();
+            }
+            catch (DSCUnitValidationException ex)
+            {
+                _logger.LogError(ex, "Validation of the added configuration unit failed");
+                ctx.Fail(props => props with { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Adding new resource failed");
+                ctx.Fail(props => props with { Message = _localizer["PreviewFile_AddResourceFailedMessage", ex.Message] });
+            }
+        });
     }
 
     [RelayCommand(CanExecute = nameof(CanValidateConfiguration))]
@@ -330,36 +338,36 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            try
+            await _operationHub.ExecuteAsync(async ctx =>
             {
-                _ui.ShowTaskProgress();
-                _logger.LogInformation($"Validating configuration code");
-                var dscFile = ConfigurationSet.GetLatestDSCFile();
-                var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-                await _dsc.ValidateSetAsync(dscSet);
-                _ui.ShowTimedNotification(_localizer["PreviewFile_ValidationSuccessfulMessage"], NotificationMessageSeverity.Success);
-            }
-            catch (OpenConfigurationSetException ex)
-            {
-                _logger.LogError(ex, $"Opening configuration set failed during validation");
-                _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
-            }
-            catch (ApplyConfigurationSetException ex)
-            {
-                _logger.LogError(ex, $"Validation of configuration set failed");
-                var title = ex.GetSetErrorMessage(_localizer);
-                var message = ex.GetUnitsSummaryMessage(_localizer);
-                _ui.ShowTimedNotification(title, message, NotificationMessageSeverity.Error);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Unknown error while validating configuration code");
-                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-            }
-            finally
-            {
-                _ui.HideTaskProgress();
-            }
+                try
+                {
+                    ctx.Publish();
+                    ctx.Start();
+                    _logger.LogInformation($"Validating configuration code");
+                    var dscFile = ConfigurationSet.GetLatestDSCFile();
+                    var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+                    await _dsc.ValidateSetAsync(dscSet);
+                    ctx.Success(props => props with { Message = _localizer["PreviewFile_ValidationSuccessfulMessage"] });
+                }
+                catch (OpenConfigurationSetException ex)
+                {
+                    _logger.LogError(ex, $"Opening configuration set failed during validation");
+                    ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
+                }
+                catch (ApplyConfigurationSetException ex)
+                {
+                    _logger.LogError(ex, $"Validation of configuration set failed");
+                    var title = ex.GetSetErrorMessage(_localizer);
+                    var message = ex.GetUnitsSummaryMessage(_localizer);
+                    ctx.Fail(props => props with { Title = title, Message = message });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Unknown error while validating configuration code");
+                    ctx.Fail(props => props with { Message = ex.Message });
+                }
+            });
         }
     }
 
@@ -368,36 +376,36 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            try
+            await _operationHub.ExecuteAsync(async ctx =>
             {
-                _ui.ShowTaskProgress();
-                _logger.LogInformation($"Testing configuration code");
-                var dscFile = ConfigurationSet.GetLatestDSCFile();
-                var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-                var result = await _dsc.TestSetAsync(dscSet);
-                if (result.TestResult == ConfigurationTestResult.Positive)
+                try
                 {
-                    _ui.ShowTimedNotification(_localizer["Notification_MachineInDesiredState"], NotificationMessageSeverity.Success);
+                    ctx.Publish();
+                    ctx.Start();
+                    _logger.LogInformation($"Testing configuration code");
+                    var dscFile = ConfigurationSet.GetLatestDSCFile();
+                    var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+                    var result = await _dsc.TestSetAsync(dscSet);
+                    if (result.TestResult == ConfigurationTestResult.Positive)
+                    {
+                        ctx.Success(props => props with { Message = _localizer["Notification_MachineInDesiredState"] });
+                    }
+                    else
+                    {
+                        ctx.Fail(props => props with { Message = _localizer["Notification_MachineNotInDesiredState"] });
+                    }
                 }
-                else
+                catch (OpenConfigurationSetException ex)
                 {
-                    _ui.ShowTimedNotification(_localizer["Notification_MachineNotInDesiredState"], NotificationMessageSeverity.Error);
+                    _logger.LogError(ex, $"Opening configuration set failed during validation");
+                    ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
                 }
-            }
-            catch (OpenConfigurationSetException ex)
-            {
-                _logger.LogError(ex, $"Opening configuration set failed during validation");
-                _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Unknown error while validating configuration code");
-                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-            }
-            finally
-            {
-                _ui.HideTaskProgress();
-            }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Unknown error while validating configuration code");
+                    ctx.Fail(props => props with { Message = ex.Message });
+                }
+            });
         }
     }
 
@@ -425,27 +433,27 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded && SelectedUnit != null)
         {
-            try
+            await _operationHub.ExecuteAsync(async ctx =>
             {
-                _ui.ShowTaskProgress();
-                _logger.LogInformation($"Updating selected unit {SelectedUnit.Item1.Title}");
-                await ConfigurationSet.UpdateAsync(SelectedUnit.Item1, SelectedUnit.Item2);
-                _ui.ShowTimedNotification(_localizer["PreviewFile_ValidationFailedMessage"], NotificationMessageSeverity.Success);
-            }
-            catch (DSCUnitValidationException ex)
-            {
-                _logger.LogError(ex, "Validation of configuration unit failed");
-                _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Updating configuration unit failed");
-                _ui.ShowTimedNotification(_localizer["PreviewFile_UpdateFailedMessage", ex.Message], NotificationMessageSeverity.Error);
-            }
-            finally
-            {
-                _ui.HideTaskProgress();
-            }
+                try
+                {
+                    ctx.Publish();
+                    ctx.Start();
+                    _logger.LogInformation($"Updating selected unit {SelectedUnit.Item1.Title}");
+                    await ConfigurationSet.UpdateAsync(SelectedUnit.Item1, SelectedUnit.Item2);
+                    ctx.Success(props => props with { Message = _localizer["PreviewFile_ValidationFailedMessage"] });
+                }
+                catch (DSCUnitValidationException ex)
+                {
+                    _logger.LogError(ex, "Validation of configuration unit failed");
+                    ctx.Fail(props => props with { Message = ex.Message });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Updating configuration unit failed");
+                    ctx.Fail(props => props with { Message = _localizer["PreviewFile_UpdateFailedMessage", ex.Message] });
+                }
+            });
         }
     }
 

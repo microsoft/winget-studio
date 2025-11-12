@@ -11,8 +11,7 @@
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:converters="using:CommunityToolkit.WinUI.Converters"
     xmlns:controls="using:WinGetStudio.Views.Controls"
-    Loaded="OnLoaded"
-    Unloaded="OnUnloaded">
+    Loaded="OnLoaded">
 
     <Page.Resources>
         <converters:DoubleToVisibilityConverter x:Key="CountToVisibilityConverter" GreaterThan="0" FalseValue="Collapsed" TrueValue="Visible" />
@@ -51,7 +50,7 @@
             <controls:LoadingProgressBar VerticalAlignment="Bottom" />
         </Grid>
 
-        <!-- Notification split view -->
+        <!-- Activity split view -->
         <SplitView x:Name="SplitView"
                    DisplayMode="CompactInline"
                    CompactPaneLength="0"
@@ -72,7 +71,7 @@
                     <Grid Grid.Row="1"
                           x:Name="SplitViewPaneContent"
                           Padding="12" Background="{ThemeResource SystemChromeMediumLowColor}">
-                        <controls:NotificationPane />
+                        <controls:ActivityPane />
                     </Grid>
                 </Grid>
             </SplitView.Pane>
@@ -162,7 +161,6 @@
                              VerticalAlignment="Top"
                              HorizontalAlignment="Right"
                              Style="{ThemeResource InAppNotification}"
-                             CloseButtonClick="NotificationRead"
                              Margin="32">
                         <i:Interaction.Behaviors>
                             <behaviors:StackedNotificationsBehavior x:Name="NotificationQueue" />

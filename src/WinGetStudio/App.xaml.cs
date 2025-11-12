@@ -17,10 +17,10 @@ using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WingetStudio.Services.Localization.Extensions;
 using WinGetStudio.Services.Logging.Extensions;
 using WinGetStudio.Services.Navigation;
+using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.Telemetry.Extensions;
-using WinGetStudio.Services.VisualFeedback.Extensions;
 using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
@@ -101,7 +101,7 @@ public partial class App : Application
                 services.AddWinGet();
                 services.AddSettings();
                 services.AddTelemetry();
-                services.AddVisualFeedback();
+                services.AddOperations();
                 services.AddLogging(AppSettingsFileName);
                 services.AddReswLocalization();
 
@@ -120,7 +120,7 @@ public partial class App : Application
                 services.AddTransient<PreviewFileViewModel>();
                 services.AddTransient<ApplyFilePage>();
                 services.AddTransient<ApplyFileViewModel>();
-                services.AddTransient<NotificationPaneViewModel>();
+                services.AddTransient<ActivityPaneViewModel>();
                 services.AddTransient<LoadingProgressBarViewModel>();
                 services.AddTransient<ResourceAutoSuggestBoxViewModel>();
 

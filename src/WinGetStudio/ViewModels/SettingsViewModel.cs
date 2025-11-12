@@ -9,11 +9,11 @@ using Windows.System;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Contracts;
 using WinGetStudio.Services.Settings.Models;
-using WingetStudio.Services.VisualFeedback.Contracts;
-using WingetStudio.Services.VisualFeedback.Models;
 
 namespace WinGetStudio.ViewModels;
 
@@ -24,7 +24,7 @@ public partial class SettingsViewModel : ObservableRecipient
     private readonly IAppSettingsService _appSettings;
     private readonly IUIDispatcher _dispatcher;
     private readonly IDSCExplorer _dscExplorer;
-    private readonly IUIFeedbackService _ui;
+    private readonly IOperationHub _operationHub;
     private readonly IStringLocalizer<SettingsViewModel> _localizer;
 
     [ObservableProperty]
@@ -44,7 +44,7 @@ public partial class SettingsViewModel : ObservableRecipient
         IAppSettingsService appSettings,
         IUIDispatcher dispatcher,
         IDSCExplorer dscExplorer,
-        IUIFeedbackService ui,
+        IOperationHub operationHub,
         IStringLocalizer<SettingsViewModel> localizer)
     {
         _appInfoService = appInfoService;
@@ -52,7 +52,7 @@ public partial class SettingsViewModel : ObservableRecipient
         _appSettings = appSettings;
         _dispatcher = dispatcher;
         _dscExplorer = dscExplorer;
-        _ui = ui;
+        _operationHub = operationHub;
         _localizer = localizer;
 
         // Initialize themes
@@ -99,10 +99,13 @@ public partial class SettingsViewModel : ObservableRecipient
     [RelayCommand]
     private async Task ClearModuleCatalogsCacheAsync()
     {
-        _ui.ShowTaskProgress();
-        await _dscExplorer.ClearCacheAsync();
-        _ui.ShowTimedNotification(_localizer["CacheClearedMessage"], NotificationMessageSeverity.Success);
-        _ui.HideTaskProgress();
+        await _operationHub.ExecuteAsync(async ctx =>
+        {
+            ctx.Publish();
+            ctx.Start();
+            await _dscExplorer.ClearCacheAsync();
+            ctx.Success(props => props with { Message = _localizer["CacheClearedMessage"] });
+        });
     }
 
     [RelayCommand]

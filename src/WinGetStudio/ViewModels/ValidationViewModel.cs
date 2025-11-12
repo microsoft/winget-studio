@@ -13,15 +13,15 @@ using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
-using WingetStudio.Services.VisualFeedback.Contracts;
-using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.ViewModels;
 
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IDSC _dsc;
-    private readonly IUIFeedbackService _ui;
+    private readonly IOperationHub _operationHub;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
     private readonly ILogger<ValidationViewModel> _logger;
     private readonly UnitViewModelFactory _unitFactory;
@@ -43,13 +43,13 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     public ValidationViewModel(
         IDSC dsc,
-        IUIFeedbackService ui,
+        IOperationHub operationHub,
         IStringLocalizer<ValidationViewModel> localizer,
         ILogger<ValidationViewModel> logger,
         UnitViewModelFactory unitFactory)
     {
         _dsc = dsc;
-        _ui = ui;
+        _operationHub = operationHub;
         _localizer = localizer;
         _logger = logger;
         _unitFactory = unitFactory;
@@ -75,7 +75,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnGetAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        await RunDscOperationAsync(async (dscUnit, ctx) =>
         {
             var result = await _dsc.GetUnitAsync(dscUnit);
             if (result.ResultInformation?.IsOk ?? true)
@@ -93,7 +93,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnSetAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        await RunDscOperationAsync(async (dscUnit, ctx) =>
         {
             var result = await _dsc.SetUnitAsync(dscUnit);
             return result.ResultInformation;
@@ -106,16 +106,16 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnTestAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        await RunDscOperationAsync(async (dscUnit, ctx) =>
         {
             var result = await _dsc.TestUnitAsync(dscUnit);
             if (result.TestResult == ConfigurationTestResult.Positive)
             {
-                _ui.ShowTimedNotification(_localizer["Notification_MachineInDesiredState"], NotificationMessageSeverity.Success);
+                ctx.Success(props => props with { Message = _localizer["Notification_MachineInDesiredState"] });
             }
             else
             {
-                _ui.ShowTimedNotification(_localizer["Notification_MachineNotInDesiredState"], NotificationMessageSeverity.Error);
+                ctx.Fail(props => props with { Message = _localizer["Notification_MachineNotInDesiredState"] });
             }
 
             return result.ResultInformation;
@@ -127,37 +127,40 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     /// <param name="action">The DSC operation to execute.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task RunDscOperationAsync(Func<IDSCUnit, Task<IDSCUnitResultInformation?>> action)
+    private async Task RunDscOperationAsync(Func<IDSCUnit, IOperationContext, Task<IDSCUnitResultInformation?>> action)
     {
-        try
+        await _operationHub.ExecuteAsync(async ctx =>
         {
-            CanExecuteDSCOperation = false;
-            _ui.ShowTaskProgress();
-            var unit = await CreateUnitAsync();
-            var result = await action(unit);
-            if (result != null && !result.IsOk)
+            try
             {
-                var title = $"0x{result.ResultCode.HResult:X}";
-                List<string> messageList = [result.Description, result.Details];
-                var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
-                _ui.ShowTimedNotification(title, message, NotificationMessageSeverity.Error);
+                ctx.Publish();
+                ctx.Start();
+                CanExecuteDSCOperation = false;
+                var unit = await CreateUnitAsync();
+                var result = await action(unit, ctx);
+                if (result != null && !result.IsOk)
+                {
+                    var title = $"0x{result.ResultCode.HResult:X}";
+                    List<string> messageList = [result.Description, result.Details];
+                    var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
+                    ctx.Fail(props => props with { Title = title, Message = message });
+                }
             }
-        }
-        catch (OpenConfigurationSetException ex)
-        {
-            _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
-            _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred while executing a DSC operation.");
-            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
-        }
-        finally
-        {
-            _ui.HideTaskProgress();
-            CanExecuteDSCOperation = true;
-        }
+            catch (OpenConfigurationSetException ex)
+            {
+                _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
+                ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while executing a DSC operation.");
+                ctx.Fail(props => props with { Message = ex.Message });
+            }
+            finally
+            {
+                CanExecuteDSCOperation = true;
+            }
+        });
     }
 
     /// <summary>

@@ -26,12 +26,23 @@ internal sealed class OperationExecutor : IOperationExecutor
     /// <inheritdoc/>
     public async Task ExecuteAsync(Func<IOperationContext, Task> operation)
     {
+        _ = await ExecuteAsync(async ctx =>
+        {
+            await operation(ctx);
+            return Task.CompletedTask;
+        });
+    }
+
+    /// <inheritdoc/>
+    public async Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation)
+    {
         using var ctx = _contextFactory();
         try
         {
             _logger.LogInformation($"Starting operation {ctx.Id}");
-            await operation(ctx);
+            var result = await operation(ctx);
             _logger.LogInformation($"Operation {ctx.Id} completed");
+            return result;
         }
         catch (Exception ex)
         {

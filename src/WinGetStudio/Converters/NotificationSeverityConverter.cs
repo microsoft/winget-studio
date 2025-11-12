@@ -4,19 +4,19 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using WinGetStudio.Helpers;
-using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Services.Operations.Models.State;
 
 namespace WinGetStudio.Converters;
 
-public partial class NotificationSeverityConverter : IValueConverter
+public partial class ActivitySeverityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        return NotificationHelper.GetInfoBarSeverity((NotificationMessageSeverity)value);
+        return ActivityHelper.GetInfoBarSeverity((OperationSeverity)value);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
     {
-        return NotificationHelper.GetNotificationMessageSeverity((InfoBarSeverity)value);
+        return ActivityHelper.GetActivitySeverity((InfoBarSeverity)value);
     }
 }

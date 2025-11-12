@@ -7,15 +7,15 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
-using WingetStudio.Services.VisualFeedback.Contracts;
-using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.ViewModels.Controls;
 
 namespace WinGetStudio.Views;
 
 public sealed partial class ResourceExplorer : ContentDialog
 {
-    private readonly IUIFeedbackService _ui;
+    private readonly IOperationHub _operationHub;
     private readonly IStringLocalizer<ResourceExplorer> _localizer;
     private readonly ILogger<ResourceExplorer> _logger;
 
@@ -23,7 +23,7 @@ public sealed partial class ResourceExplorer : ContentDialog
 
     public ResourceExplorer(DSCResource resource)
     {
-        _ui = App.GetService<IUIFeedbackService>();
+        _operationHub = App.GetService<IOperationHub>();
         _localizer = App.GetService<IStringLocalizer<ResourceExplorer>>();
         _logger = App.GetService<ILogger<ResourceExplorer>>();
         ViewModel = App.GetService<ResourceExplorerViewModelFactory>()(resource);
@@ -59,22 +59,25 @@ public sealed partial class ResourceExplorer : ContentDialog
     /// <param name="e">>The event data.</param>
     private async void OnCopyAsYaml(object sender, RoutedEventArgs e)
     {
-        try
+        await _operationHub.ExecuteAsync(async ctx =>
         {
-            var dataPackage = new DataPackage();
-            var sampleYaml = await ViewModel.GenerateDefaultYamlAsync();
-            dataPackage.SetText(sampleYaml);
-            Clipboard.SetContent(dataPackage);
-            _ui.ShowTimedNotification(_localizer["ResourceExplorer_YamlCopied"], NotificationMessageSeverity.Success);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to copy sample YAML to clipboard.");
-            _ui.ShowTimedNotification(_localizer["ResourceExplorer_YamlCopyFailed"], NotificationMessageSeverity.Error);
-        }
-        finally
-        {
-            Hide();
-        }
+            try
+            {
+                var dataPackage = new DataPackage();
+                var sampleYaml = await ViewModel.GenerateDefaultYamlAsync();
+                dataPackage.SetText(sampleYaml);
+                Clipboard.SetContent(dataPackage);
+                ctx.Success(props => props with { Message = _localizer["ResourceExplorer_YamlCopied"] });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to copy sample YAML to clipboard.");
+                ctx.Fail(props => props with { Message = _localizer["ResourceExplorer_YamlCopyFailed"] });
+            }
+            finally
+            {
+                Hide();
+            }
+        });
     }
 }

@@ -2,18 +2,13 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.WinUI;
-using Microsoft.UI.Dispatching;
-using WingetStudio.Services.VisualFeedback.Contracts;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Models.State;
 
 namespace WinGetStudio.ViewModels.Controls;
 
 public partial class LoadingProgressBarViewModel : ObservableRecipient
 {
-    private readonly DispatcherQueue _dispatcherQueue;
-    private readonly IUIFeedbackService _uiFeedbackService;
-
     [ObservableProperty]
     public partial int ProgressValue { get; set; }
 
@@ -23,31 +18,19 @@ public partial class LoadingProgressBarViewModel : ObservableRecipient
     [ObservableProperty]
     public partial bool IsProgressVisible { get; set; }
 
-    public LoadingProgressBarViewModel(IUIFeedbackService uiFeedbackService)
+    public LoadingProgressBarViewModel(IOperationHub ops)
     {
-        _uiFeedbackService = uiFeedbackService;
-        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        ops.GlobalActivity.Subscribe(OnGlobalActivity);
     }
 
-    [RelayCommand]
-    private void OnLoaded()
+    /// <summary>
+    /// Handles global activity updates.
+    /// </summary>
+    /// <param name="activity">The global activity.</param>
+    private void OnGlobalActivity(GlobalActivity activity)
     {
-        _uiFeedbackService.Loading.StateChanged += OnLoadingStateChanged;
-    }
-
-    [RelayCommand]
-    private void OnUnloaded()
-    {
-        _uiFeedbackService.Loading.StateChanged -= OnLoadingStateChanged;
-    }
-
-    private async void OnLoadingStateChanged(object? sender, EventArgs e)
-    {
-        await _dispatcherQueue.EnqueueAsync(() =>
-        {
-            ProgressValue = _uiFeedbackService.Loading.ProgressValue;
-            IsProgressIndeterminate = _uiFeedbackService.Loading.IsIndeterminate;
-            IsProgressVisible = _uiFeedbackService.Loading.IsVisible;
-        });
+        IsProgressVisible = activity.InProgressCount > 0;
+        IsProgressIndeterminate = activity.Percent == null;
+        ProgressValue = activity.Percent ?? 0;
     }
 }

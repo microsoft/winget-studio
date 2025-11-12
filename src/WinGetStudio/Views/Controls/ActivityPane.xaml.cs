@@ -6,13 +6,13 @@ using WinGetStudio.ViewModels.Controls;
 
 namespace WinGetStudio.Views.Controls;
 
-public sealed partial class NotificationPane : UserControl
+public sealed partial class ActivityPane : UserControl
 {
-    public NotificationPaneViewModel ViewModel { get; }
+    public ActivityPaneViewModel ViewModel { get; }
 
-    public NotificationPane()
+    public ActivityPane()
     {
-        ViewModel = App.GetService<NotificationPaneViewModel>();
+        ViewModel = App.GetService<ActivityPaneViewModel>();
         InitializeComponent();
     }
 }

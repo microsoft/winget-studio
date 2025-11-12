@@ -64,16 +64,17 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
         }
     }
 
-    public void PublishNotification(Func<OperationProperties, OperationProperties>? mutate = null)
+    public void PublishNotification(Func<OperationProperties, OperationProperties>? mutate = null, TimeSpan? duration = null)
     {
         if (!_disposedValue)
         {
             OperationNotification notificationProps;
             lock (_lock)
             {
+                var durationValue = duration ?? OperationNotification.DefaultDuration;
                 var currentProps = _currentSnapshot.Properties;
                 var newProps = mutate != null ? mutate(currentProps) : currentProps;
-                notificationProps = new OperationNotification(Id, newProps);
+                notificationProps = new OperationNotification(Id, durationValue, newProps);
             }
 
             _logger.LogDebug($"Operation {Id} notification: {notificationProps.Properties}. Publishing notification.");

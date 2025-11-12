@@ -39,7 +39,8 @@ public interface IOperationContext
     /// </summary>
     /// <remarks>The mutation is not committed to the operation's state.</remarks>
     /// <param name="mutate">The optional mutation function to apply.</param>
-    void PublishNotification(Func<OperationProperties, OperationProperties>? mutate = null);
+    /// <param name="duration">The optional duration for the notification.</param>
+    void PublishNotification(Func<OperationProperties, OperationProperties>? mutate = null, TimeSpan? duration = null);
 
     /// <summary>
     /// Cancels the operation.

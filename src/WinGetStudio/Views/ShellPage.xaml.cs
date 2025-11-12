@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Diagnostics;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -9,9 +8,8 @@ using Windows.System;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
-using WinGetStudio.Services.Settings.Contracts;
-using WingetStudio.Services.VisualFeedback.Contracts;
-using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Models.State;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;
@@ -20,16 +18,15 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
     private const int MaxNotificationMessageLength = 512;
     private readonly IAppInfoService _appInfoService;
-    private readonly IUIFeedbackService _uiFeedbackService;
-    private readonly IUserSettings _userSettings;
+    private readonly IOperationHub _operationHub;
 
     public ShellViewModel ViewModel { get; }
 
     public ShellPage(ShellViewModel viewModel)
     {
         _appInfoService = App.GetService<IAppInfoService>();
-        _uiFeedbackService = App.GetService<IUIFeedbackService>();
-        _userSettings = App.GetService<IUserSettings>();
+        _operationHub = App.GetService<IOperationHub>();
+        _operationHub.Notifications.Subscribe(OnPublishNotification);
         ViewModel = viewModel;
         InitializeComponent();
 
@@ -51,13 +48,6 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
-
-        _uiFeedbackService.Notification.NotificationShown += OnNotificationShown;
-    }
-
-    private void OnUnloaded(object sender, RoutedEventArgs e)
-    {
-        _uiFeedbackService.Notification.NotificationShown -= OnNotificationShown;
     }
 
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -101,45 +91,31 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
         args.Handled = result;
     }
 
-    private void OnNotificationShown(object? sender, NotificationMessage message)
+    private void OnPublishNotification(OperationNotification notification)
     {
-        if (message.ShownBehavior == NotificationShownBehavior.ClearOverlays)
+        NotificationQueue.Clear();
+
+        // Limit message length to avoid UI errors.
+        var title = notification.Properties.Title ?? string.Empty;
+        if (title.Length > MaxNotificationMessageLength)
         {
-            NotificationQueue.Clear();
+            title = string.Concat(title.AsSpan(0, MaxNotificationMessageLength), "…");
         }
 
-        if (message.Delivery.HasFlag(NotificationDelivery.Overlay))
+        var message = notification.Properties.Message ?? string.Empty;
+        if (message.Length > MaxNotificationMessageLength)
         {
-            TimeSpan? duration = null;
-            if (message.DismissBehavior == NotificationDismissBehavior.Timeout && message.Duration > TimeSpan.Zero)
-            {
-                duration = message.Duration;
-            }
-
-            // Limit message length to avoid UI issues.
-            // TODO: We should add a link to open the logs for the full message.
-            if (message.Message.Length > MaxNotificationMessageLength)
-            {
-                message.Message = string.Concat(message.Message.AsSpan(0, MaxNotificationMessageLength), "…");
-            }
-
-            NotificationQueue.Show(new()
-            {
-                Title = message.Title,
-                Message = message.Message,
-                Severity = NotificationHelper.GetInfoBarSeverity(message.Severity),
-                Content = message,
-                ContentTemplate = new DataTemplate(),
-                Duration = duration,
-            });
+            message = string.Concat(message.AsSpan(0, MaxNotificationMessageLength), "…");
         }
-    }
 
-    private void NotificationRead(InfoBar sender, object args)
-    {
-        if (sender?.Content is NotificationMessage message)
+        NotificationQueue.Show(new()
         {
-            ViewModel.MarkAsRead(message);
-        }
+            Title = title,
+            Message = message,
+            Severity = ActivityHelper.GetInfoBarSeverity(notification.Properties.Severity),
+            Content = message,
+            ContentTemplate = new DataTemplate(),
+            Duration = notification.Duration,
+        });
     }
 }

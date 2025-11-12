@@ -19,4 +19,7 @@ public interface IUIDispatcher
 
     /// <inheritdoc cref="DispatcherQueueExtensions.EnqueueAsync{T}(DispatcherQueue, Func{Task{T}}, DispatcherQueuePriority)"/>
     Task<T> EnqueueAsync<T>(Func<Task<T>> func, DispatcherQueuePriority priority = DispatcherQueuePriority.Normal);
+
+    /// <inheritdoc cref="DispatcherQueue.TryEnqueue(DispatcherQueuePriority, DispatcherQueueHandler)"/>
+    bool TryEnqueue(Action action, DispatcherQueuePriority priority = DispatcherQueuePriority.Normal);
 }

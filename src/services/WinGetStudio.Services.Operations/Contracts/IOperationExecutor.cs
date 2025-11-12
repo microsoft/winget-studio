@@ -22,4 +22,12 @@ internal interface IOperationExecutor
     /// </summary>
     /// <param name="operation">The operation function to execute.</param>
     Task ExecuteAsync(Func<IOperationContext, Task> operation);
+
+    /// <summary>
+    /// Executes the specified operation function and returns a result.
+    /// </summary>
+    /// <typeparam name="T">The type of the result.</typeparam>
+    /// <param name="operation">The operation function to execute.</param>
+    /// <returns>>The result of the operation.</returns>
+    Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation);
 }

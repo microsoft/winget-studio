@@ -39,4 +39,9 @@ internal sealed class UIDispatcher : IUIDispatcher
     {
         return _dispatcherQueue.EnqueueAsync(func, priority);
     }
+
+    public bool TryEnqueue(Action action, DispatcherQueuePriority priority = DispatcherQueuePriority.Normal)
+    {
+        return _dispatcherQueue.TryEnqueue(priority, () => action());
+    }
 }
