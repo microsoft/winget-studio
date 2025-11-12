@@ -25,6 +25,7 @@ Learn more about WinGet Studio and how to use it:
 - [Overview][docs-overview] - Introduction to WinGet Studio's features and capabilities
 - [Getting Started][docs-getting-started] - Quick start guide for new users
 - [Working with Resources][docs-validate-resources] - Step-by-step guide to work with DSC resources
+- [Working with Configuration Files][docs-manage-configurations] - Step-by-step guide to work with WinGet Configuration Files
 - [Configuration Versions][docs-config-versions] - Understanding 0.2.0 vs Microsoft DSC 3.x formats
 - [Migrate to DSC 3.x][docs-migration] - Step-by-step guide to upgrade your configurations
 - [Understanding Resources][docs-resources] - Learn about DSC resources and PowerShell Gallery
@@ -126,6 +127,7 @@ See the [privacy statement][privacy-file] for more details.
 [docs-overview]: /docs/overview.md
 [docs-getting-started]: /docs/get-started/index.md
 [docs-validate-resources]: /docs/get-started/validate-resources.md
+[docs-manage-configurations]: /docs/get-started/manage-configurations.md
 [docs-config-versions]: /docs/concepts/configuration-versions.md
 [docs-migration]: /docs/how-to/migrate-configuration-to-dsc3.md
 [docs-resources]: /docs/concepts/understanding-resources.md
