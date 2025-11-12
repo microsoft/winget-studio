@@ -43,7 +43,6 @@ In this tutorial, you'll learn how to:
   - Add a resource to a configuration
   - Specify dependencies for sequencing in a configuration
   - Specify a resource requires elevation
-- View an existing WinGet Configuration file
 - Validate, Test, and Apply a WinGet Configuration file
 
 ## Launching the Manage Configuration experience
