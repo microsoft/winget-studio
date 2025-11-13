@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.Operations.Contracts;
@@ -27,22 +28,34 @@ internal sealed class OperationExecutor : IOperationExecutor
     }
 
     /// <inheritdoc/>
-    public async Task ExecuteAsync(IOperation operation) => await ExecuteAsync(operation.ExecuteAsync, operation.Options);
-
-    /// <inheritdoc/>
-    public async Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null)
+    public async Task ExecuteAsync(IOperation operation, CancellationToken cancellationToken = default)
     {
-        _ = await ExecuteAsync(async ctx =>
-        {
-            await operation(ctx);
-            return Task.CompletedTask;
-        });
+         await ExecuteAsync(operation.ExecuteAsync, operation.Options, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public async Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation, OperationExecutionOptions? options = null)
+    public async Task ExecuteAsync(
+        Func<IOperationContext, Task> operation,
+        OperationExecutionOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
-        using var ctx = _contextFactory();
+        _ = await ExecuteAsync(
+            async ctx =>
+            {
+                await operation(ctx);
+                return Task.CompletedTask;
+            },
+            options,
+            cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<T> ExecuteAsync<T>(
+        Func<IOperationContext, Task<T>> operation,
+        OperationExecutionOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        using var ctx = _contextFactory(cancellationToken);
         try
         {
             await _policyManager.ApplyPoliciesAsync<IOperationStartPolicy>(options?.Policies, ctx);

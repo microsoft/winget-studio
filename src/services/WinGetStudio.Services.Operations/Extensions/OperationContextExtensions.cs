@@ -95,7 +95,7 @@ public static partial class OperationContextExtensions
         var cancelAction = new OperationAction(text, isPrimary, () =>
         {
             // Cancel operation
-            ctx.Cancel();
+            ctx.RequestCancellation();
 
             // Update status to canceled
             ctx.Canceled();

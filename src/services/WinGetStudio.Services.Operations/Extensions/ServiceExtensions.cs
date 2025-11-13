@@ -22,7 +22,7 @@ public static class ServiceExtensions
         services.AddSingleton<IOperationPolicyManager, OperationPolicyManager>();
 
         // Factories
-        services.AddTransient<OperationContextFactory>(sp => () => ActivatorUtilities.CreateInstance<OperationContext>(sp));
+        services.AddTransient<OperationContextFactory>(sp => cancellationToken => ActivatorUtilities.CreateInstance<OperationContext>(sp, cancellationToken));
         return services;
     }
 }

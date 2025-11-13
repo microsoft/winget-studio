@@ -9,7 +9,7 @@ using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Models;
 
-internal delegate OperationContext OperationContextFactory();
+internal delegate OperationContext OperationContextFactory(CancellationToken cancellationToken);
 
 internal sealed partial class OperationContext : IOperationContext, IDisposable
 {
@@ -31,11 +31,12 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
 
     public OperationContext(
         ILogger<OperationContext> logger,
-        IOperationManager manager)
+        IOperationManager manager,
+        CancellationToken cancellationToken)
     {
         _logger = logger;
         _manager = manager;
-        _cts = new();
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _currentSnapshot = OperationSnapshot.Empty with
         {
             Id = Guid.NewGuid(),
@@ -48,7 +49,6 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
     {
         if (!_disposedValue)
         {
-            OperationProperties props;
             lock (_lock)
             {
                 _currentSnapshot = _currentSnapshot with
@@ -56,10 +56,9 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
                     Properties = mutate(_currentSnapshot.Properties),
                     UpdatedAt = DateTimeOffset.UtcNow,
                 };
-                props = _currentSnapshot.Properties;
+                _logger.LogDebug($"Operation {Id} snapshot committed: {_currentSnapshot}. Publishing snapshots.");
             }
 
-            _logger.LogDebug($"Operation {Id} snapshot committed: {props}. Publishing snapshots.");
             _manager.PublishSnapshots();
         }
     }
@@ -83,7 +82,7 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
     }
 
     /// <inheritdoc/>
-    public void Cancel()
+    public void RequestCancellation()
     {
         if (!_disposedValue)
         {

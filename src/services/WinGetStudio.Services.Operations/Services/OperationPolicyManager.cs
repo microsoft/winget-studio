@@ -22,13 +22,13 @@ internal sealed partial class OperationPolicyManager : IOperationPolicyManager
     public async Task ApplyPoliciesAsync<T>(IReadOnlyList<IOperationPolicy>? policies, IOperationContext context)
         where T : IOperationPolicy
     {
-        if (policies == null || policies.Count == 0)
+        var policiesToApply = policies?.OfType<T>().Where(p => p.CanApply(context)).ToList();
+        if (policiesToApply == null || policiesToApply.Count == 0)
         {
             _logger.LogInformation($"No policies to apply for operation {context.Id}.");
             return;
         }
 
-        var policiesToApply = policies.OfType<T>().Where(p => p.CanApply(context)).ToList();
         foreach (var policy in policiesToApply)
         {
             _logger.LogInformation($"Applying policy {policy.GetType().Name} to operation {context.Id}.");

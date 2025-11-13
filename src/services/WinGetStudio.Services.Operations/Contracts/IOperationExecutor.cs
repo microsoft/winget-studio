@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using WinGetStudio.Services.Operations.Models.States;
 
@@ -16,14 +17,16 @@ internal interface IOperationExecutor
     /// Executes the specified operation.
     /// </summary>
     /// <param name="operation">The operation to execute.</param>
-    Task ExecuteAsync(IOperation operation);
+    /// <param name="cancellationToken">The cancellation token.</param>
+    Task ExecuteAsync(IOperation operation, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the specified operation function.
     /// </summary>
     /// <param name="operation">The operation function to execute.</param>
     /// <param name="options">The operation execution options.</param>
-    Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null);
+    /// <param name="cancellationToken">The cancellation token.</param>
+    Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the specified operation function and returns a result.
@@ -31,6 +34,7 @@ internal interface IOperationExecutor
     /// <typeparam name="T">The type of the result.</typeparam>
     /// <param name="operation">The operation function to execute.</param>
     /// <param name="options">The operation execution options.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the operation.</returns>
-    Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation, OperationExecutionOptions? options = null);
+    Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
 }

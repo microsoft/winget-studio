@@ -43,9 +43,9 @@ public interface IOperationContext
     void PublishNotification(Func<OperationProperties, OperationProperties>? mutate = null, TimeSpan? duration = null);
 
     /// <summary>
-    /// Cancels the operation.
+    /// Requests cancellation of the operation.
     /// </summary>
-    void Cancel();
+    void RequestCancellation();
 
     /// <inheritdoc cref="IOperationManager.Register(Models.OperationContext)" />
     void Register();
