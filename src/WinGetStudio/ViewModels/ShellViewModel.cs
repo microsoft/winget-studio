@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Navigation;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Operations.Contracts;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 using WinGetStudio.Views;
 
 namespace WinGetStudio.ViewModels;

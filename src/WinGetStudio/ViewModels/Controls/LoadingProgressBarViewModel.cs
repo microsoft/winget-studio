@@ -3,7 +3,7 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using WinGetStudio.Services.Operations.Contracts;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.ViewModels.Controls;
 

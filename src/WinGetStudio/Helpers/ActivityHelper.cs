@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.UI.Xaml.Controls;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Helpers;
 

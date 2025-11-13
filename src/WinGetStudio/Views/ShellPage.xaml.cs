@@ -9,7 +9,7 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Helpers;
 using WinGetStudio.Services.Operations.Contracts;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 using WinGetStudio.ViewModels;
 
 namespace WinGetStudio.Views;

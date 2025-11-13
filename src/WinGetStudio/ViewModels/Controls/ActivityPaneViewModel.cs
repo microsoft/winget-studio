@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Operations.Contracts;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.ViewModels.Controls;
 
@@ -37,12 +37,10 @@ public partial class ActivityPaneViewModel : ObservableRecipient, IDisposable
     {
         // Remove activities that are no longer present
         var snapshotIds = snapshots.Select(s => s.Id).ToHashSet();
-        foreach (var activity in Activities)
+        var toRemove = Activities.Where(a => !snapshotIds.Contains(a.Id)).ToList();
+        foreach (var activity in toRemove)
         {
-            if (!snapshotIds.Contains(activity.Id))
-            {
-                Activities.Remove(activity);
-            }
+            Activities.Remove(activity);
         }
 
         // Reorder to match the snapshots order and update existing activities

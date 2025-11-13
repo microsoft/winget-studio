@@ -3,7 +3,7 @@
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.ViewModels.Controls;
 
@@ -55,12 +55,10 @@ public sealed partial class ActivityViewModel : ObservableObject
 
         // Remove actions that are no longer present
         var actionIds = actions.Select(s => s.Id).ToHashSet();
-        foreach (var action in Actions)
+        var actionsToRemove = Actions.Where(a => !actionIds.Contains(a.Id)).ToList();
+        foreach (var action in actionsToRemove)
         {
-            if (!actionIds.Contains(action.Id))
-            {
-                Actions.Remove(action);
-            }
+            Actions.Remove(action);
         }
 
         // Reorder to match the actions order and update existing actions

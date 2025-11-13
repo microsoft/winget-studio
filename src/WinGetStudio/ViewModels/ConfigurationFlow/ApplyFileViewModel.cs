@@ -71,7 +71,7 @@ public partial class ApplyFileViewModel : ObservableRecipient
         {
             try
             {
-                ctx.Publish();
+                ctx.StartSnapshotBroadcast();
                 ctx.Start();
                 _logger.LogInformation($"Applying configuration set started");
                 var dscFile = activeSet.GetLatestDSCFile();

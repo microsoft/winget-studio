@@ -134,7 +134,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             try
             {
-                ctx.Publish();
+                ctx.StartSnapshotBroadcast();
                 ctx.Start();
                 _logger.LogInformation($"Selected file: {file.Path}");
                 IsEditMode = false;
@@ -172,7 +172,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             {
                 try
                 {
-                    ctx.Publish();
+                    ctx.StartSnapshotBroadcast();
                     ctx.Start();
                     _logger.LogInformation($"Saving configuration set as {filePath}");
                     await ConfigurationSet.SaveAsAsync(filePath);
@@ -214,7 +214,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             try
             {
-                ctx.Publish();
+                ctx.StartSnapshotBroadcast();
                 ctx.Start();
                 _logger.LogInformation($"Creating new configuration set");
                 SelectedUnit = null;
@@ -244,7 +244,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             {
                 try
                 {
-                    ctx.Publish();
+                    ctx.StartSnapshotBroadcast();
                     ctx.Start();
                     _logger.LogInformation($"Saving configuration set");
                     await ConfigurationSet.SaveAsync();
@@ -287,7 +287,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             {
                 try
                 {
-                    ctx.Publish();
+                    ctx.StartSnapshotBroadcast();
                     ctx.Start();
                     _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
                     await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
@@ -315,7 +315,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             try
             {
-                ctx.Publish();
+                ctx.StartSnapshotBroadcast();
                 ctx.Start();
                 _logger.LogInformation($"Adding new resource");
                 await AddResourceAsync();
@@ -342,7 +342,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             {
                 try
                 {
-                    ctx.Publish();
+                    ctx.StartSnapshotBroadcast();
                     ctx.Start();
                     _logger.LogInformation($"Validating configuration code");
                     var dscFile = ConfigurationSet.GetLatestDSCFile();
@@ -380,7 +380,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             {
                 try
                 {
-                    ctx.Publish();
+                    ctx.StartSnapshotBroadcast();
                     ctx.Start();
                     _logger.LogInformation($"Testing configuration code");
                     var dscFile = ConfigurationSet.GetLatestDSCFile();
@@ -437,7 +437,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
             {
                 try
                 {
-                    ctx.Publish();
+                    ctx.StartSnapshotBroadcast();
                     ctx.Start();
                     _logger.LogInformation($"Updating selected unit {SelectedUnit.Item1.Title}");
                     await ConfigurationSet.UpdateAsync(SelectedUnit.Item1, SelectedUnit.Item2);

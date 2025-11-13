@@ -133,7 +133,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         {
             try
             {
-                ctx.Publish();
+                ctx.StartSnapshotBroadcast();
                 ctx.Start();
                 CanExecuteDSCOperation = false;
                 var unit = await CreateUnitAsync();

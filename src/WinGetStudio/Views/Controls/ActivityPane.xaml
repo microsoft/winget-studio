@@ -41,7 +41,7 @@
                 <DataTemplate x:DataType="viewmodels:ActivityViewModel">
                     <InfoBar IsOpen="True"
                              Style="{ThemeResource ClosableActivityInfoBar}"
-                             Severity="{x:Bind Severity, Converter={StaticResource SeverityConverter}}"
+                             Severity="{x:Bind Severity, Mode=OneWay, Converter={StaticResource SeverityConverter}}"
                              Title="{x:Bind Title, Mode=OneWay}"
                              Message="{x:Bind Message, Mode=OneWay}">
                     </InfoBar>

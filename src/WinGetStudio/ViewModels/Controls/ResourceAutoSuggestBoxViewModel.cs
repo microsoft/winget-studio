@@ -14,7 +14,7 @@ using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.ViewModels.Controls;
 
@@ -135,7 +135,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
         _allSuggestions.Clear();
         await _operationHub.ExecuteAsync(async ctx =>
         {
-            ctx.Publish();
+            ctx.StartSnapshotBroadcast();
             ctx.Start();
             ctx.PublishNotification(props => props with { Title = _localizer["LoadingDSCResourcesMessage"] });
             await foreach (var catalog in _explorer.GetModuleCatalogsAsync())
@@ -166,7 +166,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
         {
             try
             {
-                ctx.Publish();
+                ctx.StartSnapshotBroadcast();
                 ctx.Start();
                 if (!string.IsNullOrWhiteSpace(SearchResourceText))
                 {

@@ -8,13 +8,13 @@ using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Models.Policies;
 
-public sealed partial class OperationSnapshotRetentionPolicy : IOperationCompletionPolicy
+public sealed partial class SnapshotRetentionPolicy : IOperationCompletionPolicy
 {
     private readonly OperationStatus _status;
     private readonly OperationSeverity _severity;
     private readonly TimeSpan _retentionPeriod;
 
-    public OperationSnapshotRetentionPolicy(OperationStatus status, OperationSeverity severity, TimeSpan retentionPeriod)
+    public SnapshotRetentionPolicy(OperationStatus status, OperationSeverity severity, TimeSpan retentionPeriod)
     {
         _status = status;
         _severity = severity;

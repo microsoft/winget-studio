@@ -101,7 +101,7 @@ public partial class SettingsViewModel : ObservableRecipient
     {
         await _operationHub.ExecuteAsync(async ctx =>
         {
-            ctx.Publish();
+            ctx.StartSnapshotBroadcast();
             ctx.Start();
             await _dscExplorer.ClearCacheAsync();
             ctx.Success(props => props with { Message = _localizer["CacheClearedMessage"] });
