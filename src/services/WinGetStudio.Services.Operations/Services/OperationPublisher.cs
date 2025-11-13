@@ -24,18 +24,15 @@ internal sealed partial class OperationPublisher : IOperationPublisher
     public void PublishSnapshots(IReadOnlyList<OperationSnapshot> snapshots)
     {
         Snapshots.Publish(snapshots);
-        PublishGlobalActivity(snapshots);
     }
 
     /// <inheritdoc/>
     public void PublishNotification(OperationNotification notification) => Notifications.Publish(notification);
 
-    /// <summary>
-    /// Publishes the global activity based on the current running operations.
-    /// </summary>
-    /// <param name="snapshots">The current operation snapshots.</param>
-    private void PublishGlobalActivity(IReadOnlyList<OperationSnapshot> snapshots)
+    /// <inheritdoc/>
+    public void PublishGlobalActivity(IReadOnlyList<OperationContext> activeOperationContexts)
     {
+        var snapshots = activeOperationContexts.Select(ctx => ctx.CurrentSnapshot);
         List<OperationSnapshot> inProgress = [..snapshots.Where(os => os.Properties.Status == OperationStatus.Running)];
         if (inProgress.Count == 0)
         {

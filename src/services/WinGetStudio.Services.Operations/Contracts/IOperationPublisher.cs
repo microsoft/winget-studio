@@ -31,6 +31,12 @@ internal interface IOperationPublisher
     void PublishSnapshots(IReadOnlyList<OperationSnapshot> snapshots);
 
     /// <summary>
+    /// Publishes the global activity based on the given active operation contexts.
+    /// </summary>
+    /// <param name="activeOperationContexts">The active operation contexts.</param>
+    void PublishGlobalActivity(IReadOnlyList<OperationContext> activeOperationContexts);
+
+    /// <summary>
     /// Publishes an operation notification.
     /// </summary>
     /// <param name="notification">The notification to publish.</param>

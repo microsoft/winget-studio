@@ -47,6 +47,8 @@ internal sealed partial class OperationManager : IOperationManager
         {
             _repository.AddActiveOperationContext(context);
         }
+
+        PublishGlobalActivity();
     }
 
     /// <inheritdoc/>
@@ -57,6 +59,8 @@ internal sealed partial class OperationManager : IOperationManager
         {
             _repository.RemoveActiveOperationContext(id);
         }
+
+        PublishGlobalActivity();
     }
 
     /// <inheritdoc/>
@@ -95,21 +99,29 @@ internal sealed partial class OperationManager : IOperationManager
         PublishSnapshots();
     }
 
+    /// <inheritdoc/>
     public void UpdateOperationSnapshot(OperationSnapshot snapshot)
     {
+        var repoUpdated = false;
         lock (_snapshotLock)
         {
-            if (!_repository.ContainsOperationSnapshot(snapshot.Id))
+            if (_repository.ContainsOperationSnapshot(snapshot.Id))
+            {
+                _logger.LogInformation($"Updating snapshot for operation id: {snapshot.Id} in repository.");
+                _repository.UpdateOperationSnapshot(snapshot);
+                repoUpdated = true;
+            }
+            else
             {
                 _logger.LogInformation($"Snapshot for operation id: {snapshot.Id} is not updated in repository because it is not broadcasted.");
-                return;
             }
-
-            _logger.LogInformation($"Updating snapshot for operation id: {snapshot.Id} in repository.");
-            _repository.UpdateOperationSnapshot(snapshot);
         }
 
-        PublishSnapshots();
+        PublishGlobalActivity();
+        if (repoUpdated)
+        {
+            PublishSnapshots();
+        }
     }
 
     /// <inheritdoc/>
@@ -139,5 +151,20 @@ internal sealed partial class OperationManager : IOperationManager
         }
 
         _publisher.PublishSnapshots(snapshots);
+    }
+
+    /// <summary>
+    /// Publishes the current global activity.
+    /// </summary>
+    private void PublishGlobalActivity()
+    {
+        _logger.LogInformation("Publishing global activity.");
+        List<OperationContext> contexts = [];
+        lock (_contextLock)
+        {
+            contexts.AddRange(_repository.ActiveOperationContexts);
+        }
+
+        _publisher.PublishGlobalActivity(contexts);
     }
 }
