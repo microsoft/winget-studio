@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace WinGetStudio.Services.Operations.Models.State;
+namespace WinGetStudio.Services.Operations.Models.States;
 
 /// <summary>
 /// Represents global activity state.

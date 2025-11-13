@@ -3,7 +3,7 @@
 
 using System;
 
-namespace WinGetStudio.Services.Operations.Models.State;
+namespace WinGetStudio.Services.Operations.Models.States;
 
 /// <summary>
 /// Represents an operation notification.

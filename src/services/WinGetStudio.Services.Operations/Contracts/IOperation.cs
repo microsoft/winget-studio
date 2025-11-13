@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Contracts;
 
@@ -10,6 +11,11 @@ namespace WinGetStudio.Services.Operations.Contracts;
 /// </summary>
 public interface IOperation
 {
+    /// <summary>
+    /// Gets the operation execution options.
+    /// </summary>
+    OperationExecutionOptions? Options { get; }
+
     /// <summary>
     /// Executes the operation asynchronously.
     /// </summary>

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace WinGetStudio.Services.Operations.Models.State;
+namespace WinGetStudio.Services.Operations.Models.States;
 
 /// <summary>
 /// Represents the properties of an operation.
@@ -32,4 +32,9 @@ public sealed record class OperationProperties(
         OperationStatus.NotStarted,
         OperationSeverity.Info,
         []);
+
+    /// <summary>
+    /// Gets a value indicating whether the operation is terminated.
+    /// </summary>
+    public bool IsTerminated => Status == OperationStatus.Completed || Status == OperationStatus.Canceled;
 }

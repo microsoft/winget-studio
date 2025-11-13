@@ -2,23 +2,23 @@
 // Licensed under the MIT License.
 
 using WinGetStudio.Services.Operations.Models;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Contracts;
 
 internal interface IOperationManager
 {
     /// <summary>
-    /// Publishes the operation context to the repository.
+    /// Register the operation context to the repository.
     /// </summary>
-    /// <param name="context">The operation context to publish.</param>
-    void Publish(OperationContext context);
+    /// <param name="context">The operation context to register.</param>
+    void Register(OperationContext context);
 
     /// <summary>
-    /// Unpublishes the operation context from the repository.
+    /// Unregister the operation context from the repository.
     /// </summary>
-    /// <param name="context">The operation context to unpublish.</param>
-    void Unpublish(OperationContext context);
+    /// <param name="context">The operation context to unregister.</param>
+    void Unregister(OperationContext context);
 
     /// <summary>
     /// Publishes all operation snapshots to subscribers.

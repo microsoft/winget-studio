@@ -19,6 +19,7 @@ public static class ServiceExtensions
         services.AddSingleton<IOperationPublisher, OperationPublisher>();
         services.AddSingleton<IOperationRepository, OperationRepository>();
         services.AddSingleton<IOperationManager, OperationManager>();
+        services.AddSingleton<IOperationPolicyManager, OperationPolicyManager>();
 
         // Factories
         services.AddTransient<OperationContextFactory>(sp => () => ActivatorUtilities.CreateInstance<OperationContext>(sp));

@@ -4,7 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using WinGetStudio.Services.Operations.Contracts;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Extensions;
 

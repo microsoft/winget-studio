@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Contracts;
 
@@ -47,9 +47,9 @@ public interface IOperationContext
     /// </summary>
     void Cancel();
 
-    /// <inheritdoc cref="IOperationManager.Publish(Models.OperationContext)" />
-    void Publish();
+    /// <inheritdoc cref="IOperationManager.Register(Models.OperationContext)" />
+    void Register();
 
-    /// <inheritdoc cref="IOperationManager.Unpublish(Models.OperationContext)" />
-    void Unpublish();
+    /// <inheritdoc cref="IOperationManager.Unregister(Models.OperationContext)" />
+    void Unregister();
 }

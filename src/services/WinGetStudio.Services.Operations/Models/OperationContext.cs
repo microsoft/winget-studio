@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.Operations.Contracts;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Models;
 
@@ -17,7 +17,7 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
     private readonly ILogger<OperationContext> _logger;
     private readonly IOperationManager _manager;
     private readonly CancellationTokenSource _cts;
-    private OperationSnapshot _currentSnapshot;
+    private volatile OperationSnapshot _currentSnapshot;
     private bool _disposedValue;
 
     /// <inheritdoc/>
@@ -92,10 +92,10 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
     }
 
     /// <inheritdoc/>
-    public void Publish() => _manager.Publish(this);
+    public void Register() => _manager.Register(this);
 
     /// <inheritdoc/>
-    public void Unpublish() => _manager.Unpublish(this);
+    public void Unregister() => _manager.Unregister(this);
 
     private void Dispose(bool disposing)
     {

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace WinGetStudio.Services.Operations.Models.State;
+namespace WinGetStudio.Services.Operations.Models.States;
 
 /// <summary>
 /// Represents a snapshot of an operation at a specific point in time.

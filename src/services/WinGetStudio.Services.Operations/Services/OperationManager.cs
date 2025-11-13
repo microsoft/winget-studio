@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Models;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Services;
 
@@ -21,7 +21,7 @@ internal sealed partial class OperationManager : IOperationManager
     }
 
     /// <inheritdoc/>
-    public void Publish(OperationContext context)
+    public void Register(OperationContext context)
     {
         lock (_lock)
         {
@@ -30,7 +30,7 @@ internal sealed partial class OperationManager : IOperationManager
     }
 
     /// <inheritdoc/>
-    public void Unpublish(OperationContext context)
+    public void Unregister(OperationContext context)
     {
         lock (_lock)
         {

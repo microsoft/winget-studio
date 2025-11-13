@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using WinGetStudio.Services.Operations.Models;
-using WinGetStudio.Services.Operations.Models.State;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Contracts;
 

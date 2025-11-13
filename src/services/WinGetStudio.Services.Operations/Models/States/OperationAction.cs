@@ -4,7 +4,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace WinGetStudio.Services.Operations.Models.State;
+namespace WinGetStudio.Services.Operations.Models.States;
 
 /// <summary>
 /// Represents an action that can be taken for an operation.

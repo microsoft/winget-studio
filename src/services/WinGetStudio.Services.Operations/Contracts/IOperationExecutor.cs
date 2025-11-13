@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Contracts;
 
@@ -21,13 +22,15 @@ internal interface IOperationExecutor
     /// Executes the specified operation function.
     /// </summary>
     /// <param name="operation">The operation function to execute.</param>
-    Task ExecuteAsync(Func<IOperationContext, Task> operation);
+    /// <param name="options">The operation execution options.</param>
+    Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null);
 
     /// <summary>
     /// Executes the specified operation function and returns a result.
     /// </summary>
     /// <typeparam name="T">The type of the result.</typeparam>
     /// <param name="operation">The operation function to execute.</param>
-    /// <returns>>The result of the operation.</returns>
-    Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation);
+    /// <param name="options">The operation execution options.</param>
+    /// <returns>The result of the operation.</returns>
+    Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation, OperationExecutionOptions? options = null);
 }
