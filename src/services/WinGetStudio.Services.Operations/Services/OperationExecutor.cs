@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Models;
 using WinGetStudio.Services.Operations.Models.States;
@@ -13,18 +12,11 @@ namespace WinGetStudio.Services.Operations.Services;
 
 internal sealed class OperationExecutor : IOperationExecutor
 {
-    private readonly ILogger<OperationExecutor> _logger;
-    private readonly IOperationPolicyManager _policyManager;
-    private readonly OperationContextFactory _contextFactory;
+    private readonly OperationScopeFactory _scopeFactory;
 
-    public OperationExecutor(
-        ILogger<OperationExecutor> logger,
-        IOperationPolicyManager policyManager,
-        OperationContextFactory contextFactory)
+    public OperationExecutor(OperationScopeFactory scopeFactory)
     {
-        _logger = logger;
-        _policyManager = policyManager;
-        _contextFactory = contextFactory;
+        _scopeFactory = scopeFactory;
     }
 
     /// <inheritdoc/>
@@ -55,24 +47,18 @@ internal sealed class OperationExecutor : IOperationExecutor
         OperationExecutionOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        using var ctx = _contextFactory(cancellationToken);
-        try
-        {
-            await _policyManager.ApplyPoliciesAsync<IOperationStartPolicy>(options?.Policies, ctx);
-            _logger.LogInformation($"Starting operation {ctx.Id}");
-            var result = await operation(ctx);
-            _logger.LogInformation($"Operation {ctx.Id} completed");
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Operation {ctx.Id} failed");
-            throw;
-        }
-        finally
-        {
-            await _policyManager.ApplyPoliciesAsync<IOperationCompletionPolicy>(options?.Policies, ctx);
-            _logger.LogInformation($"Disposing operation {ctx.Id}");
-        }
+        await using var scope = await BeginOperationAsync(options, cancellationToken);
+        return await operation(scope.Context);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IOperationScope> BeginOperationAsync(
+        OperationExecutionOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        options ??= OperationExecutionOptions.Default;
+        var scope = _scopeFactory(options, cancellationToken);
+        await scope.BeginAsync();
+        return scope;
     }
 }

@@ -8,13 +8,13 @@ using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Models.Policies;
 
-public sealed partial class OperationContextRetentionPolicy : IOperationCompletionPolicy
+public sealed partial class OperationSnapshotRetentionPolicy : IOperationCompletionPolicy
 {
     private readonly OperationStatus _status;
     private readonly OperationSeverity _severity;
     private readonly TimeSpan _retentionPeriod;
 
-    public OperationContextRetentionPolicy(OperationStatus status, OperationSeverity severity, TimeSpan retentionPeriod)
+    public OperationSnapshotRetentionPolicy(OperationStatus status, OperationSeverity severity, TimeSpan retentionPeriod)
     {
         _status = status;
         _severity = severity;
@@ -33,6 +33,6 @@ public sealed partial class OperationContextRetentionPolicy : IOperationCompleti
     public async Task ApplyAsync(IOperationContext context)
     {
         await Task.Delay(_retentionPeriod);
-        context.Unregister();
+        context.StopSnapshotBroadcast();
     }
 }

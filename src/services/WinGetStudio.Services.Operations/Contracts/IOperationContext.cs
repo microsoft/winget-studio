@@ -47,9 +47,13 @@ public interface IOperationContext
     /// </summary>
     void RequestCancellation();
 
-    /// <inheritdoc cref="IOperationManager.Register(Models.OperationContext)" />
-    void Register();
+    /// <summary>
+    /// Starts broadcasting snapshots to subscribers.
+    /// </summary>
+    void StartSnapshotBroadcast();
 
-    /// <inheritdoc cref="IOperationManager.Unregister(Models.OperationContext)" />
-    void Unregister();
+    /// <summary>
+    /// Stops broadcasting snapshots to subscribers.
+    /// </summary>
+    void StopSnapshotBroadcast();
 }

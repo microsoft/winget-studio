@@ -11,7 +11,7 @@ namespace WinGetStudio.Services.Operations.Models.States;
 /// <param name="Id">The source operation ID.</param>
 /// <param name="Duration">The notification duration.</param>
 /// <param name="Properties">The operation properties.</param>
-public sealed record class OperationNotification(Guid Id, TimeSpan Duration, OperationProperties Properties)
+public sealed record class OperationNotification(Guid OperatinoId, TimeSpan Duration, OperationProperties Properties)
 {
     public static TimeSpan DefaultDuration { get; } = TimeSpan.FromSeconds(3);
 }

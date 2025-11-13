@@ -49,17 +49,18 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
     {
         if (!_disposedValue)
         {
+            OperationSnapshot updatedSnapshot;
             lock (_lock)
             {
-                _currentSnapshot = _currentSnapshot with
+                updatedSnapshot = _currentSnapshot with
                 {
                     Properties = mutate(_currentSnapshot.Properties),
                     UpdatedAt = DateTimeOffset.UtcNow,
                 };
-                _logger.LogDebug($"Operation {Id} snapshot committed: {_currentSnapshot}. Publishing snapshots.");
+                _currentSnapshot = updatedSnapshot;
             }
 
-            _manager.PublishSnapshots();
+            _manager.UpdateOperationSnapshot(updatedSnapshot);
         }
     }
 
@@ -76,7 +77,7 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
                 notificationProps = new OperationNotification(Id, durationValue, newProps);
             }
 
-            _logger.LogDebug($"Operation {Id} notification: {notificationProps.Properties}. Publishing notification.");
+            _logger.LogInformation($"Operation {Id} notification: {notificationProps}. Publishing notification.");
             _manager.PublishNotification(notificationProps);
         }
     }
@@ -91,10 +92,23 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
     }
 
     /// <inheritdoc/>
-    public void Register() => _manager.Register(this);
+    public void StartSnapshotBroadcast()
+    {
+        _manager.AddOperationSnapshot(_currentSnapshot);
+    }
 
     /// <inheritdoc/>
-    public void Unregister() => _manager.Unregister(this);
+    public void StopSnapshotBroadcast()
+    {
+        _manager.RemoveOperationSnapshot(_currentSnapshot.Id);
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 
     private void Dispose(bool disposing)
     {
@@ -107,12 +121,5 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
 
             _disposedValue = true;
         }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }

@@ -11,32 +11,49 @@ namespace WinGetStudio.Services.Operations.Contracts;
 internal interface IOperationRepository
 {
     /// <summary>
-    /// Gets the snapshots of all operations.
+    /// Gets the list of operation snapshots.
     /// </summary>
-    IReadOnlyList<OperationSnapshot> Snapshots { get; }
+    IReadOnlyList<OperationSnapshot> OperationSnapshots { get; }
 
     /// <summary>
-    /// Gets all operations.
+    /// Gets the list of all active operation contexts.
     /// </summary>
-    IReadOnlyList<OperationContext> Operations { get; }
+    IReadOnlyList<OperationContext> ActiveOperationContexts { get; }
 
     /// <summary>
-    /// Adds an operation.
+    /// Adds an active operation context to the collection.
     /// </summary>
     /// <param name="operation">The operation to add.</param>
-    void Add(OperationContext operation);
+    void AddActiveOperationContext(OperationContext operation);
 
     /// <summary>
-    /// Removes an operation.
+    /// Removes the specified active operation context from the collection.
     /// </summary>
-    /// <param name="operation">The operation to remove.</param>
-    void Remove(OperationContext operation);
+    /// <param name="id">The identifier of the operation context to remove.</param>
+    void RemoveActiveOperationContext(Guid id);
 
     /// <summary>
-    /// Tries to get an operation by ID.
+    /// Adds an operation snapshot to the repository.
     /// </summary>
-    /// <param name="id">The ID of the operation to get.</param>
-    /// <param name="operation">The operation, if found.</param>
-    /// <returns>True if the operation was found; otherwise, false.</returns>
-    bool TryGetOperation(Guid id, out OperationContext? operation);
+    /// <param name="snapshot">The operation snapshot to add.</param>
+    void AddOperationSnapshot(OperationSnapshot snapshot);
+
+    /// <summary>
+    /// Removes an operation snapshot from the repository.
+    /// </summary>
+    /// <param name="id">The identifier of the operation snapshot to remove.</param>
+    void RemoveOperationSnapshot(Guid id);
+
+    /// <summary>
+    /// Updates an operation snapshot in the repository.
+    /// </summary>
+    /// <param name="snapshot">The operation snapshot to update.</param>
+    void UpdateOperationSnapshot(OperationSnapshot snapshot);
+
+    /// <summary>
+    /// Checks if the repository contains an operation snapshot with the specified identifier.
+    /// </summary>
+    /// <param name="id">The identifier of the operation snapshot.</param>
+    /// <returns>True if the operation snapshot exists; otherwise, false.</returns>
+    bool ContainsOperationSnapshot(Guid id);
 }

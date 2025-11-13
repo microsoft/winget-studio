@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Models;
 using WinGetStudio.Services.Operations.Models.States;
@@ -10,49 +13,131 @@ namespace WinGetStudio.Services.Operations.Services;
 
 internal sealed partial class OperationManager : IOperationManager
 {
+    private readonly ILogger<OperationManager> _logger;
     private readonly IOperationRepository _repository;
     private readonly IOperationPublisher _publisher;
-    private readonly object _lock = new();
+    private readonly IOperationPolicyManager _policyManager;
+    private readonly object _contextLock = new();
+    private readonly object _snapshotLock = new();
 
-    public OperationManager(IOperationRepository repository, IOperationPublisher publisher)
+    public OperationManager(
+        ILogger<OperationManager> logger,
+        IOperationRepository repository,
+        IOperationPublisher publisher,
+        IOperationPolicyManager policyManager)
     {
+        _logger = logger;
         _repository = repository;
         _publisher = publisher;
-    }
-
-    /// <inheritdoc/>
-    public void Register(OperationContext context)
-    {
-        lock (_lock)
-        {
-            _repository.Add(context);
-        }
-    }
-
-    /// <inheritdoc/>
-    public void Unregister(OperationContext context)
-    {
-        lock (_lock)
-        {
-            _repository.Remove(context);
-        }
-    }
-
-    /// <inheritdoc/>
-    public void PublishSnapshots()
-    {
-        List<OperationSnapshot> snapshots = [];
-        lock (_lock)
-        {
-            snapshots.AddRange(_repository.Snapshots);
-        }
-
-        _publisher.PublishSnapshots(snapshots);
+        _policyManager = policyManager;
     }
 
     /// <inheritdoc/>
     public void PublishNotification(OperationNotification notification)
     {
+        _logger.LogInformation($"Publishing operation notification for operation id: {notification.OperatinoId}");
         _publisher.PublishNotification(notification);
+    }
+
+    /// <inheritdoc/>
+    public void AddActiveOperationContext(OperationContext context)
+    {
+        _logger.LogInformation($"Adding active operation context for operation id: {context.Id}");
+        lock (_contextLock)
+        {
+            _repository.AddActiveOperationContext(context);
+        }
+    }
+
+    /// <inheritdoc/>
+    public void RemoveActiveOperationContext(Guid id)
+    {
+        _logger.LogInformation($"Removing active operation context for operation id: {id}");
+        lock (_contextLock)
+        {
+            _repository.RemoveActiveOperationContext(id);
+        }
+    }
+
+    /// <inheritdoc/>
+    public void AddOperationSnapshot(OperationSnapshot snapshot)
+    {
+        lock (_snapshotLock)
+        {
+            if (_repository.ContainsOperationSnapshot(snapshot.Id))
+            {
+                _logger.LogInformation($"Snapshot for operation id: {snapshot.Id} already exists in repository. Skipping add.");
+                return;
+            }
+
+            _logger.LogInformation($"Adding or updating snapshot for operation id: {snapshot.Id} in repository.");
+            _repository.AddOperationSnapshot(snapshot);
+        }
+
+        PublishSnapshots();
+    }
+
+    /// <inheritdoc/>
+    public void RemoveOperationSnapshot(Guid id)
+    {
+        lock (_snapshotLock)
+        {
+            if (!_repository.ContainsOperationSnapshot(id))
+            {
+                _logger.LogInformation($"Snapshot for operation id: {id} does not exist in repository. Skipping remove.");
+                return;
+            }
+
+            _logger.LogInformation($"Removing snapshot for operation id: {id} in repository.");
+            _repository.RemoveOperationSnapshot(id);
+        }
+
+        PublishSnapshots();
+    }
+
+    public void UpdateOperationSnapshot(OperationSnapshot snapshot)
+    {
+        lock (_snapshotLock)
+        {
+            if (!_repository.ContainsOperationSnapshot(snapshot.Id))
+            {
+                _logger.LogInformation($"Snapshot for operation id: {snapshot.Id} is not updated in repository because it is not broadcasted.");
+                return;
+            }
+
+            _logger.LogInformation($"Updating snapshot for operation id: {snapshot.Id} in repository.");
+            _repository.UpdateOperationSnapshot(snapshot);
+        }
+
+        PublishSnapshots();
+    }
+
+    /// <inheritdoc/>
+    public Task ApplyStartPoliciesAsync(IReadOnlyList<IOperationPolicy>? policies, IOperationContext context)
+    {
+        _logger.LogInformation($"Applying start policies for operation id: {context.Id}");
+        return _policyManager.ApplyPoliciesAsync<IOperationStartPolicy>(policies, context);
+    }
+
+    /// <inheritdoc/>
+    public Task ApplyCompletionPoliciesAsync(IReadOnlyList<IOperationPolicy>? policies, IOperationContext context)
+    {
+        _logger.LogInformation($"Applying completion policies for operation id: {context.Id}");
+        return _policyManager.ApplyPoliciesAsync<IOperationCompletionPolicy>(policies, context);
+    }
+
+    /// <summary>
+    /// Publishes the current operation snapshots.
+    /// </summary>
+    private void PublishSnapshots()
+    {
+        _logger.LogInformation("Publishing operation snapshots.");
+        List<OperationSnapshot> snapshots = [];
+        lock (_snapshotLock)
+        {
+            snapshots.AddRange(_repository.OperationSnapshots);
+        }
+
+        _publisher.PublishSnapshots(snapshots);
     }
 }

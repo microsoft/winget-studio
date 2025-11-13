@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using WinGetStudio.Services.Operations.Models.States;
 
@@ -19,12 +20,15 @@ public interface IOperationHub
     /// <inheritdoc cref="IOperationPublisher.GlobalActivity"/>
     IEventStream<GlobalActivity> GlobalActivity { get; }
 
-    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync(IOperation)"/>
-    Task ExecuteAsync(IOperation operation);
+    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync(IOperation, CancellationToken)"/>
+    Task ExecuteAsync(IOperation operation, CancellationToken cancellationToken = default);
 
-    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync(Func{IOperationContext, Task})"/>
-    Task ExecuteAsync(Func<IOperationContext, Task> operation);
+    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync(Func{IOperationContext, Task}, OperationExecutionOptions?, CancellationToken)"/>
+    Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
 
-    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync{T}(Func{IOperationContext, Task{T}})"/>
-    Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation);
+    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync{T}(Func{IOperationContext, Task{T}}, OperationExecutionOptions?, CancellationToken)"/>
+    Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
+
+    /// <inheritdoc cref="IOperationExecutor.BeginOperationAsync(OperationExecutionOptions?, CancellationToken)"/>
+    Task<IOperationScope> BeginOperationAsync(OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
 }

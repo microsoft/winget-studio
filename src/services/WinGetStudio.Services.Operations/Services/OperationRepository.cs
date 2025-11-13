@@ -13,25 +13,36 @@ namespace WinGetStudio.Services.Operations.Services;
 
 internal sealed class OperationRepository : IOperationRepository
 {
-    private readonly ConcurrentDictionary<Guid, OperationContext> _operations;
+    private readonly ConcurrentDictionary<Guid, OperationContext> _activeOperationContexts;
+    private readonly ConcurrentDictionary<Guid, OperationSnapshot> _operationSnapshots;
 
     /// <inheritdoc/>
-    public IReadOnlyList<OperationContext> Operations => [.._operations.Values.OrderBy(op => op.CurrentSnapshot.CreatedAt)];
+    public IReadOnlyList<OperationContext> ActiveOperationContexts => [.._activeOperationContexts.Values];
 
     /// <inheritdoc/>
-    public IReadOnlyList<OperationSnapshot> Snapshots => [.. Operations.Select(op => op.CurrentSnapshot)];
+    public IReadOnlyList<OperationSnapshot> OperationSnapshots => [.._operationSnapshots.Values.OrderBy(snapshot => snapshot.CreatedAt)];
 
     public OperationRepository()
     {
-        _operations = [];
+        _activeOperationContexts = [];
+        _operationSnapshots = [];
     }
 
     /// <inheritdoc/>
-    public void Add(OperationContext operation) => _operations.TryAdd(operation.Id, operation);
+    public void AddActiveOperationContext(OperationContext operation) => _activeOperationContexts.TryAdd(operation.Id, operation);
 
     /// <inheritdoc/>
-    public void Remove(OperationContext operation) => _operations.TryRemove(operation.Id, out _);
+    public void RemoveActiveOperationContext(Guid id) => _activeOperationContexts.TryRemove(id, out _);
 
     /// <inheritdoc/>
-    public bool TryGetOperation(Guid id, out OperationContext? operation) => _operations.TryGetValue(id, out operation);
+    public void AddOperationSnapshot(OperationSnapshot snapshot) => _operationSnapshots.TryAdd(snapshot.Id, snapshot);
+
+    /// <inheritdoc/>
+    public void RemoveOperationSnapshot(Guid id) => _operationSnapshots.TryRemove(id, out _);
+
+    /// <inheritdoc/>
+    public void UpdateOperationSnapshot(OperationSnapshot snapshot) => _operationSnapshots.AddOrUpdate(snapshot.Id, snapshot, (_, _) => snapshot);
+
+    /// <inheritdoc/>
+    public bool ContainsOperationSnapshot(Guid id) => _operationSnapshots.ContainsKey(id);
 }

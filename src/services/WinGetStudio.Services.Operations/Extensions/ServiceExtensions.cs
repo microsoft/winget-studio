@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using WinGetStudio.Services.Core.Extensions;
 using WinGetStudio.Services.Operations.Contracts;
@@ -23,6 +24,7 @@ public static class ServiceExtensions
 
         // Factories
         services.AddTransient<OperationContextFactory>(sp => cancellationToken => ActivatorUtilities.CreateInstance<OperationContext>(sp, cancellationToken));
+        services.AddTransient<OperationScopeFactory>(sp => (options, cancellationToken) => ActivatorUtilities.CreateInstance<OperationScope>(sp, options, cancellationToken));
         return services;
     }
 }

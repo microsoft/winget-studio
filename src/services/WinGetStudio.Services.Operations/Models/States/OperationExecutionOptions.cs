@@ -6,4 +6,10 @@ using WinGetStudio.Services.Operations.Contracts;
 
 namespace WinGetStudio.Services.Operations.Models.States;
 
-public sealed record class OperationExecutionOptions(IReadOnlyList<IOperationPolicy> Policies);
+public sealed record class OperationExecutionOptions(IReadOnlyList<IOperationPolicy> Policies)
+{
+    /// <summary>
+    /// Default options.
+    /// </summary>
+    public static readonly OperationExecutionOptions Default = new([]);
+}

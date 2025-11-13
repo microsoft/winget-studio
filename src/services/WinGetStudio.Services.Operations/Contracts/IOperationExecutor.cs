@@ -37,4 +37,12 @@ internal interface IOperationExecutor
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the operation.</returns>
     Task<T> ExecuteAsync<T>(Func<IOperationContext, Task<T>> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Begins a new operation scope.
+    /// </summary>
+    /// <param name="options">The operation execution options.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The operation scope.</returns>
+    Task<IOperationScope> BeginOperationAsync(OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
 }
