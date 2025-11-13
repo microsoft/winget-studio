@@ -74,7 +74,7 @@ internal sealed partial class OperationManager : IOperationManager
                 return;
             }
 
-            _logger.LogInformation($"Adding or updating snapshot for operation id: {snapshot.Id} in repository.");
+            _logger.LogInformation($"Adding snapshot for operation id: {snapshot.Id} in repository.");
             _repository.AddOperationSnapshot(snapshot);
         }
 

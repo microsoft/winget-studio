@@ -60,6 +60,7 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
                 _currentSnapshot = updatedSnapshot;
             }
 
+            _logger.LogInformation($"Operation {Id} committing snapshot: {updatedSnapshot}");
             _manager.UpdateOperationSnapshot(updatedSnapshot);
         }
     }
@@ -77,7 +78,7 @@ internal sealed partial class OperationContext : IOperationContext, IDisposable
                 notificationProps = new OperationNotification(Id, durationValue, newProps);
             }
 
-            _logger.LogInformation($"Operation {Id} notification: {notificationProps}. Publishing notification.");
+            _logger.LogInformation($"Operation {Id} notification: {notificationProps}");
             _manager.PublishNotification(notificationProps);
         }
     }
