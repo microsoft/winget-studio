@@ -175,35 +175,28 @@ public sealed partial class MonacoEditor : UserControl
     }
 
     /// <summary>
-    /// Handle theme changes from the theme applier service.
-    /// </summary>
-    /// <param name="sender">The sender.</param>
-    /// <param name="newTheme">The new theme.</param>
-    private void OnThemeApplied(object? sender, ElementTheme newTheme)
-    {
-        DispatcherQueue.TryEnqueue(() => SetTheme(newTheme));
-    }
-
-    /// <summary>
     /// Update the editor theme based on the current application theme.
     /// </summary>
     private void SetTheme(ElementTheme newTheme)
     {
-        if (Editor.CoreWebView2 != null)
+        DispatcherQueue.TryEnqueue(() =>
         {
-            // Resolve the theme to use
-            var theme = newTheme switch
+            if (Editor.CoreWebView2 != null)
             {
-                ElementTheme.Light => LightTheme,
-                ElementTheme.Dark => DarkTheme,
-                _ => _themeSettings.DefaultAppTheme == ApplicationTheme.Light ? LightTheme : DarkTheme,
-            };
+                // Resolve the theme to use
+                var theme = newTheme switch
+                {
+                    ElementTheme.Light => LightTheme,
+                    ElementTheme.Dark => DarkTheme,
+                    _ => _themeSettings.DefaultAppTheme == ApplicationTheme.Light ? LightTheme : DarkTheme,
+                };
 
-            // Send the theme change message to the editor
-            var msg = new EditorMessage<string>() { Type = SetThemeApi, Value = theme };
-            var json = JsonSerializer.Serialize(msg, _options);
-            Editor.CoreWebView2.PostWebMessageAsJson(json);
-        }
+                // Send the theme change message to the editor
+                var msg = new EditorMessage<string>() { Type = SetThemeApi, Value = theme };
+                var json = JsonSerializer.Serialize(msg, _options);
+                Editor.CoreWebView2.PostWebMessageAsJson(json);
+            }
+        });
     }
 
     /// <summary>
@@ -269,18 +262,7 @@ public sealed partial class MonacoEditor : UserControl
         Editor.CoreWebView2.Navigate($"https://{HostName}/editor.html");
 
         // Subscribe to theme changes
-        _themeSettings.ThemeApplied += OnThemeApplied;
-    }
-
-    /// <summary>
-    /// Handle the Unloaded event of the WebView2 control.
-    /// </summary>
-    /// <param name="sender">The sender.</param>
-    /// <param name="e">The event args.</param>
-    private void Editor_Unloaded(object sender, RoutedEventArgs e)
-    {
-        // Unsubscribe from theme changes
-        _themeSettings.ThemeApplied -= OnThemeApplied;
+        ActualThemeChanged += (_, _) => SetTheme(ActualTheme);
     }
 
     /// <summary>

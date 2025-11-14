@@ -45,5 +45,5 @@ public interface IDSC
     Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit unit, CancellationToken ct = default);
 
     /// <inheritdoc cref="IDSCOperations.GetDscV3ResourcesAsync"/>
-    Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync();
+    Task<IReadOnlyList<ResourceMetadata>> GetDscV3ResourcesAsync();
 }

@@ -1,4 +1,6 @@
-﻿*Recommended Markdown Viewer: [Markdown Editor](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.MarkdownEditor2)*
+﻿<!-- markdownlint-disable MD013 MD041 MD049 -->
+
+*Recommended Markdown Viewer: [Markdown Editor](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.MarkdownEditor2)*
 
 ## Getting Started
 
