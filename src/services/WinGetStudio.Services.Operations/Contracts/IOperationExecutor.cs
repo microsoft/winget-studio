@@ -18,8 +18,9 @@ internal interface IOperationExecutor
     /// </summary>
     /// <typeparam name="T">The type of the result.</typeparam>
     /// <param name="operation">The operation to execute.</param>
+    /// <param name="options">The operation execution options.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    Task<T> ExecuteAsync<T>(IOperation<T> operation, CancellationToken cancellationToken = default);
+    Task<T> ExecuteAsync<T>(IOperation<T> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the specified operation function.

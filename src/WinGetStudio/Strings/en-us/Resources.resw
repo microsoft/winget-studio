@@ -574,14 +574,8 @@
     <value>Code view</value>
     <comment>Show the code view of the configuration file</comment>
   </data>
-  <data name="NotificationPane_Title.Text" xml:space="preserve">
-    <value>Notifications</value>
-  </data>
-  <data name="NotificationPane_ShowAll.Content" xml:space="preserve">
-    <value>Show all notifications</value>
-  </data>
-  <data name="NotificationPane_Previous.Text" xml:space="preserve">
-    <value>Previous notifications</value>
+  <data name="ActivityPane_Title.Text" xml:space="preserve">
+    <value>Activities</value>
   </data>
   <data name="Notification_MachineInDesiredState" xml:space="preserve">
     <value>Machine is in the desired state</value>

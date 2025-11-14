@@ -19,9 +19,9 @@ internal sealed class OperationExecutor : IOperationExecutor
     }
 
     /// <inheritdoc/>
-    public async Task<T> ExecuteAsync<T>(IOperation<T> operation, CancellationToken cancellationToken = default)
+    public async Task<T> ExecuteAsync<T>(IOperation<T> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default)
     {
-         return await ExecuteAsync(operation.ExecuteAsync, operation.Options, cancellationToken);
+         return await ExecuteAsync(operation.ExecuteAsync, options, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -30,14 +30,7 @@ internal sealed class OperationExecutor : IOperationExecutor
         OperationExecutionOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        _ = await ExecuteAsync(
-            async ctx =>
-            {
-                await operation(ctx);
-                return Task.CompletedTask;
-            },
-            options,
-            cancellationToken);
+        await ExecuteAsync<Task>(ctx => Task.FromResult(operation(ctx)), options, cancellationToken);
     }
 
     /// <inheritdoc/>

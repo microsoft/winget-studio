@@ -3,26 +3,19 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using Microsoft.Management.Configuration;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
-using WinGetStudio.Services.Operations.Contracts;
-using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.ViewModels;
 
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
-    private readonly IDSC _dsc;
-    private readonly IOperationHub _operationHub;
-    private readonly IStringLocalizer<ValidationViewModel> _localizer;
+    private readonly IDSCOperationHub _dscOperationHub;
     private readonly ILogger<ValidationViewModel> _logger;
     private readonly UnitViewModelFactory _unitFactory;
 
@@ -41,16 +34,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     public partial string? SettingsText { get; set; }
 
-    public ValidationViewModel(
-        IDSC dsc,
-        IOperationHub operationHub,
-        IStringLocalizer<ValidationViewModel> localizer,
-        ILogger<ValidationViewModel> logger,
-        UnitViewModelFactory unitFactory)
+    public ValidationViewModel(IDSCOperationHub dscOperationHub, ILogger<ValidationViewModel> logger, UnitViewModelFactory unitFactory)
     {
-        _dsc = dsc;
-        _operationHub = operationHub;
-        _localizer = localizer;
+        _dscOperationHub = dscOperationHub;
         _logger = logger;
         _unitFactory = unitFactory;
     }
@@ -75,15 +61,13 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnGetAsync()
     {
-        await RunDscOperationAsync(async (dscUnit, ctx) =>
+        await RunDscOperationAsync(async dscFile =>
         {
-            var result = await _dsc.GetUnitAsync(dscUnit);
-            if (result.ResultInformation?.IsOk ?? true)
+            var executionResult = await _dscOperationHub.ExecuteGetUnitAsync(dscFile);
+            if (executionResult.IsSuccess && executionResult.Result?.Settings != null)
             {
-                OutputText = result.Settings.ToYaml();
+                OutputText = executionResult.Result.Settings.ToYaml();
             }
-
-            return result.ResultInformation;
         });
     }
 
@@ -93,10 +77,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnSetAsync()
     {
-        await RunDscOperationAsync(async (dscUnit, ctx) =>
+        await RunDscOperationAsync(async dscFile =>
         {
-            var result = await _dsc.SetUnitAsync(dscUnit);
-            return result.ResultInformation;
+            await _dscOperationHub.ExecuteSetUnitAsync(dscFile);
         });
     }
 
@@ -106,74 +89,44 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnTestAsync()
     {
-        await RunDscOperationAsync(async (dscUnit, ctx) =>
+        await RunDscOperationAsync(async dscFile =>
         {
-            var result = await _dsc.TestUnitAsync(dscUnit);
-            if (result.TestResult == ConfigurationTestResult.Positive)
-            {
-                ctx.Success(props => props with { Message = _localizer["Notification_MachineInDesiredState"] });
-            }
-            else
-            {
-                ctx.Fail(props => props with { Message = _localizer["Notification_MachineNotInDesiredState"] });
-            }
-
-            return result.ResultInformation;
+            await _dscOperationHub.ExecuteTestUnitAsync(dscFile);
         });
     }
 
     /// <summary>
-    /// Runs a DSC operation while managing UI feedback.
+    /// Runs a DSC operation with proper error handling and state management.
     /// </summary>
-    /// <param name="action">The DSC operation to execute.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task RunDscOperationAsync(Func<IDSCUnit, IOperationContext, Task<IDSCUnitResultInformation?>> action)
+    /// <param name="operation">The DSC operation to execute.</param>
+    private async Task RunDscOperationAsync(Func<IDSCFile, Task> operation)
     {
-        await _operationHub.ExecuteAsync(async ctx =>
+        try
         {
-            try
-            {
-                ctx.StartSnapshotBroadcast();
-                ctx.Start();
-                CanExecuteDSCOperation = false;
-                var unit = await CreateUnitAsync();
-                var result = await action(unit, ctx);
-                if (result != null && !result.IsOk)
-                {
-                    var title = $"0x{result.ResultCode.HResult:X}";
-                    List<string> messageList = [result.Description, result.Details];
-                    var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
-                    ctx.Fail(props => props with { Title = title, Message = message });
-                }
-            }
-            catch (OpenConfigurationSetException ex)
-            {
-                _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
-                ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while executing a DSC operation.");
-                ctx.Fail(props => props with { Message = ex.Message });
-            }
-            finally
-            {
-                CanExecuteDSCOperation = true;
-            }
-        });
+            CanExecuteDSCOperation = false;
+            var dscFile = CreateDSCFile();
+            await operation(dscFile);
+        }
+        catch (Exception ex)
+        {
+            // TODO notification
+            _logger.LogError(ex, "An error occurred while executing the DSC operation.");
+        }
+        finally
+        {
+            CanExecuteDSCOperation = true;
+        }
     }
 
     /// <summary>
-    /// Creates a DSC unit from the current state.
+    /// Creates a dsc file from the current input.
     /// </summary>
-    /// <returns>The created DSC unit.</returns>
-    private async Task<IDSCUnit> CreateUnitAsync()
+    /// <returns>The created dsc file.</returns>
+    private IDSCFile CreateDSCFile()
     {
         var unit = _unitFactory();
         unit.Title = SearchResourceText ?? string.Empty;
         unit.Settings = DSCPropertySet.FromYaml(SettingsText ?? string.Empty);
-        var dscFile = DSCFile.CreateVirtual(unit.ToConfigurationV3().ToYaml());
-        var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-        return dscSet.Units[0];
+        return DSCFile.CreateVirtual(unit.ToConfigurationV3().ToYaml());
     }
 }

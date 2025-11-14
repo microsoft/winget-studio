@@ -34,7 +34,7 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" x:Uid="NotificationPane_Title" />
+        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" x:Uid="ActivityPane_Title" />
 
         <!-- Activity list -->
         <ListView ItemsSource="{x:Bind ViewModel.Activities}"
@@ -54,6 +54,7 @@
                                  Message="{x:Bind Message, Mode=OneWay}">
                             <StackPanel Spacing="{ThemeResource SectionSpacing}" Padding="{ThemeResource Padding8Uniform}">
                                 <ProgressBar Value="{x:Bind ProgressValue, Mode=OneWay}"
+                                             Visibility="{x:Bind ShowProgress, Mode=OneWay}"
                                              IsIndeterminate="{x:Bind IsProgressIndeterminate, Mode=OneWay}"
                                              HorizontalAlignment="Stretch" />
                                 <ItemsRepeater ItemsSource="{x:Bind Actions}" HorizontalAlignment="Right">

@@ -7,8 +7,7 @@ using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
-using WinGetStudio.Services.Operations.Models.Policies;
-using WinGetStudio.Services.Operations.Models.States;
+using WinGetStudio.Services.Operations.Models;
 
 namespace WinGetStudio.ViewModels;
 
@@ -46,8 +45,7 @@ public partial class MainViewModel : ObservableRecipient
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task Button1Async()
     {
-        var options = new OperationExecutionOptions([
-        ]);
+        var options = new OperationExecutionOptions();
         await _operationHub.ExecuteAsync(
             async ctx =>
             {

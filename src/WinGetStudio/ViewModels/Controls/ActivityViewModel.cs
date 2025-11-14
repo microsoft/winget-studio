@@ -28,6 +28,9 @@ public sealed partial class ActivityViewModel : ObservableObject
     public partial bool CanDismiss { get; set; } = false;
 
     [ObservableProperty]
+    public partial bool ShowProgress { get; set; }
+
+    [ObservableProperty]
     public partial int ProgressValue { get; set; }
 
     [ObservableProperty]
@@ -54,6 +57,7 @@ public sealed partial class ActivityViewModel : ObservableObject
         Message = props.Message;
         Severity = props.Severity;
         CanDismiss = IsDismissable(props);
+        ShowProgress = props.Status == OperationStatus.Running;
         ProgressValue = props.Percent ?? 0;
         IsProgressIndeterminate = props.Percent == null;
         UpdateActions(props.Actions);

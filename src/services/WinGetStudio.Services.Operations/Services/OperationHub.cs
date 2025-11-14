@@ -34,7 +34,7 @@ internal sealed partial class OperationHub : IOperationHub
     }
 
     /// <inheritdoc/>
-    public Task<T> ExecuteAsync<T>(IOperation<T> operation, CancellationToken cancellationToken = default) => _executor.ExecuteAsync(operation, cancellationToken);
+    public Task<T> ExecuteAsync<T>(IOperation<T> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default) => _executor.ExecuteAsync(operation, options, cancellationToken);
 
     /// <inheritdoc/>
     public Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default) => _executor.ExecuteAsync(operation, options, cancellationToken);

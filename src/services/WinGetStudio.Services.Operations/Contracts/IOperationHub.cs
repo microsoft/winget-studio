@@ -21,8 +21,8 @@ public interface IOperationHub
     /// <inheritdoc cref="IOperationPublisher.GlobalActivity"/>
     IEventStream<GlobalActivity> GlobalActivity { get; }
 
-    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync{T}(IOperation{T}, CancellationToken)"/>
-    Task<T> ExecuteAsync<T>(IOperation<T> operation, CancellationToken cancellationToken = default);
+    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync{T}(IOperation{T}, OperationExecutionOptions?, CancellationToken)"/>
+    Task<T> ExecuteAsync<T>(IOperation<T> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
 
     /// <inheritdoc cref="IOperationExecutor.ExecuteAsync(Func{IOperationContext, Task}, OperationExecutionOptions?, CancellationToken)"/>
     Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
