@@ -121,7 +121,7 @@
     <value>WinGet Studio (Dev)</value>
   </data>
   <data name="AppDisplayNameStable" xml:space="preserve">
-    <value>WinGet Studio (Preview)</value>
+    <value>WinGet Studio (Experimental)</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
     <value>WinGet Studio</value>
@@ -800,6 +800,10 @@
   <data name="PreviewFile_DependenciesButton.Content" xml:space="preserve">
     <value>Dependencies</value>
   </data>
+  <data name="PreviewFile_UntitledFileName.Text" xml:space="preserve">
+    <value>Untitled.winget</value>
+    <comment>{Locked=".winget"} Default file name with '.winget' extension</comment>
+  </data>
   <data name="ApplyFile_DoneButton.Content" xml:space="preserve">
     <value>Done</value>
   </data>
@@ -815,7 +819,7 @@
   <data name="PreviewFile_ResourceAutoSuggestBox.Header" xml:space="preserve">
     <value>Resource type</value>
   </data>
-  <data name="PreviewFile_SecurityContenxtComboBox.Header" xml:space="preserve">
+  <data name="PreviewFile_SecurityContextComboBox.Header" xml:space="preserve">
     <value>Security context</value>
   </data>
   <data name="PreviewFile_ResourceNameTextBox.Header" xml:space="preserve">

@@ -55,5 +55,5 @@ internal sealed class DSC : IDSC
     public async Task<IDSCTestUnitResult> TestUnitAsync(IDSCUnit unit, CancellationToken ct) => await _dscOperations.TestUnitAsync(unit, ct);
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<ResourceMetada>> GetDscV3ResourcesAsync() => await _dscOperations.GetDscV3ResourcesAsync();
+    public async Task<IReadOnlyList<ResourceMetadata>> GetDscV3ResourcesAsync() => await _dscOperations.GetDscV3ResourcesAsync();
 }
