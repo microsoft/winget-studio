@@ -566,6 +566,10 @@
   <data name="PreviewPage_FilePicker_ConfigurationFiles" xml:space="preserve">
     <value>Configuration files</value>
   </data>
+  <data name="PreviewPage_UpdateFromCodeSuccess" xml:space="preserve">
+    <value>Configuration updated successfully from code</value>
+    <comment>Notification message shown when the configuration is successfully updated from the code view</comment>
+  </data>
   <data name="ConfigurationFile_SummaryView.Content" xml:space="preserve">
     <value>Summary view</value>
     <comment>Show the summary view of the configuration file</comment>

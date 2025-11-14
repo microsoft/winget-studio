@@ -448,12 +448,34 @@
                             </Grid>
 
                             <!-- Code view -->
-                            <ScrollViewer Grid.Row="4"
-                                          Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}"
-                                          HorizontalScrollBarVisibility="Auto"
-                                          VerticalScrollBarVisibility="Auto">
-                                <localControls:MonacoEditor Text="{x:Bind ViewModel.ConfigurationSet.Code, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
-                            </ScrollViewer>
+                            <Grid Grid.Row="4"
+                                  Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
+                                
+                                <!-- Monaco Editor -->
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                              VerticalScrollBarVisibility="Auto">
+                                    <localControls:MonacoEditor Text="{x:Bind ViewModel.ConfigurationSet.Code, Mode=TwoWay}" Syntax="yaml" IsReadOnly="False" />
+                                </ScrollViewer>
+                                
+                                <!-- Update button -->
+                                <StackPanel Grid.Row="1" 
+                                            Orientation="Horizontal" 
+                                            HorizontalAlignment="Right"
+                                            Spacing="8"
+                                            Margin="0,8,0,0">
+                                    <Button Command="{x:Bind ViewModel.UpdateFromCodeCommand}"
+                                            Style="{ThemeResource AccentButtonStyle}">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon Glyph="&#xE895;" FontSize="{ThemeResource BodyTextBlockFontSize}" />
+                                            <TextBlock>Update from Code</TextBlock>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
 
                         <!-- Resizer -->
