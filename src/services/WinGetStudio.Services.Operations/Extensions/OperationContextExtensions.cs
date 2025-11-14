@@ -94,11 +94,17 @@ public static partial class OperationContextExtensions
     {
         var cancelAction = new OperationAction(text, isPrimary, () =>
         {
-            // Cancel operation
             ctx.RequestCancellation();
+            return Task.CompletedTask;
+        });
+        ctx.CommitSnapshot(props => props with { Actions = [.. props.Actions, cancelAction] });
+    }
 
-            // Update status to canceled
-            ctx.Canceled();
+    public static void AddDoneAction(this IOperationContext ctx, string text, bool isPrimary = true)
+    {
+        var cancelAction = new OperationAction(text, isPrimary, () =>
+        {
+            ctx.StopSnapshotBroadcast();
             return Task.CompletedTask;
         });
         ctx.CommitSnapshot(props => props with { Actions = [.. props.Actions, cancelAction] });

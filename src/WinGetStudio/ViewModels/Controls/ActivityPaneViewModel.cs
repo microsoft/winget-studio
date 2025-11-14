@@ -59,7 +59,7 @@ public partial class ActivityPaneViewModel : ObservableRecipient, IDisposable
             }
             else
             {
-                Activities.Insert(i, new(snapshot));
+                Activities.Insert(i, new(_operationHub, snapshot));
             }
         }
     }

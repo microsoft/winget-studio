@@ -5,26 +5,4 @@
     <Style x:Key="InAppNotification" TargetType="InfoBar">
         <Setter Property="IsIconVisible" Value="False" />
     </Style>
-
-    <Style x:Key="ReadInAppNotification" TargetType="InfoBar" BasedOn="{StaticResource InAppNotification}">
-        <Setter Property="IsClosable" Value="False" />
-    </Style>
-
-    <Style x:Key="ClosableActivityInfoBar" TargetType="InfoBar" BasedOn="{StaticResource InAppNotification}">
-        <Setter Property="IsClosable" Value="True" />
-        <Setter Property="CloseButtonStyle">
-            <Setter.Value>
-                <Style TargetType="Button" BasedOn="{StaticResource InfoBarCloseButtonStyle}">
-                    <Setter Property="ContentTemplate">
-                        <Setter.Value>
-                            <DataTemplate>
-                                <FontIcon Glyph="&#xE73E;" FontSize="{ThemeResource ContentControlFontSize}" />
-                            </DataTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
 </ResourceDictionary>

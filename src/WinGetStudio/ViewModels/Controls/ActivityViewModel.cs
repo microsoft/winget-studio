@@ -3,12 +3,16 @@
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.ViewModels.Controls;
 
 public sealed partial class ActivityViewModel : ObservableObject
 {
+    private readonly IOperationHub _operationHub;
+
     public Guid Id { get; }
 
     [ObservableProperty]
@@ -23,10 +27,17 @@ public sealed partial class ActivityViewModel : ObservableObject
     [ObservableProperty]
     public partial bool CanDismiss { get; set; } = false;
 
+    [ObservableProperty]
+    public partial int ProgressValue { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsProgressIndeterminate { get; set; }
+
     public ObservableCollection<ActivityActionViewModel> Actions { get; }
 
-    public ActivityViewModel(OperationSnapshot snapshot)
+    public ActivityViewModel(IOperationHub operationHub, OperationSnapshot snapshot)
     {
+        _operationHub = operationHub;
         Id = snapshot.Id;
         Actions = [];
         Update(snapshot);
@@ -38,11 +49,14 @@ public sealed partial class ActivityViewModel : ObservableObject
     /// <param name="snapshot">The operation snapshot.</param>
     public void Update(OperationSnapshot snapshot)
     {
-        Title = snapshot.Properties.Title;
-        Message = snapshot.Properties.Message;
-        Severity = snapshot.Properties.Severity;
-        CanDismiss = IsDismissable(snapshot);
-        UpdateActions(snapshot.Properties.Actions);
+        var props = snapshot.Properties;
+        Title = props.Title;
+        Message = props.Message;
+        Severity = props.Severity;
+        CanDismiss = IsDismissable(props);
+        ProgressValue = props.Percent ?? 0;
+        IsProgressIndeterminate = props.Percent == null;
+        UpdateActions(props.Actions);
     }
 
     /// <summary>
@@ -85,11 +99,16 @@ public sealed partial class ActivityViewModel : ObservableObject
     /// <summary>
     /// Gets a value indicating whether the activity can be dismissed.
     /// </summary>
-    /// <param name="snapshot">The operation snapshot.</param>
+    /// <param name="props">The operation properties.</param>
     /// <returns>True if the activity can be dismissed; otherwise, false.</returns>
-    private bool IsDismissable(OperationSnapshot snapshot)
+    private bool IsDismissable(OperationProperties props)
     {
-        return snapshot.Properties.Status == OperationStatus.Completed ||
-               snapshot.Properties.Status == OperationStatus.Canceled;
+        return props.Status == OperationStatus.Completed || props.Status == OperationStatus.Canceled;
+    }
+
+    [RelayCommand]
+    private void OnDismiss()
+    {
+        _operationHub.StopSnapshotBroadcast(Id);
     }
 }

@@ -47,13 +47,14 @@ public partial class MainViewModel : ObservableRecipient
     private async Task Button1Async()
     {
         var options = new OperationExecutionOptions([
-            new SnapshotRetentionPolicy(OperationStatus.Completed, OperationSeverity.Success, TimeSpan.FromSeconds(3)),
         ]);
         await _operationHub.ExecuteAsync(
             async ctx =>
             {
                 ctx.StartSnapshotBroadcast();
                 ctx.Start();
+                ctx.AddCancelAction("Cancel 1", false);
+                ctx.AddCancelAction("Cancel 2");
                 var progress = 0;
                 while (progress < 100)
                 {
@@ -63,6 +64,8 @@ public partial class MainViewModel : ObservableRecipient
                 }
 
                 ctx.Success(props => props with { Title = Guid.NewGuid().ToString(), Message = Guid.NewGuid().ToString() });
+                ctx.AddDoneAction("Done 1", false);
+                ctx.AddDoneAction("Done 2");
             },
             options);
     }

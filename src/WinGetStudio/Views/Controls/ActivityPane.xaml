@@ -7,11 +7,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:localConverters="using:WinGetStudio.Converters"
+    xmlns:converters="using:CommunityToolkit.WinUI.Converters"
     xmlns:viewmodels="using:WinGetStudio.ViewModels.Controls"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d">
     <UserControl.Resources>
         <localConverters:ActivitySeverityConverter x:Key="SeverityConverter" />
+        <converters:BoolToObjectConverter x:Key="IsPrimaryStyleConverter"
+                                          TrueValue="{StaticResource AccentButtonStyle}"
+                                          FalseValue="{StaticResource DefaultButtonStyle}" />
         <Style x:Key="ItemContainerStyle" TargetType="ListViewItem">
             <Setter Property="Padding" Value="0" />
             <Setter Property="Margin" Value="0" />
@@ -39,12 +44,33 @@
                   ItemContainerStyle="{StaticResource ItemContainerStyle}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:ActivityViewModel">
-                    <InfoBar IsOpen="True"
-                             Style="{ThemeResource ClosableActivityInfoBar}"
-                             Severity="{x:Bind Severity, Mode=OneWay, Converter={StaticResource SeverityConverter}}"
-                             Title="{x:Bind Title, Mode=OneWay}"
-                             Message="{x:Bind Message, Mode=OneWay}">
-                    </InfoBar>
+                    <Grid>
+                        <InfoBar IsOpen="True"
+                                 Style="{ThemeResource InAppNotification}"
+                                 Severity="{x:Bind Severity, Mode=OneWay, Converter={StaticResource SeverityConverter}}"
+                                 Title="{x:Bind Title, Mode=OneWay}"
+                                 IsClosable="{x:Bind CanDismiss, Mode=OneWay}"
+                                 CloseButtonCommand="{x:Bind DismissCommand}"
+                                 Message="{x:Bind Message, Mode=OneWay}">
+                            <StackPanel Spacing="{ThemeResource SectionSpacing}" Padding="{ThemeResource Padding8Uniform}">
+                                <ProgressBar Value="{x:Bind ProgressValue, Mode=OneWay}"
+                                             IsIndeterminate="{x:Bind IsProgressIndeterminate, Mode=OneWay}"
+                                             HorizontalAlignment="Stretch" />
+                                <ItemsRepeater ItemsSource="{x:Bind Actions}" HorizontalAlignment="Right">
+                                    <ItemsRepeater.Layout>
+                                        <StackLayout Orientation="Horizontal" Spacing="8" />
+                                    </ItemsRepeater.Layout>
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="viewmodels:ActivityActionViewModel">
+                                            <Button Content="{x:Bind Text, Mode=OneWay}"
+                                                    Command="{x:Bind ExecuteCommand}"
+                                                    Style="{x:Bind IsPrimary, Converter={StaticResource IsPrimaryStyleConverter}}"/>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+                            </StackPanel>
+                        </InfoBar>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

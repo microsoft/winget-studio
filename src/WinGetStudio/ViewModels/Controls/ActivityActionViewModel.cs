@@ -18,7 +18,7 @@ public sealed partial class ActivityActionViewModel : ObservableObject
     private partial Func<Task>? Action { get; set; }
 
     [ObservableProperty]
-    private partial bool IsPrimary { get; set; } = false;
+    public partial bool IsPrimary { get; set; } = false;
 
     public ActivityActionViewModel(OperationAction action)
     {

@@ -14,6 +14,7 @@ internal sealed partial class OperationHub : IOperationHub
 {
     private readonly IOperationPublisher _publisher;
     private readonly IOperationExecutor _executor;
+    private readonly IOperationManager _manager;
 
     /// <inheritdoc/>
     public IEventStream<IReadOnlyList<OperationSnapshot>> Snapshots => _publisher.Snapshots;
@@ -24,10 +25,11 @@ internal sealed partial class OperationHub : IOperationHub
     /// <inheritdoc/>
     public IEventStream<GlobalActivity> GlobalActivity => _publisher.GlobalActivity;
 
-    public OperationHub(IOperationPublisher publisher, IOperationExecutor executor)
+    public OperationHub(IOperationPublisher publisher, IOperationExecutor executor, IOperationManager manager)
     {
         _publisher = publisher;
         _executor = executor;
+        _manager = manager;
     }
 
     /// <inheritdoc/>
@@ -41,4 +43,7 @@ internal sealed partial class OperationHub : IOperationHub
 
     /// <inheritdoc/>
     public Task<IOperationScope> BeginOperationAsync(OperationExecutionOptions? options = null, CancellationToken cancellationToken = default) => _executor.BeginOperationAsync(options, cancellationToken);
+
+    /// <inheritdoc/>
+    public void StopSnapshotBroadcast(Guid id) => _manager.RemoveOperationSnapshot(id);
 }

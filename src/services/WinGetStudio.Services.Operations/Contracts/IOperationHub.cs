@@ -31,4 +31,10 @@ public interface IOperationHub
 
     /// <inheritdoc cref="IOperationExecutor.BeginOperationAsync(OperationExecutionOptions?, CancellationToken)"/>
     Task<IOperationScope> BeginOperationAsync(OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Stops broadcasting snapshots to subscribers.
+    /// </summary>
+    /// <param name="id">The operation ID.</param>
+    void StopSnapshotBroadcast(Guid id);
 }
