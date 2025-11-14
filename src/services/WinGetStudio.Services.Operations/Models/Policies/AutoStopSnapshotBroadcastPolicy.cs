@@ -6,7 +6,7 @@ using WinGetStudio.Services.Operations.Contracts;
 
 namespace WinGetStudio.Services.Operations.Models.Policies;
 
-internal sealed partial class AutoStopSnapshotBroadcastPolicy : IOperationStartPolicy
+public sealed partial class AutoStopSnapshotBroadcastPolicy : IOperationCompletionPolicy
 {
     public bool CanApply(IOperationContext context) => true;
 

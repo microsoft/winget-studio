@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Models;
-using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Services;
 
@@ -20,9 +19,9 @@ internal sealed class OperationExecutor : IOperationExecutor
     }
 
     /// <inheritdoc/>
-    public async Task ExecuteAsync(IOperation operation, CancellationToken cancellationToken = default)
+    public async Task<T> ExecuteAsync<T>(IOperation<T> operation, CancellationToken cancellationToken = default)
     {
-         await ExecuteAsync(operation.ExecuteAsync, operation.Options, cancellationToken);
+         return await ExecuteAsync(operation.ExecuteAsync, operation.Options, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -56,7 +55,7 @@ internal sealed class OperationExecutor : IOperationExecutor
         OperationExecutionOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        options ??= OperationExecutionOptions.Default;
+        options ??= new OperationExecutionOptions();
         var scope = _scopeFactory(options, cancellationToken);
         await scope.BeginAsync();
         return scope;

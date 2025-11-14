@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
-using WinGetStudio.Services.Operations.Models.States;
+using WinGetStudio.Services.Operations.Models;
 
 namespace WinGetStudio.Services.Operations.Contracts;
 
 /// <summary>
 /// Represents an operation that can be executed.
 /// </summary>
-public interface IOperation
+public interface IOperation<T>
 {
     /// <summary>
     /// Gets the operation execution options.
@@ -20,5 +20,5 @@ public interface IOperation
     /// Executes the operation asynchronously.
     /// </summary>
     /// <param name="context">The operation context.</param>
-    Task ExecuteAsync(IOperationContext context);
+    Task<T> ExecuteAsync(IOperationContext context);
 }

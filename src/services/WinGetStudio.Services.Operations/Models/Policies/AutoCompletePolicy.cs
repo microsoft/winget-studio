@@ -7,7 +7,7 @@ using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.Services.Operations.Models.Policies;
 
-internal sealed partial class AutoCompletePolicy : IOperationCompletionPolicy
+public sealed partial class AutoCompletePolicy : IOperationCompletionPolicy
 {
     /// <inheritdoc/>
     public bool CanApply(IOperationContext context)

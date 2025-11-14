@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using WinGetStudio.Services.Operations.Models.States;
+using WinGetStudio.Services.Operations.Models;
 
 namespace WinGetStudio.Services.Operations.Contracts;
 
@@ -16,9 +16,10 @@ internal interface IOperationExecutor
     /// <summary>
     /// Executes the specified operation.
     /// </summary>
+    /// <typeparam name="T">The type of the result.</typeparam>
     /// <param name="operation">The operation to execute.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    Task ExecuteAsync(IOperation operation, CancellationToken cancellationToken = default);
+    Task<T> ExecuteAsync<T>(IOperation<T> operation, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the specified operation function.

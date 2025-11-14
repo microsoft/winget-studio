@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using WinGetStudio.Services.Operations.Models;
 using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Contracts;
@@ -20,8 +21,8 @@ public interface IOperationHub
     /// <inheritdoc cref="IOperationPublisher.GlobalActivity"/>
     IEventStream<GlobalActivity> GlobalActivity { get; }
 
-    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync(IOperation, CancellationToken)"/>
-    Task ExecuteAsync(IOperation operation, CancellationToken cancellationToken = default);
+    /// <inheritdoc cref="IOperationExecutor.ExecuteAsync{T}(IOperation{T}, CancellationToken)"/>
+    Task<T> ExecuteAsync<T>(IOperation<T> operation, CancellationToken cancellationToken = default);
 
     /// <inheritdoc cref="IOperationExecutor.ExecuteAsync(Func{IOperationContext, Task}, OperationExecutionOptions?, CancellationToken)"/>
     Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);

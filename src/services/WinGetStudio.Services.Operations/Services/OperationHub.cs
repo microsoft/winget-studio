@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Models;
 using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Services;
@@ -33,7 +34,7 @@ internal sealed partial class OperationHub : IOperationHub
     }
 
     /// <inheritdoc/>
-    public Task ExecuteAsync(IOperation operation, CancellationToken cancellationToken = default) => _executor.ExecuteAsync(operation, cancellationToken);
+    public Task<T> ExecuteAsync<T>(IOperation<T> operation, CancellationToken cancellationToken = default) => _executor.ExecuteAsync(operation, cancellationToken);
 
     /// <inheritdoc/>
     public Task ExecuteAsync(Func<IOperationContext, Task> operation, OperationExecutionOptions? options = null, CancellationToken cancellationToken = default) => _executor.ExecuteAsync(operation, options, cancellationToken);
