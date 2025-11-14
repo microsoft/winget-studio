@@ -3,7 +3,7 @@
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 
-internal sealed partial class DSCProcessResult
+public sealed partial class DSCProcessResult
 {
     /// <summary>
     /// Gets the output from the process.

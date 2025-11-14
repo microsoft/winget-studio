@@ -21,6 +21,7 @@ namespace WinGetStudio.ViewModels;
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IDSC _dsc;
+    private readonly IDSCProcess _dscProcess;
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
     private readonly ILogger<ValidationViewModel> _logger;
@@ -43,12 +44,14 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     public ValidationViewModel(
         IDSC dsc,
+        IDSCProcess dscProcess,
         IUIFeedbackService ui,
         IStringLocalizer<ValidationViewModel> localizer,
         ILogger<ValidationViewModel> logger,
         UnitViewModelFactory unitFactory)
     {
         _dsc = dsc;
+        _dscProcess = dscProcess;
         _ui = ui;
         _localizer = localizer;
         _logger = logger;
@@ -75,16 +78,36 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnGetAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        try
         {
-            var result = await _dsc.GetUnitAsync(dscUnit);
-            if (result.ResultInformation?.IsOk ?? true)
+            CanExecuteDSCOperation = false;
+            _ui.ShowTaskProgress();
+
+            _logger.LogInformation("Executing DSC get operation for resource: {Resource}", SearchResourceText);
+            var result = await _dscProcess.GetResourceAsync(SearchResourceText ?? string.Empty, SettingsText ?? string.Empty);
+
+            if (!result.IsSuccess)
             {
-                OutputText = result.Settings.ToYaml();
+                _logger.LogError("DSC get failed with exit code {ExitCode}. Error: {Error}", result.ExitCode, result.Errors);
+                _ui.ShowTimedNotification(
+                    "DSC Get Failed",
+                    $"Exit code: {result.ExitCode}\n{result.Errors}",
+                    NotificationMessageSeverity.Error);
+                return;
             }
 
-            return result.ResultInformation;
-        });
+            OutputText = result.Output;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while executing DSC get operation");
+            _ui.ShowTimedNotification("Error", ex.Message, NotificationMessageSeverity.Error);
+        }
+        finally
+        {
+            _ui.HideTaskProgress();
+            CanExecuteDSCOperation = true;
+        }
     }
 
     /// <summary>
@@ -93,11 +116,37 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnSetAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        try
         {
-            var result = await _dsc.SetUnitAsync(dscUnit);
-            return result.ResultInformation;
-        });
+            CanExecuteDSCOperation = false;
+            _ui.ShowTaskProgress();
+
+            _logger.LogInformation("Executing DSC set operation for resource: {Resource}", SearchResourceText);
+            var result = await _dscProcess.SetResourceAsync(SearchResourceText, SettingsText ?? string.Empty);
+
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("DSC set failed with exit code {ExitCode}. Error: {Error}", result.ExitCode, result.Errors);
+                _ui.ShowTimedNotification(
+                    "DSC Set Failed",
+                    $"Exit code: {result.ExitCode}\n{result.Errors}",
+                    NotificationMessageSeverity.Error);
+                return;
+            }
+
+            OutputText = result.Output;
+            _ui.ShowTimedNotification("Set Completed", "Configuration applied successfully", NotificationMessageSeverity.Success);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while executing DSC set operation");
+            _ui.ShowTimedNotification("Error", ex.Message, NotificationMessageSeverity.Error);
+        }
+        finally
+        {
+            _ui.HideTaskProgress();
+            CanExecuteDSCOperation = true;
+        }
     }
 
     /// <summary>
@@ -106,10 +155,29 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnTestAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        try
         {
-            var result = await _dsc.TestUnitAsync(dscUnit);
-            if (result.TestResult == ConfigurationTestResult.Positive)
+            CanExecuteDSCOperation = false;
+            _ui.ShowTaskProgress();
+
+            _logger.LogInformation("Executing DSC test operation for resource: {Resource}", SearchResourceText);
+            var result = await _dscProcess.TestResourceAsync(SearchResourceText ?? string.Empty, SettingsText ?? string.Empty);
+
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("DSC test failed with exit code {ExitCode}. Error: {Error}", result.ExitCode, result.Errors);
+                _ui.ShowTimedNotification(
+                    "DSC Test Failed",
+                    $"Exit code: {result.ExitCode}\n{result.Errors}",
+                    NotificationMessageSeverity.Error);
+                return;
+            }
+
+            OutputText = result.Output;
+
+            var inDesiredState = result.Output.Contains("inDesiredState: true", StringComparison.OrdinalIgnoreCase);
+
+            if (inDesiredState)
             {
                 _ui.ShowTimedNotification(_localizer["Notification_MachineInDesiredState"], NotificationMessageSeverity.Success);
             }
@@ -117,9 +185,17 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
             {
                 _ui.ShowTimedNotification(_localizer["Notification_MachineNotInDesiredState"], NotificationMessageSeverity.Error);
             }
-
-            return result.ResultInformation;
-        });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while executing DSC test operation");
+            _ui.ShowTimedNotification("Error", ex.Message, NotificationMessageSeverity.Error);
+        }
+        finally
+        {
+            _ui.HideTaskProgress();
+            CanExecuteDSCOperation = true;
+        }
     }
 
     /// <summary>

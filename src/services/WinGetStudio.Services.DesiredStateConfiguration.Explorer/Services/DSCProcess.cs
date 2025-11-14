@@ -28,7 +28,28 @@ internal sealed partial class DSCProcess : IDSCProcess
         // This implementation can potentially be removed once this issue is resolved:
         // https://github.com/microsoft/winget-cli/issues/5829
         _logger.LogInformation($"Getting schema for DSC resource: {resource}");
-        return Task.Run(() => ExecuteAsync("resource", "schema", "-r", resource, "-o", "json"));
+        return ExecuteAsync("resource", "schema", "-r", resource, "-o", "json");
+    }
+
+    /// <inheritdoc/>
+    public Task<DSCProcessResult> GetResourceAsync(string resource, string input)
+    {
+        _logger.LogInformation($"Getting current state for DSC resource: {resource}");
+        return ExecuteAsync("resource", "get", "--resource", resource, "--input", input, "--output-format", "yaml");
+    }
+
+    /// <inheritdoc/>
+    public Task<DSCProcessResult> SetResourceAsync(string resource, string input)
+    {
+        _logger.LogInformation($"Setting state for DSC resource: {resource}");
+        return ExecuteAsync("resource", "set", "--resource", resource, "--input", input, "--output-format", "yaml");
+    }
+
+    /// <inheritdoc/>
+    public Task<DSCProcessResult> TestResourceAsync(string resource, string input)
+    {
+        _logger.LogInformation($"Testing state for DSC resource: {resource}");
+        return ExecuteAsync("resource", "test", "--resource", resource, "--input", input, "--output-format", "yaml");
     }
 
     /// <summary>
