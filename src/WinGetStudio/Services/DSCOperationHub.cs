@@ -17,19 +17,19 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
 {
     private readonly IOperationHub _operationHub;
     private readonly IDSC _dsc;
-    private readonly ILogger<DSCOperationHub> _logger;
+    private readonly ILoggerFactory _loggerFactory;
     private readonly IStringLocalizer<DSCOperationHub> _localizer;
     private readonly OperationExecutionOptions _options;
 
     public DSCOperationHub(
         IOperationHub operationHub,
         IDSC dsc,
-        ILogger<DSCOperationHub> logger,
+        ILoggerFactory loggerFactory,
         IStringLocalizer<DSCOperationHub> localizer)
     {
         _operationHub = operationHub;
         _dsc = dsc;
-        _logger = logger;
+        _loggerFactory = loggerFactory;
         _localizer = localizer;
         _options = new()
         {
@@ -44,21 +44,48 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
     /// <inheritdoc/>
     public async Task<DSCOperationResult<IDSCGetUnitResult>> ExecuteGetUnitAsync(IDSCFile dscFile, CancellationToken cancellationToken = default)
     {
-        var operation = new DSCGetUnitOperation(_logger, _localizer, _dsc, dscFile);
+        var logger = _loggerFactory.CreateLogger<DSCGetUnitOperation>();
+        var operation = new DSCGetUnitOperation(logger, _localizer, _dsc, dscFile);
         return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
     }
 
     /// <inheritdoc/>
     public async Task<DSCOperationResult<IDSCApplyUnitResult>> ExecuteSetUnitAsync(IDSCFile dscFile, CancellationToken cancellationToken = default)
     {
-        var operation = new DSCSetUnitOperation(_logger, _localizer, _dsc, dscFile);
+        var logger = _loggerFactory.CreateLogger<DSCSetUnitOperation>();
+        var operation = new DSCSetUnitOperation(logger, _localizer, _dsc, dscFile);
         return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
     }
 
     /// <inheritdoc/>
     public async Task<DSCOperationResult<IDSCTestUnitResult>> ExecuteTestUnitAsync(IDSCFile dscFile, CancellationToken cancellationToken = default)
     {
-        var operation = new DSCTestUnitOperation(_logger, _localizer, _dsc, dscFile);
+        var logger = _loggerFactory.CreateLogger<DSCTestUnitOperation>();
+        var operation = new DSCTestUnitOperation(logger, _localizer, _dsc, dscFile);
+        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<DSCOperationResult<IDSCApplySetResult>> ExecuteValidateSetAsync(IDSCFile dscFile, CancellationToken cancellationToken = default)
+    {
+        var logger = _loggerFactory.CreateLogger<DSCValidateSetOperation>();
+        var operation = new DSCValidateSetOperation(logger, _localizer, _dsc, dscFile);
+        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<DSCOperationResult<IDSCTestSetResult>> ExecuteTestSetAsync(IDSCFile dscFile, CancellationToken cancellationToken = default)
+    {
+        var logger = _loggerFactory.CreateLogger<DSCTestSetOperation>();
+        var operation = new DSCTestSetOperation(logger, _localizer, _dsc, dscFile);
+        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<DSCOperationResult<IDSCSet>> ExecuteOpenSetAsync(IDSCFile dscFile, CancellationToken cancellationToken = default)
+    {
+        var logger = _loggerFactory.CreateLogger<DSCOpenSetOperation>();
+        var operation = new DSCOpenSetOperation(logger, _localizer, _dsc, dscFile);
         return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
     }
 }

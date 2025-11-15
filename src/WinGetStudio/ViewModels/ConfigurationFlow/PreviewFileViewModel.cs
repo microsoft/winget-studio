@@ -25,6 +25,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private readonly ILogger<PreviewFileViewModel> _logger;
     private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
     private readonly IOperationHub _operationHub;
+    private readonly IDSCOperationHub _dscOperationHub;
     private readonly IDSC _dsc;
     private readonly IAppFrameNavigationService _appNavigation;
     private readonly IConfigurationFrameNavigationService _configNavigation;
@@ -106,6 +107,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         ILogger<PreviewFileViewModel> logger,
         IStringLocalizer<PreviewFileViewModel> localizer,
         IOperationHub operationHub,
+        IDSCOperationHub dscOperationHub,
         IDSC dsc,
         IAppFrameNavigationService appNavigation,
         IConfigurationFrameNavigationService configNavigation,
@@ -116,6 +118,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _logger = logger;
         _localizer = localizer;
         _operationHub = operationHub;
+        _dscOperationHub = dscOperationHub;
         _dsc = dsc;
         _appNavigation = appNavigation;
         _configNavigation = configNavigation;
@@ -130,38 +133,19 @@ public partial class PreviewFileViewModel : ObservableRecipient
     /// <param name="file">The configuration file to open.</param>
     public async Task OpenConfigurationFileAsync(StorageFile file)
     {
-        await _operationHub.ExecuteAsync(async ctx =>
+        IsEditMode = false;
+        IsConfigurationLoading = true;
+        SelectedUnit = null;
+        ConfigurationSet = _setFactory();
+        var dscFile = await DSCFile.LoadAsync(file.Path);
+        var operationResult = await _dscOperationHub.ExecuteOpenSetAsync(dscFile);
+        if (operationResult.IsSuccess && operationResult.Result != null)
         {
-            try
-            {
-                ctx.StartSnapshotBroadcast();
-                ctx.Start();
-                _logger.LogInformation($"Selected file: {file.Path}");
-                IsEditMode = false;
-                IsConfigurationLoading = true;
-                SelectedUnit = null;
-                ConfigurationSet = _setFactory();
-                var dscFile = await DSCFile.LoadAsync(file.Path);
-                var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-                await ConfigurationSet.UseAsync(dscSet, dscFile);
-                SaveConfigurationCommand.NotifyCanExecuteChanged();
-                ctx.Complete();
-            }
-            catch (OpenConfigurationSetException ex)
-            {
-                _logger.LogError(ex, $"Opening configuration set failed");
-                ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Unknown error while opening configuration set");
-                ctx.Fail(props => props with { Message = ex.Message });
-            }
-            finally
-            {
-                IsConfigurationLoading = false;
-            }
-        });
+            await ConfigurationSet.UseAsync(operationResult.Result, dscFile);
+        }
+
+        SaveConfigurationCommand.NotifyCanExecuteChanged();
+        IsConfigurationLoading = false;
     }
 
     public async Task SaveConfigurationAsAsync(string filePath)
@@ -338,36 +322,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            await _operationHub.ExecuteAsync(async ctx =>
-            {
-                try
-                {
-                    ctx.StartSnapshotBroadcast();
-                    ctx.Start();
-                    _logger.LogInformation($"Validating configuration code");
-                    var dscFile = ConfigurationSet.GetLatestDSCFile();
-                    var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-                    await _dsc.ValidateSetAsync(dscSet);
-                    ctx.Success(props => props with { Message = _localizer["PreviewFile_ValidationSuccessfulMessage"] });
-                }
-                catch (OpenConfigurationSetException ex)
-                {
-                    _logger.LogError(ex, $"Opening configuration set failed during validation");
-                    ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
-                }
-                catch (ApplyConfigurationSetException ex)
-                {
-                    _logger.LogError(ex, $"Validation of configuration set failed");
-                    var title = ex.GetSetErrorMessage(_localizer);
-                    var message = ex.GetUnitsSummaryMessage(_localizer);
-                    ctx.Fail(props => props with { Title = title, Message = message });
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Unknown error while validating configuration code");
-                    ctx.Fail(props => props with { Message = ex.Message });
-                }
-            });
+            var dscFile = ConfigurationSet.GetLatestDSCFile();
+            await _dscOperationHub.ExecuteValidateSetAsync(dscFile);
         }
     }
 
@@ -376,36 +332,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            await _operationHub.ExecuteAsync(async ctx =>
-            {
-                try
-                {
-                    ctx.StartSnapshotBroadcast();
-                    ctx.Start();
-                    _logger.LogInformation($"Testing configuration code");
-                    var dscFile = ConfigurationSet.GetLatestDSCFile();
-                    var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-                    var result = await _dsc.TestSetAsync(dscSet);
-                    if (result.TestResult == ConfigurationTestResult.Positive)
-                    {
-                        ctx.Success(props => props with { Message = _localizer["Notification_MachineInDesiredState"] });
-                    }
-                    else
-                    {
-                        ctx.Fail(props => props with { Message = _localizer["Notification_MachineNotInDesiredState"] });
-                    }
-                }
-                catch (OpenConfigurationSetException ex)
-                {
-                    _logger.LogError(ex, $"Opening configuration set failed during validation");
-                    ctx.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Unknown error while validating configuration code");
-                    ctx.Fail(props => props with { Message = ex.Message });
-                }
-            });
+            var dscFile = ConfigurationSet.GetLatestDSCFile();
+            await _dscOperationHub.ExecuteTestSetAsync(dscFile);
         }
     }
 

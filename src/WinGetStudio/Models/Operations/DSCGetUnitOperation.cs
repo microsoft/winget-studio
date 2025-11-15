@@ -12,12 +12,12 @@ namespace WinGetStudio.Models.Operations;
 
 public sealed partial class DSCGetUnitOperation : IOperation<DSCOperationResult<IDSCGetUnitResult>>
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<DSCGetUnitOperation> _logger;
     private readonly IDSC _dsc;
     private readonly IDSCFile _dscFile;
     private readonly IStringLocalizer _localizer;
 
-    public DSCGetUnitOperation(ILogger logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
+    public DSCGetUnitOperation(ILogger<DSCGetUnitOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
     {
         _logger = logger;
         _localizer = localizer;
@@ -25,11 +25,7 @@ public sealed partial class DSCGetUnitOperation : IOperation<DSCOperationResult<
         _dscFile = dscFile;
     }
 
-    /// <summary>
-    /// Executes the DSC get unit operation.
-    /// </summary>
-    /// <param name="context">The operation context.</param>
-    /// <returns>The DSC get unit result.</returns>
+    /// <inheritdoc/>
     public async Task<DSCOperationResult<IDSCGetUnitResult>> ExecuteAsync(IOperationContext context)
     {
         try

@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Management.Configuration;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.Operations.Contracts;
@@ -10,14 +11,14 @@ using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.Models.Operations;
 
-public sealed partial class DSCSetUnitOperation : IOperation<DSCOperationResult<IDSCApplyUnitResult>>
+public sealed partial class DSCTestSetOperation : IOperation<DSCOperationResult<IDSCTestSetResult>>
 {
-    private readonly ILogger<DSCSetUnitOperation> _logger;
+    private readonly ILogger<DSCTestSetOperation> _logger;
     private readonly IDSC _dsc;
     private readonly IDSCFile _dscFile;
     private readonly IStringLocalizer _localizer;
 
-    public DSCSetUnitOperation(ILogger<DSCSetUnitOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
+    public DSCTestSetOperation(ILogger<DSCTestSetOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
     {
         _logger = logger;
         _localizer = localizer;
@@ -26,42 +27,43 @@ public sealed partial class DSCSetUnitOperation : IOperation<DSCOperationResult<
     }
 
     /// <inheritdoc/>
-    public async Task<DSCOperationResult<IDSCApplyUnitResult>> ExecuteAsync(IOperationContext context)
+    public async Task<DSCOperationResult<IDSCTestSetResult>> ExecuteAsync(IOperationContext context)
     {
         try
         {
             context.Start();
             context.StartSnapshotBroadcast();
-            context.AddCancelAction("Cancel");
-            var dscSet = await _dsc.OpenConfigurationSetAsync(_dscFile);
-            var dscUnit = dscSet.Units[0];
-            var result = await _dsc.SetUnitAsync(dscUnit, context.CancellationToken);
-            var resultInfo = result.ResultInformation;
-            if (resultInfo != null && !resultInfo.IsOk)
+            _logger.LogInformation($"Testing configuration code");
+            var dscSet = await _dsc.OpenConfigurationSetAsync(_dscFile, context.CancellationToken);
+
+            // TODO capture progress and pass CT
+            var result = await _dsc.TestSetAsync(dscSet);
+            if (result.TestResult == ConfigurationTestResult.Positive)
             {
-                var title = $"0x{resultInfo.ResultCode.HResult:X}";
-                List<string> messageList = [resultInfo.Description, resultInfo.Details];
-                var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
-                context.Fail(props => props with { Title = title, Message = message });
+                context.Success(props => props with { Message = _localizer["Notification_MachineInDesiredState"] });
+            }
+            else
+            {
+                context.Fail(props => props with { Message = _localizer["Notification_MachineNotInDesiredState"] });
             }
 
             return new(result);
         }
         catch (OperationCanceledException ex)
         {
-            _logger.LogWarning(ex, "The DSC set unit operation was canceled.");
+            _logger.LogWarning(ex, "The DSC test set operation was canceled.");
             context.Canceled(props => props with { Message = "The operation was canceled." });
             return new(ex);
         }
         catch (OpenConfigurationSetException ex)
         {
-            _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
+            _logger.LogError(ex, $"Opening configuration set failed during validation");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
             return new(ex);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while executing a DSC operation.");
+            _logger.LogError(ex, $"Unknown error while validating configuration code");
             context.Fail(props => props with { Message = ex.Message });
             return new(ex);
         }

@@ -29,6 +29,30 @@ public interface IDSCOperationHub
     /// </summary>
     /// <param name="dscFile">The DSC File to test the unit from.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>>The result of the Test operation.</returns>
+    /// <returns>The result of the Test operation.</returns>
     Task<DSCOperationResult<IDSCTestUnitResult>> ExecuteTestUnitAsync(IDSCFile dscFile, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Executes a Validate operation for the specified DSC Configuration Set.
+    /// </summary>
+    /// <param name="dscFile">The DSC File to validate the configuration set from.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the Validate operation.</returns>
+    Task<DSCOperationResult<IDSCApplySetResult>> ExecuteValidateSetAsync(IDSCFile dscFile, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Executes a Test operation for the specified DSC Configuration Set.
+    /// </summary>
+    /// <param name="dscFile">The DSC File to test the configuration set from.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the Test operation.</returns>
+    Task<DSCOperationResult<IDSCTestSetResult>> ExecuteTestSetAsync(IDSCFile dscFile, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Executes an Open operation for the specified DSC Configuration Set.
+    /// </summary>
+    /// <param name="dscFile">The DSC File to open the configuration set from.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the Open operation.</returns>
+    Task<DSCOperationResult<IDSCSet>> ExecuteOpenSetAsync(IDSCFile dscFile, CancellationToken cancellationToken = default);
 }
