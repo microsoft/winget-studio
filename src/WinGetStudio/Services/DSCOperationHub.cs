@@ -19,7 +19,8 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
     private readonly IDSC _dsc;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IStringLocalizer<DSCOperationHub> _localizer;
-    private readonly OperationExecutionOptions _options;
+    private readonly OperationExecutionOptions _interactiveOperationOptions;
+    private readonly OperationExecutionOptions _passiveOperationOptions;
 
     public DSCOperationHub(
         IOperationHub operationHub,
@@ -31,7 +32,8 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
         _dsc = dsc;
         _loggerFactory = loggerFactory;
         _localizer = localizer;
-        _options = new()
+
+        _interactiveOperationOptions = new()
         {
             Policies =
             [
@@ -46,7 +48,7 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
     {
         var logger = _loggerFactory.CreateLogger<DSCGetUnitOperation>();
         var operation = new DSCGetUnitOperation(logger, _localizer, _dsc, dscFile);
-        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+        return await ExecuteInteractiveOperationAsync(operation, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -54,7 +56,7 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
     {
         var logger = _loggerFactory.CreateLogger<DSCSetUnitOperation>();
         var operation = new DSCSetUnitOperation(logger, _localizer, _dsc, dscFile);
-        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+        return await ExecuteInteractiveOperationAsync(operation, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -62,7 +64,7 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
     {
         var logger = _loggerFactory.CreateLogger<DSCTestUnitOperation>();
         var operation = new DSCTestUnitOperation(logger, _localizer, _dsc, dscFile);
-        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+        return await ExecuteInteractiveOperationAsync(operation, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -70,7 +72,7 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
     {
         var logger = _loggerFactory.CreateLogger<DSCValidateSetOperation>();
         var operation = new DSCValidateSetOperation(logger, _localizer, _dsc, dscFile);
-        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+        return await ExecuteInteractiveOperationAsync(operation, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -78,7 +80,7 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
     {
         var logger = _loggerFactory.CreateLogger<DSCTestSetOperation>();
         var operation = new DSCTestSetOperation(logger, _localizer, _dsc, dscFile);
-        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+        return await ExecuteInteractiveOperationAsync(operation, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -86,6 +88,29 @@ public sealed partial class DSCOperationHub : IDSCOperationHub
     {
         var logger = _loggerFactory.CreateLogger<DSCOpenSetOperation>();
         var operation = new DSCOpenSetOperation(logger, _localizer, _dsc, dscFile);
-        return await _operationHub.ExecuteAsync(operation, _options, cancellationToken);
+        return await ExecuteInteractiveOperationAsync(operation, cancellationToken);
+    }
+
+    /// <summary>
+    /// Execute an interactive operation.
+    /// </summary>
+    /// <typeparam name="TResult">The result type.</typeparam>
+    /// <param name="operation">The operation.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The operation result.</returns>
+    private Task<TResult> ExecuteInteractiveOperationAsync<TResult>(IOperation<TResult> operation, CancellationToken cancellationToken = default)
+    {
+        return _operationHub.ExecuteAsync(operation, _interactiveOperationOptions, cancellationToken);
+    }
+
+    /// <summary>
+    /// Execute a passive operation.
+    /// </summary>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <param name="operation">The operation.</param>
+    /// <returns>The operation result.</returns>
+    private Task<T> ExecutePassiveOperationAsync<T>(IOperation<T> operation)
+    {
+        return _operationHub.ExecuteAsync(operation, _passiveOperationOptions);
     }
 }

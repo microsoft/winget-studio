@@ -7,13 +7,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using Microsoft.Management.Configuration;
 using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
-using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
-using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
@@ -26,7 +23,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
     private readonly IOperationHub _operationHub;
     private readonly IDSCOperationHub _dscOperationHub;
-    private readonly IDSC _dsc;
     private readonly IAppFrameNavigationService _appNavigation;
     private readonly IConfigurationFrameNavigationService _configNavigation;
     private readonly IConfigurationManager _manager;
@@ -108,7 +104,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
         IStringLocalizer<PreviewFileViewModel> localizer,
         IOperationHub operationHub,
         IDSCOperationHub dscOperationHub,
-        IDSC dsc,
         IAppFrameNavigationService appNavigation,
         IConfigurationFrameNavigationService configNavigation,
         IConfigurationManager manager,
@@ -119,7 +114,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _localizer = localizer;
         _operationHub = operationHub;
         _dscOperationHub = dscOperationHub;
-        _dsc = dsc;
         _appNavigation = appNavigation;
         _configNavigation = configNavigation;
         _manager = manager;
