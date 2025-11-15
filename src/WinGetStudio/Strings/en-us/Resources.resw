@@ -761,12 +761,6 @@
   <data name="PreviewFile_CreateNewConfigurationFailed" xml:space="preserve">
     <value>Creating new configuration set failed: {0}</value>
   </data>
-  <data name="PreviewFile_SaveSuccessfulMessage" xml:space="preserve">
-    <value>Configuration saved successfully</value>
-  </data>
-  <data name="PreviewFile_SaveFailedMessage" xml:space="preserve">
-    <value>Saving configuration set failed: {0}</value>
-  </data>
   <data name="PreviewFile_DeleteSuccessfulMessage" xml:space="preserve">
     <value>Configuration unit deleted</value>
   </data>

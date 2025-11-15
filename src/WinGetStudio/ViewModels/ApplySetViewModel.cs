@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
+using WinGetStudio.Models.Operations;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.ViewModels;
@@ -21,6 +22,7 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
     private readonly IStringLocalizer<ApplySetViewModel> _localizer;
     private readonly ILogger<ApplySetViewModel> _logger;
     private readonly IDSC _dsc;
+    private readonly IAppOperationHub _operationHub;
     private readonly IDSCSet _applySet;
     private readonly IUIDispatcher _dispatcher;
     private CancellationTokenSource? _cts;
@@ -52,12 +54,14 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
 
     public ApplySetViewModel(
         IDSC dsc,
+        IAppOperationHub operationHub,
         IStringLocalizer<ApplySetViewModel> localizer,
         ILogger<ApplySetViewModel> logger,
         IUIDispatcher dispatcher,
         IDSCSet applySet)
     {
         _dsc = dsc;
+        _operationHub = operationHub;
         _localizer = localizer;
         _logger = logger;
         _applySet = applySet;
@@ -71,13 +75,13 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
     /// Applies the configuration set asynchronously.
     /// </summary>
     /// <returns>The result of the apply operation.</returns>
-    public async Task<IDSCApplySetResult> ApplyAsync()
+    public async Task<OperationResult<IDSCApplySetResult>> ApplyAsync()
     {
         try
         {
             _cts = new();
             var progress = new Progress<IDSCSetChangeData>(OnDataChanged);
-            return await _dsc.ApplySetAsync(_applySet, progress, _cts.Token);
+            return await _operationHub.ExecuteApplySetAsync(_applySet, progress, _cts.Token);
         }
         finally
         {

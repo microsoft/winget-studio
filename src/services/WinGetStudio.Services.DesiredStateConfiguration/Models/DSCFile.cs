@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Localization;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 
 namespace WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -68,13 +68,9 @@ public sealed class DSCFile : IDSCFile
     }
 
     /// <inheritdoc/>
-    public async Task SaveAsync(IStringLocalizer localizer)
+    public async Task SaveAsync()
     {
-        if (FileInfo == null)
-        {
-            throw new InvalidDataException(localizer["File_PathCannotBeNullOrEmpty"]);
-        }
-
+        ArgumentNullException.ThrowIfNull(FileInfo);
         await File.WriteAllTextAsync(FileInfo.FullName, Content);
     }
 

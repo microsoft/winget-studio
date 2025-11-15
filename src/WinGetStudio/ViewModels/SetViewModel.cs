@@ -7,6 +7,7 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -20,6 +21,7 @@ public sealed partial class SetViewModel : ObservableObject
 {
     private readonly ILogger<SetViewModel> _logger;
     private readonly IStringLocalizer<SetViewModel> _localizer;
+    private readonly IAppOperationHub _operationHub;
     private readonly UnitViewModelFactory _unitFactory;
     private readonly ObservableCollection<UnitViewModel> _units;
 
@@ -51,10 +53,15 @@ public sealed partial class SetViewModel : ObservableObject
         remove => _units.CollectionChanged -= value;
     }
 
-    public SetViewModel(ILogger<SetViewModel> logger, IStringLocalizer<SetViewModel> localizer, UnitViewModelFactory unitFactory)
+    public SetViewModel(
+        ILogger<SetViewModel> logger,
+        IStringLocalizer<SetViewModel> localizer,
+        IAppOperationHub operationHub,
+        UnitViewModelFactory unitFactory)
     {
         _logger = logger;
         _localizer = localizer;
+        _operationHub = operationHub;
         _unitFactory = unitFactory;
         _units = [];
         Units = new(_units);
@@ -181,7 +188,7 @@ public sealed partial class SetViewModel : ObservableObject
     {
         Debug.Assert(dscFile.CanSave, $"DSC file should be savable before calling {nameof(SaveInternalAsync)}.");
         OriginalDscFile = dscFile;
-        await dscFile.SaveAsync(_localizer);
+        await _operationHub.ExecuteSaveDscFile(dscFile);
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 }

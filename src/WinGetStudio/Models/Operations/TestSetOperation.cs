@@ -11,14 +11,14 @@ using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.Models.Operations;
 
-public sealed partial class DSCTestSetOperation : IOperation<DSCOperationResult<IDSCTestSetResult>>
+public sealed partial class TestSetOperation : IOperation<OperationResult<IDSCTestSetResult>>
 {
-    private readonly ILogger<DSCTestSetOperation> _logger;
+    private readonly ILogger<TestSetOperation> _logger;
     private readonly IDSC _dsc;
     private readonly IDSCFile _dscFile;
     private readonly IStringLocalizer _localizer;
 
-    public DSCTestSetOperation(ILogger<DSCTestSetOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
+    public TestSetOperation(ILogger<TestSetOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
     {
         _logger = logger;
         _localizer = localizer;
@@ -27,7 +27,7 @@ public sealed partial class DSCTestSetOperation : IOperation<DSCOperationResult<
     }
 
     /// <inheritdoc/>
-    public async Task<DSCOperationResult<IDSCTestSetResult>> ExecuteAsync(IOperationContext context)
+    public async Task<OperationResult<IDSCTestSetResult>> ExecuteAsync(IOperationContext context)
     {
         try
         {
@@ -47,25 +47,25 @@ public sealed partial class DSCTestSetOperation : IOperation<DSCOperationResult<
                 context.Fail(props => props with { Message = _localizer["Notification_MachineNotInDesiredState"] });
             }
 
-            return new(result);
+            return new() { Result = result };
         }
         catch (OperationCanceledException ex)
         {
             _logger.LogWarning(ex, "The DSC test set operation was canceled.");
             context.Canceled(props => props with { Message = "The operation was canceled." });
-            return new(ex);
+            return new() { Error = ex };
         }
         catch (OpenConfigurationSetException ex)
         {
             _logger.LogError(ex, $"Opening configuration set failed during validation");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
-            return new(ex);
+            return new() { Error = ex };
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Unknown error while validating configuration code");
             context.Fail(props => props with { Message = ex.Message });
-            return new(ex);
+            return new() { Error = ex };
         }
     }
 }

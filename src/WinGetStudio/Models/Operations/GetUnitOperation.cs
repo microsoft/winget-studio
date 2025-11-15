@@ -10,14 +10,14 @@ using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.Models.Operations;
 
-public sealed partial class DSCGetUnitOperation : IOperation<DSCOperationResult<IDSCGetUnitResult>>
+public sealed partial class GetUnitOperation : IOperation<OperationResult<IDSCGetUnitResult>>
 {
-    private readonly ILogger<DSCGetUnitOperation> _logger;
+    private readonly ILogger<GetUnitOperation> _logger;
     private readonly IDSC _dsc;
     private readonly IDSCFile _dscFile;
     private readonly IStringLocalizer _localizer;
 
-    public DSCGetUnitOperation(ILogger<DSCGetUnitOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
+    public GetUnitOperation(ILogger<GetUnitOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
     {
         _logger = logger;
         _localizer = localizer;
@@ -26,7 +26,7 @@ public sealed partial class DSCGetUnitOperation : IOperation<DSCOperationResult<
     }
 
     /// <inheritdoc/>
-    public async Task<DSCOperationResult<IDSCGetUnitResult>> ExecuteAsync(IOperationContext context)
+    public async Task<OperationResult<IDSCGetUnitResult>> ExecuteAsync(IOperationContext context)
     {
         try
         {
@@ -45,25 +45,25 @@ public sealed partial class DSCGetUnitOperation : IOperation<DSCOperationResult<
                 context.Fail(props => props with { Title = title, Message = message });
             }
 
-            return new(result);
+            return new() { Result = result };
         }
         catch (OperationCanceledException ex)
         {
             _logger.LogWarning(ex, "The DSC get unit operation was canceled.");
             context.Canceled(props => props with { Message = "The operation was canceled." });
-            return new(ex);
+            return new() { Error = ex };
         }
         catch (OpenConfigurationSetException ex)
         {
             _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
-            return new(ex);
+            return new() { Error = ex };
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while executing a DSC operation.");
             context.Fail(props => props with { Message = ex.Message });
-            return new(ex);
+            return new() { Error = ex };
         }
     }
 }

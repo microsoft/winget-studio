@@ -15,7 +15,7 @@ namespace WinGetStudio.ViewModels;
 
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
-    private readonly IDSCOperationHub _dscOperationHub;
+    private readonly IAppOperationHub _operationHub;
     private readonly ILogger<ValidationViewModel> _logger;
     private readonly UnitViewModelFactory _unitFactory;
 
@@ -34,9 +34,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     public partial string? SettingsText { get; set; }
 
-    public ValidationViewModel(IDSCOperationHub dscOperationHub, ILogger<ValidationViewModel> logger, UnitViewModelFactory unitFactory)
+    public ValidationViewModel(IAppOperationHub operationHub, ILogger<ValidationViewModel> logger, UnitViewModelFactory unitFactory)
     {
-        _dscOperationHub = dscOperationHub;
+        _operationHub = operationHub;
         _logger = logger;
         _unitFactory = unitFactory;
     }
@@ -63,7 +63,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async dscFile =>
         {
-            var executionResult = await _dscOperationHub.ExecuteGetUnitAsync(dscFile);
+            var executionResult = await _operationHub.ExecuteGetUnitAsync(dscFile);
             if (executionResult.IsSuccess && executionResult.Result?.Settings != null)
             {
                 OutputText = executionResult.Result.Settings.ToYaml();
@@ -79,7 +79,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async dscFile =>
         {
-            await _dscOperationHub.ExecuteSetUnitAsync(dscFile);
+            await _operationHub.ExecuteSetUnitAsync(dscFile);
         });
     }
 
@@ -91,7 +91,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async dscFile =>
         {
-            await _dscOperationHub.ExecuteTestUnitAsync(dscFile);
+            await _operationHub.ExecuteTestUnitAsync(dscFile);
         });
     }
 

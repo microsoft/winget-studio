@@ -10,14 +10,14 @@ using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.Models.Operations;
 
-public sealed partial class DSCSetUnitOperation : IOperation<DSCOperationResult<IDSCApplyUnitResult>>
+public sealed partial class OpenSetOperation : IOperation<OperationResult<IDSCSet>>
 {
-    private readonly ILogger<DSCSetUnitOperation> _logger;
+    private readonly ILogger<OpenSetOperation> _logger;
     private readonly IDSC _dsc;
     private readonly IDSCFile _dscFile;
     private readonly IStringLocalizer _localizer;
 
-    public DSCSetUnitOperation(ILogger<DSCSetUnitOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
+    public OpenSetOperation(ILogger<OpenSetOperation> logger, IStringLocalizer localizer, IDSC dsc, IDSCFile dscFile)
     {
         _logger = logger;
         _localizer = localizer;
@@ -26,44 +26,33 @@ public sealed partial class DSCSetUnitOperation : IOperation<DSCOperationResult<
     }
 
     /// <inheritdoc/>
-    public async Task<DSCOperationResult<IDSCApplyUnitResult>> ExecuteAsync(IOperationContext context)
+    public async Task<OperationResult<IDSCSet>> ExecuteAsync(IOperationContext context)
     {
         try
         {
             context.Start();
             context.StartSnapshotBroadcast();
             context.AddCancelAction("Cancel");
-            var dscSet = await _dsc.OpenConfigurationSetAsync(_dscFile);
-            var dscUnit = dscSet.Units[0];
-            var result = await _dsc.SetUnitAsync(dscUnit, context.CancellationToken);
-            var resultInfo = result.ResultInformation;
-            if (resultInfo != null && !resultInfo.IsOk)
-            {
-                var title = $"0x{resultInfo.ResultCode.HResult:X}";
-                List<string> messageList = [resultInfo.Description, resultInfo.Details];
-                var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
-                context.Fail(props => props with { Title = title, Message = message });
-            }
-
-            return new(result);
+            var result = await _dsc.OpenConfigurationSetAsync(_dscFile, context.CancellationToken);
+            return new() { Result = result };
         }
         catch (OperationCanceledException ex)
         {
-            _logger.LogWarning(ex, "The DSC set unit operation was canceled.");
+            _logger.LogWarning(ex, "Opening the DSC configuration set was canceled.");
             context.Canceled(props => props with { Message = "The operation was canceled." });
-            return new(ex);
+            return new() { Error = ex };
         }
         catch (OpenConfigurationSetException ex)
         {
             _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
-            return new(ex);
+            return new() { Error = ex };
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while executing a DSC operation.");
             context.Fail(props => props with { Message = ex.Message });
-            return new(ex);
+            return new() { Error = ex };
         }
     }
 }
