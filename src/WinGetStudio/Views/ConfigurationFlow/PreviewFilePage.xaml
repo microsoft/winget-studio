@@ -26,6 +26,7 @@
     <Page.Resources>
         <ResourceDictionary>
             <converters:StringVisibilityConverter x:Key="StringVisibilityConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:BoolToObjectConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionInverseVisibilityConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
@@ -445,6 +446,22 @@
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
                                 </ListView>
+
+                                <!-- Empty state when no units -->
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Spacing="8"
+                                            Visibility="{x:Bind ViewModel.HasNoUnits, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <FontIcon Glyph="&#xE74C;"
+                                              FontSize="48"
+                                              HorizontalAlignment="Center"
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Uid="PreviewFile_NoResourcesMessage"
+                                               HorizontalAlignment="Center"
+                                               TextAlignment="Center"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Style="{ThemeResource BodyTextBlockStyle}" />
+                                </StackPanel>
                             </Grid>
 
                             <!-- Code view -->

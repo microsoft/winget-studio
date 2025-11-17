@@ -41,6 +41,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [NotifyPropertyChangedFor(nameof(CanValidateConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanTestConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanSaveConfigurationAs))]
+    [NotifyPropertyChangedFor(nameof(HasNoUnits))]
     [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(TestConfigurationCommand))]
@@ -99,6 +100,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool CanOpenConfigurationFile => !IsApplyInProgress;
 
     public bool CanCreateNewConfiguration => !IsApplyInProgress;
+
+    public bool HasNoUnits => IsConfigurationLoaded && ConfigurationSet.Units.Count == 0;
 
     public ApplySetViewModel? ActiveApplySet => _manager.ActiveSetApplyState.ActiveApplySet;
 
@@ -281,12 +284,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
                 await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
                 SelectedUnit = null;
-
-                if (ConfigurationSet.Units.Count == 0)
-                {
-                    ConfigurationSet = null;
-                }
-
                 _ui.ShowTimedNotification(_localizer["PreviewFile_DeleteSuccessfulMessage"], NotificationMessageSeverity.Success);
             }
             catch (DSCUnitValidationException ex)
@@ -500,6 +497,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     private void OnConfigurationSetUnitsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        // Notify HasNoUnits
+        OnPropertyChanged(nameof(HasNoUnits));
+
         // Notify validation
         OnPropertyChanged(nameof(CanValidateConfiguration));
         ValidateConfigurationCommand.NotifyCanExecuteChanged();

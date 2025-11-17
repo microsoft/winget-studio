@@ -807,6 +807,9 @@
     <value>Untitled.winget</value>
     <comment>{Locked=".winget"} Default file name with '.winget' extension</comment>
   </data>
+  <data name="PreviewFile_NoResourcesMessage.Text" xml:space="preserve">
+    <value>No resources in the file. Click on "Add resource" button to add a resource.</value>
+  </data>
   <data name="ApplyFile_DoneButton.Content" xml:space="preserve">
     <value>Done</value>
   </data>
