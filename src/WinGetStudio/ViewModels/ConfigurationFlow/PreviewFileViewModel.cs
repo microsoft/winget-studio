@@ -11,6 +11,7 @@ using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
+using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WinGetStudio.Services.Operations.Extensions;
 
@@ -21,6 +22,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private readonly ILogger<PreviewFileViewModel> _logger;
     private readonly IStringLocalizer<PreviewFileViewModel> _localizer;
     private readonly IAppOperationHub _operationHub;
+    private readonly IOperationFactory _operationFactory;
     private readonly IAppFrameNavigationService _appNavigation;
     private readonly IConfigurationFrameNavigationService _configNavigation;
     private readonly IConfigurationManager _manager;
@@ -101,6 +103,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         ILogger<PreviewFileViewModel> logger,
         IStringLocalizer<PreviewFileViewModel> localizer,
         IAppOperationHub operationHub,
+        IOperationFactory operationFactory,
         IAppFrameNavigationService appNavigation,
         IConfigurationFrameNavigationService configNavigation,
         IConfigurationManager manager,
@@ -110,6 +113,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _logger = logger;
         _localizer = localizer;
         _operationHub = operationHub;
+        _operationFactory = operationFactory;
         _appNavigation = appNavigation;
         _configNavigation = configNavigation;
         _manager = manager;
@@ -138,7 +142,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     /// <param name="file">The configuration file to open.</param>
     public async Task OpenConfigurationFileAsync(StorageFile file)
     {
-        await _operationHub.ExecutePassiveOperationAsync(async context =>
+        await _operationHub.ExecuteAsync(AppOperationHub.InteractiveOptions, async context =>
         {
             try
             {
@@ -147,11 +151,17 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 SelectedUnit = null;
                 ConfigurationSet = _setFactory();
                 var dscFile = await DSCFile.LoadAsync(file.Path);
-                var operationResult = await _operationHub.ExecuteOpenSetAsync(dscFile);
-                if (operationResult.IsSuccess && operationResult.Result != null)
+                var openSet = _operationFactory.CreateOpenSetOperation(dscFile);
+                var openSetResult = await openSet.ExecuteAsync(context);
+                if (openSetResult.IsSuccess && openSetResult.Result != null)
                 {
-                    await ConfigurationSet.UseAsync(operationResult.Result, dscFile);
+                    await ConfigurationSet.UseAsync(openSetResult.Result, dscFile);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An occurred while opening the configuration file");
+                context.Fail(props => props with { Message = $"Error opening configuration file: {ex.Message}" });
             }
             finally
             {
@@ -164,7 +174,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanCreateNewConfiguration))]
     private async Task OnNewConfigurationAsync()
     {
-        await _operationHub.ExecutePassiveOperationAsync(async context =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async context =>
         {
             _logger.LogInformation($"Creating new configuration set");
             SelectedUnit = null;
@@ -178,10 +188,19 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            await _operationHub.ExecutePassiveOperationAsync(async context =>
+            await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async context =>
             {
-                _logger.LogInformation($"Saving configuration set");
-                await ConfigurationSet.SaveAsync();
+                try
+                {
+                    _logger.LogInformation($"Saving configuration set");
+                    await ConfigurationSet.SaveAsync();
+                    context.Success(props => props with { Message = _localizer["PreviewFile_SavedSuccessfully"] });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while saving the DSC file.");
+                    context.Fail(props => props with { Message = _localizer["PreviewFile_SaveFailed", ex.Message] });
+                }
             });
         }
     }
@@ -190,12 +209,18 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            await _operationHub.ExecutePassiveOperationAsync(async context =>
+            await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async context =>
             {
                 try
                 {
                     _logger.LogInformation($"Saving configuration set as {filePath}");
                     await ConfigurationSet.SaveAsAsync(filePath);
+                    context.Success(props => props with { Message = _localizer["PreviewFile_SavedSuccessfully"] });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while saving the DSC file.");
+                    context.Fail(props => props with { Message = _localizer["PreviewFile_SaveFailed", ex.Message] });
                 }
                 finally
                 {
@@ -230,7 +255,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded && SelectedUnit != null)
         {
-            await _operationHub.ExecutePassiveOperationAsync(async context =>
+            await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async context =>
             {
                 _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
                 await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
@@ -243,7 +268,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanAddUnit))]
     private async Task OnAddResourceAsync()
     {
-        await _operationHub.ExecutePassiveOperationAsync(async context =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async context =>
         {
             _logger.LogInformation($"Adding new resource");
             await AddResourceAsync();
@@ -255,8 +280,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            var dscFile = ConfigurationSet.GetLatestDSCFile();
-            await _operationHub.ExecuteValidateSetAsync(dscFile);
+            await _operationHub.ExecuteAsync(AppOperationHub.InteractiveOptions, async context =>
+            {
+                var dscFile = ConfigurationSet.GetLatestDSCFile();
+                var validateSet = _operationFactory.CreateValidateSetOperation(dscFile);
+                await validateSet.ExecuteAsync(context);
+            });
         }
     }
 
@@ -265,8 +294,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            var dscFile = ConfigurationSet.GetLatestDSCFile();
-            await _operationHub.ExecuteTestSetAsync(dscFile);
+            await _operationHub.ExecuteAsync(AppOperationHub.InteractiveOptions, async context =>
+            {
+                var dscFile = ConfigurationSet.GetLatestDSCFile();
+                var testSet = _operationFactory.CreateTestSetOperation(dscFile);
+                await testSet.ExecuteAsync(context);
+            });
         }
     }
 
@@ -294,13 +327,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded && SelectedUnit != null)
         {
-            await _operationHub.ExecutePassiveOperationAsync(async context =>
+            await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async context =>
             {
                 try
                 {
                     _logger.LogInformation($"Updating selected unit {SelectedUnit.Item1.Title}");
                     await ConfigurationSet.UpdateAsync(SelectedUnit.Item1, SelectedUnit.Item2);
-                    context.Success(props => props with { Message = _localizer["PreviewFile_ValidationFailedMessage"] });
+                    context.Success(props => props with { Message = _localizer["PreviewFile_UpdateSuccessfulMessage"] });
                 }
                 catch (DSCUnitValidationException ex)
                 {

@@ -773,7 +773,7 @@
   <data name="PreviewFile_ValidationSuccessfulMessage" xml:space="preserve">
     <value>Configuration code is valid</value>
   </data>
-  <data name="PreviewFile_ValidationFailedMessage" xml:space="preserve">
+  <data name="PreviewFile_UpdateSuccessfulMessage" xml:space="preserve">
     <value>Configuration unit updated</value>
   </data>
   <data name="PreviewFile_UpdateFailedMessage" xml:space="preserve">

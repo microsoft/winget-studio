@@ -9,7 +9,7 @@ namespace WinGetStudio.Services.Operations.Models;
 public sealed partial class OperationExecutionOptions
 {
     /// <summary>
-    /// Gets or sets the operation policies.
+    /// Gets the operation policies.
     /// </summary>
-    public IReadOnlyList<IOperationPolicy> Policies { get; set; } = [];
+    public IReadOnlyList<IOperationPolicy> Policies { get; init; } = [];
 }

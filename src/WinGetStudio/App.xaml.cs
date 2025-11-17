@@ -85,6 +85,7 @@ public partial class App : Application
                 services.AddSingleton<IAppInfoService, AppInfoService>();
                 services.AddSingleton<IConfigurationManager, ConfigurationManager>();
                 services.AddSingleton<IAppOperationHub, AppOperationHub>();
+                services.AddSingleton<IOperationFactory, OperationFactory>();
 
                 // Dispatcher Queue
                 services.AddSingleton(_dispatcherQueue);

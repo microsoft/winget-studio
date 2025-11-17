@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WinGetStudio.Services.Operations.Contracts;
-using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Models;
 

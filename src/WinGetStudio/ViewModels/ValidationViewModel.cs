@@ -7,15 +7,19 @@ using Microsoft.Extensions.Logging;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
+using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
+using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.ViewModels;
 
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IAppOperationHub _operationHub;
+    private readonly IOperationFactory _operationFactory;
     private readonly ILogger<ValidationViewModel> _logger;
     private readonly UnitViewModelFactory _unitFactory;
 
@@ -34,9 +38,14 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     public partial string? SettingsText { get; set; }
 
-    public ValidationViewModel(IAppOperationHub operationHub, ILogger<ValidationViewModel> logger, UnitViewModelFactory unitFactory)
+    public ValidationViewModel(
+        IAppOperationHub operationHub,
+        IOperationFactory operationFactory,
+        ILogger<ValidationViewModel> logger,
+        UnitViewModelFactory unitFactory)
     {
         _operationHub = operationHub;
+        _operationFactory = operationFactory;
         _logger = logger;
         _unitFactory = unitFactory;
     }
@@ -61,9 +70,10 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnGetAsync()
     {
-        await RunDscOperationAsync(async dscFile =>
+        await ExecuteDscOperationAsync(async (dscFile, context) =>
         {
-            var executionResult = await _operationHub.ExecuteGetUnitAsync(dscFile);
+            var getUnit = _operationFactory.CreateGetUnitOperation(dscFile);
+            var executionResult = await getUnit.ExecuteAsync(context);
             if (executionResult.IsSuccess && executionResult.Result?.Settings != null)
             {
                 OutputText = executionResult.Result.Settings.ToYaml();
@@ -77,9 +87,10 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnSetAsync()
     {
-        await RunDscOperationAsync(async dscFile =>
+        await ExecuteDscOperationAsync(async (dscFile, context) =>
         {
-            await _operationHub.ExecuteSetUnitAsync(dscFile);
+            var setUnit = _operationFactory.CreateSetUnitOperation(dscFile);
+            await setUnit.ExecuteAsync(context);
         });
     }
 
@@ -89,33 +100,37 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnTestAsync()
     {
-        await RunDscOperationAsync(async dscFile =>
+        await ExecuteDscOperationAsync(async (dscFile, context) =>
         {
-            await _operationHub.ExecuteTestUnitAsync(dscFile);
+            var testUnit = _operationFactory.CreateTestUnitOperation(dscFile);
+            await testUnit.ExecuteAsync(context);
         });
     }
 
     /// <summary>
-    /// Runs a DSC operation with proper error handling and state management.
+    /// Executes a DSC operation with proper error handling and state management.
     /// </summary>
     /// <param name="operation">The DSC operation to execute.</param>
-    private async Task RunDscOperationAsync(Func<IDSCFile, Task> operation)
+    private async Task ExecuteDscOperationAsync(Func<IDSCFile, IOperationContext, Task> operation)
     {
-        try
+        await _operationHub.ExecuteAsync(AppOperationHub.InteractiveOptions, async context =>
         {
-            CanExecuteDSCOperation = false;
-            var dscFile = CreateDSCFile();
-            await operation(dscFile);
-        }
-        catch (Exception ex)
-        {
-            // TODO notification
-            _logger.LogError(ex, "An error occurred while executing the DSC operation.");
-        }
-        finally
-        {
-            CanExecuteDSCOperation = true;
-        }
+            try
+            {
+                CanExecuteDSCOperation = false;
+                var dscFile = CreateDSCFile();
+                await operation(dscFile, context);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while executing the DSC operation.");
+                context.Fail(props => props with { Message = "An error occurred while executing the DSC operation." });
+            }
+            finally
+            {
+                CanExecuteDSCOperation = true;
+            }
+        });
     }
 
     /// <summary>

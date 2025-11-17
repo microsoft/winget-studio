@@ -30,9 +30,6 @@ public sealed partial class OpenSetOperation : IOperation<OperationResult<IDSCSe
     {
         try
         {
-            context.Start();
-            context.StartSnapshotBroadcast();
-            context.AddCancelAction("Cancel");
             var result = await _dsc.OpenConfigurationSetAsync(_dscFile, context.CancellationToken);
             return new() { Result = result };
         }

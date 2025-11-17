@@ -11,6 +11,7 @@ using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
 using WinGetStudio.Models.Operations;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
+using WinGetStudio.Services.Operations.Contracts;
 
 namespace WinGetStudio.ViewModels;
 
@@ -18,12 +19,11 @@ public delegate ApplySetViewModel ApplySetViewModelFactory(IDSCSet applySet);
 
 public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
 {
+    private readonly ApplySetOperation _applySetOperation;
     private readonly ObservableCollection<ApplyUnitViewModel> _units;
     private readonly IStringLocalizer<ApplySetViewModel> _localizer;
     private readonly ILogger<ApplySetViewModel> _logger;
-    private readonly IDSC _dsc;
-    private readonly IAppOperationHub _operationHub;
-    private readonly IDSCSet _applySet;
+    private readonly IOperationFactory _operationFactory;
     private readonly IUIDispatcher _dispatcher;
     private CancellationTokenSource? _cts;
     private bool _disposedValue;
@@ -53,20 +53,19 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
     public ReadOnlyObservableCollection<ApplyUnitViewModel> Units { get; }
 
     public ApplySetViewModel(
-        IDSC dsc,
-        IAppOperationHub operationHub,
+        IOperationFactory operationFactory,
         IStringLocalizer<ApplySetViewModel> localizer,
         ILogger<ApplySetViewModel> logger,
         IUIDispatcher dispatcher,
         IDSCSet applySet)
     {
-        _dsc = dsc;
-        _operationHub = operationHub;
+        _operationFactory = operationFactory;
         _localizer = localizer;
         _logger = logger;
-        _applySet = applySet;
         _dispatcher = dispatcher;
-        _cts = new();
+
+        var progress = new Progress<IDSCSetChangeData>(OnDataChanged);
+        _applySetOperation = _operationFactory.CreateApplySetOperation(applySet, progress);
         _units = [.. applySet.Units.Select(unit => new ApplyUnitViewModel(localizer, unit))];
         Units = new(_units);
     }
@@ -74,14 +73,14 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
     /// <summary>
     /// Applies the configuration set asynchronously.
     /// </summary>
+    /// <param name="context">The operation context.</param>
     /// <returns>The result of the apply operation.</returns>
-    public async Task<OperationResult<IDSCApplySetResult>> ApplyAsync()
+    public async Task<OperationResult<IDSCApplySetResult>> ApplyAsync(IOperationContext context)
     {
         try
         {
-            _cts = new();
-            var progress = new Progress<IDSCSetChangeData>(OnDataChanged);
-            return await _operationHub.ExecuteApplySetAsync(_applySet, progress, _cts.Token);
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
+            return await _applySetOperation.ExecuteAsync(context);
         }
         finally
         {

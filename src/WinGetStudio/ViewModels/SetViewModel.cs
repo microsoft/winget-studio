@@ -188,7 +188,7 @@ public sealed partial class SetViewModel : ObservableObject
     {
         Debug.Assert(dscFile.CanSave, $"DSC file should be savable before calling {nameof(SaveInternalAsync)}.");
         OriginalDscFile = dscFile;
-        await _operationHub.ExecuteSaveDscFile(dscFile);
+        await dscFile.SaveAsync();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 }
