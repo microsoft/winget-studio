@@ -87,29 +87,9 @@ This project has adopted the [Microsoft Open Source Code of Conduct][ms-code-of-
 information, please refer to the [Code of Conduct FAQ][code-of-conduct-faq] or contact
 [opencode@microsoft.com][opencode-email] with any additional questions or comments.
 
-## Data/Telemetry
+## Privacy Statement
 
-The WinGet Studio application is instrumented to collect usage and diagnostic (error) data and
-sends it to Microsoft to help improve the product.
-
-If you build the application yourself the instrumentation will not be enabled and no data will be
-sent to Microsoft.
-
-The WinGet Studio application respects machine wide privacy settings and users can opt-out on their
-device, as documented in the [Microsoft Windows privacy statement][ms-privacy-statement].
-
-In short to opt-out, do one of the following:
-
-**WinGet Studio Settings**: Launch `WinGet Studio`, then select `Settings` and turn on
-`Disable Telemetry`
-
-**Windows 11**: Go to `Start`, then select `Settings` > `Privacy & security` >
-`Diagnostics & feedback` > `Diagnostic data` and unselect `Send optional diagnostic data`.
-
-**Windows 10**: Go to `Start`, then select `Settings` > `Privacy` > `Diagnostics & feedback`, and
-select `Required diagnostic data`.
-
-See the [privacy statement][privacy-file] for more details.
+The application logs basic diagnostic data (telemetry). For more privacy information and what we collect, see our [WinGet Studio Data and Privacy documentation][privacy-file].
 
 <!-- Link reference definitions -->
 [winget-studio-main]: https://github.com/microsoft/winget-studio
@@ -122,7 +102,6 @@ See the [privacy statement][privacy-file] for more details.
 [ms-code-of-conduct]: https://opensource.microsoft.com/codeofconduct/
 [code-of-conduct-faq]: https://opensource.microsoft.com/codeofconduct/faq/
 [opencode-email]: mailto:opencode@microsoft.com
-[ms-privacy-statement]: https://support.microsoft.com/help/4468236/diagnostics-feedback-and-privacy-in-windows-10-microsoft-privacy
 [privacy-file]: /PRIVACY.md
 [docs-overview]: /docs/overview.md
 [docs-getting-started]: /docs/get-started/index.md
