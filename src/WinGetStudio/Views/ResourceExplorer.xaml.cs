@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.ApplicationModel.DataTransfer;
+using WinGetStudio.Contracts.Services;
+using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
@@ -15,7 +17,7 @@ namespace WinGetStudio.Views;
 
 public sealed partial class ResourceExplorer : ContentDialog
 {
-    private readonly IOperationHub _operationHub;
+    private readonly IAppOperationHub _operationHub;
     private readonly IStringLocalizer<ResourceExplorer> _localizer;
     private readonly ILogger<ResourceExplorer> _logger;
 
@@ -23,7 +25,7 @@ public sealed partial class ResourceExplorer : ContentDialog
 
     public ResourceExplorer(DSCResource resource)
     {
-        _operationHub = App.GetService<IOperationHub>();
+        _operationHub = App.GetService<IAppOperationHub>();
         _localizer = App.GetService<IStringLocalizer<ResourceExplorer>>();
         _logger = App.GetService<ILogger<ResourceExplorer>>();
         ViewModel = App.GetService<ResourceExplorerViewModelFactory>()(resource);
@@ -59,7 +61,7 @@ public sealed partial class ResourceExplorer : ContentDialog
     /// <param name="e">>The event data.</param>
     private async void OnCopyAsYaml(object sender, RoutedEventArgs e)
     {
-        await _operationHub.ExecuteAsync(async ctx =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async ctx =>
         {
             try
             {

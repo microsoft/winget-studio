@@ -7,7 +7,9 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using WinGetStudio.Common.Windows.FileDialog;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
+using WinGetStudio.Services;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.ViewModels;
@@ -18,14 +20,14 @@ namespace WinGetStudio.Views.ConfigurationFlow;
 public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 {
     private readonly IStringLocalizer<PreviewFilePage> _localizer;
-    private readonly IOperationHub _operationHub;
+    private readonly IAppOperationHub _operationHub;
 
     public PreviewFileViewModel ViewModel { get; }
 
     public PreviewFilePage()
     {
         _localizer = App.GetService<IStringLocalizer<PreviewFilePage>>();
-        _operationHub = App.GetService<IOperationHub>();
+        _operationHub = App.GetService<IAppOperationHub>();
         ViewModel = App.GetService<PreviewFileViewModel>();
         InitializeComponent();
     }
@@ -52,7 +54,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 
     private async void OpenConfigurationFile(object sender, RoutedEventArgs e)
     {
-        await _operationHub.ExecuteAsync(async ctx =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async ctx =>
         {
             try
             {
@@ -74,7 +76,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 
     private async void SaveConfigurationFileAs(object sender, RoutedEventArgs e)
     {
-        await _operationHub.ExecuteAsync(async ctx =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async ctx =>
         {
             try
             {

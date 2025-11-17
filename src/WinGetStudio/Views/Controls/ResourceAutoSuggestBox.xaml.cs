@@ -47,10 +47,10 @@ public sealed partial class ResourceAutoSuggestBox : UserControl
     /// <param name="e">The event args.</param>
     private async void ExploreResource_Click(object sender, RoutedEventArgs e)
     {
-        var resource = await ViewModel.OnExploreAsync();
-        if (resource != null)
+        var operationResult = await ViewModel.OnExploreAsync();
+        if (operationResult.IsSuccess && operationResult.Result != null)
         {
-            ResourceExplorer dialog = new(resource) { XamlRoot = XamlRoot };
+            ResourceExplorer dialog = new(operationResult.Result) { XamlRoot = XamlRoot };
             await dialog.ShowAsync();
         }
     }

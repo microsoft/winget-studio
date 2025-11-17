@@ -13,7 +13,7 @@ namespace WinGetStudio.ViewModels;
 
 public partial class ShellViewModel : ObservableRecipient, IDisposable
 {
-    private readonly IOperationHub _ops;
+    private readonly IOperationHub _operationHub;
     private readonly IDisposable _activitySubscription;
     private bool _disposedValue;
 
@@ -36,13 +36,13 @@ public partial class ShellViewModel : ObservableRecipient, IDisposable
     public ShellViewModel(
         IAppFrameNavigationService navigationService,
         IAppShellNavigationViewService navigationViewService,
-        IOperationHub ops)
+        IOperationHub operationHub)
     {
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
-        _ops = ops;
-        _activitySubscription = _ops.GlobalActivity.Subscribe(OnGlobalActivity);
+        _operationHub = operationHub;
+        _activitySubscription = _operationHub.GlobalActivity.Subscribe(OnGlobalActivity);
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)

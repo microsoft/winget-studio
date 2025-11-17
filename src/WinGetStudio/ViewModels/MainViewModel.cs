@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Windows.Storage;
 using WinGetStudio.Contracts.Services;
+using WinGetStudio.Services;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.Services.Operations.Models;
@@ -14,9 +15,9 @@ namespace WinGetStudio.ViewModels;
 public partial class MainViewModel : ObservableRecipient
 {
     private readonly IAppFrameNavigationService _navigationService;
-    private readonly IOperationHub _operationHub;
+    private readonly IAppOperationHub _operationHub;
 
-    public MainViewModel(IAppFrameNavigationService navigationService, IOperationHub operationHub)
+    public MainViewModel(IAppFrameNavigationService navigationService, IAppOperationHub operationHub)
     {
         _navigationService = navigationService;
         _operationHub = operationHub;
@@ -45,8 +46,8 @@ public partial class MainViewModel : ObservableRecipient
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task Button1Async()
     {
-        var options = new OperationExecutionOptions();
         await _operationHub.ExecuteAsync(
+            AppOperationHub.PassiveOptions,
             async ctx =>
             {
                 ctx.StartSnapshotBroadcast();
@@ -64,7 +65,6 @@ public partial class MainViewModel : ObservableRecipient
                 ctx.Success(props => props with { Title = Guid.NewGuid().ToString(), Message = Guid.NewGuid().ToString() });
                 ctx.AddDoneAction("Done 1", false);
                 ctx.AddDoneAction("Done 2");
-            },
-            options);
+            });
     }
 }

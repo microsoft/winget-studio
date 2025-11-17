@@ -9,10 +9,12 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using NuGet.Packaging;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
+using WinGetStudio.Models.Operations;
+using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
-using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.Services.Operations.Models.States;
 
@@ -22,7 +24,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
 {
     private readonly ResourceSuggestionViewModel _noResultsSuggestion;
     private readonly ConcurrentDictionary<string, ResourceSuggestionViewModel> _allSuggestions;
-    private readonly IOperationHub _operationHub;
+    private readonly IAppOperationHub _operationHub;
     private readonly IStringLocalizer<ResourceAutoSuggestBoxViewModel> _localizer;
     private readonly ILogger<ResourceAutoSuggestBoxViewModel> _logger;
     private readonly IDSCExplorer _explorer;
@@ -39,7 +41,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     public ObservableCollection<ResourceSuggestionViewModel> SelectedSuggestions { get; }
 
     public ResourceAutoSuggestBoxViewModel(
-        IOperationHub operationHub,
+        IAppOperationHub operationHub,
         IStringLocalizer<ResourceAutoSuggestBoxViewModel> localizer,
         IDSCExplorer explorer,
         ILogger<ResourceAutoSuggestBoxViewModel> logger)
@@ -133,7 +135,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     {
         CanReload = false;
         _allSuggestions.Clear();
-        await _operationHub.ExecuteAsync(async ctx =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async ctx =>
         {
             ctx.StartSnapshotBroadcast();
             ctx.Start();
@@ -160,9 +162,9 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     /// Handles the exploration of a selected DSC resource asynchronously.
     /// </summary>
     /// <returns>The selected DSC resource, or null if not found.</returns>
-    public async Task<DSCResource?> OnExploreAsync()
+    public async Task<OperationResult<DSCResource>> OnExploreAsync()
     {
-        return await _operationHub.ExecuteAsync(async ctx =>
+        return await _operationHub.ExecuteAsync<DSCResource>(AppOperationHub.PassiveOptions, async ctx =>
         {
             try
             {
@@ -184,11 +186,11 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
                         if (!selectedSuggestion.Module.IsEnriched)
                         {
                             ctx.Complete(props => props with { Severity = OperationSeverity.Warning, Message = _localizer["ResourceInfoNotFoundMessage"] });
-                            return null;
+                            return new() { Result = null };
                         }
 
                         ctx.Complete();
-                        return selectedSuggestion.Resource;
+                        return new() { Result = selectedSuggestion.Resource };
                     }
                     else
                     {
@@ -196,13 +198,13 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
                     }
                 }
 
-                return null;
+                return new() { Result = null };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while exploring the DSC resource.");
                 ctx.Fail(props => props with { Message = _localizer["ExploreResource_Failed"] });
-                return null;
+                return new() { Error = null };
             }
         });
     }
