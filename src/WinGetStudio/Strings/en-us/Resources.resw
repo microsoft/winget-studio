@@ -663,7 +663,7 @@
     <value>WinGet &amp; DSC Definitions</value>
   </data>
   <data name="MainPage_Content.Text" xml:space="preserve">
-    <value>Get Started with Winget Studio</value>
+    <value>Get Started with WinGet Studio</value>
   </data>
   <data name="MainPage_DSCDefinitions_ConfigurationFile.Text" xml:space="preserve">
     <value>What is a "configuration file"?</value>
