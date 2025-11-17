@@ -20,7 +20,7 @@
     <Content Include="$(TargetDir)\Microsoft.Management.Deployment.winmd" Link="Microsoft.Management.Deployment.winmd" CopyToOutputDirectory="PreserveNewest" />
 
     <!-- This DLL from the winget COM interop package allows activating the winget server elevated -->
-    <Content Include="$(TargetDir)\winrtact.dll" Link="winrtact.dll" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(TargetDir)\Microsoft.Management.Deployment.CsWinRTProjection.dll" Link="Microsoft.Management.Deployment.CsWinRTProjection.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,7 +51,7 @@
   </ItemGroup>
 
   <Target Name="CopyWinmdToTargetDir" BeforeTargets="BeforeBuild">
-    <Copy SourceFiles="$(PkgMicrosoft_WindowsPackageManager_ComInterop)\lib\Microsoft.Management.Deployment.winmd" DestinationFolder="$(TargetDir)" />
-    <Copy SourceFiles="$(PkgMicrosoft_WindowsPackageManager_ComInterop)\runtimes\win10-$(Platform)\native\winrtact.dll" DestinationFolder="$(TargetDir)" />
+    <Copy SourceFiles="$(PkgMicrosoft_WindowsPackageManager_ComInterop)\lib\uap10.0\Microsoft.Management.Deployment.winmd" DestinationFolder="$(TargetDir)" />
+    <Copy SourceFiles="$(PkgMicrosoft_WindowsPackageManager_ComInterop)\lib\net8.0-windows10.0.26100.0\Microsoft.Management.Deployment.CsWinRTProjection.dll" DestinationFolder="$(TargetDir)" />
   </Target>
 </Project>

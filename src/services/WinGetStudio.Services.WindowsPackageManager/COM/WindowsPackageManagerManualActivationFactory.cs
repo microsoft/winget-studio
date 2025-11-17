@@ -51,7 +51,7 @@ internal sealed class WindowsPackageManagerManualActivationFactory : WindowsPack
         }
     }
 
-    [DllImport("winrtact.dll", ExactSpelling = true)]
+    [DllImport("Microsoft.Management.Deployment.CsWinRTProjection.dll", ExactSpelling = true)]
     private static unsafe extern int WinGetServerManualActivation_CreateInstance(
         in Guid clsid,
         in Guid iid,
