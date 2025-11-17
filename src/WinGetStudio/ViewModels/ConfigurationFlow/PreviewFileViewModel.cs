@@ -281,6 +281,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
                 await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
                 SelectedUnit = null;
+
+                if (ConfigurationSet.Units.Count == 0)
+                {
+                    ConfigurationSet = null;
+                }
+
                 _ui.ShowTimedNotification(_localizer["PreviewFile_DeleteSuccessfulMessage"], NotificationMessageSeverity.Success);
             }
             catch (DSCUnitValidationException ex)
