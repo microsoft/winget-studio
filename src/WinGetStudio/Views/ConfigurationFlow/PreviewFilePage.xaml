@@ -26,6 +26,7 @@
     <Page.Resources>
         <ResourceDictionary>
             <converters:StringVisibilityConverter x:Key="StringVisibilityConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:BoolToObjectConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionInverseVisibilityConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
@@ -445,6 +446,11 @@
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
                                 </ListView>
+
+                                <!-- Empty state when no units -->
+                                <localControls:EmptyStateControl Glyph="&#xE74C;"
+                                                                 Visibility="{x:Bind ViewModel.HasNoUnits, Mode=OneWay}"
+                                                                 x:Uid="PreviewFile_NoResourcesMessage"/>
                             </Grid>
 
                             <!-- Code view -->

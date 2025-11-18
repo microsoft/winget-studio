@@ -41,6 +41,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [NotifyPropertyChangedFor(nameof(CanValidateConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanTestConfiguration))]
     [NotifyPropertyChangedFor(nameof(CanSaveConfigurationAs))]
+    [NotifyPropertyChangedFor(nameof(HasNoUnits))]
     [NotifyCanExecuteChangedFor(nameof(AddResourceCommand))]
     [NotifyCanExecuteChangedFor(nameof(ApplyConfigurationCommand))]
     [NotifyCanExecuteChangedFor(nameof(TestConfigurationCommand))]
@@ -99,6 +100,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool CanOpenConfigurationFile => !IsApplyInProgress;
 
     public bool CanCreateNewConfiguration => !IsApplyInProgress;
+
+    public bool HasNoUnits => IsConfigurationLoaded && ConfigurationSet.Units.Count == 0;
 
     public ApplySetViewModel? ActiveApplySet => _manager.ActiveSetApplyState.ActiveApplySet;
 
@@ -512,5 +515,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
         // Notify save as
         OnPropertyChanged(nameof(CanSaveConfigurationAs));
+
+        // Notify HasNoUnits
+        OnPropertyChanged(nameof(HasNoUnits));
     }
 }
