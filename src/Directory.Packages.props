@@ -24,7 +24,6 @@
     <PackageVersion Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.2.250402" />
     <PackageVersion Include="CommunityToolkit.WinUI.Converters" Version="8.2.250402" />
     <!-- WinGet -->
-    <PackageVersion Include="Microsoft.WindowsPackageManager.ComInterop" Version="1.12.350" />
     <PackageVersion Include="Microsoft.WindowsPackageManager.Configuration.OutOfProc" Version="1.12.350" />
     <!-- WinUI and related -->
     <PackageVersion Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
