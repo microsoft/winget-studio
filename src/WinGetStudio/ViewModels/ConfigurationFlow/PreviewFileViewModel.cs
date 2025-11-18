@@ -497,9 +497,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     private void OnConfigurationSetUnitsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        // Notify HasNoUnits
-        OnPropertyChanged(nameof(HasNoUnits));
-
         // Notify validation
         OnPropertyChanged(nameof(CanValidateConfiguration));
         ValidateConfigurationCommand.NotifyCanExecuteChanged();
@@ -518,5 +515,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
         // Notify save as
         OnPropertyChanged(nameof(CanSaveConfigurationAs));
+
+        // Notify HasNoUnits
+        OnPropertyChanged(nameof(HasNoUnits));
     }
 }
