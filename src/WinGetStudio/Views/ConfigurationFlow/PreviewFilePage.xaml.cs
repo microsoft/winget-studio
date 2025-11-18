@@ -10,7 +10,6 @@ using WinGetStudio.Common.Windows.FileDialog;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
 using WinGetStudio.Services;
-using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
@@ -54,7 +53,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 
     private async void OpenConfigurationFile(object sender, RoutedEventArgs e)
     {
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async ctx =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
         {
             try
             {
@@ -69,14 +68,14 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             }
             catch (Exception ex)
             {
-                ctx.Fail(props => props with { Message = ex.Message });
+                context.Fail(props => props with { Message = ex.Message });
             }
         });
     }
 
     private async void SaveConfigurationFileAs(object sender, RoutedEventArgs e)
     {
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async ctx =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
         {
             try
             {
@@ -90,7 +89,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             }
             catch (Exception ex)
             {
-                ctx.Fail(props => props with { Message = ex.Message });
+                context.Fail(props => props with { Message = ex.Message });
             }
         });
     }

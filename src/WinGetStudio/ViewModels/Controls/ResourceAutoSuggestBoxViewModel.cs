@@ -135,11 +135,11 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     {
         CanReload = false;
         _allSuggestions.Clear();
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async ctx =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
         {
-            ctx.StartSnapshotBroadcast();
-            ctx.Start();
-            ctx.PublishNotification(props => props with { Title = _localizer["LoadingDSCResourcesMessage"] });
+            context.StartSnapshotBroadcast();
+            context.Start();
+            context.PublishNotification(props => props with { Title = _localizer["LoadingDSCResourcesMessage"] });
             await foreach (var catalog in _explorer.GetModuleCatalogsAsync())
             {
                 foreach (var module in catalog.Modules.Values)
@@ -153,7 +153,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
                 }
             }
 
-            ctx.Complete(props => props with { Title = _localizer["CompletedLoadingDSCResourcesMessage"] });
+            context.Complete(props => props with { Title = _localizer["CompletedLoadingDSCResourcesMessage"] });
         });
         CanReload = true;
     }
@@ -164,7 +164,7 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     /// <returns>The selected DSC resource, or null if not found.</returns>
     public async Task<OperationResult<DSCResource>> OnExploreAsync()
     {
-        return await _operationHub.ExecuteAsync<DSCResource>(AppOperationHub.PassiveOptions, async ctx =>
+        return await _operationHub.ExecuteAsync<DSCResource>(AppOperationHub.PassiveOptions, async (ctx, factory) =>
         {
             try
             {

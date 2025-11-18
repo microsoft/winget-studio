@@ -9,7 +9,6 @@ using Windows.ApplicationModel.DataTransfer;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
-using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.ViewModels.Controls;
 
@@ -61,7 +60,7 @@ public sealed partial class ResourceExplorer : ContentDialog
     /// <param name="e">>The event data.</param>
     private async void OnCopyAsYaml(object sender, RoutedEventArgs e)
     {
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async ctx =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
         {
             try
             {
@@ -69,12 +68,12 @@ public sealed partial class ResourceExplorer : ContentDialog
                 var sampleYaml = await ViewModel.GenerateDefaultYamlAsync();
                 dataPackage.SetText(sampleYaml);
                 Clipboard.SetContent(dataPackage);
-                ctx.Success(props => props with { Message = _localizer["ResourceExplorer_YamlCopied"] });
+                context.Success(props => props with { Message = _localizer["ResourceExplorer_YamlCopied"] });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to copy sample YAML to clipboard.");
-                ctx.Fail(props => props with { Message = _localizer["ResourceExplorer_YamlCopyFailed"] });
+                context.Fail(props => props with { Message = _localizer["ResourceExplorer_YamlCopyFailed"] });
             }
             finally
             {

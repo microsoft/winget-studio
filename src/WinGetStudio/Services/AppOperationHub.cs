@@ -15,6 +15,16 @@ public sealed partial class AppOperationHub : IAppOperationHub
 {
     private readonly IOperationHub _operationHub;
     private readonly ILogger _logger;
+    private readonly IOperationFactory _operationFactory;
+
+    /// <inheritdoc/>
+    public IEventStream<IReadOnlyList<OperationSnapshot>> Snapshots => _operationHub.Snapshots;
+
+    /// <inheritdoc/>
+    public IEventStream<OperationNotification> Notifications => _operationHub.Notifications;
+
+    /// <inheritdoc/>
+    public IEventStream<GlobalActivity> GlobalActivity => _operationHub.GlobalActivity;
 
     public static OperationExecutionOptions InteractiveOptions { get; } = new()
     {
@@ -27,18 +37,19 @@ public sealed partial class AppOperationHub : IAppOperationHub
 
     public static OperationExecutionOptions PassiveOptions { get; } = new();
 
-    public AppOperationHub(IOperationHub operationHub, ILogger<AppOperationHub> logger)
+    public AppOperationHub(IOperationHub operationHub, IOperationFactory operationFactory, ILogger<AppOperationHub> logger)
     {
         _operationHub = operationHub;
+        _operationFactory = operationFactory;
         _logger = logger;
     }
 
     /// <inheritdoc/>
-    public async Task<OperationResult<TResult>> ExecuteAsync<TResult>(OperationExecutionOptions options, Func<IOperationContext, Task<OperationResult<TResult>>> operation)
+    public async Task<OperationResult<TResult>> ExecuteAsync<TResult>(OperationExecutionOptions options, Func<IOperationContext, IOperationFactory, Task<OperationResult<TResult>>> operation)
     {
         try
         {
-            return await _operationHub.ExecuteAsync(operation, options);
+            return await _operationHub.ExecuteAsync(context => operation(context, _operationFactory), options);
         }
         catch (Exception ex)
         {
@@ -48,11 +59,11 @@ public sealed partial class AppOperationHub : IAppOperationHub
     }
 
     /// <inheritdoc/>
-    public async Task ExecuteAsync(OperationExecutionOptions options, Func<IOperationContext, Task> operation)
+    public async Task ExecuteAsync(OperationExecutionOptions options, Func<IOperationContext, IOperationFactory, Task> operation)
     {
         try
         {
-            await _operationHub.ExecuteAsync(operation, options);
+            await _operationHub.ExecuteAsync(context => operation(context, _operationFactory), options);
         }
         catch (Exception ex)
         {
@@ -73,4 +84,10 @@ public sealed partial class AppOperationHub : IAppOperationHub
             return new() { Error = ex };
         }
     }
+
+    /// <inheritdoc/>
+    public Task<IOperationScope> BeginOperationAsync(OperationExecutionOptions? options = null, CancellationToken cancellationToken = default) => _operationHub.BeginOperationAsync(options, cancellationToken);
+
+    /// <inheritdoc/>
+    public void StopSnapshotBroadcast(Guid id) => _operationHub.StopSnapshotBroadcast(id);
 }

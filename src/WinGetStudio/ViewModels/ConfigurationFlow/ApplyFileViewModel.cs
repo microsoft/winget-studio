@@ -14,7 +14,6 @@ public partial class ApplyFileViewModel : ObservableRecipient
 {
     private readonly IConfigurationFrameNavigationService _navigationService;
     private readonly IAppOperationHub _operationHub;
-    private readonly IOperationFactory _operationFactory;
     private readonly ILogger _logger;
     private readonly IConfigurationManager _manager;
     private readonly ApplySetViewModelFactory _applySetFactory;
@@ -25,7 +24,6 @@ public partial class ApplyFileViewModel : ObservableRecipient
     public ApplyFileViewModel(
         IConfigurationFrameNavigationService navigationService,
         IAppOperationHub operationHub,
-        IOperationFactory operationFactory,
         ILogger<ApplyFileViewModel> logger,
         IConfigurationManager manager,
         ApplySetViewModelFactory applySetFactory)
@@ -33,7 +31,6 @@ public partial class ApplyFileViewModel : ObservableRecipient
         _navigationService = navigationService;
         _logger = logger;
         _operationHub = operationHub;
-        _operationFactory = operationFactory;
         _manager = manager;
         _applySetFactory = applySetFactory;
     }
@@ -61,11 +58,11 @@ public partial class ApplyFileViewModel : ObservableRecipient
         var activeSet = _manager.ActiveSetPreviewState.ActiveSet;
         Debug.Assert(activeSet != null, "ActiveSet should not be null when applying configuration set.");
 
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async context =>
+        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
         {
             _logger.LogInformation($"Applying configuration set started");
             var dscFile = activeSet.GetLatestDSCFile();
-            var openSet = _operationFactory.CreateOpenSetOperation(dscFile);
+            var openSet = factory.CreateOpenSetOperation(dscFile);
             var openSetResult = await openSet.ExecuteAsync(context);
             if (openSetResult.IsSuccess && openSetResult.Result != null)
             {

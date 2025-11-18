@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.Mvvm.ComponentModel;
-using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.ViewModels.Controls;
@@ -18,7 +18,7 @@ public partial class LoadingProgressBarViewModel : ObservableRecipient
     [ObservableProperty]
     public partial bool IsProgressVisible { get; set; }
 
-    public LoadingProgressBarViewModel(IOperationHub ops)
+    public LoadingProgressBarViewModel(IAppOperationHub ops)
     {
         ops.GlobalActivity.Subscribe(OnGlobalActivity);
     }

@@ -30,7 +30,14 @@ internal sealed class OperationExecutor : IOperationExecutor
         OperationExecutionOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        await ExecuteAsync<Task>(ctx => Task.FromResult(operation(ctx)), options, cancellationToken);
+        await ExecuteAsync<Task>(
+            async context =>
+            {
+                await operation(context);
+                return Task.CompletedTask;
+            },
+            options,
+            cancellationToken);
     }
 
     /// <inheritdoc/>

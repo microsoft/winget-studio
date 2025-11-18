@@ -19,7 +19,6 @@ namespace WinGetStudio.ViewModels;
 public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IAppOperationHub _operationHub;
-    private readonly IOperationFactory _operationFactory;
     private readonly ILogger<ValidationViewModel> _logger;
     private readonly UnitViewModelFactory _unitFactory;
 
@@ -40,12 +39,10 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     public ValidationViewModel(
         IAppOperationHub operationHub,
-        IOperationFactory operationFactory,
         ILogger<ValidationViewModel> logger,
         UnitViewModelFactory unitFactory)
     {
         _operationHub = operationHub;
-        _operationFactory = operationFactory;
         _logger = logger;
         _unitFactory = unitFactory;
     }
@@ -70,9 +67,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnGetAsync()
     {
-        await ExecuteDscOperationAsync(async (dscFile, context) =>
+        await ExecuteDscOperationAsync(async (dscFile, context, factory) =>
         {
-            var getUnit = _operationFactory.CreateGetUnitOperation(dscFile);
+            var getUnit = factory.CreateGetUnitOperation(dscFile);
             var executionResult = await getUnit.ExecuteAsync(context);
             if (executionResult.IsSuccess && executionResult.Result?.Settings != null)
             {
@@ -87,9 +84,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnSetAsync()
     {
-        await ExecuteDscOperationAsync(async (dscFile, context) =>
+        await ExecuteDscOperationAsync(async (dscFile, context, factory) =>
         {
-            var setUnit = _operationFactory.CreateSetUnitOperation(dscFile);
+            var setUnit = factory.CreateSetUnitOperation(dscFile);
             await setUnit.ExecuteAsync(context);
         });
     }
@@ -100,9 +97,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnTestAsync()
     {
-        await ExecuteDscOperationAsync(async (dscFile, context) =>
+        await ExecuteDscOperationAsync(async (dscFile, context, factory) =>
         {
-            var testUnit = _operationFactory.CreateTestUnitOperation(dscFile);
+            var testUnit = factory.CreateTestUnitOperation(dscFile);
             await testUnit.ExecuteAsync(context);
         });
     }
@@ -111,15 +108,15 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     /// Executes a DSC operation with proper error handling and state management.
     /// </summary>
     /// <param name="operation">The DSC operation to execute.</param>
-    private async Task ExecuteDscOperationAsync(Func<IDSCFile, IOperationContext, Task> operation)
+    private async Task ExecuteDscOperationAsync(Func<IDSCFile, IOperationContext, IOperationFactory, Task> operation)
     {
-        await _operationHub.ExecuteAsync(AppOperationHub.InteractiveOptions, async context =>
+        await _operationHub.ExecuteAsync(AppOperationHub.InteractiveOptions, async (context, factory) =>
         {
             try
             {
                 CanExecuteDSCOperation = false;
                 var dscFile = CreateDSCFile();
-                await operation(dscFile, context);
+                await operation(dscFile, context, factory);
             }
             catch (Exception ex)
             {

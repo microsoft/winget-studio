@@ -11,14 +11,14 @@ namespace WinGetStudio.ViewModels.Controls;
 
 public partial class ActivityPaneViewModel : ObservableRecipient, IDisposable
 {
-    private readonly IOperationHub _operationHub;
+    private readonly IAppOperationHub _operationHub;
     private readonly IDisposable _snapshotSubscription;
     private readonly IUIDispatcher _dispatcher;
     private bool _disposedValue;
 
     public ObservableCollection<ActivityViewModel> Activities { get; }
 
-    public ActivityPaneViewModel(IOperationHub operationHub, IUIDispatcher dispatcher)
+    public ActivityPaneViewModel(IAppOperationHub operationHub, IUIDispatcher dispatcher)
     {
         _operationHub = operationHub;
         _dispatcher = dispatcher;

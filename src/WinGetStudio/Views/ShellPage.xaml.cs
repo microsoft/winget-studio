@@ -18,14 +18,14 @@ public sealed partial class ShellPage : Page, IView<ShellViewModel>
 {
     private const int MaxNotificationMessageLength = 512;
     private readonly IAppInfoService _appInfoService;
-    private readonly IOperationHub _operationHub;
+    private readonly IAppOperationHub _operationHub;
 
     public ShellViewModel ViewModel { get; }
 
     public ShellPage(ShellViewModel viewModel)
     {
         _appInfoService = App.GetService<IAppInfoService>();
-        _operationHub = App.GetService<IOperationHub>();
+        _operationHub = App.GetService<IAppOperationHub>();
         _operationHub.Notifications.Subscribe(OnPublishNotification);
         ViewModel = viewModel;
         InitializeComponent();

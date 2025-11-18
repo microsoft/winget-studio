@@ -4,14 +4,14 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using WinGetStudio.Services.Operations.Contracts;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.ViewModels.Controls;
 
 public sealed partial class ActivityViewModel : ObservableObject
 {
-    private readonly IOperationHub _operationHub;
+    private readonly IAppOperationHub _operationHub;
 
     public Guid Id { get; }
 
@@ -38,7 +38,7 @@ public sealed partial class ActivityViewModel : ObservableObject
 
     public ObservableCollection<ActivityActionViewModel> Actions { get; }
 
-    public ActivityViewModel(IOperationHub operationHub, OperationSnapshot snapshot)
+    public ActivityViewModel(IAppOperationHub operationHub, OperationSnapshot snapshot)
     {
         _operationHub = operationHub;
         Id = snapshot.Id;

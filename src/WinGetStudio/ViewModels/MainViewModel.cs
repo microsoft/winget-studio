@@ -6,9 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services;
-using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
-using WinGetStudio.Services.Operations.Models;
 
 namespace WinGetStudio.ViewModels;
 
@@ -48,23 +46,23 @@ public partial class MainViewModel : ObservableRecipient
     {
         await _operationHub.ExecuteAsync(
             AppOperationHub.PassiveOptions,
-            async ctx =>
+            async (context, factory) =>
             {
-                ctx.StartSnapshotBroadcast();
-                ctx.Start();
-                ctx.AddCancelAction("Cancel 1", false);
-                ctx.AddCancelAction("Cancel 2");
+                context.StartSnapshotBroadcast();
+                context.Start();
+                context.AddCancelAction("Cancel 1", false);
+                context.AddCancelAction("Cancel 2");
                 var progress = 0;
                 while (progress < 100)
                 {
                     await Task.Delay(500);
                     progress += 10;
-                    ctx.ReportProgress(progress);
+                    context.ReportProgress(progress);
                 }
 
-                ctx.Success(props => props with { Title = Guid.NewGuid().ToString(), Message = Guid.NewGuid().ToString() });
-                ctx.AddDoneAction("Done 1", false);
-                ctx.AddDoneAction("Done 2");
+                context.Success(props => props with { Title = Guid.NewGuid().ToString(), Message = Guid.NewGuid().ToString() });
+                context.AddDoneAction("Done 1", false);
+                context.AddDoneAction("Done 2");
             });
     }
 }
