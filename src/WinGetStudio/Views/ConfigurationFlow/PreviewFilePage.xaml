@@ -26,7 +26,6 @@
     <Page.Resources>
         <ResourceDictionary>
             <converters:StringVisibilityConverter x:Key="StringVisibilityConverter"/>
-            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:BoolToObjectConverter x:Key="BoolToVisibilityNegationConverter" TrueValue="Collapsed" FalseValue="Visible"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
             <converters:CollectionVisibilityConverter x:Key="CollectionInverseVisibilityConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
