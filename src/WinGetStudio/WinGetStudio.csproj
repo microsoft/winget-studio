@@ -64,7 +64,6 @@
     <ProjectReference Include="..\WinGetStudio.CLI\WinGetStudio.CLI.csproj" />
     <ProjectReference Include="..\WinGetStudio.Core\WinGetStudio.Common.csproj" />
     <ProjectReference Include="..\services\WinGetStudio.Services.DesiredStateConfiguration\WinGetStudio.Services.DesiredStateConfiguration.csproj" />
-    <ProjectReference Include="..\services\WinGetStudio.Services.WindowsPackageManager\WinGetStudio.Services.WindowsPackageManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>

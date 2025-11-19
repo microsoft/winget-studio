@@ -21,7 +21,6 @@ using WinGetStudio.Services.Settings;
 using WinGetStudio.Services.Settings.Extensions;
 using WinGetStudio.Services.Telemetry.Extensions;
 using WinGetStudio.Services.VisualFeedback.Extensions;
-using WinGetStudio.Services.WindowsPackageManager.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
 using WinGetStudio.ViewModels.Controls;
@@ -98,7 +97,6 @@ public partial class App : Application
                 services.AddCore();
                 services.AddDSC();
                 services.AddDSCExplorer();
-                services.AddWinGet();
                 services.AddSettings();
                 services.AddTelemetry();
                 services.AddVisualFeedback();
