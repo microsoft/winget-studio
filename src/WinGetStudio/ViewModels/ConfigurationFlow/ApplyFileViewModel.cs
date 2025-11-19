@@ -4,9 +4,9 @@
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.Services;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
@@ -14,7 +14,8 @@ public partial class ApplyFileViewModel : ObservableRecipient
 {
     private readonly IConfigurationFrameNavigationService _navigationService;
     private readonly IAppOperationHub _operationHub;
-    private readonly ILogger _logger;
+    private readonly ILogger<ApplyFileViewModel> _logger;
+    private readonly IStringLocalizer<ApplyFileViewModel> _localizer;
     private readonly IConfigurationManager _manager;
     private readonly ApplySetViewModelFactory _applySetFactory;
 
@@ -25,11 +26,13 @@ public partial class ApplyFileViewModel : ObservableRecipient
         IConfigurationFrameNavigationService navigationService,
         IAppOperationHub operationHub,
         ILogger<ApplyFileViewModel> logger,
+        IStringLocalizer<ApplyFileViewModel> localizer,
         IConfigurationManager manager,
         ApplySetViewModelFactory applySetFactory)
     {
         _navigationService = navigationService;
         _logger = logger;
+        _localizer = localizer;
         _operationHub = operationHub;
         _manager = manager;
         _applySetFactory = applySetFactory;
@@ -58,19 +61,20 @@ public partial class ApplyFileViewModel : ObservableRecipient
         var activeSet = _manager.ActiveSetPreviewState.ActiveSet;
         Debug.Assert(activeSet != null, "ActiveSet should not be null when applying configuration set.");
 
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
-        {
-            _logger.LogInformation($"Applying configuration set started");
-            var dscFile = activeSet.GetLatestDSCFile();
-            var openSet = factory.CreateOpenSetOperation(dscFile);
-            var openSetResult = await openSet.ExecuteAsync(context);
-            if (openSetResult.IsSuccess && openSetResult.Result != null)
+        await _operationHub.RunWithProgressAsync(
+            props => props with { Title = _localizer["ApplySetOperation_Title"], Message = _localizer["ApplySetOperation_PreStartMessage"] },
+            async (context, factory) =>
             {
-                ApplySet = _applySetFactory(openSetResult.Result);
-                _manager.ActiveSetApplyState.CaptureState(this);
-                await ApplySet.ApplyAsync(context);
-            }
-        });
+                var dscFile = activeSet.GetLatestDSCFile();
+                var openSet = factory.CreateOpenSetOperation(dscFile);
+                var openSetResult = await openSet.ExecuteAsync(context);
+                if (openSetResult.IsSuccess && openSetResult.Result != null)
+                {
+                    ApplySet = _applySetFactory(openSetResult.Result);
+                    _manager.ActiveSetApplyState.CaptureState(this);
+                    await ApplySet.ApplyAsync(context);
+                }
+            });
     }
 
     [RelayCommand]

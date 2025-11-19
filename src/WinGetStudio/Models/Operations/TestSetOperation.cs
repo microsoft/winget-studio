@@ -31,40 +31,37 @@ public sealed partial class TestSetOperation : IOperation<OperationResult<IDSCTe
     {
         try
         {
-            context.Start();
-            context.StartSnapshotBroadcast();
-            _logger.LogInformation($"Testing configuration code");
+            _logger.LogInformation($"Starting {nameof(TestSetOperation)} operation with ID {context.Id}.");
+            context.CommitSnapshot(props => props with { Message = _localizer["TestSetOperation_StartMessage"] });
             var dscSet = await _dsc.OpenConfigurationSetAsync(_dscFile, context.CancellationToken);
-
-            // TODO capture progress and pass CT
-            var result = await _dsc.TestSetAsync(dscSet);
+            var result = await _dsc.TestSetAsync(dscSet, null, context.CancellationToken);
             if (result.TestResult == ConfigurationTestResult.Positive)
             {
-                context.Success(props => props with { Message = _localizer["Notification_MachineInDesiredState"] });
+                context.Success(props => props with { Message = _localizer["TestOperation_MachineInDesiredStateMessage"] });
             }
             else
             {
-                context.Fail(props => props with { Message = _localizer["Notification_MachineNotInDesiredState"] });
+                context.Fail(props => props with { Message = _localizer["TestOperation_MachineNotInDesiredStateMessage"] });
             }
 
             return new() { Result = result };
         }
         catch (OperationCanceledException ex)
         {
-            _logger.LogWarning(ex, "The DSC test set operation was canceled.");
-            context.Canceled(props => props with { Message = "The operation was canceled." });
+            _logger.LogInformation("Operation was canceled by user.");
+            context.Canceled(props => props with { Message = _localizer["TestSetOperation_CancelledMessage"] });
             return new() { Error = ex };
         }
         catch (OpenConfigurationSetException ex)
         {
-            _logger.LogError(ex, $"Opening configuration set failed during validation");
+            _logger.LogError(ex, $"Error opening configuration set");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
             return new() { Error = ex };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Unknown error while validating configuration code");
-            context.Fail(props => props with { Message = ex.Message });
+            _logger.LogError(ex, $"Unexpected error during {nameof(TestSetOperation)} operation.");
+            context.Fail(props => props with { Message = _localizer["TestSetOperation_UnexpectedErrorMessage", ex.Message] });
             return new() { Error = ex };
         }
     }

@@ -21,11 +21,11 @@ public sealed partial class ApplySetOperation : IOperation<OperationResult<IDSCA
     private readonly IProgress<IDSCSetChangeData> _progress;
     private readonly ConcurrentDictionary<Guid, ConfigurationUnitState> _unitStates = [];
 
-    public int TotalUnits => _dscSet.Units.Count;
+    private int TotalUnits => _dscSet.Units.Count;
 
-    public int TotalCompletedUnits => _unitStates.Count(kvp => kvp.Value == ConfigurationUnitState.Completed);
+    private int TotalCompletedUnits => _unitStates.Count(kvp => kvp.Value == ConfigurationUnitState.Completed);
 
-    public int PercentComplete => TotalUnits == 0 ? 0 : (int)((double)TotalCompletedUnits / TotalUnits * 100);
+    private int PercentComplete => TotalUnits == 0 ? 0 : (int)((double)TotalCompletedUnits / TotalUnits * 100);
 
     public ApplySetOperation(
         ILogger<ApplySetOperation> logger,
@@ -46,33 +46,35 @@ public sealed partial class ApplySetOperation : IOperation<OperationResult<IDSCA
     {
         try
         {
-            _logger.LogInformation($"Applying configuration set started");
+            _logger.LogInformation($"Starting {nameof(ApplySetOperation)} operation with ID {context.Id}.");
+            context.CommitSnapshot(props => props with { Message = _localizer["ApplySetOperation_StartMessage"] });
             var progress = new Progress<IDSCSetChangeData>(data => OnDataChanged(data, context));
             var result = await _dsc.ApplySetAsync(_dscSet, progress, context.CancellationToken);
+            context.Complete(props => props with { Message = _localizer["ApplySetOperation_CompletedMessage"] });
             return new() { Result = result };
         }
         catch (OpenConfigurationSetException ex)
         {
-            _logger.LogError(ex, $"Opening configuration set failed during apply");
+            _logger.LogError(ex, $"Error opening configuration set");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
             return new() { Error = ex };
         }
         catch (ApplyConfigurationSetException ex)
         {
-            _logger.LogError(ex, $"Applying configuration set failed");
+            _logger.LogError(ex, $"Error applying configuration set");
             context.Fail(props => props with { Message = ex.GetSetErrorMessage(_localizer) });
             return new() { Error = ex };
         }
         catch (OperationCanceledException ex)
         {
-            _logger.LogInformation("Applying configuration set was canceled by user");
-            context.Canceled(props => props with { Message = _localizer["ApplyFile_ApplyOperationCanceledMessage"] });
+            _logger.LogInformation("Operation was canceled by user.");
+            context.Canceled(props => props with { Message = _localizer["ApplySetOperation_CancelledMessage"] });
             return new() { Error = ex };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Unknown error while validating configuration code");
-            context.Fail(props => props with { Message = ex.Message });
+            _logger.LogError(ex, $"Unexpected error during {nameof(ApplySetOperation)} operation.");
+            context.Fail(props => props with { Message = _localizer["ApplySetOperation_UnexpectedErrorMessage", ex.Message] });
             return new() { Error = ex };
         }
     }

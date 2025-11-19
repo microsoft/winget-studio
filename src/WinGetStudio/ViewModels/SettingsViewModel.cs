@@ -99,12 +99,10 @@ public partial class SettingsViewModel : ObservableRecipient
     [RelayCommand]
     private async Task ClearModuleCatalogsCacheAsync()
     {
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
+        await _operationHub.RunAsync(async (context, factory) =>
         {
-            context.StartSnapshotBroadcast();
-            context.Start();
             await _dscExplorer.ClearCacheAsync();
-            context.Success(props => props with { Message = _localizer["CacheClearedMessage"] });
+            context.Success(props => props with { Message = _localizer["ClearDSCResourcesCache_CompletedMessage"] });
         });
     }
 

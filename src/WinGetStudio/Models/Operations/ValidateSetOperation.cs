@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Management.Configuration;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.Operations.Contracts;
@@ -30,38 +31,35 @@ public sealed partial class ValidateSetOperation : IOperation<OperationResult<ID
     {
         try
         {
-            context.Start();
-            context.StartSnapshotBroadcast();
-            _logger.LogInformation($"Validating configuration code");
-            var dscSet = await _dsc.OpenConfigurationSetAsync(_dscFile);
-            var result = await _dsc.ValidateSetAsync(dscSet);
-            context.Success(props => props with { Message = _localizer["PreviewFile_ValidationSuccessfulMessage"] });
+            _logger.LogInformation($"Starting {nameof(ValidateSetOperation)} operation with ID {context.Id}.");
+            context.CommitSnapshot(props => props with { Message = _localizer["ValidateSetOperation_StartMessage"] });
+            var dscSet = await _dsc.OpenConfigurationSetAsync(_dscFile, context.CancellationToken);
+            var result = await _dsc.ValidateSetAsync(dscSet, null, context.CancellationToken);
+            context.Success(props => props with { Message = _localizer["ValidateSetOperation_SuccessMessage"] });
             return new() { Result = result };
         }
         catch (OperationCanceledException ex)
         {
-            _logger.LogWarning(ex, "The DSC validation operation was canceled.");
-            context.Canceled(props => props with { Message = "The operation was canceled." });
+            _logger.LogInformation("Operation was canceled by user.");
+            context.Canceled(props => props with { Message = _localizer["ValidateSetOperation_CancelledMessage"] });
             return new() { Error = ex };
         }
         catch (OpenConfigurationSetException ex)
         {
-            _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
+            _logger.LogError(ex, $"Error opening configuration set");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
             return new() { Error = ex };
         }
         catch (ApplyConfigurationSetException ex)
         {
-            _logger.LogError(ex, $"Validation of configuration set failed");
-            var title = ex.GetSetErrorMessage(_localizer);
-            var message = ex.GetUnitsSummaryMessage(_localizer);
-            context.Fail(props => props with { Title = title, Message = message });
+            _logger.LogError(ex, $"Error validating configuration set.");
+            context.Fail(props => props with { Message = ex.GetUnitsSummaryMessage(_localizer) });
             return new() { Error = ex };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while executing a DSC operation.");
-            context.Fail(props => props with { Message = ex.Message });
+            _logger.LogError(ex, $"Unexpected error during {nameof(ValidateSetOperation)} operation.");
+            context.Fail(props => props with { Message = _localizer["ValidateSetOperation_UnexpectedErrorMessage", ex.Message] });
             return new() { Error = ex };
         }
     }

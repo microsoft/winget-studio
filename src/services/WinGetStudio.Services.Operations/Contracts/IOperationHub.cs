@@ -34,6 +34,12 @@ public interface IOperationHub
     Task<IOperationScope> BeginOperationAsync(OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Starts broadcasting snapshots to subscribers.
+    /// </summary>
+    /// <param name="snapshot">The operation snapshot.</param>
+    void StartSnapshotBroadcast(OperationSnapshot snapshot);
+
+    /// <summary>
     /// Stops broadcasting snapshots to subscribers.
     /// </summary>
     /// <param name="id">The operation ID.</param>

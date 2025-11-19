@@ -3,14 +3,12 @@
 
 using CommunityToolkit.WinUI;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using WinGetStudio.Common.Windows.FileDialog;
-using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.Views;
-using WinGetStudio.Services;
-using WinGetStudio.Services.Operations.Extensions;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
 
@@ -18,15 +16,15 @@ namespace WinGetStudio.Views.ConfigurationFlow;
 
 public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 {
+    private readonly ILogger<PreviewFilePage> _logger;
     private readonly IStringLocalizer<PreviewFilePage> _localizer;
-    private readonly IAppOperationHub _operationHub;
 
     public PreviewFileViewModel ViewModel { get; }
 
     public PreviewFilePage()
     {
+        _logger = App.GetService<ILogger<PreviewFilePage>>();
         _localizer = App.GetService<IStringLocalizer<PreviewFilePage>>();
-        _operationHub = App.GetService<IAppOperationHub>();
         ViewModel = App.GetService<PreviewFileViewModel>();
         InitializeComponent();
     }
@@ -53,45 +51,39 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
 
     private async void OpenConfigurationFile(object sender, RoutedEventArgs e)
     {
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
+        try
         {
-            try
+            var filePicker = new WindowOpenFileDialog();
+            string[] fileExts = [".winget", ".yaml", ".yml"];
+            filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], fileExts);
+            var selectedFile = await filePicker.ShowAsync(App.MainWindow);
+            if (selectedFile != null)
             {
-                var filePicker = new WindowOpenFileDialog();
-                string[] fileExts = [".winget", ".yaml", ".yml"];
-                filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], fileExts);
-                var selectedFile = await filePicker.ShowAsync(App.MainWindow);
-                if (selectedFile != null)
-                {
-                    await ViewModel.OpenConfigurationFileAsync(selectedFile);
-                }
+                await ViewModel.OpenConfigurationFileAsync(selectedFile);
             }
-            catch (Exception ex)
-            {
-                context.Fail(props => props with { Message = ex.Message });
-            }
-        });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error opening configuration file");
+        }
     }
 
     private async void SaveConfigurationFileAs(object sender, RoutedEventArgs e)
     {
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
+        try
         {
-            try
+            var filePicker = new WindowSaveFileDialog();
+            filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], ".winget");
+            var selectedFile = filePicker.Show(App.MainWindow);
+            if (!string.IsNullOrEmpty(selectedFile))
             {
-                var filePicker = new WindowSaveFileDialog();
-                filePicker.AddFileType(_localizer["PreviewPage_FilePicker_ConfigurationFiles"], ".winget");
-                var selectedFile = filePicker.Show(App.MainWindow);
-                if (!string.IsNullOrEmpty(selectedFile))
-                {
-                    await ViewModel.SaveConfigurationAsAsync(selectedFile);
-                }
+                await ViewModel.SaveConfigurationAsAsync(selectedFile);
             }
-            catch (Exception ex)
-            {
-                context.Fail(props => props with { Message = ex.Message });
-            }
-        });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving configuration file");
+        }
     }
 
     private void SelectedUnitDependencyChanged(object sender, SelectionChangedEventArgs e)

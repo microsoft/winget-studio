@@ -20,29 +20,28 @@ public interface IAppOperationHub
     IEventStream<GlobalActivity> GlobalActivity { get; }
 
     /// <summary>
-    /// Execute an operation.
+    /// Run an operation with the given operation function.
     /// </summary>
-    /// <typeparam name="TResult">The result type.</typeparam>
-    /// <param name="options">The execution options.</param>
-    /// <param name="operation">The operation.</param>
-    /// <returns>The operation result.</returns>
-    Task<OperationResult<TResult>> ExecuteAsync<TResult>(OperationExecutionOptions options, Func<IOperationContext, IOperationFactory, Task<OperationResult<TResult>>> operation);
+    /// <param name="operation">The operation function.</param>
+    Task RunAsync(Func<IOperationContext, IOperationFactory, Task> operation);
 
     /// <summary>
-    /// Execute an operation.
+    /// Run an operation with progress with the given properties mutation and operation function.
     /// </summary>
-    /// <param name="options">The execution options.</param>
-    /// <param name="operation">The operation.</param>
-    Task ExecuteAsync(OperationExecutionOptions options, Func<IOperationContext, IOperationFactory, Task> operation);
+    /// <param name="mutate">The properties mutation function.</param>
+    /// <param name="operation">The operation function.</param>
+    /// <param name="canCancel">A value indicating whether the operation can be canceled.</param><
+    Task RunWithProgressAsync(Func<OperationProperties, OperationProperties> mutate, Func<IOperationContext, IOperationFactory, Task> operation, bool canCancel = true);
 
     /// <summary>
-    /// Execute an operation.
+    /// Run an operation with progress with the given properties mutation and operation function.
     /// </summary>
+    /// <param name="mutate">The properties mutation function.</param>
+    /// <param name="operation">The operation function.</param>
+    /// <param name="canCancel">A value indicating whether the operation can be canceled.</param>
     /// <typeparam name="TResult">The result type.</typeparam>
-    /// <param name="options">The execution options.</param>
-    /// <param name="operation">The operation.</param>
     /// <returns>The operation result.</returns>
-    Task<OperationResult<TResult>> ExecuteAsync<TResult>(OperationExecutionOptions options, IOperation<OperationResult<TResult>> operation);
+    Task<OperationResult<TResult>> RunWithProgressAsync<TResult>(Func<OperationProperties, OperationProperties> mutate, Func<IOperationContext, IOperationFactory, Task<OperationResult<TResult>>> operation, bool canCancel = true);
 
     /// <inheritdoc cref="IOperationHub.BeginOperationAsync(OperationExecutionOptions?, CancellationToken)"/>
     Task<IOperationScope> BeginOperationAsync(OperationExecutionOptions? options = null, CancellationToken cancellationToken = default);

@@ -12,11 +12,9 @@ using NuGet.Packaging;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Models;
 using WinGetStudio.Models.Operations;
-using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Models;
 using WinGetStudio.Services.Operations.Extensions;
-using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.ViewModels.Controls;
 
@@ -135,26 +133,26 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     {
         CanReload = false;
         _allSuggestions.Clear();
-        await _operationHub.ExecuteAsync(AppOperationHub.PassiveOptions, async (context, factory) =>
-        {
-            context.StartSnapshotBroadcast();
-            context.Start();
-            context.PublishNotification(props => props with { Title = _localizer["LoadingDSCResourcesMessage"] });
-            await foreach (var catalog in _explorer.GetModuleCatalogsAsync())
+        await _operationHub.RunWithProgressAsync(
+            props => props with { Message = _localizer["LoadingDSCResources_LoadingMessage"] },
+            async (context, factory) =>
             {
-                foreach (var module in catalog.Modules.Values)
+                await foreach (var catalog in _explorer.GetModuleCatalogsAsync())
                 {
-                    foreach (var resource in module.Resources.Values)
+                    foreach (var module in catalog.Modules.Values)
                     {
-                        var suggestion = new ResourceSuggestion(module, resource);
-                        var viewModel = new ResourceSuggestionViewModel(suggestion);
-                        _allSuggestions.TryAdd(viewModel.DisplayName.ToLowerInvariant(), viewModel);
+                        foreach (var resource in module.Resources.Values)
+                        {
+                            var suggestion = new ResourceSuggestion(module, resource);
+                            var viewModel = new ResourceSuggestionViewModel(suggestion);
+                            _allSuggestions.TryAdd(viewModel.DisplayName.ToLowerInvariant(), viewModel);
+                        }
                     }
                 }
-            }
 
-            context.Complete(props => props with { Title = _localizer["CompletedLoadingDSCResourcesMessage"] });
-        });
+                context.Complete(props => props with { Message = _localizer["LoadingDSCResources_CompletedMessage"] });
+            },
+            canCancel: false);
         CanReload = true;
     }
 
@@ -164,48 +162,48 @@ public sealed partial class ResourceAutoSuggestBoxViewModel : ObservableRecipien
     /// <returns>The selected DSC resource, or null if not found.</returns>
     public async Task<OperationResult<DSCResource>> OnExploreAsync()
     {
-        return await _operationHub.ExecuteAsync<DSCResource>(AppOperationHub.PassiveOptions, async (ctx, factory) =>
-        {
-            try
+        return await _operationHub.RunWithProgressAsync<DSCResource>(
+            props => props with { Message = _localizer["ExploreDSCResource_LoadingMessage"] },
+            async (ctx, factory) =>
             {
-                ctx.StartSnapshotBroadcast();
-                ctx.Start();
-                if (!string.IsNullOrWhiteSpace(SearchResourceText))
+                try
                 {
-                    if (_allSuggestions.TryGetValue(SearchResourceText.ToLowerInvariant(), out var selectedSuggestion)
-                        && selectedSuggestion.Module != null
-                        && selectedSuggestion.Resource != null)
+                    if (!string.IsNullOrWhiteSpace(SearchResourceText))
                     {
-                        // If the module is not enriched, enrich it with resource details
-                        if (!selectedSuggestion.Module.IsEnriched)
+                        if (_allSuggestions.TryGetValue(SearchResourceText.ToLowerInvariant(), out var selectedSuggestion)
+                            && selectedSuggestion.Module != null
+                            && selectedSuggestion.Resource != null)
                         {
-                            await _explorer.EnrichModuleWithResourceDetailsAsync(selectedSuggestion.Module);
-                        }
+                            // If the module is not enriched, enrich it with resource details
+                            if (!selectedSuggestion.Module.IsEnriched)
+                            {
+                                await _explorer.EnrichModuleWithResourceDetailsAsync(selectedSuggestion.Module);
+                            }
 
-                        // If the module is still not enriched, show a warning and return null
-                        if (!selectedSuggestion.Module.IsEnriched)
+                            // If the module is still not enriched, show a warning and return null
+                            if (!selectedSuggestion.Module.IsEnriched)
+                            {
+                                ctx.Warn(props => props with { Message = _localizer["ExploreDSCResource_NotFoundMessage"] });
+                                return new() { Result = null };
+                            }
+
+                            ctx.Complete(props => props with { Message = _localizer["ExploreDSCResource_CompletedMessage"] });
+                            return new() { Result = selectedSuggestion.Resource };
+                        }
+                        else
                         {
-                            ctx.Complete(props => props with { Severity = OperationSeverity.Warning, Message = _localizer["ResourceInfoNotFoundMessage"] });
-                            return new() { Result = null };
+                            ctx.Warn(props => props with { Message = _localizer["ExploreDSCResource_NotFoundMessage"] });
                         }
+                    }
 
-                        ctx.Complete();
-                        return new() { Result = selectedSuggestion.Resource };
-                    }
-                    else
-                    {
-                        ctx.Complete(props => props with { Severity = OperationSeverity.Warning, Message = _localizer["ResourceInfoNotFoundMessage"] });
-                    }
+                    return new() { Result = null };
                 }
-
-                return new() { Result = null };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while exploring the DSC resource.");
-                ctx.Fail(props => props with { Message = _localizer["ExploreResource_Failed"] });
-                return new() { Error = null };
-            }
-        });
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while exploring the DSC resource.");
+                    ctx.Fail(props => props with { Message = _localizer["ExploreDSCResource_ErrorMessage"] });
+                    return new() { Error = null };
+                }
+            });
     }
 }

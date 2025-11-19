@@ -10,29 +10,32 @@ namespace WinGetStudio.Services.Operations.Models.Policies;
 
 public sealed partial class SnapshotRetentionPolicy : IOperationCompletionPolicy
 {
-    private readonly OperationStatus _status;
-    private readonly OperationSeverity _severity;
+    private readonly Func<OperationProperties, bool> _applyCondition;
     private readonly TimeSpan _retentionPeriod;
 
-    public SnapshotRetentionPolicy(OperationStatus status, OperationSeverity severity, TimeSpan retentionPeriod)
+    public SnapshotRetentionPolicy(Func<OperationProperties, bool> applyCondition, TimeSpan retentionPeriod)
     {
-        _status = status;
-        _severity = severity;
+        _applyCondition = applyCondition;
         _retentionPeriod = retentionPeriod;
     }
 
     /// <inheritdoc/>
     public bool CanApply(IOperationContext context)
     {
-        var status = context.CurrentSnapshot.Properties.Status;
-        var severity = context.CurrentSnapshot.Properties.Severity;
-        return status == _status && severity == _severity;
+        return _applyCondition(context.CurrentSnapshot.Properties);
     }
 
     /// <inheritdoc/>
-    public async Task ApplyAsync(IOperationContext context)
+    public Task ApplyAsync(IOperationContext context)
     {
-        await Task.Delay(_retentionPeriod);
-        context.StopSnapshotBroadcast();
+        // In a background task, wait for the retention period then stop
+        // broadcasting snapshots.
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(_retentionPeriod);
+            context.StopSnapshotBroadcast();
+        });
+
+        return Task.CompletedTask;
     }
 }

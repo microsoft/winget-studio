@@ -103,12 +103,19 @@ public partial class UnitViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(Title))
         {
-            throw new DSCUnitValidationException(_localizer["Unit_TitleCannotBeNullOrEmpty"]);
+            throw new DSCUnitValidationException(_localizer["ValidateUnit_TitleCannotBeNullOrEmpty"]);
         }
 
-        if (!string.IsNullOrEmpty(SettingsText))
+        try
         {
-            DSCPropertySet.FromYaml(SettingsText);
+            if (!string.IsNullOrEmpty(SettingsText))
+            {
+                DSCPropertySet.FromYaml(SettingsText);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new DSCUnitValidationException(_localizer["ValidateUnit_SettingsInvalidFormat", ex.Message]);
         }
     }
 

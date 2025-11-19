@@ -577,11 +577,11 @@
   <data name="ActivityPane_Title.Text" xml:space="preserve">
     <value>Activities</value>
   </data>
-  <data name="Notification_MachineInDesiredState" xml:space="preserve">
-    <value>Machine is in the desired state</value>
+  <data name="ActivityPane_CancelText" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="Notification_MachineNotInDesiredState" xml:space="preserve">
-    <value>Machine is not in the desired state</value>
+    <data name="ActivityPane_ViewLogsText" xml:space="preserve">
+    <value>View logs</value>
   </data>
   <data name="WinGetStudioCli_Description" xml:space="preserve">
     <value>WinGetStudio command line interface - v{0}</value>
@@ -683,17 +683,8 @@
   <data name="MainPage_DSCDefinitions_ModuleDesc.Text" xml:space="preserve">
     <value>A module is a PowerShell module that contains the implementation for one or more DSC resources. Modules provide the actual functionality to apply configurations, such as the Microsoft.WinGet.DSC module for package management.</value>
   </data>
-  <data name="CacheClearedMessage" xml:space="preserve">
-    <value>Cache cleared</value>
-  </data>
   <data name="ResourceInfoNotFoundMessage" xml:space="preserve">
     <value>Unable to find information for the specified resource</value>
-  </data>
-  <data name="LoadingDSCResourcesMessage" xml:space="preserve">
-    <value>Loading DSC resources ...</value>
-  </data>
-  <data name="CompletedLoadingDSCResourcesMessage" xml:space="preserve">
-    <value>Completed loading DSC resources</value>
   </data>
   <data name="ResourceExplorer_View.Label" xml:space="preserve">
     <value>View</value>
@@ -746,8 +737,11 @@
   <data name="ApplySet_TotalUnitsCompleted" xml:space="preserve">
     <value>{0}% Completed</value>
   </data>
-  <data name="Unit_TitleCannotBeNullOrEmpty" xml:space="preserve">
-    <value>Title cannot be null or empty when creating configuration.</value>
+  <data name="ValidateUnit_TitleCannotBeNullOrEmpty" xml:space="preserve">
+    <value>Title cannot be empty when creating configuration.</value>
+  </data>
+  <data name="ValidateUnit_SettingsInvalidFormat" xml:space="preserve">
+    <value>Invalid settings format: {0}</value>
   </data>
   <data name="File_PathCannotBeNullOrEmpty" xml:space="preserve">
     <value>Cannot save a file without a valid file path.</value>
@@ -769,9 +763,6 @@
   </data>
   <data name="PreviewFile_AddResourceFailedMessage" xml:space="preserve">
     <value>Adding new resource failed: {0}</value>
-  </data>
-  <data name="PreviewFile_ValidationSuccessfulMessage" xml:space="preserve">
-    <value>Configuration code is valid</value>
   </data>
   <data name="PreviewFile_UpdateSuccessfulMessage" xml:space="preserve">
     <value>Configuration unit updated</value>
@@ -801,9 +792,6 @@
   <data name="ApplyFile_CancelButton.Content" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="ApplyFile_ApplyOperationCanceledMessage" xml:space="preserve">
-    <value>Apply operation canceled</value>
-  </data>
   <data name="PreviewFile_ResourceAutoSuggestBox.Header" xml:space="preserve">
     <value>Resource type</value>
   </data>
@@ -831,7 +819,139 @@
   <data name="ApplyFile_CancelDialog.Title" xml:space="preserve">
     <value>Are you sure you want to cancel applying the configuration?</value>
   </data>
-  <data name="ExploreResource_Failed" xml:space="preserve">
+  <data name="GetUnitOperation_PreStartMessage" xml:space="preserve">
+    <value>Preparing to get unit settings...</value>
+  </data>
+  <data name="GetUnitOperation_StartMessage" xml:space="preserve">
+    <value>Getting unit settings...</value>
+  </data>
+  <data name="GetUnitOperation_UnexpectedErrorMessage" xml:space="preserve">
+    <value>An unexpected error occurred while getting the unit settings: {0}</value>
+  </data>
+  <data name="GetUnitOperation_CancelledMessage" xml:space="preserve">
+    <value>The operation to get unit settings was cancelled by the user.</value>
+  </data>
+  <data name="GetUnitOperation_SuccessMessage" xml:space="preserve">
+    <value>Successfully retrieved unit settings</value>
+  </data>
+  <data name="SetUnitOperation_PreStartMessage" xml:space="preserve">
+    <value>Preparing to apply unit settings...</value>
+  </data>
+  <data name="SetUnitOperation_StartMessage" xml:space="preserve">
+    <value>Applying unit settings...</value>
+  </data>
+  <data name="SetUnitOperation_UnexpectedErrorMessage" xml:space="preserve">
+    <value>An unexpected error occurred while applying the unit settings: {0}</value>
+  </data>
+  <data name="SetUnitOperation_CancelledMessage" xml:space="preserve">
+    <value>The operation to apply unit settings was cancelled by the user.</value>
+  </data>
+  <data name="SetUnitOperation_SuccessMessage" xml:space="preserve">
+    <value>Unit settings applied successfully</value>
+  </data>
+  <data name="TestUnitOperation_PreStartMessage" xml:space="preserve">
+    <value>Preparing to test unit settings...</value>
+  </data>
+  <data name="TestUnitOperation_StartMessage" xml:space="preserve">
+    <value>Testing unit settings...</value>
+  </data>
+  <data name="TestUnitOperation_UnexpectedErrorMessage" xml:space="preserve">
+    <value>An unexpected error occurred while testing the unit settings: {0}</value>
+  </data>
+  <data name="TestUnitOperation_CancelledMessage" xml:space="preserve">
+    <value>The operation to test unit settings was cancelled by the user.</value>
+  </data>
+  <data name="TestOperation_MachineInDesiredStateMessage" xml:space="preserve">
+    <value>Machine is in the desired state</value>
+  </data>
+  <data name="TestOperation_MachineNotInDesiredStateMessage" xml:space="preserve">
+    <value>Machine is not in the desired state</value>
+  </data>
+  <data name="ApplySetOperation_Title" xml:space="preserve">
+    <value>Applying configuration</value>
+  </data>
+   <data name="ApplySetOperation_PreStartMessage" xml:space="preserve">
+    <value>Preparing to apply configuration...</value>
+  </data>
+  <data name="ApplySetOperation_StartMessage" xml:space="preserve">
+    <value>Applying configuration...</value>
+  </data>
+  <data name="ApplySetOperation_UnexpectedErrorMessage" xml:space="preserve">
+    <value>An error occurred while applying the configuration: {0}</value>
+  </data>
+  <data name="ApplySetOperation_CancelledMessage" xml:space="preserve">
+    <value>The configuration application was cancelled by the user.</value>
+  </data>
+  <data name="ApplySetOperation_CompletedMessage" xml:space="preserve">
+    <value>Configuration application completed</value>
+  </data>
+  <data name="OpenSetOperation_PreStartMessage" xml:space="preserve">
+    <value>Preparing to open configuration...</value>
+  </data>
+  <data name="OpenSetOperation_StartMessage" xml:space="preserve">
+    <value>Opening configuration...</value>
+  </data>
+  <data name="OpenSetOperation_UnexpectedErrorMessage" xml:space="preserve">
+    <value>An unexpected error occurred while opening the configuration: {0}</value>
+  </data>
+  <data name="OpenSetOperation_CancelledMessage" xml:space="preserve">
+    <value>The operation to open the configuration was cancelled by the user.</value>
+  </data>
+  <data name="OpenSetOperation_SuccessMessage" xml:space="preserve">
+    <value>Opened configuration successfully</value>
+  </data>
+  <data name="TestSetOperation_Title" xml:space="preserve">
+    <value>Testing configuration</value>
+  </data>
+  <data name="TestSetOperation_PreStartMessage" xml:space="preserve">
+    <value>Preparing to test configuration...</value>
+  </data>
+  <data name="TestSetOperation_StartMessage" xml:space="preserve">
+    <value>Testing configuration...</value>
+  </data>
+  <data name="TestSetOperation_UnexpectedErrorMessage" xml:space="preserve">
+    <value>An unexpected error occurred while testing the configuration: {0}</value>
+  </data>
+  <data name="TestSetOperation_CancelledMessage" xml:space="preserve">
+    <value>The operation to test the configuration was cancelled by the user.</value>
+  </data>
+  <data name="ValidateSetOperation_Title" xml:space="preserve">
+    <value>Validating configuration</value>
+  </data>
+  <data name="ValidateSetOperation_PreStartMessage" xml:space="preserve">
+    <value>Preparing to validate configuration...</value>
+  </data>
+  <data name="ValidateSetOperation_StartMessage" xml:space="preserve">
+    <value>Validating configuration...</value>
+  </data>
+  <data name="ValidateSetOperation_UnexpectedErrorMessage" xml:space="preserve">
+    <value>An unexpected error occurred while validating the configuration: {0}</value>
+  </data>
+  <data name="ValidateSetOperation_CancelledMessage" xml:space="preserve">
+    <value>The operation to validate the configuration was cancelled by the user.</value>
+  </data>
+  <data name="ValidateSetOperation_SuccessMessage" xml:space="preserve">
+    <value>Configuration is valid</value>
+  </data>
+  <data name="LoadingDSCResources_LoadingMessage" xml:space="preserve">
+    <value>Loading DSC resources ...</value>
+  </data>
+  <data name="LoadingDSCResources_CompletedMessage" xml:space="preserve">
+    <value>Completed loading DSC resources</value>
+  </data>
+  <data name="ExploreDSCResource_LoadingMessage" xml:space="preserve">
+    <value>Loading resource details ...</value>
+  </data>
+  <data name="ExploreDSCResource_NotFoundMessage" xml:space="preserve">
+    <value>Resource details not found</value>
+  </data>
+  <data name="ExploreDSCResource_CompletedMessage" xml:space="preserve">
+    <value>Completed loading resource details</value>
+  </data>
+  <data name="ExploreDSCResource_ErrorMessage" xml:space="preserve">
     <value>Failed to load resource details</value>
+  </data>
+  <data name="ClearDSCResourcesCache_CompletedMessage" xml:space="preserve">
+    <value>Cache cleared</value>
   </data>
 </root>

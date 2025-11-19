@@ -44,8 +44,7 @@ public partial class MainViewModel : ObservableRecipient
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task Button1Async()
     {
-        await _operationHub.ExecuteAsync(
-            AppOperationHub.PassiveOptions,
+        await _operationHub.RunAsync(
             async (context, factory) =>
             {
                 context.StartSnapshotBroadcast();

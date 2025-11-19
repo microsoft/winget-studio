@@ -31,49 +31,60 @@ public sealed partial class TestUnitOperation : IOperation<OperationResult<IDSCT
     {
         try
         {
-            context.Start();
-            context.StartSnapshotBroadcast();
-            context.AddCancelAction("Cancel");
-            var dscSet = await _dsc.OpenConfigurationSetAsync(_dscFile);
+            _logger.LogInformation($"Starting {nameof(TestUnitOperation)} operation with ID {context.Id}.");
+            context.CommitSnapshot(props => props with { Message = _localizer["TestUnitOperation_StartMessage"] });
+            var dscSet = await _dsc.OpenConfigurationSetAsync(_dscFile, context.CancellationToken);
             var dscUnit = dscSet.Units[0];
             var result = await _dsc.TestUnitAsync(dscUnit, context.CancellationToken);
             if (result.TestResult == ConfigurationTestResult.Positive)
             {
-                context.Success(props => props with { Message = _localizer["Notification_MachineInDesiredState"] });
+                context.Success(props => props with { Message = _localizer["TestOperation_MachineInDesiredStateMessage"] });
+            }
+            else if (result.ResultInformation != null && !result.ResultInformation.IsOk)
+            {
+                context.Fail(props => props with { Message = GetDescriptiveFailureMessage(result.ResultInformation) });
             }
             else
             {
-                context.Fail(props => props with { Message = _localizer["Notification_MachineNotInDesiredState"] });
-            }
-
-            var resultInfo = result.ResultInformation;
-            if (resultInfo != null && !resultInfo.IsOk)
-            {
-                var title = $"0x{resultInfo.ResultCode.HResult:X}";
-                List<string> messageList = [resultInfo.Description, resultInfo.Details];
-                var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
-                context.Fail(props => props with { Title = title, Message = message });
+                context.Fail(props => props with { Message = _localizer["TestOperation_MachineNotInDesiredStateMessage"] });
             }
 
             return new() { Result = result };
         }
         catch (OperationCanceledException ex)
         {
-            _logger.LogWarning(ex, "The DSC test unit operation was canceled.");
-            context.Canceled(props => props with { Message = "The operation was canceled." });
+            _logger.LogInformation("Operation was canceled by user.");
+            context.Canceled(props => props with { Message = _localizer["TestUnitOperation_CancelledMessage"] });
             return new() { Error = ex };
         }
         catch (OpenConfigurationSetException ex)
         {
-            _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
+            _logger.LogError(ex, $"Error opening configuration set");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
             return new() { Error = ex };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while executing a DSC operation.");
-            context.Fail(props => props with { Message = ex.Message });
+            _logger.LogError(ex, $"Unexpected error during {nameof(TestUnitOperation)} operation.");
+            context.Fail(props => props with { Message = _localizer["TestUnitOperation_UnexpectedErrorMessage", ex.Message] });
             return new() { Error = ex };
         }
+    }
+
+    private string GetDescriptiveFailureMessage(IDSCUnitResultInformation resultInfo)
+    {
+        var message = $"0x{resultInfo.ResultCode.HResult:X}";
+        var info = new[] { resultInfo.Description, resultInfo.Details }.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+        if (info.Length == 0)
+        {
+            return message;
+        }
+
+        if (info.Length == 1)
+        {
+            return $"{message}: {info[0]}";
+        }
+
+        return $"{message}: {string.Join(Environment.NewLine, info)}";
     }
 }

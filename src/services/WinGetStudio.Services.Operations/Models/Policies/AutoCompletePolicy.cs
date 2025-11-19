@@ -4,11 +4,19 @@
 using System.Threading.Tasks;
 using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
+using WinGetStudio.Services.Operations.Models.States;
 
 namespace WinGetStudio.Services.Operations.Models.Policies;
 
 public sealed partial class AutoCompletePolicy : IOperationCompletionPolicy
 {
+    private readonly OperationSeverity? _severity;
+
+    public AutoCompletePolicy(OperationSeverity? severity = null)
+    {
+        _severity = severity;
+    }
+
     /// <inheritdoc/>
     public bool CanApply(IOperationContext context)
     {
@@ -18,7 +26,8 @@ public sealed partial class AutoCompletePolicy : IOperationCompletionPolicy
     /// <inheritdoc/>
     public async Task ApplyAsync(IOperationContext context)
     {
-        context.Complete();
+        var severity = _severity ?? context.CurrentSnapshot.Properties.Severity;
+        context.Complete(props => props with { Severity = severity });
         await Task.CompletedTask;
     }
 }

@@ -3,15 +3,15 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
+using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
-using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
-using WinGetStudio.Services.Operations.Contracts;
 using WinGetStudio.Services.Operations.Extensions;
 
 namespace WinGetStudio.ViewModels;
@@ -20,6 +20,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IAppOperationHub _operationHub;
     private readonly ILogger<ValidationViewModel> _logger;
+    private readonly IStringLocalizer<ValidationViewModel> _localizer;
     private readonly UnitViewModelFactory _unitFactory;
 
     [ObservableProperty]
@@ -38,12 +39,14 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     public partial string? SettingsText { get; set; }
 
     public ValidationViewModel(
-        IAppOperationHub operationHub,
         ILogger<ValidationViewModel> logger,
+        IStringLocalizer<ValidationViewModel> localizer,
+        IAppOperationHub operationHub,
         UnitViewModelFactory unitFactory)
     {
-        _operationHub = operationHub;
         _logger = logger;
+        _localizer = localizer;
+        _operationHub = operationHub;
         _unitFactory = unitFactory;
     }
 
@@ -67,15 +70,37 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnGetAsync()
     {
-        await ExecuteDscOperationAsync(async (dscFile, context, factory) =>
-        {
-            var getUnit = factory.CreateGetUnitOperation(dscFile);
-            var executionResult = await getUnit.ExecuteAsync(context);
-            if (executionResult.IsSuccess && executionResult.Result?.Settings != null)
+        CanExecuteDSCOperation = false;
+        await _operationHub.RunWithProgressAsync(
+            props => props with
             {
-                OutputText = executionResult.Result.Settings.ToYaml();
-            }
-        });
+                Title = SearchResourceText,
+                Message = _localizer["GetUnitOperation_PreStartMessage"],
+            },
+            async (context, factory) =>
+            {
+                try
+                {
+                    var dscFile = CreateDSCFile();
+                    var getUnit = factory.CreateGetUnitOperation(dscFile);
+                    var operationResult = await getUnit.ExecuteAsync(context);
+                    if (operationResult.IsSuccess && operationResult.Result?.Settings != null)
+                    {
+                        OutputText = operationResult.Result.Settings.ToYaml();
+                    }
+                }
+                catch (DSCUnitValidationException ex)
+                {
+                    _logger.LogError(ex, "A validation error occurred while getting the unit settings.");
+                    context.Fail(props => props with { Message = ex.Message });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while getting the unit settings.");
+                    context.Fail(props => props with { Message = _localizer["GetUnitOperation_UnexpectedErrorMessage", ex.Message] });
+                }
+            });
+        CanExecuteDSCOperation = true;
     }
 
     /// <summary>
@@ -84,11 +109,33 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnSetAsync()
     {
-        await ExecuteDscOperationAsync(async (dscFile, context, factory) =>
-        {
-            var setUnit = factory.CreateSetUnitOperation(dscFile);
-            await setUnit.ExecuteAsync(context);
-        });
+        CanExecuteDSCOperation = false;
+        await _operationHub.RunWithProgressAsync(
+            props => props with
+            {
+                Title = SearchResourceText,
+                Message = _localizer["SetUnitOperation_PreStartMessage"],
+            },
+            async (context, factory) =>
+            {
+                try
+                {
+                    var dscFile = CreateDSCFile();
+                    var setUnit = factory.CreateSetUnitOperation(dscFile);
+                    await setUnit.ExecuteAsync(context);
+                }
+                catch (DSCUnitValidationException ex)
+                {
+                    _logger.LogError(ex, "A validation error occurred while applying the unit settings.");
+                    context.Fail(props => props with { Message = ex.Message });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while applying the unit settings.");
+                    context.Fail(props => props with { Message = _localizer["SetUnitOperation_UnexpectedErrorMessage", ex.Message] });
+                }
+            });
+        CanExecuteDSCOperation = true;
     }
 
     /// <summary>
@@ -97,37 +144,33 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
     private async Task OnTestAsync()
     {
-        await ExecuteDscOperationAsync(async (dscFile, context, factory) =>
-        {
-            var testUnit = factory.CreateTestUnitOperation(dscFile);
-            await testUnit.ExecuteAsync(context);
-        });
-    }
-
-    /// <summary>
-    /// Executes a DSC operation with proper error handling and state management.
-    /// </summary>
-    /// <param name="operation">The DSC operation to execute.</param>
-    private async Task ExecuteDscOperationAsync(Func<IDSCFile, IOperationContext, IOperationFactory, Task> operation)
-    {
-        await _operationHub.ExecuteAsync(AppOperationHub.InteractiveOptions, async (context, factory) =>
-        {
-            try
+        CanExecuteDSCOperation = false;
+        await _operationHub.RunWithProgressAsync(
+            props => props with
             {
-                CanExecuteDSCOperation = false;
-                var dscFile = CreateDSCFile();
-                await operation(dscFile, context, factory);
-            }
-            catch (Exception ex)
+                Title = SearchResourceText,
+                Message = _localizer["TestUnitOperation_PreStartMessage"],
+            },
+            async (context, factory) =>
             {
-                _logger.LogError(ex, "An error occurred while executing the DSC operation.");
-                context.Fail(props => props with { Message = "An error occurred while executing the DSC operation." });
-            }
-            finally
-            {
-                CanExecuteDSCOperation = true;
-            }
-        });
+                try
+                {
+                    var dscFile = CreateDSCFile();
+                    var testUnit = factory.CreateTestUnitOperation(dscFile);
+                    await testUnit.ExecuteAsync(context);
+                }
+                catch (DSCUnitValidationException ex)
+                {
+                    _logger.LogError(ex, "A validation error occurred while testing the unit settings.");
+                    context.Fail(props => props with { Message = ex.Message });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while testing the unit settings.");
+                    context.Fail(props => props with { Message = _localizer["TestUnitOperation_UnexpectedErrorMessage", ex.Message] });
+                }
+            });
+        CanExecuteDSCOperation = true;
     }
 
     /// <summary>

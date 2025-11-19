@@ -30,25 +30,28 @@ public sealed partial class OpenSetOperation : IOperation<OperationResult<IDSCSe
     {
         try
         {
+            _logger.LogInformation($"Starting {nameof(OpenSetOperation)} operation with ID {context.Id}.");
+            context.CommitSnapshot(props => props with { Message = _localizer["OpenSetOperation_StartMessage"] });
             var result = await _dsc.OpenConfigurationSetAsync(_dscFile, context.CancellationToken);
+            context.Success(props => props with { Message = _localizer["OpenSetOperation_SuccessMessage"] });
             return new() { Result = result };
         }
         catch (OperationCanceledException ex)
         {
-            _logger.LogWarning(ex, "Opening the DSC configuration set was canceled.");
-            context.Canceled(props => props with { Message = "The operation was canceled." });
+            _logger.LogInformation("Operation was canceled by user.");
+            context.Canceled(props => props with { Message = _localizer["OpenSetOperation_CancelledMessage"] });
             return new() { Error = ex };
         }
         catch (OpenConfigurationSetException ex)
         {
-            _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
+            _logger.LogError(ex, $"Error opening configuration set");
             context.Fail(props => props with { Message = ex.GetErrorMessage(_localizer) });
             return new() { Error = ex };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while executing a DSC operation.");
-            context.Fail(props => props with { Message = ex.Message });
+            _logger.LogError(ex, $"Unexpected error during {nameof(OpenSetOperation)} operation.");
+            context.Fail(props => props with { Message = _localizer["OpenSetOperation_UnexpectedErrorMessage", ex.Message] });
             return new() { Error = ex };
         }
     }

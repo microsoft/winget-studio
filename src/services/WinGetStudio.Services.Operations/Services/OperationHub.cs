@@ -46,5 +46,8 @@ internal sealed partial class OperationHub : IOperationHub
     public Task<IOperationScope> BeginOperationAsync(OperationExecutionOptions? options = null, CancellationToken cancellationToken = default) => _executor.BeginOperationAsync(options, cancellationToken);
 
     /// <inheritdoc/>
+    public void StartSnapshotBroadcast(OperationSnapshot snapshot) => _manager.AddOperationSnapshot(snapshot);
+
+    /// <inheritdoc/>
     public void StopSnapshotBroadcast(Guid id) => _manager.RemoveOperationSnapshot(id);
 }

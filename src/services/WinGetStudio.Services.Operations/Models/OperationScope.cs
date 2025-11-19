@@ -52,10 +52,25 @@ internal sealed partial class OperationScope : IOperationScope
         if (!_disposedValue)
         {
             _disposedValue = true;
-            await _manager.ApplyCompletionPoliciesAsync(_options.Policies, _context);
-            _manager.RemoveActiveOperationContext(_context.Id);
+            await EndAsync();
             _context.Dispose();
-            _logger.LogInformation($"Disposed operation scope for operation id: {_context.Id}");
         }
+    }
+
+    private async Task EndAsync()
+    {
+        _logger.LogInformation($"Ending operation scope for operation id: {_context.Id}");
+
+        // First apply completion policies
+        await _manager.ApplyCompletionPoliciesAsync(_options.Policies, _context);
+
+        // Second process completion options
+        if (_options.NotifyOnCompletion)
+        {
+            _context.PublishNotification();
+        }
+
+        // Finally remove from active operations
+        _manager.RemoveActiveOperationContext(_context.Id);
     }
 }

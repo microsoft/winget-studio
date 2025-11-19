@@ -22,17 +22,19 @@ internal sealed partial class OperationPolicyManager : IOperationPolicyManager
     public async Task ApplyPoliciesAsync<T>(IReadOnlyList<IOperationPolicy>? policies, IOperationContext context)
         where T : IOperationPolicy
     {
-        var policiesToApply = policies?.OfType<T>().Where(p => p.CanApply(context)).ToList();
-        if (policiesToApply == null || policiesToApply.Count == 0)
+        var policyCandidates = policies?.OfType<T>().ToList();
+        if (policyCandidates == null || policyCandidates.Count == 0)
         {
-            _logger.LogInformation($"No policies to apply for operation {context.Id}.");
             return;
         }
 
-        foreach (var policy in policiesToApply)
+        foreach (var policy in policyCandidates)
         {
-            _logger.LogInformation($"Applying policy {policy.GetType().Name} to operation {context.Id}.");
-            await policy.ApplyAsync(context);
+            if (policy.CanApply(context))
+            {
+                _logger.LogInformation($"Applying policy {policy.GetType().Name} to operation {context.Id}.");
+                await policy.ApplyAsync(context);
+            }
         }
     }
 }

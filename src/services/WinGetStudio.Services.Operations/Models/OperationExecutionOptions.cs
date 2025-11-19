@@ -8,6 +8,8 @@ namespace WinGetStudio.Services.Operations.Models;
 
 public sealed partial class OperationExecutionOptions
 {
+    public bool NotifyOnCompletion { get; set; }
+
     /// <summary>
     /// Gets the operation policies.
     /// </summary>

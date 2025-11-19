@@ -45,7 +45,6 @@ public static partial class OperationContextExtensions
                 Actions = [],
             },
             mutate);
-        ctx.PublishNotification();
     }
 
     public static void Success(this IOperationContext ctx, Func<OperationProperties, OperationProperties>? mutate = null)
@@ -59,7 +58,6 @@ public static partial class OperationContextExtensions
                 Actions = [],
             },
             mutate);
-        ctx.PublishNotification();
     }
 
     public static void Fail(this IOperationContext ctx, Func<OperationProperties, OperationProperties>? mutate = null)
@@ -73,7 +71,19 @@ public static partial class OperationContextExtensions
                 Actions = [],
             },
             mutate);
-        ctx.PublishNotification();
+    }
+
+    public static void Warn(this IOperationContext ctx, Func<OperationProperties, OperationProperties>? mutate = null)
+    {
+        ctx.CommitSnapshotInternal(
+            props => props with
+            {
+                Status = OperationStatus.Completed,
+                Percent = 100,
+                Severity = OperationSeverity.Warning,
+                Actions = [],
+            },
+            mutate);
     }
 
     public static void Canceled(this IOperationContext ctx, Func<OperationProperties, OperationProperties>? mutate = null)
@@ -87,7 +97,6 @@ public static partial class OperationContextExtensions
                 Actions = [],
             },
             mutate);
-        ctx.PublishNotification();
     }
 
     public static void AddCancelAction(this IOperationContext ctx, string text, bool isPrimary = true)
