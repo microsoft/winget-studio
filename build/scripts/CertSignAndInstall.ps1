@@ -38,7 +38,10 @@ function Invoke-SignPackage([string]$Path) {
 }
 
 function Remove-WinGetStudioCertificates {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function',
+        Justification = 'This function is a wrapper which removes multiple certificates matching a pattern.')]
+
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param()
 
     # Remove certificates from CurrentUser\My
