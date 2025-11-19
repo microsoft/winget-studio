@@ -9,11 +9,15 @@ on:
       - '!main'
     tags-ignore:
       - '**'
+    paths:
+      - "**/*.md"
   pull_request_target:
     branches:
       - '**'
     tags-ignore:
       - '**'
+    paths:
+      - "**/*.md"
     types:
       - 'opened'
       - 'reopened'
