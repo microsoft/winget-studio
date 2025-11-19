@@ -37,7 +37,25 @@ function Invoke-SignPackage([string]$Path) {
     }
 }
 
-function Remove-WinGetStudioCertificates() {
-    Get-ChildItem 'Cert:\CurrentUser\My' | Where-Object { $_.FriendlyName -match 'Microsoft.WinGetStudio' } | Remove-Item
-    Get-ChildItem 'Cert:\LocalMachine\TrustedPeople' | Where-Object { $_.FriendlyName -match 'Microsoft.WinGetStudio' } | Remove-Item
+function Remove-WinGetStudioCertificates {
+    [CmdletBinding(SupportsShouldProcess=$true)]
+    param()
+
+    # Remove certificates from CurrentUser\My
+    $userCerts = Get-ChildItem 'Cert:\CurrentUser\My' | Where-Object { $_.FriendlyName -match 'Microsoft.WinGetStudio' }
+    foreach ($cert in $userCerts) {
+        $target = "Cert:\CurrentUser\My\$($cert.Thumbprint)"
+        if ($PSCmdlet.ShouldProcess($target, 'Remove certificate')) {
+            Remove-Item -Path $cert.PSPath -ErrorAction SilentlyContinue
+        }
+    }
+
+    # Remove certificates from LocalMachine\TrustedPeople
+    $localCerts = Get-ChildItem 'Cert:\LocalMachine\TrustedPeople' | Where-Object { $_.FriendlyName -match 'Microsoft.WinGetStudio' }
+    foreach ($cert in $localCerts) {
+        $target = "Cert:\LocalMachine\TrustedPeople\$($cert.Thumbprint)"
+        if ($PSCmdlet.ShouldProcess($target, 'Remove certificate')) {
+            Remove-Item -Path $cert.PSPath -ErrorAction SilentlyContinue
+        }
+    }
 }

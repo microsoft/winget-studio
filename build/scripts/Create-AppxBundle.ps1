@@ -33,6 +33,7 @@ if ($null -eq (Get-Item $MakeAppxPath -EA:SilentlyContinue)) {
 # Enumerates a set of appx files beginning with a project name
 # and generates a temporary file containing a bundle content map.
 function New-AppxBundleMapping {
+  [CmdletBinding(SupportsShouldProcess=$true)]
   param(
     [Parameter(Mandatory)]
     [string]
@@ -48,9 +49,12 @@ function New-AppxBundleMapping {
     $lines += ("`"{0}`" `"{1}`"" -f ($_.FullName, $_.Name))
   }
 
+  # Create the temporary mapping file only when the caller allows it (supports -WhatIf/-Confirm).
   $outputFile = New-TemporaryFile
-  $lines | Out-File -Encoding:ASCII $outputFile
-  $outputFile
+  if ($PSCmdlet.ShouldProcess($outputFile, 'Create appx bundle mapping file')) {
+    $lines | Out-File -Encoding:ASCII $outputFile
+    $outputFile
+  }
 }
 
 $NewMapping = New-AppxBundleMapping -InputPath:$InputPath -ProjectName:$ProjectName
