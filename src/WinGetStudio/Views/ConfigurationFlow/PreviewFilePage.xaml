@@ -453,12 +453,27 @@
                             </Grid>
 
                             <!-- Code view -->
-                            <ScrollViewer Grid.Row="4"
-                                          Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}"
-                                          HorizontalScrollBarVisibility="Auto"
-                                          VerticalScrollBarVisibility="Auto">
-                                <localControls:MonacoEditor Text="{x:Bind ViewModel.ConfigurationSet.Code, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
-                            </ScrollViewer>
+                             <Grid Grid.Row="4" Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Monaco Editor -->
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                              VerticalScrollBarVisibility="Auto">
+                                    <localControls:MonacoEditor Text="{x:Bind ViewModel.Code, Mode=TwoWay}" Syntax="yaml" IsReadOnly="False" />
+                                </ScrollViewer>
+
+                                <!-- Action buttons -->
+                                <Grid Grid.Row="1" Padding="{ThemeResource SectionPadding}">
+                                    <Button Command="{x:Bind ViewModel.UpdateFromCodeCommand}"
+                                            HorizontalAlignment="Right"
+                                            Style="{ThemeResource AccentButtonStyle}">
+                                        <TextBlock>Reload</TextBlock>
+                                    </Button>
+                                </Grid>
+                            </Grid>
                         </Grid>
 
                         <!-- Resizer -->
