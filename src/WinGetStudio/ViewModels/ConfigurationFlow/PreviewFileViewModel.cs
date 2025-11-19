@@ -11,7 +11,6 @@ using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
-using WinGetStudio.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WinGetStudio.Services.Operations.Extensions;
 
@@ -139,7 +138,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     /// <param name="file">The configuration file to open.</param>
     public async Task OpenConfigurationFileAsync(StorageFile file)
     {
-        await _operationHub.RunAsync(async (context, factory) =>
+        await _operationHub.RunWithNotificationAsync(async (context, factory) =>
         {
             try
             {
@@ -171,7 +170,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanCreateNewConfiguration))]
     private async Task OnNewConfigurationAsync()
     {
-        await _operationHub.RunAsync(async (context, factory) =>
+        await _operationHub.RunSilentlyAsync(async (context, factory) =>
         {
             _logger.LogInformation($"Creating new configuration set");
             SelectedUnit = null;
@@ -185,7 +184,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            await _operationHub.RunAsync(async (context, factory) =>
+            await _operationHub.RunWithNotificationAsync(async (context, factory) =>
             {
                 try
                 {
@@ -206,7 +205,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded)
         {
-            await _operationHub.RunAsync(async (context, factory) =>
+            await _operationHub.RunWithNotificationAsync(async (context, factory) =>
             {
                 try
                 {
@@ -252,7 +251,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded && SelectedUnit != null)
         {
-            await _operationHub.RunAsync(async (context, factory) =>
+            await _operationHub.RunWithNotificationAsync(async (context, factory) =>
             {
                 _logger.LogInformation($"Deleting selected unit {SelectedUnit.Item1.Title}");
                 await ConfigurationSet.RemoveAsync(SelectedUnit.Item1);
@@ -265,7 +264,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanAddUnit))]
     private async Task OnAddResourceAsync()
     {
-        await _operationHub.RunAsync(async (context, factory) =>
+        await _operationHub.RunSilentlyAsync(async (context, factory) =>
         {
             _logger.LogInformation($"Adding new resource");
             await AddResourceAsync();
@@ -328,7 +327,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         if (IsConfigurationLoaded && SelectedUnit != null)
         {
-            await _operationHub.RunAsync(async (context, factory) =>
+            await _operationHub.RunWithNotificationAsync(async (context, factory) =>
             {
                 try
                 {

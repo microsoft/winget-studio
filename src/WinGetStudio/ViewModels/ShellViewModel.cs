@@ -14,6 +14,7 @@ namespace WinGetStudio.ViewModels;
 public partial class ShellViewModel : ObservableRecipient, IDisposable
 {
     private readonly IAppOperationHub _operationHub;
+    private readonly IUIDispatcher _dispatcher;
     private readonly IDisposable _activitySubscription;
     private bool _disposedValue;
 
@@ -36,13 +37,18 @@ public partial class ShellViewModel : ObservableRecipient, IDisposable
     public ShellViewModel(
         IAppFrameNavigationService navigationService,
         IAppShellNavigationViewService navigationViewService,
+        IUIDispatcher dispatcher,
         IAppOperationHub operationHub)
     {
+        _dispatcher = dispatcher;
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
         _operationHub = operationHub;
-        _activitySubscription = _operationHub.GlobalActivity.Subscribe(OnGlobalActivity);
+        _activitySubscription = _operationHub.Snapshots.Subscribe(snapshots =>
+        {
+            _dispatcher.TryEnqueue(() => OnPublishOperationSnapshot(snapshots));
+        });
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
@@ -78,11 +84,6 @@ public partial class ShellViewModel : ObservableRecipient, IDisposable
         IsNotificationPaneOpen = !IsNotificationPaneOpen;
     }
 
-    private void OnGlobalActivity(GlobalActivity activity)
-    {
-        UnreadNotificationsCount = activity.InProgressCount;
-    }
-
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposedValue)
@@ -101,5 +102,10 @@ public partial class ShellViewModel : ObservableRecipient, IDisposable
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    private void OnPublishOperationSnapshot(IReadOnlyList<OperationSnapshot> snapshot)
+    {
+        UnreadNotificationsCount = snapshot.Count;
     }
 }

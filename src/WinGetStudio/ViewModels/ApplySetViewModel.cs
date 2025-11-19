@@ -17,7 +17,7 @@ namespace WinGetStudio.ViewModels;
 
 public delegate ApplySetViewModel ApplySetViewModelFactory(IDSCSet applySet);
 
-public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
+public sealed partial class ApplySetViewModel : ObservableObject
 {
     private readonly ApplySetOperation _applySetOperation;
     private readonly ObservableCollection<ApplyUnitViewModel> _units;
@@ -25,8 +25,7 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
     private readonly ILogger<ApplySetViewModel> _logger;
     private readonly IOperationFactory _operationFactory;
     private readonly IUIDispatcher _dispatcher;
-    private CancellationTokenSource? _cts;
-    private bool _disposedValue;
+    private IOperationContext? _context;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDone))]
@@ -79,13 +78,12 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
     {
         try
         {
-            _cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
+            _context = context;
             return await _applySetOperation.ExecuteAsync(context);
         }
         finally
         {
-            _cts?.Dispose();
-            _cts = null;
+            _context = null;
         }
     }
 
@@ -93,12 +91,12 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
     /// Cancels the apply operation.
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanCancel))]
-    private async Task OnCancelAsync()
+    private void OnCancel()
     {
-        if (_cts != null && !_cts.IsCancellationRequested)
+        if (_context != null)
         {
             _logger.LogInformation("Cancellation requested");
-            await _cts.CancelAsync();
+            _context.RequestCancellation();
             IsCanceled = true;
         }
     }
@@ -146,26 +144,5 @@ public sealed partial class ApplySetViewModel : ObservableObject, IDisposable
                 OnPropertyChanged(nameof(Summary));
             }
         }
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (!_disposedValue)
-        {
-            if (disposing)
-            {
-                _cts?.Dispose();
-                _cts = null;
-            }
-
-            _disposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }

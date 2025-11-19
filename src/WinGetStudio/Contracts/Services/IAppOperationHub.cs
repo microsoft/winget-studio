@@ -23,7 +23,29 @@ public interface IAppOperationHub
     /// Run an operation with the given operation function.
     /// </summary>
     /// <param name="operation">The operation function.</param>
-    Task RunAsync(Func<IOperationContext, IOperationFactory, Task> operation);
+    Task RunWithNotificationAsync(Func<IOperationContext, IOperationFactory, Task> operation);
+
+    /// <summary>
+    /// Run an operation with the given operation function.
+    /// </summary>
+    /// <typeparam name="TResult">The result type.</typeparam>
+    /// <param name="operation">The operation function.</param>
+    /// <returns>The operation result.</returns>
+    Task<OperationResult<TResult>> RunWithNotificationAsync<TResult>(Func<IOperationContext, IOperationFactory, Task<OperationResult<TResult>>> operation);
+
+    /// <summary>
+    /// Run an operation silently with the given operation function.
+    /// </summary>
+    /// <param name="operation">The operation function.</param>
+    Task RunSilentlyAsync(Func<IOperationContext, IOperationFactory, Task> operation);
+
+    /// <summary>
+    /// Run an operation silently with the given operation function.
+    /// </summary>
+    /// <typeparam name="TResult">The result type.</typeparam>
+    /// <param name="operation">The operation function.</param>
+    /// <returns>The operation result.</returns>
+    Task<OperationResult<TResult>> RunSilentlyAsync<TResult>(Func<IOperationContext, IOperationFactory, Task<OperationResult<TResult>>> operation);
 
     /// <summary>
     /// Run an operation with progress with the given properties mutation and operation function.

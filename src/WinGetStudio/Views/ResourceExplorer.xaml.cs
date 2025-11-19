@@ -60,7 +60,7 @@ public sealed partial class ResourceExplorer : ContentDialog
     /// <param name="e">>The event data.</param>
     private async void OnCopyAsYaml(object sender, RoutedEventArgs e)
     {
-        await _operationHub.RunAsync(async (context, factory) =>
+        await _operationHub.RunWithNotificationAsync(async (context, factory) =>
         {
             try
             {

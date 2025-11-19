@@ -6,9 +6,9 @@ using WinGetStudio.Services.Operations.Contracts;
 
 namespace WinGetStudio.Services.Operations.Models;
 
-public sealed partial class OperationExecutionOptions
+public sealed record class OperationExecutionOptions
 {
-    public bool NotifyOnCompletion { get; set; }
+    public bool NotifyOnCompletion { get; init; }
 
     /// <summary>
     /// Gets the operation policies.

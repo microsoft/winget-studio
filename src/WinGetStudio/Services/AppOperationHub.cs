@@ -20,8 +20,9 @@ public sealed partial class AppOperationHub : IAppOperationHub
     private readonly IStringLocalizer<AppOperationHub> _localizer;
     private readonly IOperationHub _operationHub;
     private readonly IOperationFactory _operationFactory;
-    private readonly OperationExecutionOptions _options;
-    private readonly TimeSpan _successSnapshotRetention = TimeSpan.FromSeconds(3);
+    private readonly TimeSpan _retentionTimeout = TimeSpan.FromSeconds(5);
+    private readonly OperationExecutionOptions _defaultOptions;
+    private readonly OperationExecutionOptions _silentOptions;
 
     /// <inheritdoc/>
     public IEventStream<IReadOnlyList<OperationSnapshot>> Snapshots => _operationHub.Snapshots;
@@ -42,7 +43,7 @@ public sealed partial class AppOperationHub : IAppOperationHub
         _localizer = localizer;
         _operationHub = operationHub;
         _operationFactory = operationFactory;
-        _options = new()
+        _defaultOptions = new()
         {
             NotifyOnCompletion = true,
             Policies =
@@ -50,31 +51,70 @@ public sealed partial class AppOperationHub : IAppOperationHub
                 new AutoCompletePolicy(),
                 new ViewLogsOnFailurePolicy(_localizer["ActivityPane_ViewLogsText"]),
 
-                // For successful operations, retain snapshots for a short
-                // period to allow UI to show completion state before removing them.
-                new SnapshotRetentionPolicy(
-                    props => props.Status == OperationStatus.Completed && props.Severity == OperationSeverity.Success,
-                    _successSnapshotRetention),
+                // Retention policy to clean up completed operations after a timeout
+                new SnapshotRetentionPolicy(props => props.IsTerminated, _retentionTimeout),
             ],
         };
+        _silentOptions = _defaultOptions with { NotifyOnCompletion = false };
     }
 
     /// <inheritdoc/>
-    public async Task RunAsync(Func<IOperationContext, IOperationFactory, Task> operation)
+    public async Task RunWithNotificationAsync(Func<IOperationContext, IOperationFactory, Task> operation)
+    {
+        _ = await RunWithNotificationAsync<Task>(async (context, factory) =>
+        {
+            await operation(context, factory);
+            return new() { Result = Task.CompletedTask };
+        });
+    }
+
+    /// <inheritdoc/>
+    public async Task<OperationResult<TResult>> RunWithNotificationAsync<TResult>(Func<IOperationContext, IOperationFactory, Task<OperationResult<TResult>>> operation)
     {
         try
         {
-            await _operationHub.ExecuteAsync(
+            return await _operationHub.ExecuteAsync(
                 async context =>
                 {
                     context.Start();
-                    await operation(context, _operationFactory);
+                    return await operation(context, _operationFactory);
                 },
-                _options);
+                _defaultOptions);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unhandled error occurred while executing an operation.");
+            return new() { Error = ex };
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task RunSilentlyAsync(Func<IOperationContext, IOperationFactory, Task> operation)
+    {
+        _ = await RunSilentlyAsync<Task>(async (context, factory) =>
+        {
+            await operation(context, factory);
+            return new() { Result = Task.CompletedTask };
+        });
+    }
+
+    /// <inheritdoc/><
+    public async Task<OperationResult<TResult>> RunSilentlyAsync<TResult>(Func<IOperationContext, IOperationFactory, Task<OperationResult<TResult>>> operation)
+    {
+        try
+        {
+            return await _operationHub.ExecuteAsync(
+                async context =>
+                {
+                    context.Start();
+                    return await operation(context, _operationFactory);
+                },
+                _silentOptions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unhandled error occurred while executing an operation.");
+            return new() { Error = ex };
         }
     }
 
@@ -88,6 +128,7 @@ public sealed partial class AppOperationHub : IAppOperationHub
         });
     }
 
+    /// <inheritdoc/>
     public async Task<OperationResult<TResult>> RunWithProgressAsync<TResult>(Func<OperationProperties, OperationProperties> mutate, Func<IOperationContext, IOperationFactory, Task<OperationResult<TResult>>> operation, bool canCancel = true)
     {
         try
@@ -104,7 +145,7 @@ public sealed partial class AppOperationHub : IAppOperationHub
                     _operationHub.StartSnapshotBroadcast(context.CurrentSnapshot);
                     return await operation(context, _operationFactory);
                 },
-                _options);
+                _defaultOptions);
         }
         catch (Exception ex)
         {

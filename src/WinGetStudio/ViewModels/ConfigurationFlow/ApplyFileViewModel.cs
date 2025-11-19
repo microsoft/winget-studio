@@ -61,20 +61,24 @@ public partial class ApplyFileViewModel : ObservableRecipient
         var activeSet = _manager.ActiveSetPreviewState.ActiveSet;
         Debug.Assert(activeSet != null, "ActiveSet should not be null when applying configuration set.");
 
-        await _operationHub.RunWithProgressAsync(
-            props => props with { Title = _localizer["ApplySetOperation_Title"], Message = _localizer["ApplySetOperation_PreStartMessage"] },
-            async (context, factory) =>
-            {
-                var dscFile = activeSet.GetLatestDSCFile();
-                var openSet = factory.CreateOpenSetOperation(dscFile);
-                var openSetResult = await openSet.ExecuteAsync(context);
-                if (openSetResult.IsSuccess && openSetResult.Result != null)
+        var openSetResult = await _operationHub.RunSilentlyAsync(async (context, factory) =>
+        {
+            var dscFile = activeSet.GetLatestDSCFile();
+            var openSet = factory.CreateOpenSetOperation(dscFile);
+            return await openSet.ExecuteAsync(context);
+        });
+
+        if (openSetResult.IsSuccess && openSetResult.Result != null)
+        {
+            await _operationHub.RunWithProgressAsync(
+                props => props with { Title = _localizer["ApplySetOperation_Title"], Message = _localizer["ApplySetOperation_PreStartMessage"] },
+                async (context, factory) =>
                 {
                     ApplySet = _applySetFactory(openSetResult.Result);
                     _manager.ActiveSetApplyState.CaptureState(this);
                     await ApplySet.ApplyAsync(context);
-                }
-            });
+                });
+        }
     }
 
     [RelayCommand]

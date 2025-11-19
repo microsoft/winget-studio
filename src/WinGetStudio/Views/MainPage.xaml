@@ -10,9 +10,6 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="24" Margin="24">
-            <StackPanel Orientation="Horizontal">
-                <Button Command="{x:Bind ViewModel.Button1Command}">Run long operation</Button>
-            </StackPanel>
             <TextBlock x:Uid="MainPage_Content"
                        Style="{ThemeResource HeaderTextBlockStyle}" />
             <!-- Main Actions -->
