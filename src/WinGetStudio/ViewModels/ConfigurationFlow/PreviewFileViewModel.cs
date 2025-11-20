@@ -58,6 +58,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public partial bool IsEditMode { get; set; }
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(UpdateFromCodeCommand))]
     public partial bool IsCodeView { get; set; }
 
     [ObservableProperty]
@@ -470,6 +471,96 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         _logger.LogInformation($"Toggling code view to {(IsCodeView ? "ON" : "OFF")}");
     }
+
+    [RelayCommand(CanExecute = nameof(CanUpdateFromCode))]
+    private async Task OnUpdateFromCode()
+    {
+        if (!IsConfigurationLoaded || string.IsNullOrWhiteSpace(ConfigurationSet.Code))
+        {
+            return;
+        }
+
+        try
+        {
+            _ui.ShowTaskProgress();
+            _logger.LogInformation("Updating configuration from code");
+
+            // Store the currently selected unit's identifier to try to reselect it after update
+            var selectedUnitId = SelectedUnit?.Item1.Id;
+
+            // Clear selected unit temporarily
+            SelectedUnit = null;
+
+            // Create a virtual DSC file from the current code
+            var dscFile = DSCFile.CreateVirtual(ConfigurationSet.Code);
+
+            // Parse the configuration
+            var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
+
+            // Clear existing units
+            var existingUnits = ConfigurationSet.Units.ToList();
+            foreach (var unit in existingUnits)
+            {
+                await ConfigurationSet.RemoveAsync(unit);
+            }
+
+            // Load new units from parsed configuration
+            var units = dscSet?.Units ?? [];
+            var tasks = units.Select(async unit =>
+            {
+                var vm = _unitFactory();
+                await vm.CopyFromAsync(unit);
+                return vm;
+            });
+
+            var result = await Task.WhenAll(tasks);
+            foreach (var unit in result)
+            {
+                await ConfigurationSet.AddAsync(unit);
+            }
+
+            ConfigurationSet.ResolveDependencies();
+
+            // Try to reselect the same unit if it still exists, otherwise select the first unit if in edit mode
+            if (!string.IsNullOrEmpty(selectedUnitId))
+            {
+                var unitToSelect = ConfigurationSet.Units.FirstOrDefault(u => u.Id == selectedUnitId);
+                if (unitToSelect != null)
+                {
+                    await EditUnitAsync(unitToSelect);
+                }
+                else if (IsEditMode && ConfigurationSet.Units.Count > 0)
+                {
+                    // Unit ID changed or doesn't exist, select the first unit to keep right pane open
+                    await EditUnitAsync(ConfigurationSet.Units[0]);
+                }
+            }
+            else if (IsEditMode && ConfigurationSet.Units.Count > 0)
+            {
+                // No unit was selected before, but we're in edit mode, select the first unit
+                await EditUnitAsync(ConfigurationSet.Units[0]);
+            }
+
+            _ui.ShowTimedNotification(_localizer["PreviewPage_UpdateFromCodeSuccess"], NotificationMessageSeverity.Success);
+            _logger.LogInformation("Successfully updated configuration from code");
+        }
+        catch (OpenConfigurationSetException ex)
+        {
+            _logger.LogError(ex, "Failed to parse configuration from code");
+            _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unknown error while updating from code");
+            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
+        }
+        finally
+        {
+            _ui.HideTaskProgress();
+        }
+    }
+
+    private bool CanUpdateFromCode => IsConfigurationLoaded && IsCodeView && !string.IsNullOrWhiteSpace(ConfigurationSet?.Code);
 
     private async Task EditUnitAsync(UnitViewModel unit)
     {
