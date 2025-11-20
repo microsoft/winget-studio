@@ -507,7 +507,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 }
             }
 
-            _ui.ShowTimedNotification(_localizer["PreviewPage_UpdateFromCodeSuccess"], NotificationMessageSeverity.Success);
+            _ui.ShowTimedNotification(_localizer["PreviewPage_AppliedChangesFromCodeSuccess"], NotificationMessageSeverity.Success);
             _logger.LogInformation("Successfully updated configuration from code");
             OnPropertyChanged(nameof(IsCodeDirty));
         }

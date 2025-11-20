@@ -852,7 +852,7 @@
   <data name="ExploreResource_Failed" xml:space="preserve">
     <value>Failed to load resource details</value>
   </data>
-   <data name="PreviewPage_AppliedFromCodeSuccess" xml:space="preserve">
+   <data name="PreviewPage_AppliedChangesFromCodeSuccess" xml:space="preserve">
     <value>Configuration changes applied successfully from code</value>
     <comment>Notification message shown when the configuration is successfully updated from the code view</comment>
   </data>
