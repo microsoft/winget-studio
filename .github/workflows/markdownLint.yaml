@@ -28,13 +28,25 @@ jobs:
     name: Check Markdown linting
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout (pull_request_target -> head repo)
+      if: github.event_name == 'pull_request_target'
+      uses: actions/checkout@v4
+      with:
+        # When running under pull_request_target, checkout the head repo/sha
+        # so the runner can find the exact commit (handles forked PRs).
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: 0
+    - name: Checkout (default)
+      if: github.event_name != 'pull_request_target'
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - uses: tj-actions/changed-files@v45
+    - uses: tj-actions/changed-files@v47.0.0
       id: changed-files
       with:
-        files: '**/*.md'
+        files: |
+          **/*.md
     - uses: DavidAnson/markdownlint-cli2-action@v17
       if: steps.changed-files.outputs.any_changed == 'true'
       with:
