@@ -460,11 +460,14 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Action buttons -->
-                                <InfoBar Visibility="{x:Bind ViewModel.IsCodeDirty, Mode=OneWay}" IsOpen="True" Margin="{ThemeResource XSmallBottomMargin}" IsClosable="False" Severity="Warning" Message="Configuration file modified. Reload to apply changes.">
+                                <InfoBar Visibility="{x:Bind ViewModel.IsCodeDirty, Mode=OneWay}"
+                                         IsOpen="True"
+                                         IsClosable="False"
+                                         Margin="{ThemeResource XSmallBottomMargin}"
+                                         Severity="Warning"
+                                         x:Uid="PreviewPage_ApplyChangesWarning">
                                     <InfoBar.ActionButton>
-                                        <Button Command="{x:Bind ViewModel.UpdateFromCodeCommand}" HorizontalAlignment="Right">
-                                            <TextBlock>Reload</TextBlock>
-                                        </Button>
+                                        <Button Command="{x:Bind ViewModel.UpdateFromCodeCommand}" HorizontalAlignment="Right" x:Uid="PreviewPage_ApplyChangesButton"/>
                                     </InfoBar.ActionButton>
                                 </InfoBar>
 

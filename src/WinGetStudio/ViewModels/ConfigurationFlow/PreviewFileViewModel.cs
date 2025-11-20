@@ -59,7 +59,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public partial bool IsEditMode { get; set; }
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(UpdateFromCodeCommand))]
     public partial bool IsCodeView { get; set; }
 
     [ObservableProperty]
@@ -108,8 +107,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool CanOpenConfigurationFile => !IsApplyInProgress;
 
     public bool CanCreateNewConfiguration => !IsApplyInProgress;
-
-    public bool CanUpdateFromCode => IsConfigurationLoaded && IsCodeView;
 
     public bool HasNoUnits => IsConfigurationLoaded && ConfigurationSet.Units.Count == 0;
 
@@ -481,8 +478,8 @@ public partial class PreviewFileViewModel : ObservableRecipient
         _logger.LogInformation($"Toggling code view to {(IsCodeView ? "ON" : "OFF")}");
     }
 
-    [RelayCommand(CanExecute = nameof(CanUpdateFromCode))]
-    private async Task OnUpdateFromCode()
+    [RelayCommand]
+    private async Task OnUpdateFromCodeAsync()
     {
         if (!IsConfigurationLoaded)
         {
@@ -493,12 +490,14 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             _ui.ShowTaskProgress();
             _logger.LogInformation("Updating configuration from code");
+            IsConfigurationLoading = true;
             var selectedUnitId = SelectedUnit?.Item1.Id;
             var dscFile = string.IsNullOrEmpty(ConfigurationSet.FilePath) ? DSCFile.CreateVirtual(Code) : DSCFile.CreateVirtual(ConfigurationSet.FilePath, Code);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-            var configSet = _setFactory();
-            ConfigurationSet = configSet;
-            await configSet.UseAsync(dscSet, dscFile);
+            ConfigurationSet = _setFactory();
+            await ConfigurationSet.UseAsync(dscSet, dscFile);
+
+            // Try to recover the selected unit after updating from code
             if (!string.IsNullOrEmpty(selectedUnitId))
             {
                 var unitToSelect = ConfigurationSet.Units.FirstOrDefault(u => u.Id == selectedUnitId);
@@ -524,6 +523,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
         finally
         {
+            IsConfigurationLoading = false;
             _ui.HideTaskProgress();
         }
     }
