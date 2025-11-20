@@ -455,24 +455,25 @@
                             <!-- Code view -->
                              <Grid Grid.Row="4" Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
                                     <RowDefinition Height="auto" />
+                                    <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
+                                <!-- Action buttons -->
+                                <InfoBar Visibility="{x:Bind ViewModel.IsCodeDirty, Mode=OneWay}" IsOpen="True" Margin="{ThemeResource XSmallBottomMargin}" IsClosable="False" Severity="Warning" Message="Configuration file modified. Reload to apply changes.">
+                                    <InfoBar.ActionButton>
+                                        <Button Command="{x:Bind ViewModel.UpdateFromCodeCommand}" HorizontalAlignment="Right">
+                                            <TextBlock>Reload</TextBlock>
+                                        </Button>
+                                    </InfoBar.ActionButton>
+                                </InfoBar>
+
                                 <!-- Monaco Editor -->
-                                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                <ScrollViewer Grid.Row="1"
+                                              HorizontalScrollBarVisibility="Auto"
                                               VerticalScrollBarVisibility="Auto">
                                     <localControls:MonacoEditor Text="{x:Bind ViewModel.Code, Mode=TwoWay}" Syntax="yaml" IsReadOnly="False" />
                                 </ScrollViewer>
-
-                                <!-- Action buttons -->
-                                <Grid Grid.Row="1" Padding="{ThemeResource SectionPadding}">
-                                    <Button Command="{x:Bind ViewModel.UpdateFromCodeCommand}"
-                                            HorizontalAlignment="Right"
-                                            Style="{ThemeResource AccentButtonStyle}">
-                                        <TextBlock>Reload</TextBlock>
-                                    </Button>
-                                </Grid>
                             </Grid>
                         </Grid>
 

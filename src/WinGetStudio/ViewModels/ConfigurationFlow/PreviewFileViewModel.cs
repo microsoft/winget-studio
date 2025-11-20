@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -60,6 +61,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(UpdateFromCodeCommand))]
     public partial bool IsCodeView { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCodeDirty))]
+    public partial string? Code { get; set; }
+
+    public bool IsCodeDirty => IsConfigurationLoaded && ConfigurationSet.Code != Code;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmptyState))]
@@ -477,7 +484,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanUpdateFromCode))]
     private async Task OnUpdateFromCode()
     {
-        if (!IsConfigurationLoaded || string.IsNullOrWhiteSpace(ConfigurationSet.Code))
+        if (!IsConfigurationLoaded)
         {
             return;
         }
@@ -486,44 +493,12 @@ public partial class PreviewFileViewModel : ObservableRecipient
         {
             _ui.ShowTaskProgress();
             _logger.LogInformation("Updating configuration from code");
-
-            // Store the currently selected unit's identifier to try to reselect it after update
             var selectedUnitId = SelectedUnit?.Item1.Id;
-
-            // Clear selected unit temporarily
-            SelectedUnit = null;
-
-            // Create a virtual DSC file from the current code
-            var dscFile = DSCFile.CreateVirtual(ConfigurationSet.Code);
-
-            // Parse the configuration
+            var dscFile = string.IsNullOrEmpty(ConfigurationSet.FilePath) ? DSCFile.CreateVirtual(Code) : DSCFile.CreateVirtual(ConfigurationSet.FilePath, Code);
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
-
-            // Clear existing units
-            var existingUnits = ConfigurationSet.Units.ToList();
-            foreach (var unit in existingUnits)
-            {
-                await ConfigurationSet.RemoveAsync(unit);
-            }
-
-            // Load new units from parsed configuration
-            var units = dscSet?.Units ?? [];
-            var tasks = units.Select(async unit =>
-            {
-                var vm = _unitFactory();
-                await vm.CopyFromAsync(unit);
-                return vm;
-            });
-
-            var result = await Task.WhenAll(tasks);
-            foreach (var unit in result)
-            {
-                await ConfigurationSet.AddAsync(unit);
-            }
-
-            ConfigurationSet.ResolveDependencies();
-
-            // Try to reselect the same unit if it still exists, otherwise select the first unit if in edit mode
+            var configSet = _setFactory();
+            ConfigurationSet = configSet;
+            await configSet.UseAsync(dscSet, dscFile);
             if (!string.IsNullOrEmpty(selectedUnitId))
             {
                 var unitToSelect = ConfigurationSet.Units.FirstOrDefault(u => u.Id == selectedUnitId);
@@ -531,20 +506,11 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 {
                     await EditUnitAsync(unitToSelect);
                 }
-                else if (IsEditMode && ConfigurationSet.Units.Count > 0)
-                {
-                    // Unit ID changed or doesn't exist, select the first unit to keep right pane open
-                    await EditUnitAsync(ConfigurationSet.Units[0]);
-                }
-            }
-            else if (IsEditMode && ConfigurationSet.Units.Count > 0)
-            {
-                // No unit was selected before, but we're in edit mode, select the first unit
-                await EditUnitAsync(ConfigurationSet.Units[0]);
             }
 
             _ui.ShowTimedNotification(_localizer["PreviewPage_UpdateFromCodeSuccess"], NotificationMessageSeverity.Success);
             _logger.LogInformation("Successfully updated configuration from code");
+            OnPropertyChanged(nameof(IsCodeDirty));
         }
         catch (OpenConfigurationSetException ex)
         {
@@ -583,7 +549,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
     partial void OnConfigurationSetChanged(SetViewModel? oldValue, SetViewModel? newValue)
     {
         oldValue?.UnitsCollectionChanged -= OnConfigurationSetUnitsChanged;
+        oldValue?.PropertyChanged -= OnConfigurationSetPropertyChanged;
         newValue?.UnitsCollectionChanged += OnConfigurationSetUnitsChanged;
+        newValue?.PropertyChanged += OnConfigurationSetPropertyChanged;
     }
 
     private void OnConfigurationSetUnitsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -609,5 +577,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
         // Notify HasNoUnits
         OnPropertyChanged(nameof(HasNoUnits));
+    }
+
+    private void OnConfigurationSetPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(SetViewModel.Code))
+        {
+            Code = ConfigurationSet?.Code;
+        }
     }
 }
