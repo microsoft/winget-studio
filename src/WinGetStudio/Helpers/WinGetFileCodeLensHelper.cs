@@ -81,16 +81,19 @@ public static partial class WinGetFileCodeLensHelper
         {
             if (root.Children.TryGetValue(new YamlScalarNode(PropertiesKey), out var propertiesNode) && propertiesNode is YamlMappingNode properties)
             {
+                var offsetIndex = 0;
+
                 // First check for assertions
                 if (properties.Children.TryGetValue(new YamlScalarNode(AssertionsKey), out var assertionsNode) && assertionsNode is YamlSequenceNode assertions)
                 {
-                    codeLenses.AddRange(GenerateResourceCodeLenses(localizer, assertions));
+                    codeLenses.AddRange(GenerateResourceCodeLenses(localizer, assertions, offsetIndex));
+                    offsetIndex += assertions.Children.Count;
                 }
 
                 // Second check for resources
                 if (properties.Children.TryGetValue(new YamlScalarNode(ResourcesKey), out var resourcesNode) && resourcesNode is YamlSequenceNode resources)
                 {
-                    codeLenses.AddRange(GenerateResourceCodeLenses(localizer, resources));
+                    codeLenses.AddRange(GenerateResourceCodeLenses(localizer, resources, offsetIndex));
                 }
 
                 return true;
@@ -158,7 +161,7 @@ public static partial class WinGetFileCodeLensHelper
     /// <param name="localizer">The localizer.</param>
     /// <param name="resources">The YAML sequence node containing the resources.</param>
     /// <returns>A list of generated code lenses.</returns>
-    private static List<MonacoCodeLens> GenerateResourceCodeLenses(IStringLocalizer localizer, YamlSequenceNode resources)
+    private static List<MonacoCodeLens> GenerateResourceCodeLenses(IStringLocalizer localizer, YamlSequenceNode resources, int indexOffset = 0)
     {
         List<MonacoCodeLens> codeLenses = [];
         for (var i = 0; i < resources.Children.Count; i++)
@@ -169,8 +172,8 @@ public static partial class WinGetFileCodeLensHelper
             var range = new MonacoRange(start.Line, start.Column, end.Line, end.Column);
 
             // Add all code lenses for this resource
-            codeLenses.Add(CreateEditResourceCodeLens(localizer, range, i));
-            codeLenses.Add(CreateValidateUnitCodeLens(localizer, range, i));
+            codeLenses.Add(CreateEditResourceCodeLens(localizer, range, i + indexOffset));
+            codeLenses.Add(CreateValidateUnitCodeLens(localizer, range, i + indexOffset));
         }
 
         return codeLenses;
