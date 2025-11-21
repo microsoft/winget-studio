@@ -185,7 +185,9 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
     {
         if (e.PropertyName == nameof(ViewModel.ConfigurationSet))
         {
+            ViewModel.ConfigurationSet?.PropertyChanged -= CodeChanged;
             ViewModel.ConfigurationSet?.PropertyChanged += CodeChanged;
+            UpdateEditorCodeLenses();
         }
     }
 
@@ -193,16 +195,22 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
     {
         if (e.PropertyName == nameof(SetViewModel.Code))
         {
-            if (ViewModel.ConfigurationSet != null && WinGetFileCodeLensHelper.TryGenerateCodeLenses(_localizer, ViewModel.ConfigurationSet.Code, out var codeLenses))
-            {
-                ConfigurationEditor.IsCodeLensesEnabled = true;
-                ConfigurationEditor.CodeLenses = codeLenses;
-            }
-            else
-            {
-                ConfigurationEditor.IsCodeLensesEnabled = false;
-                ConfigurationEditor.CodeLenses = null;
-            }
+            UpdateEditorCodeLenses();
+        }
+    }
+
+    private void UpdateEditorCodeLenses()
+    {
+        var code = ViewModel.ConfigurationSet?.Code;
+        if (!string.IsNullOrWhiteSpace(code) && WinGetFileCodeLensHelper.TryGenerateCodeLenses(_localizer, code, out var codeLenses))
+        {
+            ConfigurationEditor.IsCodeLensesEnabled = true;
+            ConfigurationEditor.CodeLenses = codeLenses;
+        }
+        else
+        {
+            ConfigurationEditor.IsCodeLensesEnabled = false;
+            ConfigurationEditor.CodeLenses = null;
         }
     }
 }

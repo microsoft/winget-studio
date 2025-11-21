@@ -17,7 +17,6 @@ using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
-using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
@@ -222,6 +221,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private void OnUnloaded()
     {
         _manager.ActiveSetPreviewState.CaptureState(this);
+        ConfigurationSet = null;
     }
 
     [RelayCommand(CanExecute = nameof(CanCreateNewConfiguration))]
