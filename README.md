@@ -25,7 +25,8 @@ Learn more about WinGet Studio and how to use it:
 - [Overview][docs-overview] - Introduction to WinGet Studio's features and capabilities
 - [Getting Started][docs-getting-started] - Quick start guide for new users
 - [Working with Resources][docs-validate-resources] - Step-by-step guide to work with DSC resources
-- [Working with Configuration Files][docs-manage-configurations] - Step-by-step guide to work with WinGet Configuration Files
+- [Working with Configuration Files][docs-manage-configurations] - Step-by-step guide to work with
+  WinGet Configuration Files
 - [Configuration Versions][docs-config-versions] - Understanding 0.2.0 vs Microsoft DSC 3.x formats
 - [Migrate to DSC 3.x][docs-migration] - Step-by-step guide to upgrade your configurations
 - [Understanding Resources][docs-resources] - Learn about DSC resources and PowerShell Gallery
@@ -89,7 +90,9 @@ information, please refer to the [Code of Conduct FAQ][code-of-conduct-faq] or c
 
 ## Privacy Statement
 
-The application logs basic diagnostic data (telemetry). For more privacy information and what we collect, see our [WinGet Studio Data and Privacy documentation][privacy-file].
+The application logs basic diagnostic data (telemetry).
+For more privacy information and what we collect, see our
+[WinGet Studio Data and Privacy documentation][privacy-file].
 
 <!-- Link reference definitions -->
 [winget-studio-main]: https://github.com/microsoft/winget-studio

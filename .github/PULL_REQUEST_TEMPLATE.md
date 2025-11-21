@@ -17,8 +17,8 @@
 
   Tip: Use the syntax below to have a linked issue close when the PR merges:
 
-  * Resolves #1234
-  * Resolves microsoft/winget-studio#1234
+  - Resolves #1234
+  - Resolves microsoft/winget-studio#1234
 -->
 
 ## 🔍 How to Test

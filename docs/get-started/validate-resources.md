@@ -127,6 +127,7 @@ The schema helps you understand property data types, valid values, and requireme
 > Microsoft DSC 3.0 uses the underscore character `_` to denote standard properties handled by
 > `dsc.exe` directly. For example, the `_exist` property indicates whether a resource instance
 > should exist (installed) or not.
+
 ### Exploring property definitions
 
 Scroll through the schema to find specific properties. For example, the `installMode` property
@@ -161,6 +162,7 @@ settings with their default values.
 > [!TIP]
 > Refer to the schema when configuring settings to understand what each property controls and what
 > values are valid.
+
 ### Configure required properties
 
 For the `Microsoft.WinGet.DSC/WinGetPackage` resource, the most important properties are:
@@ -174,6 +176,7 @@ Remove unnecessary settings and configure the required ones:
 id: Microsoft.AppInstaller
 source: winget
 ```
+
 > [!NOTE]
 > YAML is sensitive to spaces. Include a space after the colon for each setting.
 ![Configured settings showing id and source properties for Microsoft.AppInstaller][15]
@@ -246,10 +249,10 @@ To demonstrate the Set operation safely, use the `Microsoft.WinGet/UserSettingsF
 resource instead:
 
 1. Search for and select **Microsoft.WinGet/UserSettingsFile**
-2. Click the **ℹ️** button to view resource information
-3. Review the JSON schema to understand the required `settings` property
-4. Configure the settings property in the editor
-5. Click **Get** to see current WinGet settings
+1. Click the **ℹ️** button to view resource information
+1. Review the JSON schema to understand the required `settings` property
+1. Configure the settings property in the editor
+1. Click **Get** to see current WinGet settings
 
 The Get operation returns your current WinGet configuration:
 
