@@ -34,6 +34,13 @@
                 window.chrome.webview.postMessage(contentChangedMsg);
             });
 
+            // 
+            const editCommand = monaco.editor.registerCommand("codeLensCommand", (accessor, ...args) =>
+            {
+                let contentChangedMsg = NewEditorMessage('codeLensCommandInvoked', args || []);
+                window.chrome.webview.postMessage(contentChangedMsg);
+            });
+
             // Handle messages from the host
             if (window.chrome?.webview) {
                 window.chrome.webview.addEventListener('message', e => {
@@ -51,8 +58,29 @@
                         case 'setReadOnly':
                             editor.updateOptions({ readOnly: msg.value || false });
                             break;
+                        case 'setCodeLenses':
+                            SetCodeLense(msg.value);
+                            break;
+                        case 'setCodeLensesEnabled':
+                            editor.updateOptions({ codeLens: msg.value || false });
+                            break;
                     }
                 });
+            }
+
+            // CodeLens helper function for updating lenses
+            let currentProviderDisposable = null;
+            function SetCodeLense(serializedLenses) {
+                try {
+                    let lenses = JSON.parse(serializedLenses);
+                    currentProviderDisposable?.dispose();
+                    currentProviderDisposable = monaco.languages.registerCodeLensProvider(editor.getModel().getLanguageId(), {
+                        provideCodeLenses: (model, token) => ({ lenses, dispose: () => {} }),
+                        resolveCodeLens: (model, codeLens, token) => codeLens,
+                    });
+                } catch {
+                    // No-op
+                }
             }
         });
 

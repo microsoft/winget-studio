@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Text.Json;
 using CommunityToolkit.WinUI;
 using Microsoft.Extensions.Localization;
 using Microsoft.UI.Xaml;
@@ -8,10 +9,12 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using WinGetStudio.Common.Windows.FileDialog;
 using WinGetStudio.Contracts.Views;
+using WinGetStudio.Models.Monaco;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
+using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.Views.ConfigurationFlow;
 
@@ -132,6 +135,35 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             foreach (var id in idsToSelect)
             {
                 listView.SelectedItems.Add(id);
+            }
+        }
+    }
+
+    private async void MonacoEditor_CodeLensCommandInvoked(object sender, IReadOnlyList<MonacoEditor.MonacoCommandArgument<JsonElement>> args)
+    {
+        if (args == null || args.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var arg in args)
+        {
+            try
+            {
+                if (arg?.Id == WinGetFileCodeLensGenerator.EditResourceCommandId)
+                {
+                    var index = arg.Value.GetInt32();
+                    await ViewModel.OnEditFromCodeAsync(index);
+                }
+                else if (arg?.Id == WinGetFileCodeLensGenerator.ValidateUnitCommandId)
+                {
+                    var index = arg.Value.GetInt32();
+                    await ViewModel.OnValidateFromCodeAsync(index);
+                }
+            }
+            catch
+            {
+                // No-op
             }
         }
     }

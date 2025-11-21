@@ -12,6 +12,7 @@ using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
 using WinGetStudio.Models;
+using WinGetStudio.Models.Monaco;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
@@ -66,6 +67,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     [MemberNotNullWhen(true, nameof(ConfigurationSet))]
     public bool IsConfigurationLoaded => ConfigurationSet != null;
+
+    [ObservableProperty]
+    public partial string? CodeLens { get; set; }
 
     public bool IsApplyInProgress => ActiveApplySet != null;
 
@@ -145,6 +149,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             await ConfigurationSet.UseAsync(dscSet, dscFile);
             SaveConfigurationCommand.NotifyCanExecuteChanged();
+
+            // TODO Move code to the view
+            var wingetCodeLens = new WinGetFileCodeLensGenerator(_localizer);
+            if (wingetCodeLens.TryGenerateCodeLenses(ConfigurationSet.Code, out var lens))
+            {
+                CodeLens = lens;
+            }
         }
         catch (OpenConfigurationSetException ex)
         {
@@ -185,6 +196,26 @@ public partial class PreviewFileViewModel : ObservableRecipient
                 SaveConfigurationCommand.NotifyCanExecuteChanged();
                 _ui.HideTaskProgress();
             }
+        }
+    }
+
+    public async Task OnValidateFromCodeAsync(int unitIndex)
+    {
+        if (IsConfigurationLoaded && unitIndex >= 0 && unitIndex < ConfigurationSet.Units.Count)
+        {
+            var unit = ConfigurationSet.Units[unitIndex];
+            _logger.LogInformation($"Validating unit {unit.Title} from code view");
+            await ValidateUnitAsync(unit);
+        }
+    }
+
+    public async Task OnEditFromCodeAsync(int unitIndex)
+    {
+        if (unitIndex >= 0 && unitIndex < ConfigurationSet?.Units.Count)
+        {
+            var unit = ConfigurationSet.Units[unitIndex];
+            _logger.LogInformation($"Editing unit {unit.Title} from code view");
+            await EditUnitAsync(unit);
         }
     }
 
@@ -260,9 +291,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         if (IsConfigurationLoaded && unit != null)
         {
             _logger.LogInformation($"Validating unit {unit.Title}");
-            var unitClone = await unit.CloneAsync();
-            var param = new ValidateUnitNavigationContext(unitClone);
-            _appNavigation.NavigateTo<ValidationViewModel>(param);
+            await ValidateUnitAsync(unit);
         }
     }
 
@@ -476,6 +505,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
         IsEditMode = true;
         var unitClone = await unit.CloneAsync();
         SelectedUnit = new(unit, unitClone);
+    }
+
+    private async Task ValidateUnitAsync(UnitViewModel unit)
+    {
+        var unitClone = await unit.CloneAsync();
+        var param = new ValidateUnitNavigationContext(unitClone);
+        _appNavigation.NavigateTo<ValidationViewModel>(param);
     }
 
     private async Task AddResourceAsync()
