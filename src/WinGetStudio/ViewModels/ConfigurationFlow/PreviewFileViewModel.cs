@@ -150,12 +150,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             await ConfigurationSet.UseAsync(dscSet, dscFile);
             SaveConfigurationCommand.NotifyCanExecuteChanged();
-
-            // TODO Move code to the view
-            if (WinGetFileCodeLensHelper.TryGenerateCodeLenses(_localizer, ConfigurationSet.Code, out var codeLenses))
-            {
-                CodeLens = codeLenses;
-            }
         }
         catch (OpenConfigurationSetException ex)
         {

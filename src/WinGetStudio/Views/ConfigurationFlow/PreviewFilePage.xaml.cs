@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.ComponentModel;
 using System.Text.Json;
 using CommunityToolkit.WinUI;
 using Microsoft.Extensions.Localization;
@@ -30,6 +31,8 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         _localizer = App.GetService<IStringLocalizer<PreviewFilePage>>();
         _ui = App.GetService<IUIFeedbackService>();
         ViewModel = App.GetService<PreviewFileViewModel>();
+        ViewModel.PropertyChanging += ViewModel_PropertyChanging;
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         InitializeComponent();
     }
 
@@ -166,6 +169,39 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             catch
             {
                 // No-op
+            }
+        }
+    }
+
+    private void ViewModel_PropertyChanging(object? sender, PropertyChangingEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.ConfigurationSet))
+        {
+            ViewModel.ConfigurationSet?.PropertyChanged -= CodeChanged;
+        }
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.ConfigurationSet))
+        {
+            ViewModel.ConfigurationSet?.PropertyChanged += CodeChanged;
+        }
+    }
+
+    private void CodeChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(SetViewModel.Code))
+        {
+            if (ViewModel.ConfigurationSet != null && WinGetFileCodeLensHelper.TryGenerateCodeLenses(_localizer, ViewModel.ConfigurationSet.Code, out var codeLenses))
+            {
+                ConfigurationEditor.IsCodeLensesEnabled = true;
+                ConfigurationEditor.CodeLenses = codeLenses;
+            }
+            else
+            {
+                ConfigurationEditor.IsCodeLensesEnabled = false;
+                ConfigurationEditor.CodeLenses = null;
             }
         }
     }
