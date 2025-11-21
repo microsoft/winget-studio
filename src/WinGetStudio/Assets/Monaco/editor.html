@@ -34,8 +34,8 @@
                 window.chrome.webview.postMessage(contentChangedMsg);
             });
 
-            // 
-            const editCommand = monaco.editor.registerCommand("codeLensCommand", (accessor, ...args) =>
+            // Register CodeLens command handler
+            monaco.editor.registerCommand("codeLensCommand", (accessor, ...args) =>
             {
                 let contentChangedMsg = NewEditorMessage('codeLensCommandInvoked', args || []);
                 window.chrome.webview.postMessage(contentChangedMsg);

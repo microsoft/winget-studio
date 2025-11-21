@@ -11,7 +11,6 @@ using Microsoft.Management.Configuration;
 using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
-using WinGetStudio.Helpers;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
@@ -68,9 +67,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     [MemberNotNullWhen(true, nameof(ConfigurationSet))]
     public bool IsConfigurationLoaded => ConfigurationSet != null;
-
-    [ObservableProperty]
-    public partial List<MonacoEditor.MonacoCodeLens>? CodeLens { get; set; }
 
     public bool IsApplyInProgress => ActiveApplySet != null;
 
