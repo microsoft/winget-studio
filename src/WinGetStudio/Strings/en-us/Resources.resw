@@ -840,6 +840,18 @@
   <data name="MonacoEditor_OpenUriDialog.Title" xml:space="preserve">
     <value>Do you want WinGet Studio to open the external application?</value>
   </data>
+  <data name="CodeLens_ValidateText" xml:space="preserve">
+    <value>Validate</value>
+  </data>
+  <data name="CodeLens_ValidateTextTooltip" xml:space="preserve">
+    <value>Validate this resource</value>
+  </data>
+    <data name="CodeLens_EditText" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="CodeLens_EditTextTooltip" xml:space="preserve">
+    <value>Edit this resource</value>
+  </data>
   <data name="ApplyFile_CancelDialog.CloseButtonText" xml:space="preserve">
     <value>No</value>
   </data>

@@ -11,13 +11,14 @@ using Microsoft.Management.Configuration;
 using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
+using WinGetStudio.Helpers;
 using WinGetStudio.Models;
-using WinGetStudio.Models.Monaco;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
+using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.ViewModels.ConfigurationFlow;
 
@@ -69,7 +70,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public bool IsConfigurationLoaded => ConfigurationSet != null;
 
     [ObservableProperty]
-    public partial string? CodeLens { get; set; }
+    public partial List<MonacoEditor.MonacoCodeLens>? CodeLens { get; set; }
 
     public bool IsApplyInProgress => ActiveApplySet != null;
 
@@ -151,10 +152,9 @@ public partial class PreviewFileViewModel : ObservableRecipient
             SaveConfigurationCommand.NotifyCanExecuteChanged();
 
             // TODO Move code to the view
-            var wingetCodeLens = new WinGetFileCodeLensGenerator(_localizer);
-            if (wingetCodeLens.TryGenerateCodeLenses(ConfigurationSet.Code, out var lens))
+            if (WinGetFileCodeLensHelper.TryGenerateCodeLenses(_localizer, ConfigurationSet.Code, out var codeLenses))
             {
-                CodeLens = lens;
+                CodeLens = codeLenses;
             }
         }
         catch (OpenConfigurationSetException ex)

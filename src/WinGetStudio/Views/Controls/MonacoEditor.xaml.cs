@@ -43,7 +43,7 @@ public sealed partial class MonacoEditor : UserControl
     public static readonly DependencyProperty UseThrottleProperty = DependencyProperty.Register(nameof(UseThrottle), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(true));
     public static readonly DependencyProperty ThrottleIntervalProperty = DependencyProperty.Register(nameof(ThrottleInterval), typeof(int), typeof(MonacoEditor), new PropertyMetadata(InitialThrottleInterval, OnThrottleIntervalPropertyChanged));
     public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register(nameof(IsReadOnly), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(false, OnIsReadOnlyPropertyChanged));
-    public static readonly DependencyProperty CodeLensesProperty = DependencyProperty.Register(nameof(CodeLenses), typeof(string), typeof(MonacoEditor), new PropertyMetadata(null, OnCodeLensesPropertyChanged));
+    public static readonly DependencyProperty CodeLensesProperty = DependencyProperty.Register(nameof(CodeLenses), typeof(List<MonacoCodeLens>), typeof(MonacoEditor), new PropertyMetadata(null, OnCodeLensesPropertyChanged));
     public static readonly DependencyProperty IsCodeLensesEnabledProperty = DependencyProperty.Register(nameof(IsCodeLensesEnabled), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(false, OnIsCodeLensesEnabledPropertyChanged));
 
     private bool _pending;
@@ -58,7 +58,7 @@ public sealed partial class MonacoEditor : UserControl
     /// <summary>
     /// Raised when a code lens command is invoked.
     /// </summary>
-    public event EventHandler<IReadOnlyList<MonacoCommandArgument<JsonElement>>>? CodeLensCommandInvoked;
+    public event EventHandler<IReadOnlyList<MonacoCommandArgument>>? CodeLensCommandInvoked;
 
     /// <summary>
     /// Gets the path to the Monaco assets.
@@ -110,9 +110,9 @@ public sealed partial class MonacoEditor : UserControl
     /// <summary>
     /// Gets or sets the code lenses configuration in JSON format.
     /// </summary>
-    public string? CodeLenses
+    public List<MonacoCodeLens>? CodeLenses
     {
-        get => (string?)GetValue(CodeLensesProperty);
+        get => (List<MonacoCodeLens>?)GetValue(CodeLensesProperty);
         set => SetValue(CodeLensesProperty, value);
     }
 
@@ -199,7 +199,7 @@ public sealed partial class MonacoEditor : UserControl
     private static void OnCodeLensesPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
     {
         var control = (MonacoEditor)sender;
-        control.SetCodeLenses(e.NewValue?.ToString());
+        control.SetCodeLenses(e.NewValue as List<MonacoCodeLens>);
     }
 
     /// <summary>
@@ -281,11 +281,12 @@ public sealed partial class MonacoEditor : UserControl
     /// Set the code lenses configuration.
     /// </summary>
     /// <param name="codeLenses">The code lenses configuration in JSON format.</param>
-    private void SetCodeLenses(string? codeLenses)
+    private void SetCodeLenses(List<MonacoCodeLens>? codeLenses)
     {
         if (Editor.CoreWebView2 != null)
         {
-            var msg = new EditorMessage<string>() { Type = SetCodeLensesApi, Value = codeLenses };
+            var codeLensesJson = codeLenses != null ? JsonSerializer.Serialize(codeLenses, _options) : null;
+            var msg = new EditorMessage<string>() { Type = SetCodeLensesApi, Value = codeLensesJson };
             var json = JsonSerializer.Serialize(msg, _options);
             Editor.CoreWebView2.PostWebMessageAsJson(json);
         }
@@ -416,7 +417,7 @@ public sealed partial class MonacoEditor : UserControl
             }
             else if (message?.Type == CodeLensCommandInvokedApi)
             {
-                var payload = message.Value.Deserialize<List<MonacoCommandArgument<JsonElement>>>();
+                var payload = message.Value.Deserialize<List<MonacoCommandArgument>>();
                 OnCodeLensCommandInvoked(payload);
             }
         }
@@ -460,7 +461,7 @@ public sealed partial class MonacoEditor : UserControl
     /// Handle the code lens command invoked event from the editor.
     /// </summary>
     /// <param name="commandArguments">The command arguments.</param>
-    private void OnCodeLensCommandInvoked(List<MonacoCommandArgument<JsonElement>>? commandArguments)
+    private void OnCodeLensCommandInvoked(List<MonacoCommandArgument>? commandArguments)
     {
         if (commandArguments != null)
         {

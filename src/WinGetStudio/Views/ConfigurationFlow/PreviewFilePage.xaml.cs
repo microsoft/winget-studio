@@ -9,7 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using WinGetStudio.Common.Windows.FileDialog;
 using WinGetStudio.Contracts.Views;
-using WinGetStudio.Models.Monaco;
+using WinGetStudio.Helpers;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
@@ -139,7 +139,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         }
     }
 
-    private async void MonacoEditor_CodeLensCommandInvoked(object sender, IReadOnlyList<MonacoEditor.MonacoCommandArgument<JsonElement>> args)
+    private async void MonacoEditor_CodeLensCommandInvoked(object sender, IReadOnlyList<MonacoEditor.MonacoCommandArgument> args)
     {
         if (args == null || args.Count == 0)
         {
@@ -150,14 +150,16 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         {
             try
             {
-                if (arg?.Id == WinGetFileCodeLensGenerator.EditResourceCommandId)
+                var id = arg?.Id;
+                var value = arg?.Value as JsonElement?;
+                if (id == WinGetFileCodeLensHelper.EditResourceCommandId && value != null)
                 {
-                    var index = arg.Value.GetInt32();
+                    var index = value.Value.GetInt32();
                     await ViewModel.OnEditUnitByIndexAsync(index);
                 }
-                else if (arg?.Id == WinGetFileCodeLensGenerator.ValidateUnitCommandId)
+                else if (arg?.Id == WinGetFileCodeLensHelper.ValidateUnitCommandId && value != null)
                 {
-                    var index = arg.Value.GetInt32();
+                    var index = value.Value.GetInt32();
                     await ViewModel.OnValidateUnitByIndexAsync(index);
                 }
             }

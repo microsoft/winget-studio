@@ -7,7 +7,7 @@ namespace WinGetStudio.Views.Controls;
 
 public partial class MonacoEditor
 {
-    public partial class MonacoCodeLens<T>
+    public partial class MonacoCodeLens
     {
         [JsonPropertyName("id")]
         public string? Id { get; set; }
@@ -16,7 +16,7 @@ public partial class MonacoEditor
         public MonacoRange Range { get; set; }
 
         [JsonPropertyName("command")]
-        public MonacoCommand<T>? Command { get; set; }
+        public MonacoCodeLensCommand? Command { get; set; }
 
         public MonacoCodeLens(MonacoRange range)
         {
@@ -47,7 +47,15 @@ public partial class MonacoEditor
         }
     }
 
-    public sealed partial class MonacoCommand<T>
+    public sealed partial class MonacoCodeLensCommand : MonacoCommand
+    {
+        public MonacoCodeLensCommand(string title)
+            : base("codeLensCommand", title)
+        {
+        }
+    }
+
+    public partial class MonacoCommand
     {
         [JsonPropertyName("id")]
         public string Id { get; set; }
@@ -59,7 +67,7 @@ public partial class MonacoEditor
         public string? Tooltip { get; set; }
 
         [JsonPropertyName("arguments")]
-        public List<MonacoCommandArgument<T>>? Arguments { get; set; }
+        public List<MonacoCommandArgument>? Arguments { get; set; }
 
         public MonacoCommand(string id, string title)
         {
@@ -68,12 +76,12 @@ public partial class MonacoEditor
         }
     }
 
-    public partial class MonacoCommandArgument<T>
+    public partial class MonacoCommandArgument
     {
         [JsonPropertyName("id")]
         public string? Id { get; set; }
 
         [JsonPropertyName("value")]
-        public T? Value { get; set; }
+        public object? Value { get; set; }
     }
 }
