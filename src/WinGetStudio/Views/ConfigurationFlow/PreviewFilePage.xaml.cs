@@ -153,12 +153,12 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
                 if (arg?.Id == WinGetFileCodeLensGenerator.EditResourceCommandId)
                 {
                     var index = arg.Value.GetInt32();
-                    await ViewModel.OnEditFromCodeAsync(index);
+                    await ViewModel.OnEditUnitByIndexAsync(index);
                 }
                 else if (arg?.Id == WinGetFileCodeLensGenerator.ValidateUnitCommandId)
                 {
                     var index = arg.Value.GetInt32();
-                    await ViewModel.OnValidateFromCodeAsync(index);
+                    await ViewModel.OnValidateUnitByIndexAsync(index);
                 }
             }
             catch

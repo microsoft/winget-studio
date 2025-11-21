@@ -199,7 +199,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
-    public async Task OnValidateFromCodeAsync(int unitIndex)
+    public async Task OnValidateUnitByIndexAsync(int unitIndex)
     {
         if (IsConfigurationLoaded && unitIndex >= 0 && unitIndex < ConfigurationSet.Units.Count)
         {
@@ -209,7 +209,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
-    public async Task OnEditFromCodeAsync(int unitIndex)
+    public async Task OnEditUnitByIndexAsync(int unitIndex)
     {
         if (unitIndex >= 0 && unitIndex < ConfigurationSet?.Units.Count)
         {
