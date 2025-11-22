@@ -76,9 +76,9 @@
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         </Style>
                     </controls:UniformGrid.Resources>
-                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.GetCommand}" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.SetCommand}" HorizontalAlignment="Stretch" Grid.Column="1"/>
-                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.TestCommand}" HorizontalAlignment="Stretch" Grid.Column="2"/>
+                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.ValidateUnit.GetCommand, Mode=OneWay}" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.ValidateUnit.SetCommand, Mode=OneWay}" HorizontalAlignment="Stretch" Grid.Column="1"/>
+                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.ValidateUnit.TestCommand, Mode=OneWay}" HorizontalAlignment="Stretch" Grid.Column="2"/>
                 </controls:UniformGrid>
             </Grid>
 
