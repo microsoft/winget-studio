@@ -1,4 +1,4 @@
-﻿﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -572,10 +572,6 @@
   <data name="PreviewPage_UpdateFromCodeSuccess" xml:space="preserve">
     <value>Configuration updated successfully from code</value>
     <comment>Notification message shown when the configuration is successfully updated from the code view</comment>
-  </data>
-  <data name="ConfigurationFile_SummaryView.Content" xml:space="preserve">
-    <value>Summary view</value>
-    <comment>Show the summary view of the configuration file</comment>
   </data>
   <data name="ConfigurationFile_CodeView.Content" xml:space="preserve">
     <value>Code view</value>
