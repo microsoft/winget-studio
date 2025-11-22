@@ -195,6 +195,26 @@ public partial class PreviewFileViewModel : ObservableRecipient
         }
     }
 
+    public async Task OnValidateUnitByIndexAsync(int unitIndex)
+    {
+        if (IsConfigurationLoaded && unitIndex >= 0 && unitIndex < ConfigurationSet.Units.Count)
+        {
+            var unit = ConfigurationSet.Units[unitIndex];
+            _logger.LogInformation($"Validating unit {unit.Title} from code view");
+            await ValidateUnitAsync(unit);
+        }
+    }
+
+    public async Task OnEditUnitByIndexAsync(int unitIndex)
+    {
+        if (unitIndex >= 0 && unitIndex < ConfigurationSet?.Units.Count)
+        {
+            var unit = ConfigurationSet.Units[unitIndex];
+            _logger.LogInformation($"Editing unit {unit.Title} from code view");
+            await EditUnitAsync(unit);
+        }
+    }
+
     [RelayCommand]
     private void OnLoaded()
     {
@@ -208,6 +228,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private void OnUnloaded()
     {
         _manager.ActiveSetPreviewState.CaptureState(this);
+        ConfigurationSet = null;
     }
 
     [RelayCommand(CanExecute = nameof(CanCreateNewConfiguration))]
@@ -267,9 +288,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         if (IsConfigurationLoaded && unit != null)
         {
             _logger.LogInformation($"Validating unit {unit.Title}");
-            var unitClone = await unit.CloneAsync();
-            var param = new ValidateUnitNavigationContext(unitClone);
-            _appNavigation.NavigateTo<ValidationViewModel>(param);
+            await ValidateUnitAsync(unit);
         }
     }
 
@@ -533,6 +552,13 @@ public partial class PreviewFileViewModel : ObservableRecipient
         IsEditMode = true;
         var unitClone = await unit.CloneAsync();
         SelectedUnit = new(unit, unitClone);
+    }
+
+    private async Task ValidateUnitAsync(UnitViewModel unit)
+    {
+        var unitClone = await unit.CloneAsync();
+        var param = new ValidateUnitNavigationContext(unitClone);
+        _appNavigation.NavigateTo<ValidationViewModel>(param);
     }
 
     private async Task AddResourceAsync()

@@ -40,6 +40,11 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
     /// </summary>
     public bool IsCodeView { get; set; }
 
+    /// <summary>
+    /// Gets or sets the code representation of the set.
+    /// </summary>
+    public string? Code { get; set; }
+
     /// <inheritdoc/>
     public bool CanRestoreState()
     {
@@ -54,6 +59,7 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
         IsCodeView = source.IsCodeView;
         IsEditMode = source.IsEditMode;
         SelectedUnit = source.SelectedUnit;
+        Code = source.Code;
     }
 
     /// <inheritdoc/>
@@ -64,6 +70,7 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
         source.IsCodeView = IsCodeView;
         source.IsEditMode = IsEditMode;
         source.SelectedUnit = SelectedUnit;
+        source.Code = Code;
     }
 
     /// <inheritdoc/>
@@ -74,5 +81,6 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
         SelectedUnit = null;
         IsEditMode = false;
         IsCodeView = false;
+        Code = null;
     }
 }
