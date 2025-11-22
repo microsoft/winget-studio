@@ -59,7 +59,6 @@ public partial class PreviewFileViewModel : ObservableRecipient
     public partial bool IsEditMode { get; set; }
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(UpdateFromCodeCommand))]
     public partial bool IsCodeView { get; set; }
 
     [ObservableProperty]
