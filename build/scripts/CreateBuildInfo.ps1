@@ -1,23 +1,23 @@
 [CmdLetBinding()]
-Param(
-    [string]$Version,
-    [bool]$IsAzurePipelineBuild = $false
+param(
+  [string]$Version,
+  [bool]$IsAzurePipelineBuild = $false
 )
 
-$Major = "0"
-$Minor = "1"
-$Patch = "99" # default to 99 for local builds
+$Major = '0'
+$Minor = '1'
+$Patch = '99' # default to 99 for local builds
 
-$versionSplit = $Version.Split(".");
+$versionSplit = $Version.Split('.');
 if ($versionSplit.length -gt 3) { $Build = $versionSplit[3] }
 if ($versionSplit.length -gt 2) { $Elapsed = $versionSplit[2] }
-if ($versionSplit.length -gt 1) { 
-    if ($versionSplit[1].length -gt 2) {
-        $Minor = $versionSplit[1].SubString(0,$versionSplit[1].length-2);
-        $Patch = $versionSplit[1].SubString($versionSplit[1].length-2, 2);
-    } else {
-        $Minor = $versionSplit[1]
-    }
+if ($versionSplit.length -gt 1) {
+  if ($versionSplit[1].length -gt 2) {
+    $Minor = $versionSplit[1].SubString(0, $versionSplit[1].length - 2);
+    $Patch = $versionSplit[1].SubString($versionSplit[1].length - 2, 2);
+  } else {
+    $Minor = $versionSplit[1]
+  }
 }
 if ($versionSplit.length -gt 0) { $Major = $versionSplit[0] }
 
@@ -40,16 +40,15 @@ if ($versionSplit.length -gt 0) { $Major = $versionSplit[0] }
 $epoch = (Get-Date -Year 2025 -Month 1 -Day 1).ToUniversalTime()
 $now = (Get-Date).ToUniversalTime()
 if ([string]::IsNullOrWhiteSpace($Elapsed)) {
-  $Elapsed = $(New-Timespan -Start $epoch -End $now).Days
+  $Elapsed = $(New-TimeSpan -Start $epoch -End $now).Days
 }
 
 $version_h = $now.Hour
 $version_m = $now.Minute
 if ([string]::IsNullOrWhiteSpace($Build)) {
   if ($IsAzurePipelineBuild) {
-    $Build = "0"
-  }
-  else {
+    $Build = '0'
+  } else {
     $Build = ($version_h * 100 + $version_m).ToString()
   }
 }
@@ -57,4 +56,4 @@ if ([string]::IsNullOrWhiteSpace($Build)) {
 
 $version_dotquad = [int[]]($Major, ($Minor + $Patch), $Elapsed, $Build)
 
-return ($version_dotquad -Join ".")
+return ($version_dotquad -join '.')

@@ -1,8 +1,8 @@
-Param(
-    [string]$Platform = "x64",
-    [string]$Configuration = "Debug",
+param(
+    [string]$Platform = 'x64',
+    [string]$Configuration = 'Debug',
     [string]$Version,
-    [string]$BuildStep = "all",
+    [string]$BuildStep = 'all',
     [bool]$IsRelease = $false,
     [string]$OutputDir,
     [switch]$IsAzurePipelineBuild = $false,
@@ -12,7 +12,7 @@ Param(
 $StartTime = Get-Date
 
 if ($Help) {
-    Write-Host @"
+    Write-Information @'
 Copyright (c) Microsoft Corporation and Contributors.
 Licensed under the MIT License.
 
@@ -36,8 +36,23 @@ Options:
 
   -Help
       Display this usage message.
-"@
-    Exit
+'@ -InformationAction Continue
+    exit
+}
+
+function Write-InformationColored {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Message,
+
+        [Parameter(Mandatory = $false)]
+        [ConsoleColor]$ForegroundColor = 'White' # Default color
+    )
+
+    $originalForegroundColor = $host.UI.RawUI.ForegroundColor
+    $host.UI.RawUI.ForegroundColor = $ForegroundColor
+    Write-Information $Message -InformationAction Continue
+    $host.UI.RawUI.ForegroundColor = $originalForegroundColor
 }
 
 $env:Build_RootDirectory = (Split-Path $MyInvocation.MyCommand.Path)
@@ -53,105 +68,111 @@ if ([string]::IsNullOrEmpty($OutputDir)) {
     $OutputDir = $env:Build_RootDirectory
 }
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
 
 # Install NuGet Cred Provider
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-Expression "& { $(Invoke-RestMethod https://aka.ms/install-artifacts-credprovider.ps1) } -AddNetfx"
+# Download the cred provider script to a temp file and execute it directly to avoid Invoke-Expression
+$credProviderUrl = 'https://aka.ms/install-artifacts-credprovider.ps1'
+$tempScript = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString() + '.ps1')
+Invoke-WebRequest -Uri $credProviderUrl -UseBasicParsing -OutFile $tempScript
+try {
+    & $tempScript -AddNetfx
+} finally {
+    Remove-Item $tempScript -ErrorAction SilentlyContinue -Force
+}
 
 . build\Scripts\CertSignAndInstall.ps1
 
-Try {
-    if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix")) {
+try {
+    if (($BuildStep -ieq 'all') -or ($BuildStep -ieq 'msix')) {
         # Load current (dev) appxmanifest
-        [Reflection.Assembly]::LoadWithPartialName("System.Xml.Linq")
-        $appxmanifestPath = (Join-Path $env:Build_RootDirectory "src\WinGetStudio\Package.appxmanifest")
+        [Reflection.Assembly]::LoadWithPartialName('System.Xml.Linq')
+        $appxmanifestPath = (Join-Path $env:Build_RootDirectory 'src\WinGetStudio\Package.appxmanifest')
         $appxmanifest = [System.Xml.Linq.XDocument]::Load($appxmanifestPath)
 
         # Define the xml namespaces
-        $xIdentity = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Identity");
-        $xProperties = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Properties");
-        $xDisplayName = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}DisplayName");
-        $xApplications = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Applications");
-        $xApplication = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Application");
-        $uapVisualElements = [System.Xml.Linq.XName]::Get("{http://schemas.microsoft.com/appx/manifest/uap/windows10}VisualElements");
+        $xIdentity = [System.Xml.Linq.XName]::Get('{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Identity');
+        $xProperties = [System.Xml.Linq.XName]::Get('{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Properties');
+        $xDisplayName = [System.Xml.Linq.XName]::Get('{http://schemas.microsoft.com/appx/manifest/foundation/windows10}DisplayName');
+        $xApplications = [System.Xml.Linq.XName]::Get('{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Applications');
+        $xApplication = [System.Xml.Linq.XName]::Get('{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Application');
+        $uapVisualElements = [System.Xml.Linq.XName]::Get('{http://schemas.microsoft.com/appx/manifest/uap/windows10}VisualElements');
 
         # Cache current (dev) values
-        $devVersion = $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value
-        $devPackageName = $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value
+        $devVersion = $appxmanifest.Root.Element($xIdentity).Attribute('Version').Value
+        $devPackageName = $appxmanifest.Root.Element($xIdentity).Attribute('Name').Value
         $devPackageDisplayName = $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value
-        $devAppDisplayNameResource = $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value
+        $devAppDisplayNameResource = $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute('DisplayName').Value
 
         # For dev build, use the cached values
-        $buildRing = "Dev"
+        $buildRing = 'Dev'
         $packageName = $devPackageName
         $packageDisplayName = $devPackageDisplayName
         $appDisplayNameResource = $devAppDisplayNameResource
 
         # For release build, use the new values
         if ($IsRelease) {
-            $buildRing = "Stable"
-            $packageName = "Microsoft.Windows.WinGetStudio"
-            $packageDisplayName = "WinGet Studio (Experimental)"
-            $appDisplayNameResource = "ms-resource:AppDisplayNameStable"
+            $buildRing = 'Stable'
+            $packageName = 'Microsoft.Windows.WinGetStudio'
+            $packageDisplayName = 'WinGet Studio (Experimental)'
+            $appDisplayNameResource = 'ms-resource:AppDisplayNameStable'
         }
 
-        Try {
+        try {
             # Update the appxmanifest
-            $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value = $env:msix_version
-            $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value = $packageName
+            $appxmanifest.Root.Element($xIdentity).Attribute('Version').Value = $env:msix_version
+            $appxmanifest.Root.Element($xIdentity).Attribute('Name').Value = $packageName
             $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value = $packageDisplayName
-            $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value = $appDisplayNameResource
+            $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute('DisplayName').Value = $appDisplayNameResource
             $appxmanifest.Save($appxmanifestPath)
 
-            foreach ($platform in $env:Build_Platform.Split(",")) {
-                foreach ($configuration in $env:Build_Configuration.Split(",")) {
+            foreach ($platform in $env:Build_Platform.Split(',')) {
+                foreach ($configuration in $env:Build_Configuration.Split(',')) {
                     $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
                     $msbuildArgs = @(
-                        ("src/WinGetStudio.sln"),
-                        ("/p:Platform=" + $platform),
-                        ("/p:Configuration=" + $configuration),
-                        ("/restore"),
+                        ('src/WinGetStudio.sln'),
+                        ('/p:Platform=' + $platform),
+                        ('/p:Configuration=' + $configuration),
+                        ('/restore'),
                         ("/binaryLogger:WinGetStudio.$platform.$configuration.binlog"),
                         ("/p:AppxPackageOutput=$appxPackageDir\WinGetStudio-$platform.msix"),
-                        ("/p:AppxPackageSigningEnabled=false"),
-                        ("/p:GenerateAppxPackageOnBuild=true"),
+                        ('/p:AppxPackageSigningEnabled=false'),
+                        ('/p:GenerateAppxPackageOnBuild=true'),
                         ("/p:BuildRing=$buildRing")
                     )
 
                     & $msbuildPath $msbuildArgs
-                    if (-not($IsAzurePipelineBuild) -And $isAdmin) {
+                    if (-not($IsAzurePipelineBuild) -and $isAdmin) {
                         Invoke-SignPackage "$appxPackageDir\WinGetStudio-$platform.msix"
                     }
                 }
             }
-        }
-        finally {
+        } finally {
             # Revert the appxmanifest to dev values
-            $appxmanifest.Root.Element($xIdentity).Attribute("Version").Value = $devVersion
-            $appxmanifest.Root.Element($xIdentity).Attribute("Name").Value = $devPackageName
+            $appxmanifest.Root.Element($xIdentity).Attribute('Version').Value = $devVersion
+            $appxmanifest.Root.Element($xIdentity).Attribute('Name').Value = $devPackageName
             $appxmanifest.Root.Element($xProperties).Element($xDisplayName).Value = $devPackageDisplayName
-            $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute("DisplayName").Value = $devAppDisplayNameResource
-            $appxmanifest.Save($appxmanifestPath) 
+            $appxmanifest.Root.Element($xApplications).Element($xApplication).Element($uapVisualElements).Attribute('DisplayName').Value = $devAppDisplayNameResource
+            $appxmanifest.Save($appxmanifestPath)
         }
     }
 
-    if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msixbundle")) {
-        foreach ($configuration in $env:Build_Configuration.Split(",")) {
+    if (($BuildStep -ieq 'all') -or ($BuildStep -ieq 'msixbundle')) {
+        foreach ($configuration in $env:Build_Configuration.Split(',')) {
             $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
-            $appxBundlePath = (Join-Path $OutputDir ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + "_8wekyb3d8bbwe.msixbundle"))
+            $appxBundlePath = (Join-Path $OutputDir ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + '_8wekyb3d8bbwe.msixbundle'))
             .\build\scripts\Create-AppxBundle.ps1 -InputPath $appxPackageDir -ProjectName WinGetStudio -BundleVersion ([version]$env:msix_version) -OutputPath $appxBundlePath
-            if (-not($IsAzurePipelineBuild) -And $isAdmin) {
+            if (-not($IsAzurePipelineBuild) -and $isAdmin) {
                 Invoke-SignPackage $appxBundlePath
             }
         }
     }
-}
-Catch {
+} catch {
     $formatString = "`n{0}`n`n{1}`n`n"
     $fields = $_, $_.ScriptStackTrace
-    Write-Host ($formatString -f $fields) -ForegroundColor RED
-    Exit 1
+    Write-InformationColored -Message ($formatString -f $fields) -ForegroundColor RED
+    exit 1
 }
 
 $TotalTime = (Get-Date) - $StartTime
@@ -159,21 +180,21 @@ $TotalMinutes = [math]::Floor($TotalTime.TotalMinutes)
 $TotalSeconds = [math]::Ceiling($TotalTime.TotalSeconds) - ($totalMinutes * 60)
 
 if (-not($isAdmin)) {
-    Write-Host @"
+    Write-InformationColored -Message @'
 
 WARNING: Cert signing requires admin privileges.  To sign, run the following in an elevated Developer Command Prompt.
-"@ -ForegroundColor GREEN
-    foreach ($platform in $env:Build_Platform.Split(",")) {
-        foreach ($configuration in $env:Build_Configuration.Split(",")) {
+'@ -ForegroundColor GREEN
+    foreach ($platform in $env:Build_Platform.Split(',')) {
+        foreach ($configuration in $env:Build_Configuration.Split(',')) {
             $appxPackageFile = (Join-Path $OutputDir "AppxPackages\$configuration\WinGetStudio-$platform.msix")
-            Write-Host @"
+            Write-InformationColored -Message @"
 powershell -command "& { . build\scripts\CertSignAndInstall.ps1; Invoke-SignPackage $appxPackageFile }"
 "@ -ForegroundColor GREEN
         }
     }
 }
 
-Write-Host @"
+Write-InformationColored -Message @"
 
 Total Running Time:
 $TotalMinutes minutes and $TotalSeconds seconds

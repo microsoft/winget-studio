@@ -7,7 +7,7 @@ buildtransitive
 clickable
 CLSCTX
 contentfiles
-Cred
+cred
 DFX
 dic
 dsc
