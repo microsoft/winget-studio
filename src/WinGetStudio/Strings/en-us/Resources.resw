@@ -566,10 +566,6 @@
   <data name="PreviewPage_FilePicker_ConfigurationFiles" xml:space="preserve">
     <value>Configuration files</value>
   </data>
-  <data name="ConfigurationFile_SummaryView.Content" xml:space="preserve">
-    <value>Summary view</value>
-    <comment>Show the summary view of the configuration file</comment>
-  </data>
   <data name="ConfigurationFile_CodeView.Content" xml:space="preserve">
     <value>Code view</value>
     <comment>Show the code view of the configuration file</comment>
@@ -863,5 +859,15 @@
   </data>
   <data name="ExploreResource_Failed" xml:space="preserve">
     <value>Failed to load resource details</value>
+  </data>
+   <data name="PreviewPage_AppliedChangesFromCodeSuccess" xml:space="preserve">
+    <value>Configuration changes applied successfully from code</value>
+    <comment>Notification message shown when the configuration is successfully updated from the code view</comment>
+  </data>
+   <data name="PreviewPage_ApplyChangesButton.Content" xml:space="preserve">
+    <value>Apply changes</value>
+  </data>
+   <data name="PreviewPage_ApplyChangesWarning.Message" xml:space="preserve">
+    <value>Pending changes must be applied before they can be saved or take effect.</value>
   </data>
 </root>

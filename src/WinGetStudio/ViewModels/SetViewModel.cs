@@ -25,6 +25,8 @@ public sealed partial class SetViewModel : ObservableObject
 
     public ReadOnlyObservableCollection<UnitViewModel> Units { get; }
 
+    public string? Code => CodeInternal;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSave))]
     [NotifyPropertyChangedFor(nameof(FilePath))]
@@ -37,7 +39,8 @@ public sealed partial class SetViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    public partial string? Code { get; set; }
+    [NotifyPropertyChangedFor(nameof(Code))]
+    private partial string? CodeInternal { get; set; }
 
     public bool CanSave => OriginalDscFile?.CanSave ?? false;
 
@@ -66,7 +69,7 @@ public sealed partial class SetViewModel : ObservableObject
         OriginalDscFile = dscFile;
 
         // Update units and code.
-        Code = dscFile?.Content;
+        CodeInternal = dscFile?.Content;
 
         var units = dscSet?.Units ?? [];
         var tasks = units.Select(async unit =>
@@ -136,7 +139,7 @@ public sealed partial class SetViewModel : ObservableObject
     private async Task UpdateConfigurationCodeAsync()
     {
         _logger.LogInformation("Updating configuration code");
-        Code = await GenerateConfigurationCodeAsync();
+        CodeInternal = await GenerateConfigurationCodeAsync();
         CurrentDscFile = null;
     }
 

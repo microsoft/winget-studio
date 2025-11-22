@@ -453,17 +453,35 @@
                             </Grid>
 
                             <!-- Code view -->
-                            <ScrollViewer Grid.Row="4"
-                                          Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}"
-                                          HorizontalScrollBarVisibility="Auto"
-                                          VerticalScrollBarVisibility="Auto">
-                                <localControls:MonacoEditor Text="{x:Bind ViewModel.ConfigurationSet.Code, Mode=OneWay}"
-                                                            x:Name="ConfigurationEditor"
-                                                            IsCodeLensesEnabled="True"
-                                                            CodeLensCommandInvoked="MonacoEditor_CodeLensCommandInvoked"
-                                                            Syntax="yaml"
-                                                            IsReadOnly="True" />
-                            </ScrollViewer>
+                             <Grid Grid.Row="4" Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Action buttons -->
+                                <InfoBar Visibility="{x:Bind ViewModel.IsCodeDirty, Mode=OneWay}"
+                                         IsOpen="True"
+                                         IsClosable="False"
+                                         Margin="{ThemeResource XSmallBottomMargin}"
+                                         Severity="Warning"
+                                         x:Uid="PreviewPage_ApplyChangesWarning">
+                                    <InfoBar.ActionButton>
+                                        <Button Command="{x:Bind ViewModel.UpdateFromCodeCommand}" HorizontalAlignment="Right" x:Uid="PreviewPage_ApplyChangesButton"/>
+                                    </InfoBar.ActionButton>
+                                </InfoBar>
+
+                                <!-- Monaco Editor -->
+                                <ScrollViewer Grid.Row="1"
+                                              HorizontalScrollBarVisibility="Auto"
+                                              VerticalScrollBarVisibility="Auto">
+                                    <localControls:MonacoEditor Text="{x:Bind ViewModel.Code, Mode=TwoWay}"
+                                                                x:Name="ConfigurationEditor"
+                                                                CodeLensCommandInvoked="MonacoEditor_CodeLensCommandInvoked"
+                                                                Syntax="yaml"
+                                                                IsReadOnly="False" />
+                                </ScrollViewer>
+                            </Grid>
                         </Grid>
 
                         <!-- Resizer -->

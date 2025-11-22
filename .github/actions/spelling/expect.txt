@@ -22,6 +22,7 @@ INPROC
 Insta
 INu
 IUI
+JLO
 jsonschema
 launchsettings
 minkernel
@@ -67,6 +68,7 @@ WAINACTIVE
 whatif
 windowex
 windowssettings
+wingetcreate
 wingetstudio
 winrtact
 WMACTIVATE
