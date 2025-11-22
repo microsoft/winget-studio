@@ -61,9 +61,6 @@ public partial class UnitViewModel : ObservableObject
     public partial List<UnitViewModel>? Dependencies { get; set; }
 
     [ObservableProperty]
-    public partial DSCPropertySet? Settings { get; set; }
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MetadataList))]
     public partial DSCPropertySet? Metadata { get; set; }
 
@@ -90,7 +87,6 @@ public partial class UnitViewModel : ObservableObject
         _unitFactory = unitFactory;
         SelectedSecurityContext = UnitSecurityContext.Default;
         Dependencies = [];
-        Settings = [];
         Metadata = [];
     }
 
@@ -101,14 +97,23 @@ public partial class UnitViewModel : ObservableObject
 
     public void Validate()
     {
+        // Title must not be null or empty.
         if (string.IsNullOrWhiteSpace(Title))
         {
             throw new DSCUnitValidationException(_localizer["Unit_TitleCannotBeNullOrEmpty"]);
         }
 
-        if (!string.IsNullOrEmpty(SettingsText))
+        try
         {
-            DSCPropertySet.FromYaml(SettingsText);
+            // Validate settings text by attempting to parse it.
+            if (!string.IsNullOrEmpty(SettingsText))
+            {
+                DSCPropertySet.FromYaml(SettingsText);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new DSCUnitValidationException(ex.Message);
         }
     }
 
@@ -122,9 +127,6 @@ public partial class UnitViewModel : ObservableObject
         Debug.Assert(!string.IsNullOrEmpty(Title), "Title should not be null or empty after validation.");
         var dependencies = Dependencies?.Select(d => d.IdOrDefault).ToList();
         var dependencyNames = dependencies?.Count == 0 ? null : dependencies;
-        var properties = Settings?.Count == 0 ? null : Settings?.DeepCopy();
-        var metadata = Metadata?.Count == 0 ? null : Metadata?.DeepCopy();
-        var additionalProperties = metadata == null ? [] : new Dictionary<string, object> { { "metadata", metadata } };
         var config = new ConfigurationV3()
         {
             Resources =
@@ -134,8 +136,7 @@ public partial class UnitViewModel : ObservableObject
                     Name = IdOrDefault,
                     Type = Title,
                     DependsOn = dependencyNames,
-                    Properties = properties,
-                    AdditionalProperties = additionalProperties,
+                    Properties = GetSettingsFromYaml(),
                 }
             ],
         };
@@ -155,11 +156,8 @@ public partial class UnitViewModel : ObservableObject
             config.Resources[0].AddSecurityContext(SelectedSecurityContext.Value);
         }
 
-        // Add description if specified.
-        if (!string.IsNullOrWhiteSpace(Description))
-        {
-            config.Resources[0].AddDescription(Description);
-        }
+        // Add description
+        config.Resources[0].AddDescription(Description);
 
         return config;
     }
@@ -180,14 +178,7 @@ public partial class UnitViewModel : ObservableObject
         Dependencies = source.Dependencies?.ToList();
         SettingsText = source.SettingsText;
         Details = source.Details;
-
-        // Re-parse the settings text to ensure we have an up-to-date object.
-        (Metadata, Settings) = await Task.Run(() =>
-        {
-            var m = source.Metadata?.DeepCopy();
-            var s = string.IsNullOrEmpty(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText);
-            return (m, s);
-        });
+        Metadata = await Task.Run(() => source.Metadata?.DeepCopy());
     }
 
     public async Task CopyFromAsync(IDSCUnit unit)
@@ -206,12 +197,11 @@ public partial class UnitViewModel : ObservableObject
             unit.Id = id;
             return unit;
         })];
-        (Settings, SettingsText, Metadata) = await Task.Run(() =>
+        (SettingsText, Metadata) = await Task.Run(() =>
         {
             var m = unit.Metadata.DeepCopy();
-            var s = unit.Settings.DeepCopy();
-            var st = s.ToYaml();
-            return (s, st, m);
+            var st = unit.Settings.ToYaml();
+            return (st, m);
         });
     }
 
@@ -285,5 +275,10 @@ public partial class UnitViewModel : ObservableObject
                 AreDetailsLoading = false;
             }
         }
+    }
+
+    private DSCPropertySet? GetSettingsFromYaml()
+    {
+        return string.IsNullOrWhiteSpace(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText!);
     }
 }
