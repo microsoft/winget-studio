@@ -16,4 +16,9 @@ public interface IConfigurationManager
     /// Gets or sets the active set apply state.
     /// </summary>
     SetApplyState ActiveSetApplyState { get; set; }
+
+    /// <summary>
+    /// Gets or sets the active validate unit state.
+    /// </summary>
+    ValidateUnitState ActiveValidateUnitState { get; set; }
 }

@@ -17,10 +17,14 @@ internal sealed partial class ConfigurationManager : IConfigurationManager
     /// <inheritdoc/>
     public SetApplyState ActiveSetApplyState { get; set; }
 
+    /// <inheritdoc/>
+    public ValidateUnitState ActiveValidateUnitState { get; set; }
+
     public ConfigurationManager(ILogger<ConfigurationManager> logger)
     {
         _logger = logger;
         ActiveSetPreviewState = new(_logger);
         ActiveSetApplyState = new(_logger);
+        ActiveValidateUnitState = new(_logger);
     }
 }

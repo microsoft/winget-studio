@@ -6,11 +6,11 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
+using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
-using WinGetStudio.Services.DesiredStateConfiguration.Explorer.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
 using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
@@ -24,6 +24,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
     private readonly ILogger<ValidationViewModel> _logger;
+    private readonly IConfigurationManager _manager;
     private readonly UnitViewModelFactory _unitFactory;
 
     [ObservableProperty]
@@ -33,19 +34,14 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     public partial bool CanExecuteDSCOperation { get; set; } = true;
 
     [ObservableProperty]
-    public partial string? SearchResourceText { get; set; }
-
-    [ObservableProperty]
-    public partial string? OutputText { get; set; }
-
-    [ObservableProperty]
-    public partial string? SettingsText { get; set; }
+    public partial ValidateUnitViewModel? ValidateUnit { get; set; }
 
     public ValidationViewModel(
         IDSC dsc,
         IUIFeedbackService ui,
         IStringLocalizer<ValidationViewModel> localizer,
         ILogger<ValidationViewModel> logger,
+        IConfigurationManager manager,
         UnitViewModelFactory unitFactory)
     {
         _dsc = dsc;
@@ -53,20 +49,32 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         _localizer = localizer;
         _logger = logger;
         _unitFactory = unitFactory;
+        _manager = manager;
     }
 
     public void OnNavigatedTo(object parameter)
     {
         if (parameter is ValidateUnitNavigationContext context)
         {
-            SearchResourceText = context.UnitToValidate.Title;
-            SettingsText = context.UnitToValidate.SettingsText;
+            ValidateUnit = new ValidateUnitViewModel()
+            {
+                SearchResourceText = context.UnitToValidate.Title,
+                SettingsText = context.UnitToValidate.SettingsText,
+            };
+        }
+        else if (_manager.ActiveValidateUnitState.CanRestoreState())
+        {
+            _manager.ActiveValidateUnitState.RestoreState(this);
+        }
+        else
+        {
+            ValidateUnit = new ValidateUnitViewModel();
         }
     }
 
     public void OnNavigatedFrom()
     {
-        // No-op
+        _manager.ActiveValidateUnitState.CaptureState(this);
     }
 
     /// <summary>
@@ -80,7 +88,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
             var result = await _dsc.GetUnitAsync(dscUnit);
             if (result.ResultInformation?.IsOk ?? true)
             {
-                OutputText = result.Settings.ToYaml();
+                ValidateUnit?.OutputText = result.Settings.ToYaml();
             }
 
             return result.ResultInformation;
@@ -167,8 +175,8 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private async Task<IDSCUnit> CreateUnitAsync()
     {
         var unit = _unitFactory();
-        unit.Title = SearchResourceText ?? string.Empty;
-        unit.Settings = DSCPropertySet.FromYaml(SettingsText ?? string.Empty);
+        unit.Title = ValidateUnit?.SearchResourceText ?? string.Empty;
+        unit.Settings = DSCPropertySet.FromYaml(ValidateUnit?.SettingsText ?? string.Empty);
         var dscFile = DSCFile.CreateVirtual(unit.ToConfigurationV3().ToYaml());
         var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
         return dscSet.Units[0];
