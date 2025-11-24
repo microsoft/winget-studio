@@ -169,7 +169,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         var unit = _unitFactory();
         unit.Title = SearchResourceText;
         unit.SettingsText = SettingsText;
-        var config = unit.ToConfigurationV3();
+        var config = await unit.ToConfigurationV3Async();
         var dscFile = DSCFile.CreateVirtual(config.ToYaml());
         var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
         return dscSet.Units[0];

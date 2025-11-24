@@ -95,35 +95,42 @@ public partial class UnitViewModel : ObservableObject
         return unit.ModuleName == string.Empty ? unit.Type : $"{unit.ModuleName}/{unit.Type}";
     }
 
-    public void Validate()
+    /// <summary>
+    /// Validates the DSC unit properties.
+    /// </summary>
+    /// <exception cref="DSCUnitValidationException">Thrown when validation fails.</exception>
+    public async Task ValidateAsync()
     {
-        // Title must not be null or empty.
-        if (string.IsNullOrWhiteSpace(Title))
+        await Task.Run(() =>
         {
-            throw new DSCUnitValidationException(_localizer["Unit_TitleCannotBeNullOrEmpty"]);
-        }
-
-        try
-        {
-            // Validate settings text by attempting to parse it.
-            if (!string.IsNullOrEmpty(SettingsText))
+            // Title must not be null or empty.
+            if (string.IsNullOrWhiteSpace(Title))
             {
-                DSCPropertySet.FromYaml(SettingsText);
+                throw new DSCUnitValidationException(_localizer["Unit_TitleCannotBeNullOrEmpty"]);
             }
-        }
-        catch (Exception ex)
-        {
-            throw new DSCUnitValidationException(ex.Message);
-        }
+
+            try
+            {
+                // Validate settings text by attempting to parse it.
+                if (!string.IsNullOrEmpty(SettingsText))
+                {
+                    DSCPropertySet.FromYaml(SettingsText);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new DSCUnitValidationException(ex.Message);
+            }
+        });
     }
 
     /// <summary>
     /// Creates a configuration object representing this DSC unit.
     /// </summary>
     /// <returns>The configuration object.</returns>
-    public ConfigurationV3 ToConfigurationV3()
+    public async Task<ConfigurationV3> ToConfigurationV3Async()
     {
-        Validate();
+        await ValidateAsync();
         Debug.Assert(!string.IsNullOrEmpty(Title), "Title should not be null or empty after validation.");
         var dependencies = Dependencies?.Select(d => d.IdOrDefault).ToList();
         var dependencyNames = dependencies?.Count == 0 ? null : dependencies;
@@ -136,7 +143,7 @@ public partial class UnitViewModel : ObservableObject
                     Name = IdOrDefault,
                     Type = Title,
                     DependsOn = dependencyNames,
-                    Properties = GetSettingsFromYaml(),
+                    Properties = await GetSettingsFromYamlAsync(),
                 }
             ],
         };
@@ -178,7 +185,7 @@ public partial class UnitViewModel : ObservableObject
         Dependencies = source.Dependencies?.ToList();
         SettingsText = source.SettingsText;
         Details = source.Details;
-        Metadata = await Task.Run(() => source.Metadata?.DeepCopy());
+        Metadata = await source.GetMetadataCloneAsync();
     }
 
     public async Task CopyFromAsync(IDSCUnit unit)
@@ -277,8 +284,21 @@ public partial class UnitViewModel : ObservableObject
         }
     }
 
-    private DSCPropertySet? GetSettingsFromYaml()
+    /// <summary>
+    /// Parses the settings yaml and returns a property set.
+    /// </summary>
+    /// <returns>The property set.</returns>
+    private Task<DSCPropertySet?> GetSettingsFromYamlAsync()
     {
-        return string.IsNullOrWhiteSpace(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText!);
+        return Task.Run(() => string.IsNullOrWhiteSpace(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText));
+    }
+
+    /// <summary>
+    /// Gets a deep copy of the metadata.
+    /// </summary>
+    /// <returns>The cloned metadata or null.</returns>
+    private Task<DSCPropertySet?> GetMetadataCloneAsync()
+    {
+        return Task.Run(() => Metadata?.DeepCopy());
     }
 }
