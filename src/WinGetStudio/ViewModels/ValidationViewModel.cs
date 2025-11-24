@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
@@ -95,9 +96,157 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         await RunDscOperationAsync(async (dscUnit) =>
         {
-            var result = await _dsc.SetUnitAsync(dscUnit);
-            return result.ResultInformation;
+            var inputSettings = dscUnit.Settings.DeepCopy();
+            var setResult = await _dsc.SetUnitAsync(dscUnit);
+            var afterResult = await _dsc.GetUnitAsync(dscUnit);
+
+            // Merge input with actual state for a complete "before" view
+            // Note: This works well for simple properties but has limitations with deeply nested objects
+            var beforeSettings = MergeSettings(inputSettings, afterResult.Settings);
+            var beforeState = beforeSettings.ToYaml().TrimEnd();
+            var afterState = afterResult.Settings.ToYaml().TrimEnd();
+
+            var action = setResult.PreviouslyInDesiredState ? "None" : "Partial";
+
+            var changedProperties = GetChangedProperties(beforeSettings, afterResult.Settings);
+
+            // Build similar output as DSC
+            var changedPropsStr = changedProperties.Count == 0
+                ? "[]"
+                : Environment.NewLine + string.Join(Environment.NewLine, changedProperties.Select(p => $"- {p}"));
+
+            var output = $"beforeState:{IndentYaml(beforeState, 2)}{Environment.NewLine}afterState:{IndentYaml(afterState, 2)}{Environment.NewLine}action: {action}{Environment.NewLine}changedProperties: {changedPropsStr}";
+
+            if (setResult.ResultInformation?.IsOk ?? true)
+            {
+                OutputText = output;
+            }
+
+            return setResult.ResultInformation;
         });
+    }
+
+    /// <summary>
+    /// Merges input settings with actual state to create a complete "before" view.
+    /// This overlays input values on top of the actual state.
+    /// Note: Deep merging of nested DSCPropertySet objects is complex and may not always
+    /// produce accurate results when the input contains partial nested objects.
+    /// This works best for resources with simple, flat property structures.
+    /// </summary>
+    private DSCPropertySet MergeSettings(DSCPropertySet input, DSCPropertySet actual)
+    {
+        var merged = new DSCPropertySet();
+
+        // Copy all properties from actual state
+        foreach (var kvp in actual)
+        {
+            merged[kvp.Key] = kvp.Value is DSCPropertySet nested ? nested.DeepCopy() : kvp.Value;
+        }
+
+        // Overlay with input values (this may overwrite entire nested objects)
+        foreach (var kvp in input)
+        {
+            merged[kvp.Key] = kvp.Value is DSCPropertySet nested ? nested.DeepCopy() : kvp.Value;
+        }
+
+        return merged;
+    }
+
+    /// <summary>
+    /// Indents YAML content by the specified number of spaces.
+    /// </summary>
+    private string IndentYaml(string yaml, int spaces)
+    {
+        var indent = new string(' ', spaces);
+        var lines = yaml.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
+        var indented = string.Join(Environment.NewLine, lines.Select(line => string.IsNullOrWhiteSpace(line) ? line : indent + line));
+        return Environment.NewLine + indented;
+    }
+
+    /// <summary>
+    /// Compares two property sets and returns a list of changed property names.
+    /// </summary>
+    private List<string> GetChangedProperties(DSCPropertySet before, DSCPropertySet after)
+    {
+        var changedProperties = new List<string>();
+
+        // Check for modified or added properties
+        foreach (var kvp in after)
+        {
+            if (!before.TryGetValue(kvp.Key, out var beforeValue) || !AreValuesEqual(beforeValue, kvp.Value))
+            {
+                changedProperties.Add(kvp.Key);
+            }
+        }
+
+        // Check for removed properties
+        foreach (var kvp in before)
+        {
+            if (!after.ContainsKey(kvp.Key))
+            {
+                changedProperties.Add(kvp.Key);
+            }
+        }
+
+        return changedProperties;
+    }
+
+    /// <summary>
+    /// Compares two values for equality, handling nested objects.
+    /// </summary>
+    private bool AreValuesEqual(object value1, object value2)
+    {
+        if (value1 == null && value2 == null)
+        {
+            return true;
+        }
+
+        if (value1 == null || value2 == null)
+        {
+            return false;
+        }
+
+        if (value1 is DSCPropertySet dict1 && value2 is DSCPropertySet dict2)
+        {
+            if (dict1.Count != dict2.Count)
+            {
+                return false;
+            }
+
+            return dict1.All(kvp => dict2.TryGetValue(kvp.Key, out var v2) && AreValuesEqual(kvp.Value, v2));
+        }
+
+        // Handle collections (but not strings or dictionaries)
+        if (value1 is not string && value2 is not string &&
+            value1 is not DSCPropertySet && value2 is not DSCPropertySet)
+        {
+            try
+            {
+                if (value1 is System.Collections.IList list1 && value2 is System.Collections.IList list2)
+                {
+                    if (list1.Count != list2.Count)
+                    {
+                        return false;
+                    }
+
+                    for (int i = 0; i < list1.Count; i++)
+                    {
+                        if (!AreValuesEqual(list1[i]!, list2[i]!))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+            catch
+            {
+                // If enumeration fails, fall back to simple equality
+            }
+        }
+
+        return value1.Equals(value2);
     }
 
     /// <summary>
