@@ -167,9 +167,10 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private async Task<IDSCUnit> CreateUnitAsync()
     {
         var unit = _unitFactory();
-        unit.Title = SearchResourceText ?? string.Empty;
-        unit.Settings = DSCPropertySet.FromYaml(SettingsText ?? string.Empty);
-        var dscFile = DSCFile.CreateVirtual(unit.ToConfigurationV3().ToYaml());
+        unit.Title = SearchResourceText;
+        unit.SettingsText = SettingsText;
+        var config = await unit.ToConfigurationV3Async();
+        var dscFile = DSCFile.CreateVirtual(config.ToYaml());
         var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
         return dscSet.Units[0];
     }
