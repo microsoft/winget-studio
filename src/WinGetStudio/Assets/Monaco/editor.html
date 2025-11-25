@@ -59,9 +59,9 @@
                             editor.updateOptions({ readOnly: msg.value || false });
                             break;
                         case 'setCodeLenses':
-                            SetCodeLense(msg.value);
+                            SetCodeLenses(msg.value);
                             break;
-                        case 'setCodeLensesEnabled':
+                        case 'setCodeLensEnabled':
                             editor.updateOptions({ codeLens: msg.value || false });
                             break;
                     }
@@ -70,7 +70,7 @@
 
             // CodeLens helper function for updating lenses
             let currentProviderDisposable = null;
-            function SetCodeLense(serializedLenses) {
+            function SetCodeLenses(serializedLenses) {
                 try {
                     let lenses = JSON.parse(serializedLenses);
                     currentProviderDisposable?.dispose();

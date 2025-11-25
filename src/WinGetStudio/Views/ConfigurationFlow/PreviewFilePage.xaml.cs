@@ -184,7 +184,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         }
         else if (e.PropertyName == nameof(ViewModel.IsCodeDirty))
         {
-            ConfigurationEditor.IsCodeLensesEnabled = !ViewModel.IsCodeDirty;
+            ConfigurationEditor.IsCodeLensEnabled = !ViewModel.IsCodeDirty;
         }
     }
 }
