@@ -61,9 +61,6 @@ public partial class UnitViewModel : ObservableObject
     public partial List<UnitViewModel>? Dependencies { get; set; }
 
     [ObservableProperty]
-    public partial DSCPropertySet? Settings { get; set; }
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MetadataList))]
     public partial DSCPropertySet? Metadata { get; set; }
 
@@ -90,7 +87,6 @@ public partial class UnitViewModel : ObservableObject
         _unitFactory = unitFactory;
         SelectedSecurityContext = UnitSecurityContext.Default;
         Dependencies = [];
-        Settings = [];
         Metadata = [];
     }
 
@@ -99,32 +95,45 @@ public partial class UnitViewModel : ObservableObject
         return unit.ModuleName == string.Empty ? unit.Type : $"{unit.ModuleName}/{unit.Type}";
     }
 
-    public void Validate()
+    /// <summary>
+    /// Validates the DSC unit properties.
+    /// </summary>
+    /// <exception cref="DSCUnitValidationException">Thrown when validation fails.</exception>
+    public async Task ValidateAsync()
     {
-        if (string.IsNullOrWhiteSpace(Title))
+        await Task.Run(() =>
         {
-            throw new DSCUnitValidationException(_localizer["Unit_TitleCannotBeNullOrEmpty"]);
-        }
+            // Title must not be null or empty.
+            if (string.IsNullOrWhiteSpace(Title))
+            {
+                throw new DSCUnitValidationException(_localizer["Unit_TitleCannotBeNullOrEmpty"]);
+            }
 
-        if (!string.IsNullOrEmpty(SettingsText))
-        {
-            DSCPropertySet.FromYaml(SettingsText);
-        }
+            try
+            {
+                // Validate settings text by attempting to parse it.
+                if (!string.IsNullOrEmpty(SettingsText))
+                {
+                    DSCPropertySet.FromYaml(SettingsText);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new DSCUnitValidationException(ex.Message);
+            }
+        });
     }
 
     /// <summary>
     /// Creates a configuration object representing this DSC unit.
     /// </summary>
     /// <returns>The configuration object.</returns>
-    public ConfigurationV3 ToConfigurationV3()
+    public async Task<ConfigurationV3> ToConfigurationV3Async()
     {
-        Validate();
+        await ValidateAsync();
         Debug.Assert(!string.IsNullOrEmpty(Title), "Title should not be null or empty after validation.");
         var dependencies = Dependencies?.Select(d => d.IdOrDefault).ToList();
         var dependencyNames = dependencies?.Count == 0 ? null : dependencies;
-        var properties = Settings?.Count == 0 ? null : Settings?.DeepCopy();
-        var metadata = Metadata?.Count == 0 ? null : Metadata?.DeepCopy();
-        var additionalProperties = metadata == null ? [] : new Dictionary<string, object> { { "metadata", metadata } };
         var config = new ConfigurationV3()
         {
             Resources =
@@ -134,8 +143,7 @@ public partial class UnitViewModel : ObservableObject
                     Name = IdOrDefault,
                     Type = Title,
                     DependsOn = dependencyNames,
-                    Properties = properties,
-                    AdditionalProperties = additionalProperties,
+                    Properties = await GetSettingsFromYamlAsync(),
                 }
             ],
         };
@@ -155,11 +163,8 @@ public partial class UnitViewModel : ObservableObject
             config.Resources[0].AddSecurityContext(SelectedSecurityContext.Value);
         }
 
-        // Add description if specified.
-        if (!string.IsNullOrWhiteSpace(Description))
-        {
-            config.Resources[0].AddDescription(Description);
-        }
+        // Add description
+        config.Resources[0].AddDescription(Description);
 
         return config;
     }
@@ -180,14 +185,7 @@ public partial class UnitViewModel : ObservableObject
         Dependencies = source.Dependencies?.ToList();
         SettingsText = source.SettingsText;
         Details = source.Details;
-
-        // Re-parse the settings text to ensure we have an up-to-date object.
-        (Metadata, Settings) = await Task.Run(() =>
-        {
-            var m = source.Metadata?.DeepCopy();
-            var s = string.IsNullOrEmpty(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText);
-            return (m, s);
-        });
+        Metadata = await source.GetMetadataCloneAsync();
     }
 
     public async Task CopyFromAsync(IDSCUnit unit)
@@ -206,12 +204,11 @@ public partial class UnitViewModel : ObservableObject
             unit.Id = id;
             return unit;
         })];
-        (Settings, SettingsText, Metadata) = await Task.Run(() =>
+        (SettingsText, Metadata) = await Task.Run(() =>
         {
             var m = unit.Metadata.DeepCopy();
-            var s = unit.Settings.DeepCopy();
-            var st = s.ToYaml();
-            return (s, st, m);
+            var st = unit.Settings.ToYaml();
+            return (st, m);
         });
     }
 
@@ -285,5 +282,23 @@ public partial class UnitViewModel : ObservableObject
                 AreDetailsLoading = false;
             }
         }
+    }
+
+    /// <summary>
+    /// Parses the settings yaml and returns a property set.
+    /// </summary>
+    /// <returns>The property set.</returns>
+    private Task<DSCPropertySet?> GetSettingsFromYamlAsync()
+    {
+        return Task.Run(() => string.IsNullOrWhiteSpace(SettingsText) ? null : DSCPropertySet.FromYaml(SettingsText));
+    }
+
+    /// <summary>
+    /// Gets a deep copy of the metadata.
+    /// </summary>
+    /// <returns>The cloned metadata or null.</returns>
+    private Task<DSCPropertySet?> GetMetadataCloneAsync()
+    {
+        return Task.Run(() => Metadata?.DeepCopy());
     }
 }
