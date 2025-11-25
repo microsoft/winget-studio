@@ -105,7 +105,7 @@ public sealed partial class SetViewModel : ObservableObject
 
     public async Task UpdateAsync(UnitViewModel original, UnitViewModel updated)
     {
-        updated.Validate();
+        await updated.ValidateAsync();
         await original.CopyFromAsync(updated);
         await UpdateConfigurationCodeAsync();
     }
@@ -145,13 +145,13 @@ public sealed partial class SetViewModel : ObservableObject
 
     private Task<string> GenerateConfigurationCodeAsync()
     {
-        return Task.Run(() =>
+        return Task.Run(async () =>
         {
             var config = new ConfigurationV3();
             config.AddWinGetMetadata();
             foreach (var unit in Units)
             {
-                var unitConfig = unit.ToConfigurationV3();
+                var unitConfig = await unit.ToConfigurationV3Async();
                 config.Resources.AddRange(unitConfig.Resources);
             }
 

@@ -6,7 +6,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
-using WinGetStudio.Contracts.Services;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
@@ -153,9 +152,10 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
     private async Task<IDSCUnit> CreateUnitAsync()
     {
         var unit = _unitFactory();
-        unit.Title = SearchResourceText ?? string.Empty;
-        unit.Settings = DSCPropertySet.FromYaml(SettingsText ?? string.Empty);
-        var dscFile = DSCFile.CreateVirtual(unit.ToConfigurationV3().ToYaml());
+        unit.Title = SearchResourceText;
+        unit.SettingsText = SettingsText;
+        var config = await unit.ToConfigurationV3Async();
+        var dscFile = DSCFile.CreateVirtual(config.ToYaml());
         var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
         return dscSet.Units[0];
     }
