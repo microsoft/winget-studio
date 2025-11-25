@@ -25,7 +25,7 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
     private void CopyResultsToClipboard()
     {
         var dataPackage = new DataPackage();
-        dataPackage.SetText(ViewModel.OutputText);
+        dataPackage.SetText(ViewModel.ValidateUnit?.OutputText);
         Clipboard.SetContent(dataPackage);
     }
 }
