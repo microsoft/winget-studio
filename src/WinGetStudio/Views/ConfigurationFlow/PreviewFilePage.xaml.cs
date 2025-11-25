@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.ComponentModel;
+using System.Text.Json;
 using CommunityToolkit.WinUI;
 using Microsoft.Extensions.Localization;
 using Microsoft.UI.Xaml;
@@ -8,10 +10,12 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using WinGetStudio.Common.Windows.FileDialog;
 using WinGetStudio.Contracts.Views;
+using WinGetStudio.Helpers;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels;
 using WinGetStudio.ViewModels.ConfigurationFlow;
+using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.Views.ConfigurationFlow;
 
@@ -27,6 +31,7 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         _localizer = App.GetService<IStringLocalizer<PreviewFilePage>>();
         _ui = App.GetService<IUIFeedbackService>();
         ViewModel = App.GetService<PreviewFileViewModel>();
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         InitializeComponent();
     }
 
@@ -133,6 +138,53 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             {
                 listView.SelectedItems.Add(id);
             }
+        }
+    }
+
+    private async void MonacoEditor_CodeLensCommandInvoked(object sender, IReadOnlyList<MonacoEditor.MonacoCommandArgument> args)
+    {
+        if (args == null || args.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var arg in args)
+        {
+            try
+            {
+                var id = arg?.Id;
+                var value = arg?.Value as JsonElement?;
+                if (id == WinGetFileCodeLensHelper.EditResourceCommandId && value != null)
+                {
+                    var index = value.Value.GetInt32();
+                    await ViewModel.OnEditUnitByIndexAsync(index);
+                }
+                else if (arg?.Id == WinGetFileCodeLensHelper.ValidateUnitCommandId && value != null)
+                {
+                    var index = value.Value.GetInt32();
+                    await ViewModel.OnValidateUnitByIndexAsync(index);
+                }
+            }
+            catch
+            {
+                // No-op
+            }
+        }
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.Code))
+        {
+            var code = ViewModel.Code;
+            if (!string.IsNullOrWhiteSpace(code) && WinGetFileCodeLensHelper.TryGenerateCodeLenses(_localizer, code, out var codeLenses))
+            {
+                ConfigurationEditor.CodeLenses = codeLenses;
+            }
+        }
+        else if (e.PropertyName == nameof(ViewModel.IsCodeDirty))
+        {
+            ConfigurationEditor.IsCodeLensEnabled = !ViewModel.IsCodeDirty;
         }
     }
 }

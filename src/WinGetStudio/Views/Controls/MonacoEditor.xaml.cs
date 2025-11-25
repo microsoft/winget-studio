@@ -21,7 +21,10 @@ public sealed partial class MonacoEditor : UserControl
     private const string SetThemeApi = "setTheme";
     private const string SetLanguageApi = "setLanguage";
     private const string SetReadOnlyApi = "setReadOnly";
+    private const string SetCodeLensesApi = "setCodeLenses";
+    private const string SetCodeLensEnabledApi = "setCodeLensEnabled";
     private const string ContentChangedApi = "contentChanged";
+    private const string CodeLensCommandInvokedApi = "codeLensCommandInvoked";
 
     private const string LightTheme = "vs";
     private const string DarkTheme = "vs-dark";
@@ -40,6 +43,8 @@ public sealed partial class MonacoEditor : UserControl
     public static readonly DependencyProperty UseThrottleProperty = DependencyProperty.Register(nameof(UseThrottle), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(true));
     public static readonly DependencyProperty ThrottleIntervalProperty = DependencyProperty.Register(nameof(ThrottleInterval), typeof(int), typeof(MonacoEditor), new PropertyMetadata(InitialThrottleInterval, OnThrottleIntervalPropertyChanged));
     public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register(nameof(IsReadOnly), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(false, OnIsReadOnlyPropertyChanged));
+    public static readonly DependencyProperty CodeLensesProperty = DependencyProperty.Register(nameof(CodeLenses), typeof(List<MonacoCodeLens>), typeof(MonacoEditor), new PropertyMetadata(null, OnCodeLensesPropertyChanged));
+    public static readonly DependencyProperty IsCodeLensEnabledProperty = DependencyProperty.Register(nameof(IsCodeLensEnabled), typeof(bool), typeof(MonacoEditor), new PropertyMetadata(false, OnIsCodeLensEnabledPropertyChanged));
 
     private bool _pending;
     private string? _unboundText;
@@ -49,6 +54,11 @@ public sealed partial class MonacoEditor : UserControl
     /// Raised when the text in the editor changes.
     /// </summary>
     public event EventHandler? TextChanged;
+
+    /// <summary>
+    /// Raised when a code lens command is invoked.
+    /// </summary>
+    public event EventHandler<IReadOnlyList<MonacoCommandArgument>>? CodeLensCommandInvoked;
 
     /// <summary>
     /// Gets the path to the Monaco assets.
@@ -95,6 +105,24 @@ public sealed partial class MonacoEditor : UserControl
     {
         get => (int)GetValue(ThrottleIntervalProperty);
         set => SetValue(ThrottleIntervalProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the code lenses configuration in JSON format.
+    /// </summary>
+    public List<MonacoCodeLens>? CodeLenses
+    {
+        get => (List<MonacoCodeLens>?)GetValue(CodeLensesProperty);
+        set => SetValue(CodeLensesProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether code lenses are enabled.
+    /// </summary>
+    public bool IsCodeLensEnabled
+    {
+        get => (bool)GetValue(IsCodeLensEnabledProperty);
+        set => SetValue(IsCodeLensEnabledProperty, value);
     }
 
     public MonacoEditor()
@@ -164,6 +192,28 @@ public sealed partial class MonacoEditor : UserControl
     }
 
     /// <summary>
+    /// Handle changes to the CodeLenses dependency property.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private static void OnCodeLensesPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (MonacoEditor)sender;
+        control.SetCodeLenses(e.NewValue as List<MonacoCodeLens>);
+    }
+
+    /// <summary>
+    /// Handle changes to the IsCodeLensEnabled dependency property.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The event args.</param>
+    private static void OnIsCodeLensEnabledPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (MonacoEditor)sender;
+        control.SetIsCodeLensEnabled((bool)e.NewValue);
+    }
+
+    /// <summary>
     /// Set the text in the editor internally.
     /// </summary>
     /// <param name="text">The text to set.</param>
@@ -222,6 +272,35 @@ public sealed partial class MonacoEditor : UserControl
         if (Editor.CoreWebView2 != null)
         {
             var msg = new EditorMessage<bool>() { Type = SetReadOnlyApi, Value = isReadOnly };
+            var json = JsonSerializer.Serialize(msg, _options);
+            Editor.CoreWebView2.PostWebMessageAsJson(json);
+        }
+    }
+
+    /// <summary>
+    /// Set the code lenses configuration.
+    /// </summary>
+    /// <param name="codeLenses">The code lenses configuration in JSON format.</param>
+    private void SetCodeLenses(List<MonacoCodeLens>? codeLenses)
+    {
+        if (Editor.CoreWebView2 != null)
+        {
+            var codeLensesJson = codeLenses != null ? JsonSerializer.Serialize(codeLenses, _options) : null;
+            var msg = new EditorMessage<string>() { Type = SetCodeLensesApi, Value = codeLensesJson };
+            var json = JsonSerializer.Serialize(msg, _options);
+            Editor.CoreWebView2.PostWebMessageAsJson(json);
+        }
+    }
+
+    /// <summary>
+    /// Set whether code lens is enabled.
+    /// </summary>
+    /// <param name="isEnabled">True to enable code lens, false otherwise.</param>
+    private void SetIsCodeLensEnabled(bool isEnabled)
+    {
+        if (Editor.CoreWebView2 != null)
+        {
+            var msg = new EditorMessage<bool>() { Type = SetCodeLensEnabledApi, Value = isEnabled };
             var json = JsonSerializer.Serialize(msg, _options);
             Editor.CoreWebView2.PostWebMessageAsJson(json);
         }
@@ -287,6 +366,8 @@ public sealed partial class MonacoEditor : UserControl
         SetReadOnly(IsReadOnly);
         SetIsLoading(false);
         SetEditorText(Text);
+        SetCodeLenses(CodeLenses);
+        SetIsCodeLensEnabled(IsCodeLensEnabled);
         Editor.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
     }
 
@@ -329,10 +410,15 @@ public sealed partial class MonacoEditor : UserControl
     {
         try
         {
-            var message = JsonSerializer.Deserialize<EditorMessage<string>>(args.WebMessageAsJson);
+            var message = JsonSerializer.Deserialize<EditorMessage<JsonElement>>(args.WebMessageAsJson);
             if (message?.Type == ContentChangedApi)
             {
-                OnEditorContentChanged(message.Value);
+                OnEditorContentChanged(message.Value.GetString());
+            }
+            else if (message?.Type == CodeLensCommandInvokedApi)
+            {
+                var payload = message.Value.Deserialize<List<MonacoCommandArgument>>();
+                OnCodeLensCommandInvoked(payload);
             }
         }
         catch
@@ -368,6 +454,18 @@ public sealed partial class MonacoEditor : UserControl
         if (UseThrottle)
         {
             _timer.Start();
+        }
+    }
+
+    /// <summary>
+    /// Handle the code lens command invoked event from the editor.
+    /// </summary>
+    /// <param name="commandArguments">The command arguments.</param>
+    private void OnCodeLensCommandInvoked(List<MonacoCommandArgument>? commandArguments)
+    {
+        if (commandArguments != null)
+        {
+            CodeLensCommandInvoked?.Invoke(this, commandArguments);
         }
     }
 

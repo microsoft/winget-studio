@@ -475,7 +475,11 @@
                                 <ScrollViewer Grid.Row="1"
                                               HorizontalScrollBarVisibility="Auto"
                                               VerticalScrollBarVisibility="Auto">
-                                    <localControls:MonacoEditor Text="{x:Bind ViewModel.Code, Mode=TwoWay}" Syntax="yaml" IsReadOnly="False" />
+                                    <localControls:MonacoEditor Text="{x:Bind ViewModel.Code, Mode=TwoWay}"
+                                                                x:Name="ConfigurationEditor"
+                                                                CodeLensCommandInvoked="MonacoEditor_CodeLensCommandInvoked"
+                                                                Syntax="yaml"
+                                                                IsReadOnly="False" />
                                 </ScrollViewer>
                             </Grid>
                         </Grid>
