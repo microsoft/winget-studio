@@ -37,15 +37,60 @@
                 </Hyperlink>
             </TextBlock>
 
-            <!-- Search input -->
-            <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.ValidateUnit.SearchResourceText, Mode=TwoWay}" />
+            <TabView SelectedIndex="0" CanReorderTabs="False">
+                <TabView.Resources>
+                    <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
+                </TabView.Resources>
+                <TabViewItem Header="Configuration 1">
+                    <TabViewItem.IconSource>
+                        <FontIconSource Glyph="&#xE8E4;"/>
+                    </TabViewItem.IconSource>
+                </TabViewItem>
+                <TabViewItem Header="Configuration 2" >
+                    <TabViewItem.IconSource>
+                        <FontIconSource Glyph="&#xE8E4;"/>
+                    </TabViewItem.IconSource>
+                </TabViewItem>
+                <TabViewItem Header="Configuration 3" >
+                    <TabViewItem.IconSource>
+                        <FontIconSource Glyph="&#xE8E4;"/>
+                    </TabViewItem.IconSource>
+                </TabViewItem>
+                <TabViewItem Header="Configuration 4" >
+                    <TabViewItem.IconSource>
+                        <FontIconSource Glyph="&#xE8E4;"/>
+                    </TabViewItem.IconSource>
+                </TabViewItem>
+            </TabView>
         </StackPanel>
 
-        <Rectangle Height="1"
-                   Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                   HorizontalAlignment="Stretch"
-                   Margin="0,8"
-                   Grid.Row="1"/>
+        <!-- Page command -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.ValidateUnit.SearchResourceText, Mode=TwoWay}" />
+            </Grid>
+
+            <CommandBar Grid.Column="1"
+                        HorizontalAlignment="Left"
+                        VerticalContentAlignment="Center"
+                        HorizontalContentAlignment="Stretch"
+                        DefaultLabelPosition="Right">
+                <AppBarButton Label="Get" Icon="Download" />
+                <AppBarButton Label="Set" Icon="Upload" />
+                <AppBarButton Label="Test" Icon="Accept" />
+                <AppBarButton Label="Back to configuration" Icon="Back" />
+                <AppBarButton Label="Save to original" Icon="Save" />
+            </CommandBar>
+        </Grid>
 
         <!-- Page content -->
         <Grid Grid.Row="2" ColumnSpacing="8">
@@ -60,41 +105,62 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <!-- Settings header -->
-                <TextBlock x:Uid="ValidationPage_SettingsText" FontWeight="Bold"/>
+                <TabView TabWidthMode="SizeToContent" IsAddTabButtonVisible="False" SelectedIndex="0">
+                    <TabView.Resources>
+                        <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
+                        <StaticResource x:Key="TabViewItemHeaderFontSize" ResourceKey="CaptionTextBlockFontSize" />
+                        <StaticResource x:Key="TabViewItemHeaderIconSize" ResourceKey="CaptionTextBlockFontSize" />
+                    </TabView.Resources>
+                    <TabView.TabStripHeader>
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,6,12,0">
+                            <FontIcon Glyph="&#xE713;" FontSize="{ThemeResource CaptionTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
+                            <TextBlock VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">Settings</TextBlock>
+                        </StackPanel>
+                    </TabView.TabStripHeader>
+                    <TabViewItem Header="YAML" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <FontIconSource Glyph="&#xE943;" />
+                        </TabViewItem.IconSource>
+                    </TabViewItem>
+                </TabView>
 
                 <!-- Settings -->
                 <localControls:MonacoEditor Grid.Row="1" Text="{x:Bind ViewModel.ValidateUnit.SettingsText, Mode=TwoWay}" Syntax="yaml" />
-
-                <!-- DSC buttons -->
-                <controls:UniformGrid Grid.Row="2" Rows="1" Columns="3" ColumnSpacing="8">
-                    <controls:UniformGrid.Resources>
-                        <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                        </Style>
-                    </controls:UniformGrid.Resources>
-                    <Button x:Uid="ValidationPage_GetButton" Command="{x:Bind ViewModel.ValidateUnit.GetCommand, Mode=OneWay}" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button x:Uid="ValidationPage_SetButton" Command="{x:Bind ViewModel.ValidateUnit.SetCommand, Mode=OneWay}" HorizontalAlignment="Stretch" Grid.Column="1"/>
-                    <Button x:Uid="ValidationPage_TestButton" Command="{x:Bind ViewModel.ValidateUnit.TestCommand, Mode=OneWay}" HorizontalAlignment="Stretch" Grid.Column="2"/>
-                </controls:UniformGrid>
             </Grid>
 
             <!-- Resizer -->
             <controls:GridSplitter Grid.Column="1" />
 
             <!-- Results output -->
-            <Grid Grid.Column="2" RowSpacing="4">
+            <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Results header -->
-                <TextBlock x:Uid="ValidationPage_ResultsText" FontWeight="Bold"/>
-
+                <!-- Result header -->
+                <TabView TabWidthMode="SizeToContent" IsAddTabButtonVisible="False" SelectedIndex="0">
+                    <TabView.Resources>
+                        <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
+                        <StaticResource x:Key="TabViewItemHeaderFontSize" ResourceKey="CaptionTextBlockFontSize" />
+                        <StaticResource x:Key="TabViewItemHeaderIconSize" ResourceKey="CaptionTextBlockFontSize" />
+                    </TabView.Resources>
+                    <TabView.TabStripHeader>
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,6,12,0">
+                            <FontIcon Glyph="&#xE700;" FontSize="{ThemeResource CaptionTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
+                            <TextBlock Style="{ThemeResource CaptionTextBlockStyle}">Output</TextBlock>
+                        </StackPanel>
+                    </TabView.TabStripHeader>
+                    <TabViewItem Header="YAML" IsClosable="False">
+                        <TabViewItem.IconSource>
+                            <FontIconSource Glyph="&#xE943;" />
+                        </TabViewItem.IconSource>
+                    </TabViewItem>
+                </TabView>
+                
                 <!-- Result output box -->
                 <Grid Grid.Row="1">
                     <localControls:MonacoEditor Text="{x:Bind ViewModel.ValidateUnit.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
