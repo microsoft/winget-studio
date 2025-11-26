@@ -46,6 +46,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
     public partial bool CanExecuteDSCOperation { get; set; } = true;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title))]
     public partial string? SearchResourceText { get; set; }
 
     [ObservableProperty]
@@ -53,6 +54,8 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
 
     [ObservableProperty]
     public partial string? SettingsText { get; set; }
+
+    public string Title => string.IsNullOrWhiteSpace(SearchResourceText) ? "New validation" : SearchResourceText;
 
     /// <summary>
     /// Retrieves the current configuration unit from the system asynchronously.

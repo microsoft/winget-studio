@@ -34,14 +34,14 @@ public sealed partial class ValidateUnitState : ISessionStateAware<ValidationVie
     public void CaptureState(ValidationViewModel source)
     {
         _logger.LogInformation("Capturing validation state");
-        ActiveValidateUnit = source.ValidateUnit;
+        ActiveValidateUnit = source.SelectedUnit;
     }
 
     /// <inheritdoc/>
     public void RestoreState(ValidationViewModel source)
     {
         _logger.LogInformation("Restoring validation state");
-        source.ValidateUnit = ActiveValidateUnit;
+        source.SelectedUnit = ActiveValidateUnit;
     }
 
     /// <inheritdoc/>

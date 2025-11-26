@@ -37,30 +37,24 @@
                 </Hyperlink>
             </TextBlock>
 
-            <TabView SelectedIndex="0" CanReorderTabs="False">
+            <TabView CanReorderTabs="False"
+                     TabItemsSource="{x:Bind ViewModel.ValidateUnitList}"
+                     SelectedItem="{x:Bind ViewModel.SelectedUnit, Mode=TwoWay}">
                 <TabView.Resources>
                     <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
                 </TabView.Resources>
-                <TabViewItem Header="Configuration 1">
-                    <TabViewItem.IconSource>
-                        <FontIconSource Glyph="&#xE8E4;"/>
-                    </TabViewItem.IconSource>
-                </TabViewItem>
-                <TabViewItem Header="Configuration 2" >
-                    <TabViewItem.IconSource>
-                        <FontIconSource Glyph="&#xE8E4;"/>
-                    </TabViewItem.IconSource>
-                </TabViewItem>
-                <TabViewItem Header="Configuration 3" >
-                    <TabViewItem.IconSource>
-                        <FontIconSource Glyph="&#xE8E4;"/>
-                    </TabViewItem.IconSource>
-                </TabViewItem>
-                <TabViewItem Header="Configuration 4" >
-                    <TabViewItem.IconSource>
-                        <FontIconSource Glyph="&#xE8E4;"/>
-                    </TabViewItem.IconSource>
-                </TabViewItem>
+                <TabView.TabItemTemplate>
+                    <DataTemplate x:DataType="vm:ValidateUnitViewModel">
+                        <TabViewItem>
+                            <TabViewItem.Header>
+                                <TextBlock Text="{x:Bind Title, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                            </TabViewItem.Header>
+                            <TabViewItem.IconSource>
+                                <FontIconSource Glyph="&#xE8E4;"/>
+                            </TabViewItem.IconSource>
+                        </TabViewItem>
+                    </DataTemplate>
+                </TabView.TabItemTemplate>
             </TabView>
         </StackPanel>
 
@@ -76,7 +70,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.ValidateUnit.SearchResourceText, Mode=TwoWay}" />
+                <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.SelectedUnit.SearchResourceText, Mode=TwoWay}" />
             </Grid>
 
             <CommandBar Grid.Column="1"
@@ -128,7 +122,7 @@
                 </TabView>
 
                 <!-- Settings -->
-                <localControls:MonacoEditor Grid.Row="1" Text="{x:Bind ViewModel.ValidateUnit.SettingsText, Mode=TwoWay}" Syntax="yaml" />
+                <localControls:MonacoEditor Grid.Row="1" Text="{x:Bind ViewModel.SelectedUnit.SettingsText, Mode=TwoWay}" Syntax="yaml" />
             </Grid>
 
             <!-- Resizer -->
@@ -163,7 +157,7 @@
                 
                 <!-- Result output box -->
                 <Grid Grid.Row="1">
-                    <localControls:MonacoEditor Text="{x:Bind ViewModel.ValidateUnit.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
+                    <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
 
                     <!-- Copy button -->
                     <localControls:CopyButton Content="&#xE8C8;"

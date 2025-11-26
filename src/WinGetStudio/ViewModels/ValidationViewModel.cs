@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Contracts.ViewModels;
@@ -13,8 +14,10 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     private readonly IConfigurationManager _manager;
     private readonly ValidateUnitViewModelFactory _validateUnitFactory;
 
+    public ObservableCollection<ValidateUnitViewModel> ValidateUnitList { get; } = [];
+
     [ObservableProperty]
-    public partial ValidateUnitViewModel? ValidateUnit { get; set; }
+    public partial ValidateUnitViewModel? SelectedUnit { get; set; }
 
     public ValidationViewModel(IConfigurationManager manager, ValidateUnitViewModelFactory validateUnitFactory)
     {
@@ -26,17 +29,18 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
     {
         if (parameter is ValidateUnitNavigationContext context)
         {
-            ValidateUnit = _validateUnitFactory();
-            ValidateUnit.SearchResourceText = context.UnitToValidate.Title;
-            ValidateUnit.SettingsText = context.UnitToValidate.SettingsText;
+            var validateUnit = _validateUnitFactory();
+            validateUnit.SearchResourceText = context.UnitToValidate.Title;
+            validateUnit.SettingsText = context.UnitToValidate.SettingsText;
+            ValidateUnitList.Add(validateUnit);
         }
         else if (_manager.ActiveValidateUnitState.CanRestoreState())
         {
             _manager.ActiveValidateUnitState.RestoreState(this);
         }
-        else
+        else if (ValidateUnitList.Count == 0)
         {
-            ValidateUnit = _validateUnitFactory();
+            ValidateUnitList.Add(_validateUnitFactory());
         }
     }
 
