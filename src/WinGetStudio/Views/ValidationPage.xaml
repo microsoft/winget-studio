@@ -38,7 +38,9 @@
             </TextBlock>
 
             <TabView CanReorderTabs="False"
+                     AddTabButtonCommand="{x:Bind ViewModel.AddUnitValidationCommand}"
                      TabItemsSource="{x:Bind ViewModel.ValidateUnitList}"
+                     TabCloseRequested="UnitValidation_TabCloseRequested"
                      SelectedItem="{x:Bind ViewModel.SelectedUnit, Mode=TwoWay}">
                 <TabView.Resources>
                     <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
@@ -78,9 +80,10 @@
                         VerticalContentAlignment="Center"
                         HorizontalContentAlignment="Stretch"
                         DefaultLabelPosition="Right">
-                <AppBarButton Label="Get" Icon="Download" />
-                <AppBarButton Label="Set" Icon="Upload" />
-                <AppBarButton Label="Test" Icon="Accept" />
+                <AppBarButton Label="Get" Icon="Download" Command="{x:Bind ViewModel.SelectedUnit.GetCommand, Mode=OneWay}" />
+                <AppBarButton Label="Set" Icon="Upload" Command="{x:Bind ViewModel.SelectedUnit.SetCommand, Mode=OneWay}" />
+                <AppBarButton Label="Test" Icon="Accept" Command="{x:Bind ViewModel.SelectedUnit.TestCommand, Mode=OneWay}" />
+                <AppBarButton Label="Cancel" Icon="Cancel" Command="{x:Bind ViewModel.SelectedUnit.CancelCommand, Mode=OneWay}" />
                 <AppBarButton Label="Back to configuration" Icon="Back" />
                 <AppBarButton Label="Save to original" Icon="Save" />
             </CommandBar>
@@ -94,7 +97,7 @@
                 <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Properties -->
+            <!-- Settings panel -->
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

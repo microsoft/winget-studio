@@ -17,13 +17,15 @@ namespace WinGetStudio.ViewModels;
 
 public delegate ValidateUnitViewModel ValidateUnitViewModelFactory();
 
-public sealed partial class ValidateUnitViewModel : ObservableObject
+public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposable
 {
     private readonly IDSC _dsc;
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
     private readonly ILogger<ValidationViewModel> _logger;
     private readonly UnitViewModelFactory _unitFactory;
+    private CancellationTokenSource? _cts;
+    private bool _disposedValue;
 
     public ValidateUnitViewModel(
         IDSC dsc,
@@ -40,10 +42,13 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
     }
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
     [NotifyCanExecuteChangedFor(nameof(GetCommand))]
     [NotifyCanExecuteChangedFor(nameof(SetCommand))]
     [NotifyCanExecuteChangedFor(nameof(TestCommand))]
-    public partial bool CanExecuteDSCOperation { get; set; } = true;
+    private partial bool CanExecute { get; set; } = true;
+
+    private bool CanCancel => !CanExecute;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Title))]
@@ -60,12 +65,12 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
     /// <summary>
     /// Retrieves the current configuration unit from the system asynchronously.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
+    [RelayCommand(CanExecute = nameof(CanExecute))]
     private async Task OnGetAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        await RunDscOperationAsync(async (dscUnit, cancellationToken) =>
         {
-            var result = await _dsc.GetUnitAsync(dscUnit);
+            var result = await _dsc.GetUnitAsync(dscUnit, cancellationToken);
             if (result.ResultInformation?.IsOk ?? true)
             {
                 OutputText = result.Settings.ToYaml();
@@ -78,12 +83,12 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
     /// <summary>
     /// Sets the current machine state to the specified configuration unit asynchronously.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
+    [RelayCommand(CanExecute = nameof(CanExecute))]
     private async Task OnSetAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        await RunDscOperationAsync(async (dscUnit, cancellationToken) =>
         {
-            var result = await _dsc.SetUnitAsync(dscUnit);
+            var result = await _dsc.SetUnitAsync(dscUnit, cancellationToken);
             return result.ResultInformation;
         });
     }
@@ -91,12 +96,12 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
     /// <summary>
     /// Tests whether the current machine state matches the specified configuration unit asynchronously.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanExecuteDSCOperation))]
+    [RelayCommand(CanExecute = nameof(CanExecute))]
     private async Task OnTestAsync()
     {
-        await RunDscOperationAsync(async (dscUnit) =>
+        await RunDscOperationAsync(async (dscUnit, cancellationToken) =>
         {
-            var result = await _dsc.TestUnitAsync(dscUnit);
+            var result = await _dsc.TestUnitAsync(dscUnit, cancellationToken);
             if (result.TestResult == ConfigurationTestResult.Positive)
             {
                 _ui.ShowTimedNotification(_localizer["Notification_MachineInDesiredState"], NotificationMessageSeverity.Success);
@@ -110,19 +115,29 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
         });
     }
 
+    [RelayCommand(CanExecute = nameof(CanCancel))]
+    private void OnCancel()
+    {
+        if (_cts != null && !_cts.IsCancellationRequested)
+        {
+            _cts.Cancel();
+        }
+    }
+
     /// <summary>
     /// Runs a DSC operation while managing UI feedback.
     /// </summary>
     /// <param name="action">The DSC operation to execute.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    private async Task RunDscOperationAsync(Func<IDSCUnit, Task<IDSCUnitResultInformation?>> action)
+    private async Task RunDscOperationAsync(Func<IDSCUnit, CancellationToken, Task<IDSCUnitResultInformation?>> action)
     {
         try
         {
-            CanExecuteDSCOperation = false;
+            CanExecute = false;
+            _cts = new CancellationTokenSource();
             _ui.ShowTaskProgress();
             var unit = await CreateUnitAsync();
-            var result = await action(unit);
+            var result = await action(unit, _cts.Token);
             if (result != null && !result.IsOk)
             {
                 var title = $"0x{result.ResultCode.HResult:X}";
@@ -136,6 +151,11 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
             _logger.LogError(ex, "An error occurred while opening the DSC configuration set.");
             _ui.ShowTimedNotification(ex.GetErrorMessage(_localizer), NotificationMessageSeverity.Error);
         }
+        catch (OperationCanceledException ex)
+        {
+            _logger.LogInformation(ex, "Operation canceled.");
+            _ui.ShowTimedNotification("Operation canceled", NotificationMessageSeverity.Warning);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while executing a DSC operation.");
@@ -144,7 +164,9 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
         finally
         {
             _ui.HideTaskProgress();
-            CanExecuteDSCOperation = true;
+            _cts?.Dispose();
+            _cts = null;
+            CanExecute = true;
         }
     }
 
@@ -161,5 +183,26 @@ public sealed partial class ValidateUnitViewModel : ObservableObject
         var dscFile = DSCFile.CreateVirtual(config.ToYaml());
         var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
         return dscSet.Units[0];
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _cts?.Dispose();
+                _cts = null;
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
