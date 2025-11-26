@@ -50,11 +50,17 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
 
     private bool CanCancel => !CanExecute;
 
+    public bool ShowNoResultState => !ShowOutputText;
+
+    public bool ShowOutputText => !string.IsNullOrWhiteSpace(OutputText);
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Title))]
     public partial string? SearchResourceText { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowOutputText))]
+    [NotifyPropertyChangedFor(nameof(ShowNoResultState))]
     public partial string? OutputText { get; set; }
 
     [ObservableProperty]

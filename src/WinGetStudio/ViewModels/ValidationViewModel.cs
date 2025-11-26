@@ -34,23 +34,20 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
 
     public void OnNavigatedTo(object parameter)
     {
-        if (parameter is ValidateUnitNavigationContext context)
-        {
-            var validateUnit = _validateUnitFactory();
-            validateUnit.SearchResourceText = context.UnitToValidate.Title;
-            validateUnit.SettingsText = context.UnitToValidate.SettingsText;
-            ValidateUnitList.Add(validateUnit);
-            SelectedUnit = validateUnit;
-        }
-        else if (_manager.ActiveValidateUnitState.CanRestoreState())
+        // Always restore state if possible
+        if (_manager.ActiveValidateUnitState.CanRestoreState())
         {
             _manager.ActiveValidateUnitState.RestoreState(this);
         }
+
+        // Add new validation unit if necessary
+        if (parameter is ValidateUnitNavigationContext context)
+        {
+            AddUnitValidation(context.UnitToValidate.Title, context.UnitToValidate.SettingsText);
+        }
         else if (ValidateUnitList.Count == 0)
         {
-            var validateUnit = _validateUnitFactory();
-            ValidateUnitList.Add(validateUnit);
-            SelectedUnit = validateUnit;
+            AddUnitValidation();
         }
     }
 
@@ -77,9 +74,11 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         }
     }
 
-    private void AddUnitValidation()
+    private void AddUnitValidation(string? searchResourceText = null, string? settingsText = null)
     {
         var validateUnit = _validateUnitFactory();
+        validateUnit.SearchResourceText = searchResourceText;
+        validateUnit.SettingsText = settingsText;
         ValidateUnitList.Add(validateUnit);
         SelectedUnit = validateUnit;
     }

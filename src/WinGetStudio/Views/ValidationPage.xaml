@@ -151,25 +151,44 @@
                             <TextBlock Style="{ThemeResource CaptionTextBlockStyle}">Output</TextBlock>
                         </StackPanel>
                     </TabView.TabStripHeader>
-                    <TabViewItem Header="YAML" IsClosable="False">
+                    <TabViewItem x:Name="NoResultTabViewItem"
+                                 Header="No result"
+                                 IsClosable="False"
+                                 IsSelected="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}"
+                                 Visibility="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}">
+                        <TabViewItem.IconSource>
+                            <FontIconSource Glyph="&#xF140;" />
+                        </TabViewItem.IconSource>
+                    </TabViewItem>
+                    <TabViewItem x:Name="YamlResultTabViewItem"
+                                 Header="YAML"
+                                 IsClosable="False"
+                                 IsSelected="{x:Bind ViewModel.SelectedUnit.ShowOutputText, Mode=OneWay}"
+                                 Visibility="{x:Bind ViewModel.SelectedUnit.ShowOutputText, Mode=OneWay}">
                         <TabViewItem.IconSource>
                             <FontIconSource Glyph="&#xE943;" />
                         </TabViewItem.IconSource>
                     </TabViewItem>
                 </TabView>
-                
+
                 <!-- Result output box -->
                 <Grid Grid.Row="1">
-                    <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
+                    <localControls:EmptyStateControl Glyph="&#xE8BC;"
+                                                     Visibility="{x:Bind NoResultTabViewItem.IsSelected, Mode=OneWay}"
+                                                     Text="Results will appear here once you run an operation" />
 
-                    <!-- Copy button -->
-                    <localControls:CopyButton Content="&#xE8C8;"
-                                              Click="{x:Bind CopyResultsToClipboard}"
-                                              VerticalAlignment="Top"
-                                              HorizontalAlignment="Right"
-                                              Background="Transparent"
-                                              BorderThickness="0"
-                                              Margin="10"/>
+                    <Grid Visibility="{x:Bind YamlResultTabViewItem.IsSelected, Mode=OneWay}">
+                        <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
+
+                        <!-- Copy button -->
+                        <localControls:CopyButton Content="&#xE8C8;"
+                                                  Click="{x:Bind CopyResultsToClipboard}"
+                                                  VerticalAlignment="Top"
+                                                  HorizontalAlignment="Right"
+                                                  Background="Transparent"
+                                                  BorderThickness="0"
+                                                  Margin="10"/>
+                    </Grid>
                 </Grid>
             </Grid>
         </Grid>
