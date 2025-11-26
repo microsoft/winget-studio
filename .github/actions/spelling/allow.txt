@@ -46,6 +46,7 @@ COMMANDBARFLYOUT
 COMMONDATA
 comparand
 conemu
+configfile
 contoso
 COSTDEFERRED
 cotaskmem
@@ -168,6 +169,7 @@ JDKs
 keepachangelog
 Kristensen
 langutil
+LASTEXITCODE
 lastwritetime
 LCIDTo
 linting

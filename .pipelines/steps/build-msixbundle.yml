@@ -27,7 +27,7 @@ steps:
         -Version $(MsixVersion) `
         -BuildStep "msixbundle" `
         -OutputDir "${{ parameters.OutputDir }}" `
-        -IsAzurePipelineBuild
+        -Verbose
 
   - task: PowerShell@2
     displayName: "Create the corresponding hash files"
