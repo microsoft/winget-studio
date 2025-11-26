@@ -68,7 +68,10 @@ if ([string]::IsNullOrEmpty($OutputDir))
 
 if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
 {
-    $appxManifestPath = (Join-Path $env:Build_RootDirectory 'src' 'WinGetStudio' 'Package.appxmanifest')
+    $appxManifestPath = [System.IO.Path]::Combine($env:Build_RootDirectory, 
+        'src', 
+        'WinGetStudio', 
+        'Package.appxmanifest')
     $xmlElements = Get-XmlElement -Path $appxManifestPath
 
     $appxmanifest = [System.Xml.Linq.XDocument]::Load($appxManifestPath)
@@ -94,7 +97,8 @@ if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
         $appDisplayNameResource = "ms-resource:AppDisplayNameStable"
     }
 
-    try {
+    try
+    {
         # Update the appxmanifest
         $appxManifest.Root.Element($xmlElements.Identity).Attribute("Version").Value = $env:msix_version
         $appxManifest.Root.Element($xmlElements.Identity).Attribute("Name").Value = $packageName
@@ -102,7 +106,11 @@ if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
         $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute("DisplayName").Value = $appDisplayNameResource
         $appxManifest.Save($appxmanifestPath)
 
-        $solutionPath = Join-Path $env:Build_RootDirectory "src" "WinGetStudio.sln"
+        $solutionPath = [System.IO.Path]::Combine(
+            $env:Build_RootDirectory,
+            'src',
+            'WinGetStudio.sln'
+        )
         Restore-Nuget -SolutionPath $solutionPath -UseInternal:([bool]$env:TF_BUILD)
 
         foreach ($platform in $env:Build_Platform)
@@ -121,7 +129,8 @@ if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
         }
     } 
 
-    finally {
+    finally
+    {
         # Revert the appxmanifest to dev values
         $appxManifest.Root.Element($xmlElements.Identity).Attribute("Version").Value = $devVersion
         $appxManifest.Root.Element($xmlElements.Identity).Attribute("Name").Value = $devPackageName
