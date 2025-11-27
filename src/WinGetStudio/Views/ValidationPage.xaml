@@ -20,7 +20,7 @@
     </Page.Resources>
 
     <!-- Page layout -->
-    <Grid x:Name="ContentArea" ColumnSpacing="32" RowSpacing="12">
+    <Grid x:Name="ContentArea" RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -28,7 +28,7 @@
         </Grid.RowDefinitions>
 
         <!-- Page header -->
-        <StackPanel Spacing="8">
+        <StackPanel>
             <!-- Description -->
             <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left">
                 <Run x:Uid="ValidationPage_Description"/>
@@ -37,8 +37,8 @@
                 </Hyperlink>
             </TextBlock>
 
-            <TabView CanReorderTabs="False"
-                     AddTabButtonCommand="{x:Bind ViewModel.AddUnitValidationCommand}"
+            <!-- Tabs -->
+            <TabView AddTabButtonCommand="{x:Bind ViewModel.AddUnitValidationCommand}"
                      TabItemsSource="{x:Bind ViewModel.ValidateUnitList}"
                      TabCloseRequested="UnitValidation_TabCloseRequested"
                      SelectedItem="{x:Bind ViewModel.SelectedUnit, Mode=TwoWay}">
@@ -72,7 +72,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.SelectedUnit.SearchResourceText, Mode=TwoWay}" />
+                <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.SelectedUnit.Unit.Title, Mode=TwoWay}" />
             </Grid>
 
             <CommandBar Grid.Column="1"
@@ -84,113 +84,115 @@
                 <AppBarButton Label="Set" Icon="Upload" Command="{x:Bind ViewModel.SelectedUnit.SetCommand, Mode=OneWay}" />
                 <AppBarButton Label="Test" Icon="Accept" Command="{x:Bind ViewModel.SelectedUnit.TestCommand, Mode=OneWay}" />
                 <AppBarButton Label="Cancel" Icon="Cancel" Command="{x:Bind ViewModel.SelectedUnit.CancelCommand, Mode=OneWay}" />
-                <AppBarButton Label="Back to configuration" Icon="Back" />
-                <AppBarButton Label="Save to original" Icon="Save" />
+                <AppBarButton Label="Back to configuration" Icon="Back" Command="{x:Bind ViewModel.SelectedUnit.BackCommand, Mode=OneWay}" />
+                <AppBarButton Label="Save to original" Icon="Save" Command="{x:Bind ViewModel.SelectedUnit.SaveToOriginalCommand, Mode=OneWay}" />
             </CommandBar>
         </Grid>
 
         <!-- Page content -->
-        <Grid Grid.Row="2" ColumnSpacing="8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Settings panel -->
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+                <!-- Settings panel -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <!-- Settings header -->
-                <TabView TabWidthMode="SizeToContent" IsAddTabButtonVisible="False" SelectedIndex="0">
-                    <TabView.Resources>
-                        <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
-                        <StaticResource x:Key="TabViewItemHeaderFontSize" ResourceKey="CaptionTextBlockFontSize" />
-                        <StaticResource x:Key="TabViewItemHeaderIconSize" ResourceKey="CaptionTextBlockFontSize" />
-                    </TabView.Resources>
-                    <TabView.TabStripHeader>
-                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,6,12,0">
-                            <FontIcon Glyph="&#xE713;" FontSize="{ThemeResource CaptionTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
-                            <TextBlock VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">Settings</TextBlock>
-                        </StackPanel>
-                    </TabView.TabStripHeader>
-                    <TabViewItem Header="YAML" IsClosable="False">
-                        <TabViewItem.IconSource>
-                            <FontIconSource Glyph="&#xE943;" />
-                        </TabViewItem.IconSource>
-                    </TabViewItem>
-                </TabView>
+                    <!-- Settings header -->
+                    <TabView TabWidthMode="SizeToContent" IsAddTabButtonVisible="False" SelectedIndex="0">
+                        <TabView.Resources>
+                            <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
+                            <StaticResource x:Key="TabViewItemHeaderFontSize" ResourceKey="CaptionTextBlockFontSize" />
+                            <StaticResource x:Key="TabViewItemHeaderIconSize" ResourceKey="CaptionTextBlockFontSize" />
+                        </TabView.Resources>
+                        <TabView.TabStripHeader>
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,6,12,0">
+                                <FontIcon Glyph="&#xE713;" FontSize="{ThemeResource CaptionTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
+                                <TextBlock VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">Settings</TextBlock>
+                            </StackPanel>
+                        </TabView.TabStripHeader>
+                        <TabViewItem Header="YAML" IsClosable="False">
+                            <TabViewItem.IconSource>
+                                <FontIconSource Glyph="&#xE943;" />
+                            </TabViewItem.IconSource>
+                        </TabViewItem>
+                    </TabView>
 
-                <!-- Settings -->
-                <localControls:MonacoEditor Grid.Row="1" Text="{x:Bind ViewModel.SelectedUnit.SettingsText, Mode=TwoWay}" Syntax="yaml" />
-            </Grid>
+                    <!-- Settings -->
+                    <localControls:MonacoEditor Grid.Row="1" Text="{x:Bind ViewModel.SelectedUnit.Unit.SettingsText, Mode=TwoWay}" Syntax="yaml" />
+                </Grid>
 
-            <!-- Resizer -->
-            <controls:GridSplitter Grid.Column="1" />
+                <!-- Resizer -->
+                <controls:GridSplitter Grid.Column="1" />
 
-            <!-- Results output -->
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <!-- Results output -->
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <!-- Result header -->
-                <TabView TabWidthMode="SizeToContent" IsAddTabButtonVisible="False" SelectedIndex="0">
-                    <TabView.Resources>
-                        <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
-                        <StaticResource x:Key="TabViewItemHeaderFontSize" ResourceKey="CaptionTextBlockFontSize" />
-                        <StaticResource x:Key="TabViewItemHeaderIconSize" ResourceKey="CaptionTextBlockFontSize" />
-                    </TabView.Resources>
-                    <TabView.TabStripHeader>
-                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,6,12,0">
-                            <FontIcon Glyph="&#xE700;" FontSize="{ThemeResource CaptionTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
-                            <TextBlock Style="{ThemeResource CaptionTextBlockStyle}">Output</TextBlock>
-                        </StackPanel>
-                    </TabView.TabStripHeader>
-                    <TabViewItem x:Name="NoResultTabViewItem"
-                                 Header="No result"
-                                 IsClosable="False"
-                                 IsSelected="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}"
-                                 Visibility="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}">
-                        <TabViewItem.IconSource>
-                            <FontIconSource Glyph="&#xF140;" />
-                        </TabViewItem.IconSource>
-                    </TabViewItem>
-                    <TabViewItem x:Name="YamlResultTabViewItem"
-                                 Header="YAML"
-                                 IsClosable="False"
-                                 IsSelected="{x:Bind ViewModel.SelectedUnit.ShowOutputText, Mode=OneWay}"
-                                 Visibility="{x:Bind ViewModel.SelectedUnit.ShowOutputText, Mode=OneWay}">
-                        <TabViewItem.IconSource>
-                            <FontIconSource Glyph="&#xE943;" />
-                        </TabViewItem.IconSource>
-                    </TabViewItem>
-                </TabView>
+                    <!-- Result header -->
+                    <TabView TabWidthMode="SizeToContent" IsAddTabButtonVisible="False" SelectedIndex="0">
+                        <TabView.Resources>
+                            <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
+                            <StaticResource x:Key="TabViewItemHeaderFontSize" ResourceKey="CaptionTextBlockFontSize" />
+                            <StaticResource x:Key="TabViewItemHeaderIconSize" ResourceKey="CaptionTextBlockFontSize" />
+                        </TabView.Resources>
+                        <TabView.TabStripHeader>
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,6,12,0">
+                                <FontIcon Glyph="&#xE700;" FontSize="{ThemeResource CaptionTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}">Output</TextBlock>
+                            </StackPanel>
+                        </TabView.TabStripHeader>
+                        <TabViewItem x:Name="NoResultTabViewItem"
+                                     Header="No result"
+                                     IsClosable="False"
+                                     IsSelected="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}"
+                                     Visibility="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}">
+                            <TabViewItem.IconSource>
+                                <FontIconSource Glyph="&#xF140;" />
+                            </TabViewItem.IconSource>
+                        </TabViewItem>
+                        <TabViewItem x:Name="YamlResultTabViewItem"
+                                     Header="YAML"
+                                     IsClosable="False"
+                                     IsSelected="{x:Bind ViewModel.SelectedUnit.ShowOutputText, Mode=OneWay}"
+                                     Visibility="{x:Bind ViewModel.SelectedUnit.ShowOutputText, Mode=OneWay}">
+                            <TabViewItem.IconSource>
+                                <FontIconSource Glyph="&#xE943;" />
+                            </TabViewItem.IconSource>
+                        </TabViewItem>
+                    </TabView>
 
-                <!-- Result output box -->
-                <Grid Grid.Row="1">
-                    <localControls:EmptyStateControl Glyph="&#xE8BC;"
-                                                     Visibility="{x:Bind NoResultTabViewItem.IsSelected, Mode=OneWay}"
-                                                     Text="Results will appear here once you run an operation" />
+                    <!-- Result output box -->
+                    <Grid Grid.Row="1">
+                        <localControls:EmptyStateControl Glyph="&#xE8BC;"
+                                                         Visibility="{x:Bind NoResultTabViewItem.IsSelected, Mode=OneWay}"
+                                                         Text="Results will appear here once you run an operation" />
 
-                    <Grid Visibility="{x:Bind YamlResultTabViewItem.IsSelected, Mode=OneWay}">
-                        <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
+                        <Grid Visibility="{x:Bind YamlResultTabViewItem.IsSelected, Mode=OneWay}">
+                            <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
 
-                        <!-- Copy button -->
-                        <localControls:CopyButton Content="&#xE8C8;"
-                                                  Click="{x:Bind CopyResultsToClipboard}"
-                                                  VerticalAlignment="Top"
-                                                  HorizontalAlignment="Right"
-                                                  Background="Transparent"
-                                                  BorderThickness="0"
-                                                  Margin="10"/>
+                            <!-- Copy button -->
+                            <localControls:CopyButton Content="&#xE8C8;"
+                                                      Click="{x:Bind CopyResultsToClipboard}"
+                                                      VerticalAlignment="Top"
+                                                      HorizontalAlignment="Right"
+                                                      Background="Transparent"
+                                                      BorderThickness="0"
+                                                      Margin="10"/>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>
-        </Grid>
+        </Border>
     </Grid>
 </Page>

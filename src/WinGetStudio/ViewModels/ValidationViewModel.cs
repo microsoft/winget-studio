@@ -43,7 +43,16 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         // Add new validation unit if necessary
         if (parameter is ValidateUnitNavigationContext context)
         {
-            AddUnitValidation(context.UnitToValidate.Title, context.UnitToValidate.SettingsText);
+            var existingValidateUnit = ValidateUnitList.FirstOrDefault(unit => unit.OriginalUnit == context.OriginalUnit);
+            if (existingValidateUnit != null)
+            {
+                existingValidateUnit.Unit = context.UnitToValidate;
+                SelectedUnit = existingValidateUnit;
+            }
+            else
+            {
+                AddUnitValidation(context);
+            }
         }
         else if (ValidateUnitList.Count == 0)
         {
@@ -74,11 +83,15 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         }
     }
 
-    private void AddUnitValidation(string? searchResourceText = null, string? settingsText = null)
+    private void AddUnitValidation(ValidateUnitNavigationContext? context = null)
     {
         var validateUnit = _validateUnitFactory();
-        validateUnit.SearchResourceText = searchResourceText;
-        validateUnit.SettingsText = settingsText;
+        if (context != null)
+        {
+            validateUnit.OriginalUnit = context.OriginalUnit;
+            validateUnit.Unit = context.UnitToValidate;
+        }
+
         ValidateUnitList.Add(validateUnit);
         SelectedUnit = validateUnit;
     }
