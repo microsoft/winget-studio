@@ -557,7 +557,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
     private async Task ValidateUnitAsync(UnitViewModel unit)
     {
         var unitClone = await unit.CloneAsync();
-        var param = new ValidateUnitNavigationContext(unitClone);
+        var param = new ValidateUnitNavigationContext(unitClone, unit);
         _appNavigation.NavigateTo<ValidationViewModel>(param);
     }
 

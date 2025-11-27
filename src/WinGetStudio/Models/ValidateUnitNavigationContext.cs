@@ -15,8 +15,11 @@ public sealed partial class ValidateUnitNavigationContext
     /// </summary>
     public UnitViewModel UnitToValidate { get; }
 
-    public ValidateUnitNavigationContext(UnitViewModel unitToValidate)
+    public UnitViewModel OriginalUnit { get; }
+
+    public ValidateUnitNavigationContext(UnitViewModel unitToValidate, UnitViewModel originalUnit)
     {
         UnitToValidate = unitToValidate;
+        OriginalUnit = originalUnit;
     }
 }

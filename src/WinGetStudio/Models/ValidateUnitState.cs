@@ -15,9 +15,14 @@ public sealed partial class ValidateUnitState : ISessionStateAware<ValidationVie
     private readonly ILogger _logger;
 
     /// <summary>
-    /// Gets or sets the active validate unit.
+    /// Gets or sets the validate unit list.
     /// </summary>
-    public ValidateUnitViewModel? ActiveValidateUnit { get; set; }
+    private List<ValidateUnitViewModel> ValidateUnitList { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the selected unit.
+    /// </summary>
+    private ValidateUnitViewModel? SelectedUnit { get; set; }
 
     public ValidateUnitState(ILogger logger)
     {
@@ -27,27 +32,34 @@ public sealed partial class ValidateUnitState : ISessionStateAware<ValidationVie
     /// <inheritdoc/>
     public bool CanRestoreState()
     {
-        return ActiveValidateUnit != null;
+        return ValidateUnitList != null && SelectedUnit != null;
     }
 
     /// <inheritdoc/>
     public void CaptureState(ValidationViewModel source)
     {
         _logger.LogInformation("Capturing validation state");
-        ActiveValidateUnit = source.ValidateUnit;
+        ValidateUnitList = [..source.ValidateUnitList];
+        SelectedUnit = source.SelectedUnit;
     }
 
     /// <inheritdoc/>
     public void RestoreState(ValidationViewModel source)
     {
         _logger.LogInformation("Restoring validation state");
-        source.ValidateUnit = ActiveValidateUnit;
+        foreach (var item in ValidateUnitList)
+        {
+            source.ValidateUnitList.Add(item);
+        }
+
+        source.SelectedUnit = SelectedUnit;
     }
 
     /// <inheritdoc/>
     public void ClearState()
     {
         _logger.LogInformation("Clearing validation state");
-        ActiveValidateUnit = null;
+        SelectedUnit = null;
+        ValidateUnitList.Clear();
     }
 }
