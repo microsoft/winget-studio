@@ -436,6 +436,9 @@ function Invoke-MSBuildPackage
     .PARAMETER MSBuildPath
         Path to the MSBuild.exe executable.
 
+    .PARAMETER Clean
+        If specified, runs 'dotnet clean' before building the package.
+
     .EXAMPLE
         Invoke-MSBuildPackage -SolutionPath "src/WinGetStudio.sln" -Platform "x64" -Configuration "Debug" -OutputDirectory "C:\output\AppxPackages\Debug" -BuildRing "Dev" -MSBuildPath $msbuildPath
 
@@ -498,7 +501,12 @@ function Invoke-MSBuildPackage
                 if (Test-Path $_ -PathType Leaf) { $true }
                 else { throw "MSBuild.exe not found at '$_'." }
             })]
-        [string]$MSBuildPath
+        [string]$MSBuildPath,
+
+        [Parameter(
+            HelpMessage = "Run dotnet clean before building"
+        )]
+        [switch]$Clean
     )
 
     begin
@@ -511,6 +519,16 @@ function Invoke-MSBuildPackage
 
     process
     {
+        if ($Clean)
+        {
+            Write-Verbose "Cleaning solution before build..."
+            & dotnet clean $SolutionPath
+            if ($LASTEXITCODE -ne 0)
+            {
+                Write-Warning "dotnet clean failed with exit code $LASTEXITCODE"
+            }
+        }
+
         if (-not (Test-Path $OutputDirectory))
         {
             Write-Verbose "Creating output directory: $OutputDirectory"

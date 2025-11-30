@@ -41,6 +41,9 @@ using module ./build.helpers.psm1
 
     .PARAMETER OutputDir
         The output directory for the built packages and bundles. If not specified, defaults to the script's directory.
+
+    .PARAMETER Clean
+        Run dotnet clean before building the solution.
 #>
 [CmdletBinding()]
 param (
@@ -52,7 +55,8 @@ param (
     [ValidateSet("all", "msix", "msixbundle")]
     [string]$BuildStep = "all",
     [switch]$IsRelease = $false,
-    [string]$OutputDir
+    [string]$OutputDir,
+    [switch]$Clean
 )
 
 $env:Build_RootDirectory = (Split-Path $MyInvocation.MyCommand.Path)
@@ -124,7 +128,8 @@ if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
                     -Platform $platform.ToLower() `
                     -Configuration $configuration.ToLower() `
                     -OutputDir $appxPackageDir `
-                    -BuildRing $buildRing
+                    -BuildRing $buildRing `
+                    -Clean:$Clean
             }
         }
     } 
