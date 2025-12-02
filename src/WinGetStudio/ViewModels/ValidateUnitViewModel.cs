@@ -61,16 +61,6 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
 
     private bool CanCancel => !CanExecute;
 
-    private SetViewModel? ActiveSet => _manager.ActiveSetPreviewState.ActiveSet;
-
-    private ApplySetViewModel? ActiveApplySet => _manager.ActiveSetApplyState.ActiveApplySet;
-
-    [MemberNotNullWhen(true, nameof(ActiveSet))]
-    private bool IsPreviewInProgress => ActiveSet != null;
-
-    [MemberNotNullWhen(true, nameof(ActiveApplySet))]
-    private bool IsApplyInProgress => ActiveApplySet != null;
-
     public bool ShowNoResultState => !ShowOutputText;
 
     public bool ShowOutputText => !string.IsNullOrWhiteSpace(OutputText);
@@ -99,17 +89,17 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     {
         Debug.Assert(CanSaveToOriginal, "CanSaveToOriginalInternal called when OriginalUnit is null");
 
-        // If there the set is being applied, we cannot update the original unit.
-        if (IsApplyInProgress)
+        // We can save to the original unit only if it is part of the active preview set.
+        if (!_manager.ActiveSetPreviewState.ActiveSet?.ConfigurationSet?.Units.Contains(OriginalUnit) ?? true)
         {
-            _ui.ShowTimedNotification("Cannot save to original unit while the configuration set is being applied.", NotificationMessageSeverity.Warning);
+            _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Warning);
             return false;
         }
 
-        // We can save to the original unit only if it is part of the active preview set.
-        if (!IsPreviewInProgress || !ActiveSet.Units.Contains(OriginalUnit))
+        // If there the set is being applied, we cannot update the original unit.
+        if (_manager.ActiveSetApplyState.ActiveApplySet != null)
         {
-            _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Warning);
+            _ui.ShowTimedNotification("Cannot save to original unit while the configuration set is being applied.", NotificationMessageSeverity.Warning);
             return false;
         }
 
@@ -187,16 +177,21 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     [RelayCommand(CanExecute = nameof(CanSaveToOriginal))]
     private async Task OnSaveToOriginalAsync()
     {
+        if (_manager.ActiveSetPreviewState.ActiveSet?.ConfigurationSet == null)
+        {
+            return;
+        }
+
         try
         {
             _ui.ShowTaskProgress();
-            if (IsPreviewInProgress && CanSaveToOriginalInternal())
+            if (CanSaveToOriginalInternal())
             {
                 _logger.LogInformation($"Saving changes to original unit");
-                await ActiveSet.UpdateAsync(OriginalUnit, Unit);
+                await _manager.ActiveSetPreviewState.ActiveSet.UpdateUnitAsync(OriginalUnit, Unit);
 
                 // If the item was selected in the preview, update it as well.
-                var selectedUnit = _manager.ActiveSetPreviewState.SelectedUnit;
+                var selectedUnit = _manager.ActiveSetPreviewState.ActiveSet.SelectedUnit;
                 if (selectedUnit?.Item1 == OriginalUnit)
                 {
                     await selectedUnit.Item2.CopyFromAsync(selectedUnit.Item1);

@@ -15,35 +15,12 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
 {
     private readonly ILogger _logger;
 
-    /// <summary>
-    /// Gets or sets the active set.
-    /// </summary>
-    public SetViewModel? ActiveSet { get; set; }
+    public PreviewSetViewModel? ActiveSet { get; set; }
 
     public SetPreviewState(ILogger logger)
     {
         _logger = logger;
     }
-
-    /// <summary>
-    /// Gets or sets the selected unit tuple.
-    /// </summary>
-    public Tuple<UnitViewModel, UnitViewModel>? SelectedUnit { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the preview is in edit mode.
-    /// </summary>
-    public bool IsEditMode { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the preview is in code view mode.
-    /// </summary>
-    public bool IsCodeView { get; set; }
-
-    /// <summary>
-    /// Gets or sets the code representation of the set.
-    /// </summary>
-    public string? Code { get; set; }
 
     /// <inheritdoc/>
     public bool CanRestoreState()
@@ -55,22 +32,17 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
     public void CaptureState(PreviewFileViewModel source)
     {
         _logger.LogInformation("Capturing preview set state");
-        ActiveSet = source.ConfigurationSet;
-        IsCodeView = source.IsCodeView;
-        IsEditMode = source.IsEditMode;
-        SelectedUnit = source.SelectedUnit;
-        Code = source.Code;
+        ActiveSet = source.Set;
     }
 
     /// <inheritdoc/>
     public void RestoreState(PreviewFileViewModel source)
     {
         _logger.LogInformation("Restoring preview set state");
-        source.ConfigurationSet = ActiveSet;
-        source.IsCodeView = IsCodeView;
-        source.IsEditMode = IsEditMode;
-        source.SelectedUnit = SelectedUnit;
-        source.Code = Code;
+        if (ActiveSet != null)
+        {
+            source.Set = ActiveSet;
+        }
     }
 
     /// <inheritdoc/>
@@ -78,9 +50,5 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
     {
         _logger.LogInformation("Clearing preview set state");
         ActiveSet = null;
-        SelectedUnit = null;
-        IsEditMode = false;
-        IsCodeView = false;
-        Code = null;
     }
 }

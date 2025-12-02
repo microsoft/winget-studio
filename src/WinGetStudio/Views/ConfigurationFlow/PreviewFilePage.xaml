@@ -82,29 +82,29 @@
 
             <!-- Action buttons -->
             <CommandBar HorizontalAlignment="Left" DefaultLabelPosition="Right">
-                <AppBarButton Icon="Page" x:Uid="PreviewPage_NewConfiguration" Command="{x:Bind ViewModel.NewConfigurationCommand}" />
-                <AppBarButton Icon="OpenFile" x:Uid="PreviewPage_OpenConfiguration" Click="OpenConfigurationFile" IsEnabled="{x:Bind ViewModel.CanOpenConfigurationFile}" />
-                <AppBarToggleButton IsChecked="{x:Bind ViewModel.IsCodeView, Mode=TwoWay}" x:Uid="PreviewPage_Code" Command="{x:Bind ViewModel.ToggleCodeViewCommand}">
+                <AppBarButton Icon="Page" x:Uid="PreviewPage_NewConfiguration" Command="{x:Bind ViewModel.Set.NewConfigurationCommand, Mode=OneWay}" />
+                <AppBarButton Icon="OpenFile" x:Uid="PreviewPage_OpenConfiguration" Click="OpenConfigurationFile" IsEnabled="{x:Bind ViewModel.Set.CanOpenConfigurationFile, Mode=OneWay}" />
+                <AppBarToggleButton IsChecked="{x:Bind ViewModel.Set.IsCodeView, Mode=TwoWay}" x:Uid="PreviewPage_Code" Command="{x:Bind ViewModel.Set.ToggleCodeViewCommand, Mode=OneWay}">
                     <AppBarToggleButton.Icon>
                         <FontIcon Glyph="&#xE943;" />
                     </AppBarToggleButton.Icon>
                 </AppBarToggleButton>
-                <AppBarToggleButton Icon="Edit" x:Uid="PreviewPage_Edit" IsChecked="{x:Bind ViewModel.IsEditMode, Mode=TwoWay}" Command="{x:Bind ViewModel.ToggleEditModeCommand}" />
-                <AppBarButton Icon="Add" x:Uid="PreviewPage_AddResource" Command="{x:Bind ViewModel.AddResourceCommand}" />
+                <AppBarToggleButton Icon="Edit" x:Uid="PreviewPage_Edit" IsChecked="{x:Bind ViewModel.Set.IsEditMode, Mode=TwoWay}" Command="{x:Bind ViewModel.Set.ToggleEditModeCommand, Mode=OneWay}" />
+                <AppBarButton Icon="Add" x:Uid="PreviewPage_AddResource" Command="{x:Bind ViewModel.Set.AddResourceCommand, Mode=OneWay}" />
                 <AppBarSeparator />
-                <AppBarButton Icon="Accept" x:Uid="PreviewPage_Validate" Command="{x:Bind ViewModel.ValidateConfigurationCommand}" />
-                <AppBarButton x:Uid="PreviewPage_Test" Command="{x:Bind ViewModel.TestConfigurationCommand}">
+                <AppBarButton Icon="Accept" x:Uid="PreviewPage_Validate" Command="{x:Bind ViewModel.Set.ValidateConfigurationCommand, Mode=OneWay}" />
+                <AppBarButton x:Uid="PreviewPage_Test" Command="{x:Bind ViewModel.Set.TestConfigurationCommand, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon Glyph="&#xEC77;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton x:Uid="PreviewPage_Apply" IsEnabled="{x:Bind ViewModel.CanApplyConfigurationOrViewResult, Mode=OneWay}">
+                <AppBarButton x:Uid="PreviewPage_Apply" IsEnabled="{x:Bind ViewModel.Set.CanApplyConfigurationOrViewResult, Mode=OneWay}">
                     <AppBarButton.Icon>
                         <FontIcon x:Name="PulsingIcon" Glyph="&#xE768;" />
                     </AppBarButton.Icon>
 
                     <i:Interaction.Behaviors>
-                        <i:DataTriggerBehavior Binding="{x:Bind ViewModel.IsApplyInProgress}" Value="True">
+                        <i:DataTriggerBehavior Binding="{x:Bind ViewModel.Set.IsApplyInProgress, Mode=OneWay}" Value="True">
                             <i:ControlStoryboardAction>
                                 <i:ControlStoryboardAction.Storyboard>
                                     <Storyboard RepeatBehavior="Forever" AutoReverse="True">
@@ -121,9 +121,9 @@
 
                     <AppBarButton.Flyout>
                         <Flyout>
-                            <controls:SwitchPresenter Value="{x:Bind ViewModel.IsApplyInProgress}" TargetType="x:Boolean">
+                            <controls:SwitchPresenter Value="{x:Bind ViewModel.Set.IsApplyInProgress, Mode=OneWay}" TargetType="x:Boolean">
                                 <controls:Case Value="True">
-                                    <Grid Visibility="{x:Bind ViewModel.IsApplyInProgress}" Width="400" ColumnSpacing="8">
+                                    <Grid Visibility="{x:Bind ViewModel.Set.IsApplyInProgress, Mode=OneWay}" Width="400" ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
@@ -133,10 +133,10 @@
                                                       Height="{ThemeResource BodyTextBlockFontSize}"
                                                       Width="{ThemeResource BodyTextBlockFontSize}"
                                                       Background="{ThemeResource ProgressBarBackgroundThemeBrush}"
-                                                      Value="{x:Bind ViewModel.ActiveApplySet.TotalCompletedUnits, Mode=OneWay}"
-                                                      Maximum="{x:Bind ViewModel.ActiveApplySet.TotalUnits}" />
-                                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{x:Bind ViewModel.ActiveApplySet.Summary, Mode=OneWay}"/>
-                                        <Button Grid.Column="2" x:Uid="PreviewFile_ViewResultButton" Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.ViewResultCommand}" />
+                                                      Value="{x:Bind ViewModel.Set.ActiveApplySet.TotalCompletedUnits, Mode=OneWay}"
+                                                      Maximum="{x:Bind ViewModel.Set.ActiveApplySet.TotalUnits, Mode=OneWay}" />
+                                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{x:Bind ViewModel.Set.ActiveApplySet.Summary, Mode=OneWay}"/>
+                                        <Button Grid.Column="2" x:Uid="PreviewFile_ViewResultButton" Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.Set.ViewResultCommand, Mode=OneWay}" />
                                     </Grid>
                                 </controls:Case>
                                 <controls:Case Value="False">
@@ -144,7 +144,7 @@
                                         <InfoBar.ActionButton>
                                             <Button Style="{StaticResource AccentButtonStyle}"
                                                     x:Uid="PreviewFile_ApplyButton"
-                                                    Command="{x:Bind ViewModel.ApplyConfigurationCommand}" />
+                                                    Command="{x:Bind ViewModel.Set.ApplyConfigurationCommand, Mode=OneWay}" />
                                         </InfoBar.ActionButton>
                                     </InfoBar>
                                 </controls:Case>
@@ -153,8 +153,8 @@
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarSeparator />
-                <AppBarButton Icon="Save" x:Uid="PreviewPage_Save" Command="{x:Bind ViewModel.SaveConfigurationCommand}" />
-                <AppBarButton Icon="Save" x:Uid="PreviewPage_SaveAs" Click="SaveConfigurationFileAs" IsEnabled="{x:Bind ViewModel.CanSaveConfigurationAs, Mode=OneWay}" />
+                <AppBarButton Icon="Save" x:Uid="PreviewPage_Save" Command="{x:Bind ViewModel.Set.SaveConfigurationCommand, Mode=OneWay}" />
+                <AppBarButton Icon="Save" x:Uid="PreviewPage_SaveAs" Click="SaveConfigurationFileAs" IsEnabled="{x:Bind ViewModel.Set.CanSaveConfigurationAs, Mode=OneWay}" />
             </CommandBar>
         </StackPanel>
 
@@ -165,11 +165,11 @@
                 <!-- Empty state message -->
                 <localControls:EmptyStateControl Grid.Row="1"
                                                  Glyph="&#xE8FF;"
-                                                 Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay}"
+                                                 Visibility="{x:Bind ViewModel.Set.IsEmptyState, Mode=OneWay}"
                                                  x:Uid="PreviewPage_SelectConfigurationFileMessage"/>
 
                 <!-- Content body -->
-                <Grid Visibility="{x:Bind ViewModel.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
+                <Grid Visibility="{x:Bind ViewModel.Set.IsEmptyState, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="*" />
@@ -178,16 +178,16 @@
                     <!-- File path -->
                     <StackPanel Orientation="Horizontal">
                         <FontIcon Glyph="&#xEA37;" FontSize="{ThemeResource BodyTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
-                        <controls:SwitchPresenter Value="{x:Bind ViewModel.ConfigurationSet.CanSave, Mode=OneWay}" TargetType="x:Boolean">
+                        <controls:SwitchPresenter Value="{x:Bind ViewModel.Set.ConfigurationSet.CanSave, Mode=OneWay}" TargetType="x:Boolean">
                             <controls:Case Value="True">
-                                <TextBlock Text="{x:Bind ViewModel.ConfigurationSet.FilePath, Mode=OneWay}" IsTextSelectionEnabled="True" />
+                                <TextBlock Text="{x:Bind ViewModel.Set.ConfigurationSet.FilePath, Mode=OneWay}" IsTextSelectionEnabled="True" />
                             </controls:Case>
                             <controls:Case Value="False">
                                 <TextBlock x:Uid="PreviewFile_UntitledFileName" FontStyle="Italic" IsTextSelectionEnabled="True" />
                             </controls:Case>
                         </controls:SwitchPresenter>
                         <TextBlock Text=" *"
-                                   Visibility="{x:Bind ViewModel.ConfigurationSet.HasUnsavedChanges, Mode=OneWay}"
+                                   Visibility="{x:Bind ViewModel.Set.ConfigurationSet.HasUnsavedChanges, Mode=OneWay}"
                                    VerticalAlignment="Top"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
@@ -197,20 +197,20 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" MinWidth="{StaticResource SectionMinWidth}" />
                             <ColumnDefinition Width="auto" />
-                            <ColumnDefinition MinWidth="{x:Bind ViewModel.IsEditMode, Mode=OneWay, Converter={StaticResource BoolToMinWidthConverter}}"
-                                              Width="{x:Bind ViewModel.IsEditMode, Mode=OneWay, Converter={StaticResource BoolToGridLengthConverter}}" />
+                            <ColumnDefinition MinWidth="{x:Bind ViewModel.Set.IsEditMode, Mode=OneWay, Converter={StaticResource BoolToMinWidthConverter}}"
+                                              Width="{x:Bind ViewModel.Set.IsEditMode, Mode=OneWay, Converter={StaticResource BoolToGridLengthConverter}}" />
                         </Grid.ColumnDefinitions>
 
                         <!-- Left panel -->
                         <Grid>
                             <!-- Summary view -->
-                            <Grid Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
+                            <Grid Visibility="{x:Bind ViewModel.Set.IsCodeView, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}">
                                 <!-- Loading state -->
                                 <localControls:ShimmerRepeater ItemCount="6"
-                                                               Visibility="{x:Bind ViewModel.IsConfigurationLoading, Mode=OneWay}" />
+                                                               Visibility="{x:Bind ViewModel.Set.IsConfigurationLoading, Mode=OneWay}" />
 
                                 <!-- Loaded content -->
-                                <ListView ItemsSource="{x:Bind ViewModel.ConfigurationSet.Units, Mode=OneWay}"
+                                <ListView ItemsSource="{x:Bind ViewModel.Set.ConfigurationSet.Units, Mode=OneWay}"
                                           SelectionMode="None"
                                           x:Name="ConfigurationUnitSections"
                                           Style="{StaticResource KeyValueList}">
@@ -275,7 +275,7 @@
                                                                       Margin="{ThemeResource SmallRightMargin}" />
 
                                                             <!-- Validate unit -->
-                                                            <Button Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.ValidateUnitCommand}"
+                                                            <Button Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.Set.ValidateUnitCommand}"
                                                                     CommandParameter="{Binding}">
                                                                 <StackPanel>
                                                                     <FontIcon Glyph="&#xE762;" />
@@ -285,9 +285,9 @@
 
                                                             <!-- Edit unit -->
                                                             <Button Style="{ThemeResource AccentButtonStyle}"
-                                                                    Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.EditUnitCommand}"
+                                                                    Command="{Binding ElementName=PageRoot, Path=Tag.ViewModel.Set.EditUnitCommand}"
                                                                     CommandParameter="{Binding}"
-                                                                    Visibility="{Binding ElementName=PageRoot, Path=Tag.ViewModel.IsEditMode}">
+                                                                    Visibility="{Binding ElementName=PageRoot, Path=Tag.ViewModel.Set.IsEditMode}">
                                                                 <StackPanel>
                                                                     <FontIcon Glyph="&#xE932;" />
                                                                     <TextBlock>Edit</TextBlock>
@@ -448,26 +448,26 @@
 
                                 <!-- Empty state when no units -->
                                 <localControls:EmptyStateControl Glyph="&#xE74C;"
-                                                                 Visibility="{x:Bind ViewModel.HasNoUnits, Mode=OneWay}"
+                                                                 Visibility="{x:Bind ViewModel.Set.HasNoUnits, Mode=OneWay}"
                                                                  x:Uid="PreviewFile_NoResourcesMessage"/>
                             </Grid>
 
                             <!-- Code view -->
-                             <Grid Grid.Row="4" Visibility="{x:Bind ViewModel.IsCodeView, Mode=OneWay}">
+                             <Grid Grid.Row="4" Visibility="{x:Bind ViewModel.Set.IsCodeView, Mode=OneWay}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
                                 <!-- Action buttons -->
-                                <InfoBar Visibility="{x:Bind ViewModel.IsCodeDirty, Mode=OneWay}"
+                                <InfoBar Visibility="{x:Bind ViewModel.Set.IsCodeDirty, Mode=OneWay}"
                                          IsOpen="True"
                                          IsClosable="False"
                                          Margin="{ThemeResource XSmallBottomMargin}"
                                          Severity="Warning"
                                          x:Uid="PreviewPage_ApplyChangesWarning">
                                     <InfoBar.ActionButton>
-                                        <Button Command="{x:Bind ViewModel.UpdateFromCodeCommand}" HorizontalAlignment="Right" x:Uid="PreviewPage_ApplyChangesButton"/>
+                                        <Button Command="{x:Bind ViewModel.Set.UpdateFromCodeCommand}" HorizontalAlignment="Right" x:Uid="PreviewPage_ApplyChangesButton"/>
                                     </InfoBar.ActionButton>
                                 </InfoBar>
 
@@ -475,7 +475,7 @@
                                 <ScrollViewer Grid.Row="1"
                                               HorizontalScrollBarVisibility="Auto"
                                               VerticalScrollBarVisibility="Auto">
-                                    <localControls:MonacoEditor Text="{x:Bind ViewModel.Code, Mode=TwoWay}"
+                                    <localControls:MonacoEditor Text="{x:Bind ViewModel.Set.Code, Mode=TwoWay}"
                                                                 x:Name="ConfigurationEditor"
                                                                 CodeLensCommandInvoked="MonacoEditor_CodeLensCommandInvoked"
                                                                 Syntax="yaml"
@@ -485,20 +485,20 @@
                         </Grid>
 
                         <!-- Resizer -->
-                        <controls:GridSplitter Grid.Column="1" Visibility="{x:Bind ViewModel.IsEditMode, Mode=OneWay}" />
+                        <controls:GridSplitter Grid.Column="1" Visibility="{x:Bind ViewModel.Set.IsEditMode, Mode=OneWay}" />
 
                         <!-- Right panel -->
                         <Grid Grid.Column="2">
                             <!-- Empty state message -->
                             <localControls:EmptyStateControl Grid.Row="1"
-                                                             Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}"
+                                                             Visibility="{x:Bind ViewModel.Set.IsUnitSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityNegationConverter}}"
                                                              Glyph="&#xE932;"
                                                              x:Uid="PreviewPage_SelectConfigurationUnitMessage"/>
 
                             <!-- Edit panel -->
                             <Grid Padding="{ThemeResource SectionPadding}"
                                       RowSpacing="12"
-                                      Visibility="{x:Bind ViewModel.IsUnitSelected, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.Set.IsUnitSelected, Mode=OneWay}"
                                       Background="{StaticResource CardBackgroundFillColorSecondaryBrush}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
@@ -521,10 +521,10 @@
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="auto" />
                                             </Grid.ColumnDefinitions>
-                                            <localControls:ResourceAutoSuggestBox x:Uid="PreviewFile_ResourceAutoSuggestBox" Text="{x:Bind ViewModel.SelectedUnit.Item2.Title, Mode=TwoWay}" />
+                                            <localControls:ResourceAutoSuggestBox x:Uid="PreviewFile_ResourceAutoSuggestBox" Text="{x:Bind ViewModel.Set.SelectedUnit.Item2.Title, Mode=TwoWay}" />
                                             <ComboBox x:Uid="PreviewFile_SecurityContextComboBox"
                                                       ItemsSource="{x:Bind ViewModel.SecurityContexts}"
-                                                      SelectedItem="{x:Bind ViewModel.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
+                                                      SelectedItem="{x:Bind ViewModel.Set.SelectedUnit.Item2.SelectedSecurityContext, Mode=TwoWay}"
                                                       Grid.Column="1"
                                                       DisplayMemberPath="Name"/>
                                         </Grid>
@@ -536,13 +536,13 @@
                                                 <ColumnDefinition Width="auto" />
                                             </Grid.ColumnDefinitions>
                                             <TextBox x:Uid="PreviewFile_ResourceNameTextBox"
-                                                     PlaceholderText="{x:Bind ViewModel.SelectedUnit.Item1.DefaultId, Mode=OneWay}"
-                                                     Text="{x:Bind ViewModel.SelectedUnit.Item2.Id, Mode=TwoWay}"
+                                                     PlaceholderText="{x:Bind ViewModel.Set.SelectedUnit.Item1.DefaultId, Mode=OneWay}"
+                                                     Text="{x:Bind ViewModel.Set.SelectedUnit.Item2.Id, Mode=TwoWay}"
                                                      Height="Auto" />
                                             <Button x:Uid="PreviewFile_DependenciesButton" Grid.Column="1" VerticalAlignment="Bottom">
                                                 <Button.Flyout>
                                                     <Flyout>
-                                                        <ListView ItemsSource="{x:Bind ViewModel.ConfigurationSet.Units, Mode=OneWay}"
+                                                        <ListView ItemsSource="{x:Bind ViewModel.Set.ConfigurationSet.Units, Mode=OneWay}"
                                                                   SelectionMode="Multiple"
                                                                   IsMultiSelectCheckBoxEnabled="True"
                                                                   DisplayMemberPath="IdOrDefault"
@@ -556,11 +556,11 @@
                                         <!-- Description -->
                                         <TextBox x:Uid="PreviewPage_DescriptionHeader"
                                                  Grid.Row="2"
-                                                 Text="{x:Bind ViewModel.SelectedUnit.Item2.Description, Mode=TwoWay}"
+                                                 Text="{x:Bind ViewModel.Set.SelectedUnit.Item2.Description, Mode=TwoWay}"
                                                  Height="Auto" />
 
                                         <!-- Settings -->
-                                        <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.Item2.SettingsText, Mode=TwoWay}" Syntax="yaml" Grid.Row="3" />
+                                        <localControls:MonacoEditor Text="{x:Bind ViewModel.Set.SelectedUnit.Item2.SettingsText, Mode=TwoWay}" Syntax="yaml" Grid.Row="3" />
                                     </Grid>
                                 </ScrollViewer>
 
@@ -570,16 +570,16 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
-                                    <Button Command="{x:Bind ViewModel.DeleteSelectedUnitCommand}">
+                                    <Button Command="{x:Bind ViewModel.Set.DeleteSelectedUnitCommand, Mode=OneWay}">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <FontIcon Glyph="&#xE74D;" FontSize="{ThemeResource BodyTextBlockFontSize}" />
                                             <TextBlock>Delete</TextBlock>
                                         </StackPanel>
                                     </Button>
                                     <StackPanel Orientation="Horizontal" Spacing="8" Grid.Column="1">
-                                        <Button Command="{x:Bind ViewModel.CancelSelectedUnitCommand}">Cancel</Button>
+                                        <Button Command="{x:Bind ViewModel.Set.CancelSelectedUnitCommand, Mode=OneWay}">Cancel</Button>
                                         <Button Style="{ThemeResource AccentButtonStyle}"
-                                                    Command="{x:Bind ViewModel.UpdateSelectedUnitCommand}">Update</Button>
+                                                    Command="{x:Bind ViewModel.Set.UpdateSelectedUnitCommand, Mode=OneWay}">Update</Button>
                                     </StackPanel>
                                 </Grid>
                             </Grid>
