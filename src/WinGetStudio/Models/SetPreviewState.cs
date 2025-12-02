@@ -15,7 +15,7 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
 {
     private readonly ILogger _logger;
 
-    public PreviewSetViewModel? ActiveSet { get; set; }
+    public PreviewSetViewModel? ActivePreviewSet { get; set; }
 
     public SetPreviewState(ILogger logger)
     {
@@ -25,30 +25,27 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
     /// <inheritdoc/>
     public bool CanRestoreState()
     {
-        return ActiveSet != null;
+        return ActivePreviewSet != null;
     }
 
     /// <inheritdoc/>
     public void CaptureState(PreviewFileViewModel source)
     {
         _logger.LogInformation("Capturing preview set state");
-        ActiveSet = source.Set;
+        ActivePreviewSet = source.PreviewSet;
     }
 
     /// <inheritdoc/>
     public void RestoreState(PreviewFileViewModel source)
     {
         _logger.LogInformation("Restoring preview set state");
-        if (ActiveSet != null)
-        {
-            source.Set = ActiveSet;
-        }
+        source.PreviewSet = ActivePreviewSet;
     }
 
     /// <inheritdoc/>
     public void ClearState()
     {
         _logger.LogInformation("Clearing preview set state");
-        ActiveSet = null;
+        ActivePreviewSet = null;
     }
 }

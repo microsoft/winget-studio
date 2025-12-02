@@ -65,8 +65,8 @@ public partial class ApplyFileViewModel : ObservableRecipient
     /// </summary>
     private async Task ApplyPreviewSetAsync()
     {
-        var activeSet = _manager.ActiveSetPreviewState.ActiveSet;
-        Debug.Assert(activeSet?.ConfigurationSet != null, "ActiveSet should not be null when applying configuration set.");
+        var activeSet = _manager.ActiveSetPreviewState.ActivePreviewSet;
+        Debug.Assert(activeSet?.ConfigurationSet != null, "A configuration set should be actively in preview to apply it.");
         try
         {
             _ui.ShowTaskProgress();

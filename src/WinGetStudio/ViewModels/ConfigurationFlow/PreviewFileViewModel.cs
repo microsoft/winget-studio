@@ -15,27 +15,35 @@ public partial class PreviewFileViewModel : ObservableRecipient
 
     public IReadOnlyList<UnitSecurityContext> SecurityContexts => UnitSecurityContext.All;
 
-    public PreviewSetViewModel Set { get; set; }
+    [ObservableProperty]
+    public partial PreviewSetViewModel? PreviewSet { get; set; }
 
     public PreviewFileViewModel(IConfigurationManager manager, PreviewSetViewModelFactory setFactory)
     {
         _manager = manager;
         _setFactory = setFactory;
-        Set = _setFactory();
+
+        // Restore previous state if available
+        RestoreState();
+        PreviewSet ??= _setFactory();
     }
 
     [RelayCommand]
     private void OnLoaded()
     {
-        if (_manager.ActiveSetPreviewState.CanRestoreState())
-        {
-            _manager.ActiveSetPreviewState.RestoreState(this);
-        }
     }
 
     [RelayCommand]
     private void OnUnloaded()
     {
         _manager.ActiveSetPreviewState.CaptureState(this);
+    }
+
+    private void RestoreState()
+    {
+        if (_manager.ActiveSetPreviewState.CanRestoreState())
+        {
+            _manager.ActiveSetPreviewState.RestoreState(this);
+        }
     }
 }

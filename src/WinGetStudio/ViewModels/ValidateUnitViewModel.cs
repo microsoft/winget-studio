@@ -90,7 +90,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         Debug.Assert(CanSaveToOriginal, "CanSaveToOriginalInternal called when OriginalUnit is null");
 
         // We can save to the original unit only if it is part of the active preview set.
-        if (!_manager.ActiveSetPreviewState.ActiveSet?.ConfigurationSet?.Units.Contains(OriginalUnit) ?? true)
+        if (!_manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet?.Units.Contains(OriginalUnit) ?? true)
         {
             _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Warning);
             return false;
@@ -177,7 +177,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     [RelayCommand(CanExecute = nameof(CanSaveToOriginal))]
     private async Task OnSaveToOriginalAsync()
     {
-        if (_manager.ActiveSetPreviewState.ActiveSet?.ConfigurationSet == null)
+        if (_manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet == null)
         {
             return;
         }
@@ -188,10 +188,10 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
             if (CanSaveToOriginalInternal())
             {
                 _logger.LogInformation($"Saving changes to original unit");
-                await _manager.ActiveSetPreviewState.ActiveSet.UpdateUnitAsync(OriginalUnit, Unit);
+                await _manager.ActiveSetPreviewState.ActivePreviewSet.UpdateUnitAsync(OriginalUnit, Unit);
 
                 // If the item was selected in the preview, update it as well.
-                var selectedUnit = _manager.ActiveSetPreviewState.ActiveSet.SelectedUnit;
+                var selectedUnit = _manager.ActiveSetPreviewState.ActivePreviewSet.SelectedUnit;
                 if (selectedUnit?.Item1 == OriginalUnit)
                 {
                     await selectedUnit.Item2.CopyFromAsync(selectedUnit.Item1);
