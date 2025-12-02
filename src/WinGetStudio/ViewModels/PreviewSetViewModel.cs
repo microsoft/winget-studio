@@ -12,6 +12,7 @@ using Microsoft.Management.Configuration;
 using Windows.Storage;
 using WinGetStudio.Contracts.Services;
 using WinGetStudio.Exceptions;
+using WinGetStudio.Helpers;
 using WinGetStudio.Models;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
@@ -19,6 +20,7 @@ using WinGetStudio.Services.DesiredStateConfiguration.Models;
 using WingetStudio.Services.VisualFeedback.Contracts;
 using WingetStudio.Services.VisualFeedback.Models;
 using WinGetStudio.ViewModels.ConfigurationFlow;
+using WinGetStudio.Views.Controls;
 
 namespace WinGetStudio.ViewModels;
 
@@ -64,9 +66,15 @@ public sealed partial class PreviewSetViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCodeDirty))]
+    [NotifyPropertyChangedFor(nameof(IsCodeLensEnabled))]
     public partial string? Code { get; set; }
 
     public bool IsCodeDirty => IsConfigurationLoaded && ConfigurationSet.Code != Code;
+
+    [ObservableProperty]
+    public partial List<MonacoEditor.MonacoCodeLens>? CodeLenses { get; set; }
+
+    public bool IsCodeLensEnabled => !IsCodeDirty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmptyState))]
@@ -503,6 +511,7 @@ public sealed partial class PreviewSetViewModel : ObservableObject
             _ui.ShowTimedNotification(_localizer["PreviewPage_AppliedChangesFromCodeSuccess"], NotificationMessageSeverity.Success);
             _logger.LogInformation("Successfully updated configuration from code");
             OnPropertyChanged(nameof(IsCodeDirty));
+            OnPropertyChanged(nameof(IsCodeLensEnabled));
         }
         catch (OpenConfigurationSetException ex)
         {
@@ -589,6 +598,14 @@ public sealed partial class PreviewSetViewModel : ObservableObject
         if (e.PropertyName == nameof(SetViewModel.Code))
         {
             Code = ConfigurationSet?.Code;
+            if (WinGetFileCodeLensHelper.TryGenerateCodeLenses(_localizer, Code, out var codeLenses))
+            {
+                CodeLenses = codeLenses;
+            }
+            else
+            {
+                CodeLenses = null;
+            }
         }
     }
 

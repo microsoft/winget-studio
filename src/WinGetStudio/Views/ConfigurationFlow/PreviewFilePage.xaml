@@ -476,7 +476,8 @@
                                               HorizontalScrollBarVisibility="Auto"
                                               VerticalScrollBarVisibility="Auto">
                                     <localControls:MonacoEditor Text="{x:Bind ViewModel.PreviewSet.Code, Mode=TwoWay}"
-                                                                x:Name="ConfigurationEditor"
+                                                                IsCodeLensEnabled="{x:Bind ViewModel.PreviewSet.IsCodeLensEnabled, Mode=OneWay}"
+                                                                CodeLenses="{x:Bind ViewModel.PreviewSet.CodeLenses, Mode=OneWay}"
                                                                 CodeLensCommandInvoked="MonacoEditor_CodeLensCommandInvoked"
                                                                 Syntax="yaml"
                                                                 IsReadOnly="False" />

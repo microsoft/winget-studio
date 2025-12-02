@@ -31,7 +31,6 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
         _localizer = App.GetService<IStringLocalizer<PreviewFilePage>>();
         _ui = App.GetService<IUIFeedbackService>();
         ViewModel = App.GetService<PreviewFileViewModel>();
-        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         InitializeComponent();
     }
 
@@ -184,29 +183,6 @@ public sealed partial class PreviewFilePage : Page, IView<PreviewFileViewModel>
             {
                 // No-op
             }
-        }
-    }
-
-    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        // TODO Subscribe to property change for the PreviewSet itself
-
-        if (ViewModel.PreviewSet == null)
-        {
-            return;
-        }
-
-        if (e.PropertyName == nameof(ViewModel.PreviewSet.Code))
-        {
-            var code = ViewModel.PreviewSet.Code;
-            if (!string.IsNullOrWhiteSpace(code) && WinGetFileCodeLensHelper.TryGenerateCodeLenses(_localizer, code, out var codeLenses))
-            {
-                ConfigurationEditor.CodeLenses = codeLenses;
-            }
-        }
-        else if (e.PropertyName == nameof(ViewModel.PreviewSet.IsCodeDirty))
-        {
-            ConfigurationEditor.IsCodeLensEnabled = !ViewModel.PreviewSet.IsCodeDirty;
         }
     }
 }
