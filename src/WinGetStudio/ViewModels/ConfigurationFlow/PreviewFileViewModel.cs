@@ -22,28 +22,24 @@ public partial class PreviewFileViewModel : ObservableRecipient
     {
         _manager = manager;
         _setFactory = setFactory;
-
-        // Restore previous state if available
-        RestoreState();
-        PreviewSet ??= _setFactory();
     }
 
     [RelayCommand]
     private void OnLoaded()
     {
+        if (_manager.ActiveSetPreviewState.CanRestoreState())
+        {
+            _manager.ActiveSetPreviewState.RestoreState(this);
+        }
+        else
+        {
+            PreviewSet ??= _setFactory();
+        }
     }
 
     [RelayCommand]
     private void OnUnloaded()
     {
         _manager.ActiveSetPreviewState.CaptureState(this);
-    }
-
-    private void RestoreState()
-    {
-        if (_manager.ActiveSetPreviewState.CanRestoreState())
-        {
-            _manager.ActiveSetPreviewState.RestoreState(this);
-        }
     }
 }

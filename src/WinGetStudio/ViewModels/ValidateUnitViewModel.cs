@@ -65,8 +65,8 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
 
     public bool ShowOutputText => !string.IsNullOrWhiteSpace(OutputText);
 
-    [MemberNotNullWhen(true, nameof(OriginalUnit))]
-    public bool CanSaveToOriginal => OriginalUnit != null;
+    [MemberNotNullWhen(true, nameof(SourceUnit))]
+    public bool CanSaveToSource => SourceUnit != null && SourcePreviewSet != null;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowOutputText))]
@@ -74,9 +74,14 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     public partial string? OutputText { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanSaveToOriginal))]
-    [NotifyCanExecuteChangedFor(nameof(SaveToOriginalCommand))]
-    public partial UnitViewModel? OriginalUnit { get; set; }
+    [NotifyPropertyChangedFor(nameof(CanSaveToSource))]
+    [NotifyCanExecuteChangedFor(nameof(SaveToSourceCommand))]
+    public partial UnitViewModel? SourceUnit { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveToSource))]
+    [NotifyCanExecuteChangedFor(nameof(SaveToSourceCommand))]
+    public partial PreviewSetViewModel? SourcePreviewSet { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Title))]
@@ -84,13 +89,13 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
 
     public string Title => string.IsNullOrWhiteSpace(Unit.Title) ? "New validation" : Unit.Title;
 
-    [MemberNotNullWhen(true, nameof(OriginalUnit))]
-    private bool CanSaveToOriginalInternal()
+    [MemberNotNullWhen(true, nameof(SourceUnit))]
+    private bool CanSaveToSourceInternal()
     {
-        Debug.Assert(CanSaveToOriginal, "CanSaveToOriginalInternal called when OriginalUnit is null");
+        Debug.Assert(CanSaveToSource, $"{nameof(CanSaveToSource)} should be true before calling {nameof(CanSaveToSourceInternal)}.");
 
-        // We can save to the original unit only if it is part of the active preview set.
-        if (!_manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet?.Units.Contains(OriginalUnit) ?? true)
+        // We can save to the source unit only if it is part of the active preview set.
+        if (!_manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet?.Units.Contains(SourceUnit) ?? true)
         {
             _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Warning);
             return false;
@@ -174,8 +179,8 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         _navigation.NavigateTo<ConfigurationViewModel>();
     }
 
-    [RelayCommand(CanExecute = nameof(CanSaveToOriginal))]
-    private async Task OnSaveToOriginalAsync()
+    [RelayCommand(CanExecute = nameof(CanSaveToSource))]
+    private async Task OnSaveToSourceAsync()
     {
         if (_manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet == null)
         {
@@ -185,19 +190,19 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         try
         {
             _ui.ShowTaskProgress();
-            if (CanSaveToOriginalInternal())
+            if (CanSaveToSourceInternal())
             {
-                _logger.LogInformation($"Saving changes to original unit");
-                await _manager.ActiveSetPreviewState.ActivePreviewSet.UpdateUnitAsync(OriginalUnit, Unit);
+                _logger.LogInformation($"Saving changes to source unit");
+                await _manager.ActiveSetPreviewState.ActivePreviewSet.UpdateUnitAsync(SourceUnit, Unit);
 
                 // If the item was selected in the preview, update it as well.
                 var selectedUnit = _manager.ActiveSetPreviewState.ActivePreviewSet.SelectedUnit;
-                if (selectedUnit?.Item1 == OriginalUnit)
+                if (selectedUnit?.Item1 == SourceUnit)
                 {
                     await selectedUnit.Item2.CopyFromAsync(selectedUnit.Item1);
                 }
 
-                _ui.ShowTimedNotification("Original unit updated successfully", NotificationMessageSeverity.Success);
+                _ui.ShowTimedNotification("Source unit updated successfully", NotificationMessageSeverity.Success);
             }
         }
         catch (DSCUnitValidationException ex)

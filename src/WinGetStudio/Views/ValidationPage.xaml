@@ -85,7 +85,7 @@
                 <AppBarButton Label="Test" Icon="Accept" Command="{x:Bind ViewModel.SelectedUnit.TestCommand, Mode=OneWay}" />
                 <AppBarButton Label="Cancel" Icon="Cancel" Command="{x:Bind ViewModel.SelectedUnit.CancelCommand, Mode=OneWay}" />
                 <AppBarButton Label="Back to configuration" Icon="Back" Command="{x:Bind ViewModel.SelectedUnit.BackCommand, Mode=OneWay}" />
-                <AppBarButton Label="Save to original" Icon="Save" Command="{x:Bind ViewModel.SelectedUnit.SaveToOriginalCommand, Mode=OneWay}" />
+                <AppBarButton Label="Save to source" Icon="Save" Command="{x:Bind ViewModel.SelectedUnit.SaveToSourceCommand, Mode=OneWay}" />
             </CommandBar>
         </Grid>
 

@@ -65,13 +65,13 @@ public partial class ApplyFileViewModel : ObservableRecipient
     /// </summary>
     private async Task ApplyPreviewSetAsync()
     {
-        var activeSet = _manager.ActiveSetPreviewState.ActivePreviewSet;
-        Debug.Assert(activeSet?.ConfigurationSet != null, "A configuration set should be actively in preview to apply it.");
+        var activePreviewSet = _manager.ActiveSetPreviewState.ActivePreviewSet;
+        Debug.Assert(activePreviewSet?.ConfigurationSet != null, "A configuration set should be actively in preview to apply it.");
         try
         {
             _ui.ShowTaskProgress();
             _logger.LogInformation($"Applying configuration set started");
-            var dscFile = activeSet.ConfigurationSet.GetLatestDSCFile();
+            var dscFile = activePreviewSet.ConfigurationSet.GetLatestDSCFile();
             var dscSet = await _dsc.OpenConfigurationSetAsync(dscFile);
             ApplySet = _applySetFactory(dscSet);
             _manager.ActiveSetApplyState.CaptureState(this);

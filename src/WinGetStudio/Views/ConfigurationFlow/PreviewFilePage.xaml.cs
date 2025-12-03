@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.ComponentModel;
 using System.Text.Json;
 using CommunityToolkit.WinUI;
 using Microsoft.Extensions.Localization;

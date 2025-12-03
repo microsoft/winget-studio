@@ -43,7 +43,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         // Add new validation unit if necessary
         if (parameter is ValidateUnitNavigationContext context)
         {
-            var existingValidateUnit = ValidateUnitList.FirstOrDefault(unit => unit.OriginalUnit == context.OriginalUnit);
+            var existingValidateUnit = ValidateUnitList.FirstOrDefault(unit => unit.SourceUnit == context.SourceUnit);
             if (existingValidateUnit != null)
             {
                 existingValidateUnit.Unit = context.UnitToValidate;
@@ -88,8 +88,9 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         var validateUnit = _validateUnitFactory();
         if (context != null)
         {
-            validateUnit.OriginalUnit = context.OriginalUnit;
+            validateUnit.SourceUnit = context.SourceUnit;
             validateUnit.Unit = context.UnitToValidate;
+            validateUnit.SourcePreviewSet = context.SourcePreviewSet;
         }
 
         ValidateUnitList.Add(validateUnit);

@@ -15,6 +15,9 @@ public sealed partial class SetPreviewState : ISessionStateAware<PreviewFileView
 {
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// Gets or sets the active preview set.
+    /// </summary>
     public PreviewSetViewModel? ActivePreviewSet { get; set; }
 
     public SetPreviewState(ILogger logger)
