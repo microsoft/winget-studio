@@ -547,7 +547,8 @@ function Invoke-MSBuildPackage
             "/p:AppxPackageOutput=$packagePath",
             "/p:AppxPackageSigningEnabled=false",
             # "/p:GenerateAppxPackageOnBuild=true",
-            "/p:BuildRing=$BuildRing"
+            "/p:BuildRing=$BuildRing",
+            "/m:1"  # Single-threaded build to avoid file access conflicts
         )
 
         Write-Verbose "MSBuild arguments: $($msbuildArgs -join ' ')"
