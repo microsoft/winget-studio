@@ -515,6 +515,10 @@ public sealed partial class PreviewSetViewModel : ObservableObject
                 {
                     await EditUnitAsync(unitToSelect);
                 }
+                else
+                {
+                    SelectedUnit = null;
+                }
             }
 
             _ui.ShowTimedNotification(_localizer["PreviewPage_AppliedChangesFromCodeSuccess"], NotificationMessageSeverity.Success);

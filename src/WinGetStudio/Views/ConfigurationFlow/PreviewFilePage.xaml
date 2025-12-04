@@ -480,7 +480,7 @@
                                                                 CodeLenses="{x:Bind ViewModel.PreviewSet.CodeLenses, Mode=OneWay}"
                                                                 CodeLensCommandInvoked="MonacoEditor_CodeLensCommandInvoked"
                                                                 Syntax="yaml"
-                                                                IsReadOnly="False" />
+                                                                IsReadOnly="{x:Bind ViewModel.PreviewSet.IsReadOnlyMode, Mode=OneWay}" />
                                 </ScrollViewer>
                             </Grid>
                         </Grid>

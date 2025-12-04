@@ -11,7 +11,7 @@ namespace WinGetStudio.Models;
 public sealed partial class ValidateUnitNavigationContext
 {
     /// <summary>
-    /// Gets the preview set that contains the original unit.
+    /// Gets the set that contains the source unit.
     /// </summary>
     public SetViewModel? SourceSet { get; }
 

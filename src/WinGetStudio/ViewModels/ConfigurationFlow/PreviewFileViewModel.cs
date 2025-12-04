@@ -34,6 +34,7 @@ public partial class PreviewFileViewModel : ObservableRecipient
         else
         {
             PreviewSet ??= _setFactory();
+            _manager.ActiveSetPreviewState.CaptureState(this);
         }
     }
 
