@@ -918,7 +918,7 @@
     <value>Settings</value>
   </data>
   <data name="ValidationPage_OutputTabViewHeader.Text" xml:space="preserve">
-    <value>Settings</value>
+    <value>Output</value>
   </data>
   <data name="ValidationPage_NoResultTabViewItem.Header" xml:space="preserve">
     <value>No result</value>
