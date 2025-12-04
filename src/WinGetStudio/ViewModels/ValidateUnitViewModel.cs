@@ -52,7 +52,6 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         _navigation = navigation;
         _manager = manager;
         Unit = unitFactory();
-        Unit.PropertyChanged += OnUnitPropertyChanged;
     }
 
     [ObservableProperty]
@@ -308,6 +307,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
             {
                 _cts?.Dispose();
                 _cts = null;
+                Unit.PropertyChanged -= OnUnitPropertyChanged;
             }
 
             _disposedValue = true;
@@ -341,6 +341,19 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         if (ShowErrorOutput)
         {
             SelectedTabIndex = ErrorOutputTabIndex;
+        }
+    }
+
+    partial void OnUnitChanged(UnitViewModel oldValue, UnitViewModel newValue)
+    {
+        if (oldValue != null)
+        {
+            oldValue.PropertyChanged -= OnUnitPropertyChanged;
+        }
+
+        if (newValue != null)
+        {
+            newValue.PropertyChanged += OnUnitPropertyChanged;
         }
     }
 }
