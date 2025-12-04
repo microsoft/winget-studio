@@ -631,7 +631,7 @@ public sealed partial class PreviewSetViewModel : ObservableObject
                 _ui.ShowTaskProgress();
                 if (!await ConfigurationSet.UpdateAsync(original, updated))
                 {
-                    _ui.ShowTimedNotification("Failed to update the configuration unit because it was not found in the set.", NotificationMessageSeverity.Error);
+                    _ui.ShowTimedNotification(_localizer["PreviewFile_UnitNotInSetMessage"], NotificationMessageSeverity.Error);
                     return false;
                 }
 

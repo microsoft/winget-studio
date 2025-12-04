@@ -118,13 +118,6 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
             return false;
         }
 
-        var isUnitInPreview = SourceSet.Units.Contains(SourceUnit);
-        if (!isUnitInPreview)
-        {
-            _ui.ShowTimedNotification(_localizer["ValidateUnit_UnitNotInSetMessage"], NotificationMessageSeverity.Error);
-            return false;
-        }
-
         var isSetBeingApplied = _manager.ActiveSetApplyState.ActiveApplySet != null;
         if (isSetBeingApplied)
         {

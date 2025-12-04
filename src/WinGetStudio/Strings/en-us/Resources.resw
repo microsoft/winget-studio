@@ -876,9 +876,6 @@
   <data name="ValidateUnit_SetNotInPreviewMessage" xml:space="preserve">
     <value>Cannot update the original resource because the configuration file is not open in the preview page.</value>
   </data>
-  <data name="ValidateUnit_UnitNotInSetMessage" xml:space="preserve">
-    <value>Cannot update the original resource because it is no longer part of the configuration file.</value>
-  </data>
   <data name="ValidateUnit_ApplySetInProgressMessage" xml:space="preserve">
     <value>Cannot update the original resource while the configuration file is being applied.</value>
   </data>
@@ -892,5 +889,8 @@
   <data name="ErrorCodeText" xml:space="preserve">
     <value>Error code: {0}</value>
     <comment>{Locked="{0}"} {0} is replaced by the error code</comment>
+  </data>
+  <data name="PreviewFile_UnitNotInSetMessage" xml:space="preserve">
+    <value>Cannot update the resource because it is not part of the configuration file.</value>
   </data>
 </root>
