@@ -65,18 +65,14 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- Resource AutoSuggestBox -->
             <localControls:ResourceAutoSuggestBox VerticalAlignment="Center" Text="{x:Bind ViewModel.SelectedUnit.Unit.Title, Mode=TwoWay}" />
 
             <!-- Command bar -->
-            <CommandBar Grid.Column="1"
-                        HorizontalAlignment="Left"
-                        VerticalContentAlignment="Center"
-                        HorizontalContentAlignment="Stretch"
-                        DefaultLabelPosition="Right">
+            <CommandBar Grid.Column="1" HorizontalAlignment="Left" DefaultLabelPosition="Right">
                 <AppBarButton x:Uid="ValidationPage_GetButton" Icon="Download" Command="{x:Bind ViewModel.SelectedUnit.GetCommand, Mode=OneWay}" />
                 <AppBarButton x:Uid="ValidationPage_SetButton" Icon="Upload" Command="{x:Bind ViewModel.SelectedUnit.SetCommand, Mode=OneWay}" />
                 <AppBarButton x:Uid="ValidationPage_TestButton" Icon="Accept" Command="{x:Bind ViewModel.SelectedUnit.TestCommand, Mode=OneWay}" />
