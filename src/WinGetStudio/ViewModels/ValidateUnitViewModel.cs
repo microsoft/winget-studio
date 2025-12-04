@@ -100,7 +100,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     [ObservableProperty]
     public partial int SelectedTabIndex { get; set; } = NoResultTabIndex;
 
-    public string Title => string.IsNullOrWhiteSpace(Unit.Title) ? "New validation" : Unit.Title;
+    public string Title => string.IsNullOrWhiteSpace(Unit.Title) ? _localizer["ValidateUnit_DefaultTitle"] : Unit.Title;
 
     [MemberNotNullWhen(true, nameof(SourceUnit))]
     [MemberNotNullWhen(true, nameof(SourceSet))]
@@ -114,21 +114,21 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         var isSetInPreview = _manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet == SourceSet;
         if (!isSetInPreview)
         {
-            _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification(_localizer["ValidateUnit_SetNotInPreviewMessage"], NotificationMessageSeverity.Error);
             return false;
         }
 
         var isUnitInPreview = SourceSet.Units.Contains(SourceUnit);
         if (!isUnitInPreview)
         {
-            _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification(_localizer["ValidateUnit_UnitNotInSetMessage"], NotificationMessageSeverity.Error);
             return false;
         }
 
         var isSetBeingApplied = _manager.ActiveSetApplyState.ActiveApplySet != null;
         if (isSetBeingApplied)
         {
-            _ui.ShowTimedNotification("Cannot save to original unit while the configuration set is being applied.", NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification(_localizer["ValidateUnit_ApplySetInProgressMessage"], NotificationMessageSeverity.Error);
             return false;
         }
 
@@ -223,7 +223,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         catch (Exception ex)
         {
             _logger.LogError(ex, "Updating configuration unit failed");
-            _ui.ShowTimedNotification("Failed to update source unit: " + ex.Message, NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification(_localizer["ValidateUnit_UpdateErrorMessage", ex.Message], NotificationMessageSeverity.Error);
         }
         finally
         {
@@ -248,11 +248,11 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
             var result = await action(unit, _cts.Token);
             if (result != null && !result.IsOk)
             {
-                var title = $"0x{result.ResultCode.HResult:X}";
+                var title = _localizer["ErrorCodeText", $"0x{result.ResultCode.HResult:X}"];
                 List<string> messageList = [result.Description, result.Details];
                 var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
                 _ui.ShowTimedNotification(title, message, NotificationMessageSeverity.Error);
-                ErrorOutput = $"Error code: {title}" + Environment.NewLine + Environment.NewLine + message;
+                ErrorOutput = title + Environment.NewLine + Environment.NewLine + message;
             }
         }
         catch (OpenConfigurationSetException ex)
@@ -263,7 +263,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         catch (OperationCanceledException ex)
         {
             _logger.LogInformation(ex, "Operation canceled.");
-            _ui.ShowTimedNotification("Operation canceled", NotificationMessageSeverity.Warning);
+            _ui.ShowTimedNotification(_localizer["ValidateUnit_OperationCanceledMessage"], NotificationMessageSeverity.Warning);
         }
         catch (Exception ex)
         {
