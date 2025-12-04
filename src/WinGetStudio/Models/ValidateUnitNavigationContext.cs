@@ -13,7 +13,7 @@ public sealed partial class ValidateUnitNavigationContext
     /// <summary>
     /// Gets the preview set that contains the original unit.
     /// </summary>
-    public PreviewSetViewModel? SourcePreviewSet { get; }
+    public SetViewModel? SourceSet { get; }
 
     /// <summary>
     /// Gets the source unit.
@@ -28,10 +28,10 @@ public sealed partial class ValidateUnitNavigationContext
     public ValidateUnitNavigationContext(
         UnitViewModel unitToValidate,
         UnitViewModel? sourceUnit = null,
-        PreviewSetViewModel? sourcePreviewSet = null)
+        SetViewModel? sourceSet = null)
     {
         UnitToValidate = unitToValidate;
         SourceUnit = sourceUnit;
-        SourcePreviewSet = sourcePreviewSet;
+        SourceSet = sourceSet;
     }
 }

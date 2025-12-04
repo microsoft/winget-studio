@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Configuration;
 using WinGetStudio.Contracts.Services;
-using WinGetStudio.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Contracts;
 using WinGetStudio.Services.DesiredStateConfiguration.Exceptions;
 using WinGetStudio.Services.DesiredStateConfiguration.Extensions;
@@ -24,6 +22,11 @@ public delegate ValidateUnitViewModel ValidateUnitViewModelFactory();
 
 public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposable
 {
+    // Tab indices
+    private const int NoResultTabIndex = 0;
+    private const int YamlOutputTabIndex = 1;
+    private const int ErrorOutputTabIndex = 2;
+
     private readonly IDSC _dsc;
     private readonly IUIFeedbackService _ui;
     private readonly IStringLocalizer<ValidationViewModel> _localizer;
@@ -61,17 +64,25 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
 
     private bool CanCancel => !CanExecute;
 
-    public bool ShowNoResultState => !ShowOutputText;
+    public bool ShowNoResultState => !ShowYamlOutput && !ShowErrorOutput;
 
-    public bool ShowOutputText => !string.IsNullOrWhiteSpace(OutputText);
+    public bool ShowYamlOutput => !string.IsNullOrWhiteSpace(YamlOutput);
+
+    public bool ShowErrorOutput => !string.IsNullOrWhiteSpace(ErrorOutput);
 
     [MemberNotNullWhen(true, nameof(SourceUnit))]
-    public bool CanSaveToSource => SourceUnit != null && SourcePreviewSet != null;
+    [MemberNotNullWhen(true, nameof(SourceSet))]
+    public bool CanSaveToSource => SourceUnit != null && SourceSet != null;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowOutputText))]
+    [NotifyPropertyChangedFor(nameof(ShowYamlOutput))]
     [NotifyPropertyChangedFor(nameof(ShowNoResultState))]
-    public partial string? OutputText { get; set; }
+    public partial string? YamlOutput { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowErrorOutput))]
+    [NotifyPropertyChangedFor(nameof(ShowNoResultState))]
+    public partial string? ErrorOutput { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSaveToSource))]
@@ -81,30 +92,44 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSaveToSource))]
     [NotifyCanExecuteChangedFor(nameof(SaveToSourceCommand))]
-    public partial PreviewSetViewModel? SourcePreviewSet { get; set; }
+    public partial SetViewModel? SourceSet { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Title))]
     public partial UnitViewModel Unit { get; set; }
 
+    [ObservableProperty]
+    public partial int SelectedTabIndex { get; set; } = NoResultTabIndex;
+
     public string Title => string.IsNullOrWhiteSpace(Unit.Title) ? "New validation" : Unit.Title;
 
     [MemberNotNullWhen(true, nameof(SourceUnit))]
+    [MemberNotNullWhen(true, nameof(SourceSet))]
     private bool CanSaveToSourceInternal()
     {
-        Debug.Assert(CanSaveToSource, $"{nameof(CanSaveToSource)} should be true before calling {nameof(CanSaveToSourceInternal)}.");
-
-        // We can save to the source unit only if it is part of the active preview set.
-        if (!_manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet?.Units.Contains(SourceUnit) ?? true)
+        if (!CanSaveToSource)
         {
-            _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Warning);
             return false;
         }
 
-        // If there the set is being applied, we cannot update the original unit.
-        if (_manager.ActiveSetApplyState.ActiveApplySet != null)
+        var isSetInPreview = _manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet == SourceSet;
+        if (!isSetInPreview)
         {
-            _ui.ShowTimedNotification("Cannot save to original unit while the configuration set is being applied.", NotificationMessageSeverity.Warning);
+            _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Error);
+            return false;
+        }
+
+        var isUnitInPreview = SourceSet.Units.Contains(SourceUnit);
+        if (!isUnitInPreview)
+        {
+            _ui.ShowTimedNotification("Cannot save to original unit as it is not part of the active preview configuration set.", NotificationMessageSeverity.Error);
+            return false;
+        }
+
+        var isSetBeingApplied = _manager.ActiveSetApplyState.ActiveApplySet != null;
+        if (isSetBeingApplied)
+        {
+            _ui.ShowTimedNotification("Cannot save to original unit while the configuration set is being applied.", NotificationMessageSeverity.Error);
             return false;
         }
 
@@ -122,7 +147,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
             var result = await _dsc.GetUnitAsync(dscUnit, cancellationToken);
             if (result.ResultInformation?.IsOk ?? true)
             {
-                OutputText = result.Settings.ToYaml();
+                YamlOutput = result.Settings.ToYaml();
             }
 
             return result.ResultInformation;
@@ -182,7 +207,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     [RelayCommand(CanExecute = nameof(CanSaveToSource))]
     private async Task OnSaveToSourceAsync()
     {
-        if (_manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet == null)
+        if (_manager.ActiveSetPreviewState.ActivePreviewSet == null)
         {
             return;
         }
@@ -190,30 +215,16 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         try
         {
             _ui.ShowTaskProgress();
+            _logger.LogInformation($"Attempting to save changes to source unit");
             if (CanSaveToSourceInternal())
             {
-                _logger.LogInformation($"Saving changes to source unit");
                 await _manager.ActiveSetPreviewState.ActivePreviewSet.UpdateUnitAsync(SourceUnit, Unit);
-
-                // If the item was selected in the preview, update it as well.
-                var selectedUnit = _manager.ActiveSetPreviewState.ActivePreviewSet.SelectedUnit;
-                if (selectedUnit?.Item1 == SourceUnit)
-                {
-                    await selectedUnit.Item2.CopyFromAsync(selectedUnit.Item1);
-                }
-
-                _ui.ShowTimedNotification("Source unit updated successfully", NotificationMessageSeverity.Success);
             }
-        }
-        catch (DSCUnitValidationException ex)
-        {
-            _logger.LogError(ex, "Validation of configuration unit failed");
-            _ui.ShowTimedNotification(ex.Message, NotificationMessageSeverity.Error);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Updating configuration unit failed");
-            _ui.ShowTimedNotification(_localizer["PreviewFile_UpdateFailedMessage", ex.Message], NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification("Failed to update source unit: " + ex.Message, NotificationMessageSeverity.Error);
         }
         finally
         {
@@ -231,6 +242,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         try
         {
             CanExecute = false;
+            ResetOutput();
             _cts = new CancellationTokenSource();
             _ui.ShowTaskProgress();
             var unit = await CreateUnitAsync();
@@ -241,6 +253,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
                 List<string> messageList = [result.Description, result.Details];
                 var message = string.Join(Environment.NewLine, messageList.Where(s => !string.IsNullOrEmpty(s)));
                 _ui.ShowTimedNotification(title, message, NotificationMessageSeverity.Error);
+                ErrorOutput = $"Error code: {title}" + Environment.NewLine + Environment.NewLine + message;
             }
         }
         catch (OpenConfigurationSetException ex)
@@ -306,5 +319,28 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    public void ResetOutput()
+    {
+        YamlOutput = null;
+        ErrorOutput = null;
+        SelectedTabIndex = NoResultTabIndex;
+    }
+
+    partial void OnYamlOutputChanged(string? oldValue, string? newValue)
+    {
+        if (ShowYamlOutput)
+        {
+            SelectedTabIndex = YamlOutputTabIndex;
+        }
+    }
+
+    partial void OnErrorOutputChanged(string? oldValue, string? newValue)
+    {
+        if (ShowErrorOutput)
+        {
+            SelectedTabIndex = ErrorOutputTabIndex;
+        }
     }
 }

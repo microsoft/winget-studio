@@ -224,13 +224,22 @@ public sealed partial class PreviewSetViewModel : ObservableObject
         }
     }
 
-    public async Task UpdateUnitAsync(UnitViewModel original, UnitViewModel updated)
+    public async Task<bool> UpdateUnitAsync(UnitViewModel original, UnitViewModel updated)
     {
-        _logger.LogInformation($"Updating unit {original.Title}");
-        if (await UpdateUnitInternalAsync(original, updated) && SelectedUnit?.Item1 == original)
+        if (await UpdateUnitInternalAsync(original, updated))
         {
-            await SelectUnitAsync(original);
+            _logger.LogInformation($"Updating unit {original.Title}");
+            if (SelectedUnit?.Item1 == original)
+            {
+                _logger.LogInformation($"Updating selected unit to reflect changes");
+                await SelectUnitAsync(original);
+            }
+
+            return true;
         }
+
+        _logger.LogInformation($"Failed to update unit {original.Title}");
+        return false;
     }
 
     [RelayCommand(CanExecute = nameof(CanCreateNewConfiguration))]
@@ -545,7 +554,7 @@ public sealed partial class PreviewSetViewModel : ObservableObject
     private async Task ValidateUnitAsync(UnitViewModel unit)
     {
         var unitClone = await unit.CloneAsync();
-        var param = new ValidateUnitNavigationContext(unitClone, unit);
+        var param = new ValidateUnitNavigationContext(unitClone, unit, ConfigurationSet);
         _appNavigation.NavigateTo<ValidationViewModel>(param);
     }
 
@@ -616,8 +625,13 @@ public sealed partial class PreviewSetViewModel : ObservableObject
             try
             {
                 _ui.ShowTaskProgress();
-                await ConfigurationSet.UpdateAsync(original, updated);
-                _ui.ShowTimedNotification(_localizer["PreviewFile_ValidationFailedMessage"], NotificationMessageSeverity.Success);
+                if (!await ConfigurationSet.UpdateAsync(original, updated))
+                {
+                    _ui.ShowTimedNotification("Failed to update the configuration unit because it was not found in the set.", NotificationMessageSeverity.Error);
+                    return false;
+                }
+
+                _ui.ShowTimedNotification(_localizer["PreviewFile_UnitUpdateSuccessfulMessage"], NotificationMessageSeverity.Success);
                 return true;
             }
             catch (DSCUnitValidationException ex)

@@ -90,7 +90,7 @@ public partial class ValidationViewModel : ObservableRecipient, INavigationAware
         {
             validateUnit.SourceUnit = context.SourceUnit;
             validateUnit.Unit = context.UnitToValidate;
-            validateUnit.SourcePreviewSet = context.SourcePreviewSet;
+            validateUnit.SourceSet = context.SourceSet;
         }
 
         ValidateUnitList.Add(validateUnit);

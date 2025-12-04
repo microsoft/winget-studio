@@ -19,12 +19,22 @@ public sealed partial class ValidationPage : Page, IView<ValidationViewModel>
     }
 
     /// <summary>
-    /// Copies the raw data results to the clipboard.
+    /// Copies the yaml output results to the clipboard.
     /// </summary>
-    private void CopyResultsToClipboard()
+    private void CopyYamlResultsToClipboard()
     {
         var dataPackage = new DataPackage();
-        dataPackage.SetText(ViewModel.SelectedUnit?.OutputText);
+        dataPackage.SetText(ViewModel.SelectedUnit?.YamlOutput);
+        Clipboard.SetContent(dataPackage);
+    }
+
+    /// <summary>
+    /// Copies the error output results to the clipboard.
+    /// </summary>
+    private void CopyErrorResultsToClipboard()
+    {
+        var dataPackage = new DataPackage();
+        dataPackage.SetText(ViewModel.SelectedUnit?.ErrorOutput);
         Clipboard.SetContent(dataPackage);
     }
 

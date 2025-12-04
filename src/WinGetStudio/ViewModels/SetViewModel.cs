@@ -103,11 +103,18 @@ public sealed partial class SetViewModel : ObservableObject
         await UpdateConfigurationCodeAsync();
     }
 
-    public async Task UpdateAsync(UnitViewModel original, UnitViewModel updated)
+    public async Task<bool> UpdateAsync(UnitViewModel original, UnitViewModel updated)
     {
+        if (!Units.Contains(original))
+        {
+            _logger.LogWarning("Attempted to update a unit that does not exist in the set");
+            return false;
+        }
+
         await updated.ValidateAsync();
         await original.CopyFromAsync(updated);
         await UpdateConfigurationCodeAsync();
+        return true;
     }
 
     public void ResolveDependencies()

@@ -84,8 +84,8 @@
                 <AppBarButton Label="Set" Icon="Upload" Command="{x:Bind ViewModel.SelectedUnit.SetCommand, Mode=OneWay}" />
                 <AppBarButton Label="Test" Icon="Accept" Command="{x:Bind ViewModel.SelectedUnit.TestCommand, Mode=OneWay}" />
                 <AppBarButton Label="Cancel" Icon="Cancel" Command="{x:Bind ViewModel.SelectedUnit.CancelCommand, Mode=OneWay}" />
-                <AppBarButton Label="Back to configuration" Icon="Back" Command="{x:Bind ViewModel.SelectedUnit.BackCommand, Mode=OneWay}" />
                 <AppBarButton Label="Save to source" Icon="Save" Command="{x:Bind ViewModel.SelectedUnit.SaveToSourceCommand, Mode=OneWay}" />
+                <AppBarButton Label="Back to configuration" Icon="Back" Command="{x:Bind ViewModel.SelectedUnit.BackCommand, Mode=OneWay}" />
             </CommandBar>
         </Grid>
 
@@ -140,7 +140,9 @@
                     </Grid.RowDefinitions>
 
                     <!-- Result header -->
-                    <TabView TabWidthMode="SizeToContent" IsAddTabButtonVisible="False" SelectedIndex="0">
+                    <TabView TabWidthMode="SizeToContent"
+                             IsAddTabButtonVisible="False"
+                             SelectedIndex="{x:Bind ViewModel.SelectedUnit.SelectedTabIndex, Mode=TwoWay}">
                         <TabView.Resources>
                             <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="CardBackgroundFillColorDefaultBrush" />
                             <StaticResource x:Key="TabViewItemHeaderFontSize" ResourceKey="CaptionTextBlockFontSize" />
@@ -155,7 +157,6 @@
                         <TabViewItem x:Name="NoResultTabViewItem"
                                      Header="No result"
                                      IsClosable="False"
-                                     IsSelected="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}"
                                      Visibility="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}">
                             <TabViewItem.IconSource>
                                 <FontIconSource Glyph="&#xF140;" />
@@ -164,26 +165,56 @@
                         <TabViewItem x:Name="YamlResultTabViewItem"
                                      Header="YAML"
                                      IsClosable="False"
-                                     IsSelected="{x:Bind ViewModel.SelectedUnit.ShowOutputText, Mode=OneWay}"
-                                     Visibility="{x:Bind ViewModel.SelectedUnit.ShowOutputText, Mode=OneWay}">
+                                     Visibility="{x:Bind ViewModel.SelectedUnit.ShowYamlOutput, Mode=OneWay}">
                             <TabViewItem.IconSource>
                                 <FontIconSource Glyph="&#xE943;" />
+                            </TabViewItem.IconSource>
+                        </TabViewItem>
+                        <TabViewItem x:Name="ErrorResultTabViewItem"
+                                     Header="Errors"
+                                     IsClosable="False"
+                                     Visibility="{x:Bind ViewModel.SelectedUnit.ShowErrorOutput, Mode=OneWay}">
+                            <TabViewItem.IconSource>
+                                <FontIconSource Glyph="&#xEA39;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                             </TabViewItem.IconSource>
                         </TabViewItem>
                     </TabView>
 
                     <!-- Result output box -->
                     <Grid Grid.Row="1">
+                        <!-- No results -->
                         <localControls:EmptyStateControl Glyph="&#xE8BC;"
                                                          Visibility="{x:Bind NoResultTabViewItem.IsSelected, Mode=OneWay}"
                                                          Text="Results will appear here once you run an operation" />
 
+                        <!-- Yaml output -->
                         <Grid Visibility="{x:Bind YamlResultTabViewItem.IsSelected, Mode=OneWay}">
-                            <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.OutputText, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
+                            <localControls:MonacoEditor Text="{x:Bind ViewModel.SelectedUnit.YamlOutput, Mode=OneWay}" Syntax="yaml" IsReadOnly="True" />
 
                             <!-- Copy button -->
                             <localControls:CopyButton Content="&#xE8C8;"
-                                                      Click="{x:Bind CopyResultsToClipboard}"
+                                                      Click="{x:Bind CopyYamlResultsToClipboard}"
+                                                      VerticalAlignment="Top"
+                                                      HorizontalAlignment="Right"
+                                                      Background="Transparent"
+                                                      BorderThickness="0"
+                                                      Margin="10"/>
+                        </Grid>
+
+                        <!-- Error output -->
+                        <Grid Visibility="{x:Bind ErrorResultTabViewItem.IsSelected, Mode=OneWay}"
+                              CornerRadius="{ThemeResource CornerRadiusMedium}"
+                              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                            <ScrollViewer Padding="{ThemeResource Padding8Uniform}"
+                                          HorizontalScrollMode="Auto"
+                                          HorizontalScrollBarVisibility="Auto">
+                                <TextBlock Text="{x:Bind ViewModel.SelectedUnit.ErrorOutput, Mode=OneWay}"
+                                           IsTextSelectionEnabled="True"/>
+                            </ScrollViewer>
+
+                            <!-- Copy button -->
+                            <localControls:CopyButton Content="&#xE8C8;"
+                                                      Click="{x:Bind CopyErrorResultsToClipboard}"
                                                       VerticalAlignment="Top"
                                                       HorizontalAlignment="Right"
                                                       Background="Transparent"
