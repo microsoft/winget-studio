@@ -63,15 +63,19 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
 
     private bool CanCancel => !CanExecute;
 
+    [MemberNotNullWhen(true, nameof(SourceUnit))]
+    [MemberNotNullWhen(true, nameof(SourceSet))]
+    private bool HasSource => SourceUnit != null && SourceSet != null;
+
     public bool ShowNoResultState => !ShowYamlOutput && !ShowErrorOutput;
 
     public bool ShowYamlOutput => !string.IsNullOrWhiteSpace(YamlOutput);
 
     public bool ShowErrorOutput => !string.IsNullOrWhiteSpace(ErrorOutput);
 
-    [MemberNotNullWhen(true, nameof(SourceUnit))]
-    [MemberNotNullWhen(true, nameof(SourceSet))]
-    public bool CanSaveToSource => SourceUnit != null && SourceSet != null;
+    public bool CanSaveToSource => HasSource;
+
+    public bool CanGoBackToSource => HasSource;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowYamlOutput))]
@@ -86,11 +90,15 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSaveToSource))]
     [NotifyCanExecuteChangedFor(nameof(SaveToSourceCommand))]
+    [NotifyPropertyChangedFor(nameof(CanGoBackToSource))]
+    [NotifyCanExecuteChangedFor(nameof(BackToSourceCommand))]
     public partial UnitViewModel? SourceUnit { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSaveToSource))]
     [NotifyCanExecuteChangedFor(nameof(SaveToSourceCommand))]
+    [NotifyPropertyChangedFor(nameof(CanGoBackToSource))]
+    [NotifyCanExecuteChangedFor(nameof(BackToSourceCommand))]
     public partial SetViewModel? SourceSet { get; set; }
 
     [ObservableProperty]
@@ -106,7 +114,7 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
     [MemberNotNullWhen(true, nameof(SourceSet))]
     private bool CanSaveToSourceInternal()
     {
-        if (!CanSaveToSource)
+        if (!HasSource)
         {
             return false;
         }
@@ -114,14 +122,31 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         var isSetInPreview = _manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet == SourceSet;
         if (!isSetInPreview)
         {
-            _ui.ShowTimedNotification(_localizer["ValidateUnit_SetNotInPreviewMessage"], NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification(_localizer["ValidateUnit_UpdateErrorSetNotInPreviewMessage"], NotificationMessageSeverity.Error);
             return false;
         }
 
         var isSetBeingApplied = _manager.ActiveSetApplyState.ActiveApplySet != null;
         if (isSetBeingApplied)
         {
-            _ui.ShowTimedNotification(_localizer["ValidateUnit_ApplySetInProgressMessage"], NotificationMessageSeverity.Error);
+            _ui.ShowTimedNotification(_localizer["ValidateUnit_UpdateErrorApplySetInProgressMessage"], NotificationMessageSeverity.Error);
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool CanGoBackToSourceInternal()
+    {
+        if (!HasSource)
+        {
+            return false;
+        }
+
+        var isSetInPreview = _manager.ActiveSetPreviewState.ActivePreviewSet?.ConfigurationSet == SourceSet;
+        if (!isSetInPreview)
+        {
+            _ui.ShowTimedNotification(_localizer["ValidateUnit_GoBackErrorSetNotInPreviewMessage"], NotificationMessageSeverity.Error);
             return false;
         }
 
@@ -190,10 +215,13 @@ public sealed partial class ValidateUnitViewModel : ObservableObject, IDisposabl
         }
     }
 
-    [RelayCommand]
-    private void OnBack()
+    [RelayCommand(CanExecute = nameof(CanGoBackToSource))]
+    private void OnBackToSource()
     {
-        _navigation.NavigateTo<ConfigurationViewModel>();
+        if (CanGoBackToSourceInternal())
+        {
+            _navigation.NavigateTo<ConfigurationViewModel>();
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanSaveToSource))]

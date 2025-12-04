@@ -17,6 +17,7 @@
 
     <Page.Resources>
         <x:Double x:Key="SectionMinWidth">100</x:Double>
+        <Thickness x:Key="TabViewHeaderMargin">0,6,12,0</Thickness>
     </Page.Resources>
 
     <!-- Page layout -->
@@ -67,25 +68,21 @@
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
 
-            <Grid VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <localControls:ResourceAutoSuggestBox Text="{x:Bind ViewModel.SelectedUnit.Unit.Title, Mode=TwoWay}" />
-            </Grid>
+            <!-- Resource AutoSuggestBox -->
+            <localControls:ResourceAutoSuggestBox VerticalAlignment="Center" Text="{x:Bind ViewModel.SelectedUnit.Unit.Title, Mode=TwoWay}" />
 
+            <!-- Command bar -->
             <CommandBar Grid.Column="1"
                         HorizontalAlignment="Left"
                         VerticalContentAlignment="Center"
                         HorizontalContentAlignment="Stretch"
                         DefaultLabelPosition="Right">
-                <AppBarButton Label="Get" Icon="Download" Command="{x:Bind ViewModel.SelectedUnit.GetCommand, Mode=OneWay}" />
-                <AppBarButton Label="Set" Icon="Upload" Command="{x:Bind ViewModel.SelectedUnit.SetCommand, Mode=OneWay}" />
-                <AppBarButton Label="Test" Icon="Accept" Command="{x:Bind ViewModel.SelectedUnit.TestCommand, Mode=OneWay}" />
-                <AppBarButton Label="Cancel" Icon="Cancel" Command="{x:Bind ViewModel.SelectedUnit.CancelCommand, Mode=OneWay}" />
-                <AppBarButton Label="Save to source" Icon="Save" Command="{x:Bind ViewModel.SelectedUnit.SaveToSourceCommand, Mode=OneWay}" />
-                <AppBarButton Label="Back to configuration" Icon="Back" Command="{x:Bind ViewModel.SelectedUnit.BackCommand, Mode=OneWay}" />
+                <AppBarButton x:Uid="ValidationPage_GetButton" Icon="Download" Command="{x:Bind ViewModel.SelectedUnit.GetCommand, Mode=OneWay}" />
+                <AppBarButton x:Uid="ValidationPage_SetButton" Icon="Upload" Command="{x:Bind ViewModel.SelectedUnit.SetCommand, Mode=OneWay}" />
+                <AppBarButton x:Uid="ValidationPage_TestButton" Icon="Accept" Command="{x:Bind ViewModel.SelectedUnit.TestCommand, Mode=OneWay}" />
+                <AppBarButton x:Uid="ValidationPage_CancelButton" Icon="Cancel" Command="{x:Bind ViewModel.SelectedUnit.CancelCommand, Mode=OneWay}" />
+                <AppBarButton x:Uid="ValidationPage_UpdateButton" Icon="Sync" Command="{x:Bind ViewModel.SelectedUnit.SaveToSourceCommand, Mode=OneWay}" />
+                <AppBarButton x:Uid="ValidationPage_BackButton" Icon="Back" Command="{x:Bind ViewModel.SelectedUnit.BackToSourceCommand, Mode=OneWay}" />
             </CommandBar>
         </Grid>
 
@@ -113,9 +110,9 @@
                             <StaticResource x:Key="TabViewItemHeaderIconSize" ResourceKey="CaptionTextBlockFontSize" />
                         </TabView.Resources>
                         <TabView.TabStripHeader>
-                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,6,12,0">
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="{StaticResource TabViewHeaderMargin}">
                                 <FontIcon Glyph="&#xE713;" FontSize="{ThemeResource CaptionTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
-                                <TextBlock VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}">Settings</TextBlock>
+                                <TextBlock x:Uid="ValidationPage_SettingsTabViewHeader" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}"/>
                             </StackPanel>
                         </TabView.TabStripHeader>
                         <TabViewItem Header="YAML" IsClosable="False">
@@ -149,13 +146,13 @@
                             <StaticResource x:Key="TabViewItemHeaderIconSize" ResourceKey="CaptionTextBlockFontSize" />
                         </TabView.Resources>
                         <TabView.TabStripHeader>
-                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="0,6,12,0">
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="{StaticResource TabViewHeaderMargin}">
                                 <FontIcon Glyph="&#xE700;" FontSize="{ThemeResource CaptionTextBlockFontSize}" Margin="{ThemeResource XSmallRightMargin}" />
-                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}">Output</TextBlock>
+                                <TextBlock x:Uid="ValidationPage_OutputTabViewHeader" Style="{ThemeResource CaptionTextBlockStyle}"/>
                             </StackPanel>
                         </TabView.TabStripHeader>
                         <TabViewItem x:Name="NoResultTabViewItem"
-                                     Header="No result"
+                                     x:Uid="ValidationPage_NoResultTabViewItem"
                                      IsClosable="False"
                                      Visibility="{x:Bind ViewModel.SelectedUnit.ShowNoResultState, Mode=OneWay}">
                             <TabViewItem.IconSource>
@@ -171,7 +168,7 @@
                             </TabViewItem.IconSource>
                         </TabViewItem>
                         <TabViewItem x:Name="ErrorResultTabViewItem"
-                                     Header="Errors"
+                                     x:Uid="ValidationPage_ErrorsTabViewItem"
                                      IsClosable="False"
                                      Visibility="{x:Bind ViewModel.SelectedUnit.ShowErrorOutput, Mode=OneWay}">
                             <TabViewItem.IconSource>
@@ -185,7 +182,7 @@
                         <!-- No results -->
                         <localControls:EmptyStateControl Glyph="&#xE8BC;"
                                                          Visibility="{x:Bind NoResultTabViewItem.IsSelected, Mode=OneWay}"
-                                                         Text="Results will appear here once you run an operation" />
+                                                         x:Uid="ValidationPage_NoResultState" />
 
                         <!-- Yaml output -->
                         <Grid Visibility="{x:Bind YamlResultTabViewItem.IsSelected, Mode=OneWay}">

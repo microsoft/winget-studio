@@ -873,15 +873,18 @@
    <data name="ValidateUnit_DefaultTitle" xml:space="preserve">
     <value>New validation</value>
   </data>
-  <data name="ValidateUnit_SetNotInPreviewMessage" xml:space="preserve">
+  <data name="ValidateUnit_UpdateErrorSetNotInPreviewMessage" xml:space="preserve">
     <value>Cannot update the original resource because the configuration file is not open in the preview page.</value>
   </data>
-  <data name="ValidateUnit_ApplySetInProgressMessage" xml:space="preserve">
+  <data name="ValidateUnit_UpdateErrorApplySetInProgressMessage" xml:space="preserve">
     <value>Cannot update the original resource while the configuration file is being applied.</value>
   </data>
   <data name="ValidateUnit_UpdateErrorMessage" xml:space="preserve">
     <value>Failed to update the original resource: {0}</value>
     <comment>{Locked="{0}"} {0} is replaced by the error message</comment>
+  </data>
+  <data name="ValidateUnit_GoBackErrorSetNotInPreviewMessage" xml:space="preserve">
+    <value>Cannot go back to the configuration file because it is not open in the preview page.</value>
   </data>
   <data name="ValidateUnit_OperationCanceledMessage" xml:space="preserve">
     <value>Operation canceled</value>
@@ -890,7 +893,40 @@
     <value>Error code: {0}</value>
     <comment>{Locked="{0}"} {0} is replaced by the error code</comment>
   </data>
-  <data name="PreviewFile_UnitNotInSetMessage" xml:space="preserve">
+  <data name="PreviewFile_UpdateErrorUnitNotInSetMessage" xml:space="preserve">
     <value>Cannot update the resource because it is not part of the configuration file.</value>
+  </data>
+  <data name="ValidationPage_GetButton.Label" xml:space="preserve">
+    <value>Get</value>
+  </data>
+  <data name="ValidationPage_SetButton.Label" xml:space="preserve">
+    <value>Set</value>
+  </data>
+  <data name="ValidationPage_TestButton.Label" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="ValidationPage_CancelButton.Label" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ValidationPage_UpdateButton.Label" xml:space="preserve">
+    <value>Update configuration</value>
+  </data>
+  <data name="ValidationPage_BackButton.Label" xml:space="preserve">
+    <value>Back to configuration</value>
+  </data>
+  <data name="ValidationPage_SettingsTabViewHeader.Text" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ValidationPage_OutputTabViewHeader.Text" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ValidationPage_NoResultTabViewItem.Header" xml:space="preserve">
+    <value>No result</value>
+  </data>
+  <data name="ValidationPage_NoResultState.Text" xml:space="preserve">
+    <value>Result will appear here once you run an operation</value>
+  </data>
+  <data name="ValidationPage_ErrorsTabViewItem.Header" xml:space="preserve">
+    <value>Errors</value>
   </data>
 </root>

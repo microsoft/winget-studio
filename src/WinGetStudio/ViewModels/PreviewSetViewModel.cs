@@ -631,7 +631,7 @@ public sealed partial class PreviewSetViewModel : ObservableObject
                 _ui.ShowTaskProgress();
                 if (!await ConfigurationSet.UpdateAsync(original, updated))
                 {
-                    _ui.ShowTimedNotification(_localizer["PreviewFile_UnitNotInSetMessage"], NotificationMessageSeverity.Error);
+                    _ui.ShowTimedNotification(_localizer["PreviewFile_UpdateErrorUnitNotInSetMessage"], NotificationMessageSeverity.Error);
                     return false;
                 }
 
