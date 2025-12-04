@@ -74,6 +74,104 @@ public static class ConfigurationExtensions
     }
 
     /// <summary>
+    /// Tries to get the description from the resource.
+    /// </summary>
+    /// <param name="resource">The resource to get the description from.</param>
+    /// <param name="description">The description output.</param>
+    /// <returns>True if the description was found; otherwise, false.</returns>
+    public static bool TryGetDescription(this ConfigurationV3Resource resource, out string description)
+    {
+        if (resource.AdditionalProperties is IDictionary<string, object> additionalProperties &&
+            additionalProperties.TryGetValue(MetadataKey, out var metadataObj) &&
+            metadataObj is IDictionary<string, object> metadataDict &&
+            metadataDict.TryGetValue(DescriptionMetadataKey, out var descriptionObj))
+        {
+            description = descriptionObj as string;
+            return descriptionObj is string || descriptionObj == null;
+        }
+
+        description = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Removes the description from the resource.
+    /// </summary>
+    /// <param name="resource">The resource to remove the description from.</param>
+    public static void RemoveDescription(this ConfigurationV3Resource resource)
+    {
+        if (resource.AdditionalProperties is IDictionary<string, object> additionalProperties &&
+            additionalProperties.TryGetValue(MetadataKey, out var metadataObj) &&
+            metadataObj is IDictionary<string, object> metadataDict)
+        {
+            metadataDict.Remove(DescriptionMetadataKey);
+        }
+    }
+
+    /// <summary>
+    /// Tries to get the metadata from the resource.
+    /// </summary>
+    /// <param name="resource">The resource to get the metadata from.</param>
+    /// <param name="metadata">The metadata output.</param>
+    /// <returns>True if the metadata was found; otherwise, false.</returns>
+    public static bool TryGetMetadata(this ConfigurationV3Resource resource, out IDictionary<string, object> metadata)
+    {
+        if (resource.AdditionalProperties is IDictionary<string, object> additionalProperties &&
+            additionalProperties.TryGetValue(MetadataKey, out var metadataObj) &&
+            metadataObj is IDictionary<string, object> metadataDict)
+        {
+            metadata = metadataDict;
+            return true;
+        }
+
+        metadata = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Removes the metadata from the resource.
+    /// </summary>
+    /// <param name="resource">The resource to remove the metadata from.</param>
+    public static void RemoveMetadata(this ConfigurationV3Resource resource)
+    {
+        resource.AdditionalProperties?.Remove(MetadataKey);
+    }
+
+    /// <summary>
+    /// Normalizes the resource.
+    /// </summary>
+    /// <param name="resource">The resource to normalize.</param>
+    public static void Normalize(this ConfigurationV3Resource resource)
+    {
+        // Remove description if it's empty
+        if (resource.TryGetDescription(out var description) && string.IsNullOrEmpty(description))
+        {
+            resource.RemoveDescription();
+        }
+
+        // Remove metadata if it's empty
+        if (resource.TryGetMetadata(out var metadata) && metadata.Count == 0)
+        {
+            resource.RemoveMetadata();
+        }
+    }
+
+    /// <summary>
+    /// Normalizes the configuration.
+    /// </summary>
+    /// <param name="config">The configuration to normalize.</param>
+    public static void Normalize(this ConfigurationV3 config)
+    {
+        if (config.Resources != null)
+        {
+            foreach (var resource in config.Resources)
+            {
+                resource.Normalize();
+            }
+        }
+    }
+
+    /// <summary>
     /// Converts the configuration to JSON string.
     /// </summary>
     /// <param name="config">The configuration to convert.</param>

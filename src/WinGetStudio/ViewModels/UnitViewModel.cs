@@ -166,6 +166,9 @@ public partial class UnitViewModel : ObservableObject
         // Add description
         config.Resources[0].AddDescription(Description);
 
+        // Normalize the resource.
+        config.Resources[0].Normalize();
+
         return config;
     }
 
