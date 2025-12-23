@@ -47,13 +47,13 @@ using module ./build.helpers.psm1
 #>
 [CmdletBinding()]
 param (
-    [ValidateSet("x64", "x86", "arm64")]
-    [string]$Platform = "x64",
-    [ValidateSet("Debug", "Release")]
-    [string[]]$Configuration = "Debug",
+    [ValidateSet('x64', 'x86', 'arm64')]
+    [string]$Platform = 'x64',
+    [ValidateSet('Debug', 'Release')]
+    [string[]]$Configuration = 'Debug',
     [string]$Version,
-    [ValidateSet("all", "msix", "msixbundle")]
-    [string]$BuildStep = "all",
+    [ValidateSet('all', 'msix', 'msixbundle')]
+    [string]$BuildStep = 'all',
     [switch]$IsRelease = $false,
     [string]$OutputDir,
     [switch]$Clean
@@ -65,49 +65,45 @@ $env:Build_Configuration = $Configuration
 $env:msix_version = New-BuildInfo -Version $Version -IsAzurePipelineBuild ([bool]$env:TF_BUILD)
 $msBuildPath = Get-MSBuildPath
 
-if ([string]::IsNullOrEmpty($OutputDir))
-{
+if ([string]::IsNullOrEmpty($OutputDir)) {
     $OutputDir = $env:Build_RootDirectory
 }
 
-if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
-{
-    $appxManifestPath = [System.IO.Path]::Combine($env:Build_RootDirectory, 
-        'src', 
-        'WinGetStudio', 
+if (($BuildStep -ieq 'all') -or ($BuildStep -ieq 'msix')) {
+    $appxManifestPath = [System.IO.Path]::Combine($env:Build_RootDirectory,
+        'src',
+        'WinGetStudio',
         'Package.appxmanifest')
     $xmlElements = Get-XmlElement -Path $appxManifestPath
 
     $appxmanifest = [System.Xml.Linq.XDocument]::Load($appxManifestPath)
 
     # Cache current (dev) values
-    $devVersion = $appxManifest.Root.Element($xmlElements.Identity).Attribute("Version").Value
-    $devPackageName = $appxManifest.Root.Element($xmlElements.Identity).Attribute("Name").Value
+    $devVersion = $appxManifest.Root.Element($xmlElements.Identity).Attribute('Version').Value
+    $devPackageName = $appxManifest.Root.Element($xmlElements.Identity).Attribute('Name').Value
     $devPackageDisplayName = $appxManifest.Root.Element($xmlElements.Properties).Element($xmlElements.DisplayName).Value
-    $devAppDisplayNameResource = $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute("DisplayName").Value
+    $devAppDisplayNameResource = $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute('DisplayName').Value
 
     # For dev build, use the cached values
-    $buildRing = "Dev"
+    $buildRing = 'Dev'
     $packageName = $devPackageName
     $packageDisplayName = $devPackageDisplayName
     $appDisplayNameResource = $devAppDisplayNameResource
 
     # For release build, use the new values
-    if ($IsRelease)
-    {
-        $buildRing = "Stable"
-        $packageName = "Microsoft.Windows.WinGetStudio"
-        $packageDisplayName = "WinGet Studio (Experimental)"
-        $appDisplayNameResource = "ms-resource:AppDisplayNameStable"
+    if ($IsRelease) {
+        $buildRing = 'Stable'
+        $packageName = 'Microsoft.Windows.WinGetStudio'
+        $packageDisplayName = 'WinGet Studio (Experimental)'
+        $appDisplayNameResource = 'ms-resource:AppDisplayNameStable'
     }
 
-    try
-    {
+    try {
         # Update the appxmanifest
-        $appxManifest.Root.Element($xmlElements.Identity).Attribute("Version").Value = $env:msix_version
-        $appxManifest.Root.Element($xmlElements.Identity).Attribute("Name").Value = $packageName
+        $appxManifest.Root.Element($xmlElements.Identity).Attribute('Version').Value = $env:msix_version
+        $appxManifest.Root.Element($xmlElements.Identity).Attribute('Name').Value = $packageName
         $appxManifest.Root.Element($xmlElements.Properties).Element($xmlElements.DisplayName).Value = $packageDisplayName
-        $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute("DisplayName").Value = $appDisplayNameResource
+        $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute('DisplayName').Value = $appDisplayNameResource
         $appxManifest.Save($appxmanifestPath)
 
         $solutionPath = [System.IO.Path]::Combine(
@@ -117,10 +113,8 @@ if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
         )
         Restore-Nuget -SolutionPath $solutionPath -UseInternal:([bool]$env:TF_BUILD)
 
-        foreach ($platform in $env:Build_Platform)
-        {
-            foreach ($configuration in $env:Build_Configuration)
-            {
+        foreach ($platform in $env:Build_Platform) {
+            foreach ($configuration in $env:Build_Configuration) {
                 $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
                 Invoke-MSBuildPackage `
                     -MsBuildPath $msbuildPath `
@@ -132,29 +126,25 @@ if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msix"))
                     -Clean:$Clean
             }
         }
-    } 
+    }
 
-    finally
-    {
+    finally {
         # Revert the appxmanifest to dev values
-        $appxManifest.Root.Element($xmlElements.Identity).Attribute("Version").Value = $devVersion
-        $appxManifest.Root.Element($xmlElements.Identity).Attribute("Name").Value = $devPackageName
+        $appxManifest.Root.Element($xmlElements.Identity).Attribute('Version').Value = $devVersion
+        $appxManifest.Root.Element($xmlElements.Identity).Attribute('Name').Value = $devPackageName
         $appxManifest.Root.Element($xmlElements.Properties).Element($xmlElements.DisplayName).Value = $devPackageDisplayName
-        $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute("DisplayName").Value = $devAppDisplayNameResource
-        $appxManifest.Save($appxmanifestPath) 
+        $appxManifest.Root.Element($xmlElements.Applications).Element($xmlElements.Application).Element($xmlElements.VisualElements).Attribute('DisplayName').Value = $devAppDisplayNameResource
+        $appxManifest.Save($appxmanifestPath)
     }
 }
 
-if (($BuildStep -ieq "all") -Or ($BuildStep -ieq "msixbundle"))
-{
-    foreach ($configuration in $env:Build_Configuration)
-    {
+if (($BuildStep -ieq 'all') -or ($BuildStep -ieq 'msixbundle')) {
+    foreach ($configuration in $env:Build_Configuration) {
         $appxPackageDir = (Join-Path $OutputDir "AppxPackages\$configuration")
-        $appxBundlePath = (Join-Path $OutputDir ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + "_8wekyb3d8bbwe.msixbundle"))
+        $appxBundlePath = (Join-Path $OutputDir ("AppxBundles\$configuration\WinGetStudio_" + $env:msix_version + '_8wekyb3d8bbwe.msixbundle'))
 
         New-AppxBundle -InputPath $appxPackageDir -ProjectName WinGetStudio -BundleVersion $env:msix_version -OutputPath $appxBundlePath
-        if (-not ($env:TF_BUILD) -and (Test-IsAdmin))
-        {
+        if (-not ($env:TF_BUILD) -and (Test-IsAdmin)) {
             Invoke-SignPackage -AppxBundlePath $appxBundlePath
         }
     }
