@@ -425,7 +425,7 @@ function Invoke-MSBuildPackage {
     .OUTPUTS
         None. Invokes MSBuild and optionally signs the package.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param(
         [Parameter(
             Mandatory = $true,
@@ -596,7 +596,7 @@ function New-AppxBundle {
     Requires Windows SDK to be installed for MakeAppx.exe.
     The function searches for the latest SDK version automatically if MakeAppxPath is not specified.
   #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param(
         [Parameter(
             Mandatory = $true,
@@ -745,30 +745,53 @@ function New-AppxBundle {
             $mappingFile = New-AppxBundleMapping -InputPath $InputPath -ProjectName $ProjectName
 
             if (-not $mappingFile) {
-                Write-Verbose 'Bundle creation cancelled by ShouldProcess (-WhatIf/-Confirm).'
+                Write-Verbose 'Bundle creation cancelled by mapping creation or ShouldProcess (-WhatIf/-Confirm).'
                 return
             }
 
             $outputDir = Split-Path $OutputPath -Parent
             if (-not [string]::IsNullOrWhiteSpace($outputDir) -and -not (Test-Path $outputDir)) {
-                Write-Verbose "Creating output directory: $outputDir"
-                New-Item -Path $outputDir -ItemType Directory -Force | Out-Null
+                if ($PSCmdlet.ShouldProcess($outputDir, 'Create output directory')) {
+                    Write-Verbose "Creating output directory: $outputDir"
+                    New-Item -Path $outputDir -ItemType Directory -Force | Out-Null
+                } else {
+                    Write-Verbose 'Creation of output directory skipped by ShouldProcess. Aborting bundle creation.'
+                    return
+                }
             }
 
-            Write-Information "Creating bundle: $OutputPath" -InformationAction Continue
-            Write-Verbose "Executing: $MakeAppxPath bundle /v /bv $($BundleVersion.ToString()) /f $($mappingFile.FullName) /p $OutputPath"
+            if ($PSCmdlet.ShouldProcess($OutputPath, 'Create bundle file')) {
+                Write-Information "Creating bundle: $OutputPath" -InformationAction Continue
+                Write-Verbose "Executing: $MakeAppxPath bundle /v /bv $($BundleVersion.ToString()) /f $($mappingFile.FullName) /p $OutputPath"
 
-            & $MakeAppxPath bundle /v /bv $BundleVersion.ToString() /f $mappingFile.FullName /p $OutputPath
+                & $MakeAppxPath bundle /v /bv $BundleVersion.ToString() /f $mappingFile.FullName /p $OutputPath
 
-            if ($LASTEXITCODE -ne 0) {
-                throw "MakeAppx.exe failed with exit code $LASTEXITCODE"
+                if ($LASTEXITCODE -ne 0) {
+                    throw "MakeAppx.exe failed with exit code $LASTEXITCODE"
+                }
+
+                Write-Information "Successfully created bundle: $OutputPath" -InformationAction Continue
+            } else {
+                Write-Verbose 'Bundle creation skipped by ShouldProcess (-WhatIf/-Confirm).'
+                # If bundle creation skipped, optionally remove mapping file (respecting ShouldProcess)
+                if ($mappingFile -and (Test-Path $mappingFile.FullName)) {
+                    if ($PSCmdlet.ShouldProcess($mappingFile.FullName, 'Remove temporary mapping file')) {
+                        Remove-Item $mappingFile.FullName -Force -ErrorAction SilentlyContinue
+                        Write-Verbose 'Cleaned up temporary mapping file'
+                    } else {
+                        Write-Verbose 'Skipped removal of temporary mapping file by ShouldProcess.'
+                    }
+                }
+                return
             }
 
-            Write-Information "Successfully created bundle: $OutputPath" -InformationAction Continue
-
-            if (Test-Path $mappingFile.FullName) {
-                Remove-Item $mappingFile.FullName -Force -ErrorAction SilentlyContinue
-                Write-Verbose 'Cleaned up temporary mapping file'
+            if ($mappingFile -and (Test-Path $mappingFile.FullName)) {
+                if ($PSCmdlet.ShouldProcess($mappingFile.FullName, 'Remove temporary mapping file')) {
+                    Remove-Item $mappingFile.FullName -Force -ErrorAction SilentlyContinue
+                    Write-Verbose 'Cleaned up temporary mapping file'
+                } else {
+                    Write-Verbose 'Skipped removal of temporary mapping file by ShouldProcess.'
+                }
             }
         } catch {
             Write-Error "Failed to create bundle: $_"
