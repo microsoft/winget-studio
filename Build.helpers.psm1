@@ -255,11 +255,11 @@ function Test-IsAdmin {
 }
 
 function Get-MSBuildPath {
-    $msbuildPath = &"${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
-    if (-not($msbuildPath)) {
+    $MSBuildPath = &"${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+    if (-not($MSBuildPath)) {
         throw 'MSBuild.exe not found. Please ensure that Visual Studio with MSBuild component is installed.'
     }
-    return $msbuildPath
+    return $MSBuildPath
 }
 
 function Get-XmlElement {
@@ -468,6 +468,7 @@ function Invoke-MSBuildPackage {
         Write-Verbose "Platform: $Platform, Configuration: $Configuration"
         Write-Verbose "Output Directory: $OutputDirectory"
         Write-Verbose "Build Ring: $BuildRing"
+        Write-Debug "MSBuild Path: $MSBuildPath"
     }
 
     process {
