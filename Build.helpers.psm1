@@ -102,8 +102,31 @@ function Get-SignToolPath {
 }
 
 function Remove-WinGetStudioCertificates() {
-    Get-ChildItem 'Cert:\CurrentUser\My' | Where-Object { $_.FriendlyName -match 'Microsoft.WinGetStudio' } | Remove-Item
-    Get-ChildItem 'Cert:\LocalMachine\TrustedPeople' | Where-Object { $_.FriendlyName -match 'Microsoft.WinGetStudio' } | Remove-Item
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function',
+        Justification = 'This function is a wrapper which removes multiple certificates matching a pattern.')]
+
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param()
+
+    $certNamePattern = 'Microsoft.WinGetStudio'
+
+    # Remove certificates from CurrentUser store, honoring ShouldProcess (supports -WhatIf/-Confirm)
+    $cuCerts = Get-ChildItem 'Cert:\CurrentUser\My' | Where-Object { $_.FriendlyName -match $certNamePattern }
+    foreach ($cert in $cuCerts) {
+        $certPath = "Cert:\CurrentUser\My\$($cert.Thumbprint)"
+        if ($PSCmdlet.ShouldProcess($certPath, "Remove certificate '$($cert.FriendlyName)'") ) {
+            Remove-Item -Path $certPath -ErrorAction SilentlyContinue
+        }
+    }
+
+    # Remove certificates from LocalMachine TrustedPeople store, honoring ShouldProcess
+    $lmCerts = Get-ChildItem 'Cert:\LocalMachine\TrustedPeople' | Where-Object { $_.FriendlyName -match $certNamePattern }
+    foreach ($cert in $lmCerts) {
+        $certPath = "Cert:\LocalMachine\TrustedPeople\$($cert.Thumbprint)"
+        if ($PSCmdlet.ShouldProcess($certPath, "Remove certificate '$($cert.FriendlyName)'") ) {
+            Remove-Item -Path $certPath -ErrorAction SilentlyContinue
+        }
+    }
 }
 
 function New-BuildInfo {
