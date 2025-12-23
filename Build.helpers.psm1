@@ -129,13 +129,13 @@ function Remove-WinGetStudioCertificates() {
     }
 }
 
-function New-BuildInfo {
+function Initialize-BuildInfo {
     <#
     .SYNOPSIS
         Creates a build version string in MSIX-compatible format.
 
     .DESCRIPTION
-        The New-BuildInfo function generates a version string formatted for MSIX packages.
+        The Initialize-BuildInfo function generates a version string formatted for MSIX packages.
         The version format is M.NPP.E.B where:
         - M = Major version (max <= 65535)
         - N = Minor version (max <= 654)
@@ -159,11 +159,11 @@ function New-BuildInfo {
         When false, Build number is computed from current UTC time as HHMM.
 
     .EXAMPLE
-        New-BuildInfo -Version "1.0"
+        Initialize-BuildInfo -Version "1.0"
         Creates a build version for version 1.0 with computed elapsed days and build time.
 
     .EXAMPLE
-        New-BuildInfo -Version "1.299.365.1234" -IsAzurePipelineBuild $true
+        Initialize-BuildInfo -Version "1.299.365.1234" -IsAzurePipelineBuild $true
         Creates a build version 1.299.365.0 for an Azure Pipeline build.
 
     .OUTPUTS

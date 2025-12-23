@@ -62,7 +62,7 @@ param (
 $env:Build_RootDirectory = (Split-Path $MyInvocation.MyCommand.Path)
 $env:Build_Platform = $Platform
 $env:Build_Configuration = $Configuration
-$env:msix_version = New-BuildInfo -Version $Version -IsAzurePipelineBuild ([bool]$env:TF_BUILD)
+$env:msix_version = Initialize-BuildInfo -Version $Version -IsAzurePipelineBuild ([bool]$env:TF_BUILD)
 $msBuildPath = Get-MSBuildPath
 
 if ([string]::IsNullOrEmpty($OutputDir)) {
