@@ -690,7 +690,7 @@ function New-AppxBundle {
 
         # Function to create bundle mapping file
         function New-AppxBundleMapping {
-            [CmdletBinding()]
+            [CmdletBinding(SupportsShouldProcess = $true)]
             [OutputType([System.IO.FileInfo])]
             param(
                 [Parameter(Mandatory = $true)]
@@ -716,11 +716,17 @@ function New-AppxBundle {
                 Write-Verbose "  - $($package.Name)"
             }
 
-            $mappingFile = New-TemporaryFile
-            $lines | Out-File -Encoding ASCII $mappingFile
-            Write-Verbose "Bundle mapping file created at: $($mappingFile.FullName)"
+            # Generate a mapping file path but don't create the file until ShouldProcess approves.
+            $mappingFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), ("WinGetStudio_BundleMap_{0}.txt" -f ([guid]::NewGuid().ToString())))
 
-            return $mappingFile
+            if ($PSCmdlet.ShouldProcess($mappingFilePath, "Create bundle mapping file containing $($packages.Count) package(s)")) {
+                $lines | Out-File -Encoding ASCII -FilePath $mappingFilePath
+                Write-Verbose "Bundle mapping file created at: $mappingFilePath"
+                return (Get-Item -Path $mappingFilePath)
+            } else {
+                Write-Verbose 'Bundle mapping file creation skipped by ShouldProcess (-WhatIf/-Confirm).'
+                return $null
+            }
         }
     }
 
@@ -737,6 +743,11 @@ function New-AppxBundle {
             }
 
             $mappingFile = New-AppxBundleMapping -InputPath $InputPath -ProjectName $ProjectName
+
+            if (-not $mappingFile) {
+                Write-Verbose 'Bundle creation cancelled by ShouldProcess (-WhatIf/-Confirm).'
+                return
+            }
 
             $outputDir = Split-Path $OutputPath -Parent
             if (-not [string]::IsNullOrWhiteSpace($outputDir) -and -not (Test-Path $outputDir)) {
