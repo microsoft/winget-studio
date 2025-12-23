@@ -717,7 +717,7 @@ function New-AppxBundle {
             }
 
             # Generate a mapping file path but don't create the file until ShouldProcess approves.
-            $mappingFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), ("WinGetStudio_BundleMap_{0}.txt" -f ([guid]::NewGuid().ToString())))
+            $mappingFilePath = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), ('WinGetStudio_BundleMap_{0}.txt' -f ([guid]::NewGuid().ToString())))
 
             if ($PSCmdlet.ShouldProcess($mappingFilePath, "Create bundle mapping file containing $($packages.Count) package(s)")) {
                 $lines | Out-File -Encoding ASCII -FilePath $mappingFilePath
