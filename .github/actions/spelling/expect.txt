@@ -34,6 +34,7 @@ NJson
 NNS
 NSwag
 onebranchF
+OR'ed
 oss
 powershellgallery
 PSDSC
