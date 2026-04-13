@@ -8,9 +8,11 @@ title: WinGet Studio overview
 ---
 
 # Walkthrough
+
 ## First Launch
+
 When you launch WinGet Studio the Home screen is displayed. The two prominent choices presented on
-the main screen are "Manage Configuration" and "Validate Resource". In this walkthrough, we'll 
+the main screen are "Manage Configuration" and "Validate Resource". In this walkthrough, we'll
 start with the basics.
 
 ![Local Image][01]
@@ -27,27 +29,32 @@ Some of the new Microsoft DSC resources also support "export", but that has not 
 WinGet Studio yet.
 
 There are three versions of DSC resources.
-* [PowerShell DSC 1.1][03]
-* [PowerShell DSC 2.0][04]
-* [Microsoft DSC 3.0][05]
+
+- [PowerShell DSC 1.1][03]
+- [PowerShell DSC 2.0][04]
+- [Microsoft DSC 3.0][05]
 
 ## Search for a DSC Resource
 
 In this walkthrough we will focus on Microsoft DSC 3.0 resources and PowerShell DSC 2.0 resources.
 The first resource we will look at is the WinGet Package resource. This is a Microsoft DSC 3.0
-resource. In the "Search DSC resources.." field, go ahead and type "winget". WinGet Studio will
+resource. In the "Search DSC resources.." field, go ahead and type "WinGet". WinGet Studio will
 perform a search for locally installed DSC resources as well as resources available in the
 PowerShell gallery.
 
-On the left side of the dropdown list, a subset of the available resources are displayed along with their version numbers. On the right side is an indication of "LocalDscV3" for locally
-installed Microsoft DSC 3.0 resources, and to the right of that is the version of the resource. In
-the image below all resources with "winget" are displayed. In this case, they are all DSC 3.0
+On the left side of the dropdown list, a subset of the available resources are
+displayed along with their version numbers. On the right side is an indication
+of "LocalDscV3" for locally installed Microsoft DSC 3.0 resources, and to the
+right of that is the version of the resource. In
+the image below all resources with "WinGet" are displayed. In this case, they are all DSC 3.0
 resources.
 
 > [!TIP]
-> If you do not see any resources in the dropdown list after you've entered "winget", then the
-> configuration system hasn't be provisioned on your device. One of the easiest ways to make sure
-> you have all the prerequisites is to run WinGet Configuration Export. This may take a couple of > minutes.
+> If you do not see any resources in the dropdown list after you've entered
+> "WinGet", then the
+> configuration system hasn't be provisioned on your device. One of the easiest
+> ways to make sure you have all the prerequisites is to run WinGet
+> Configuration Export. This may take a couple of minutes.
 >
 > `winget configure export --all -o config.winget`
 >
@@ -60,7 +67,9 @@ resources.
 
 ## Get Information on a Resource
 
-Go ahead and select "Microsoft.WinGet/Package". Now that you have a resource selected, click on the "i" in the circle to the right of the resource input field.
+Go ahead and select "Microsoft.WinGet/Package". Now that you have a resource
+selected, click on the "i" in the circle to the right of the resource input
+field.
 
 ![Local Image][07]
 
@@ -69,7 +78,8 @@ WinGet Studio is now displaying the "settings" exposed for the resource.
 ![Local Image][08]
 
 Since the Microsoft.WinGet/Package resource is a Microsoft DSC 3.0 resource, a JSON schema defines
-the properties and any default values if those are specified. Go ahead and click on one of the instances of "View JSON schema" under the "Code" column.
+the properties and any default values if those are specified. Go ahead and
+click on one of the instances of "View JSON schema" under the "Code" column.
 
 ![Local Image][09]
 
@@ -83,7 +93,7 @@ data types for the properties.
 > an instance of a WinGet Package is installed or not.
 
 Scroll down so you can see the "installMode" property. Note it is an enumeration, and the valid
-values are specified. 
+values are specified.
 
 ![Local Image][10]
 
@@ -100,7 +110,9 @@ YAML" to load the default properties and their values into your clipboard. You w
 indication on the top right hand side of the Validate a resource page letting you know the YAML
 has been copied to the clipboard.
 
-Click in the editor under "Settings" and paste the YAML from your clipboard <kbd>Ctrl</kbd>+<kbd>v</kbd>. All available settings (from the Microsoft.WinGet/Package resource) and default values have been inserted.
+Click in the editor under "Settings" and paste the YAML from your clipboard
+<kbd>Ctrl</kbd>+<kbd>v</kbd>. All available settings (from the
+Microsoft.WinGet/Package resource) and default values have been inserted.
 
 ![Local Image][13]
 
@@ -114,18 +126,21 @@ the package is available in.
 
 > [!NOTE]
 > The "useLatest: "false"" is exposing a bug in the current version of the DSC resource. A boolean
-> value should not be in quotes as a string data type. This bug is being tracked with [Inaccurate default for 'useLatest' in DSC v3 schema][14].
+> value should not be in quotes as a string data type. This bug is being
+> tracked with
+> [Inaccurate default for 'useLatest' in DSC v3 schema][14].
 
 Remove the settings other than "id:" and "source:". Specify "Microsoft.AppInstaller" for the "id:"
-and specify "winget" for the "source:".
+and specify "WinGet" for the "source:".
 
 > [!IMPORTANT]
 > YAML is sensitive to spaces. Be sure to include a space after the colon for each setting.
 
 ![Local Image][15]
 
-You're now ready to explore the behavior of the WinGet Package resource with WinGet Studio. Before clicking those exciting buttons, a basic understanding of what DSC.exe is doing deeper in the
-stack will help here.
+You're now ready to explore the behavior of the WinGet Package resource with
+WinGet Studio. Before clicking those exciting buttons, a basic understanding
+of what DSC.exe is doing deeper in the stack will help here.
 
 ## DSC Basics
 
@@ -144,10 +159,14 @@ The "Set" method of a DSC resource is used to apply the desired state. An optimi
 will run "Test" to check and see if the system is already in the desired state, and if it is in the
 desired state, no operation will be performed.
 
-The "Test" method is designed to check if the system is in the desired state. In some cases DSC.exe will perform a synthetic test. This is done by calling the "Get" method, and performing a
-comparison against the desired state. This is an optimization done for DSC resource authors to
-simplify their implementation, but in some cases a custom behavior may need to be implemented. This is often the case when DSC is acting on a collection of objects managed by resource, or where
-the structure of the settings is complex.
+The "Test" method is designed to check if the system is in the desired state.
+In some cases DSC.exe will perform a synthetic test. This is done by calling
+the "Get" method, and performing a comparison against the desired state. This
+is an optimization done for DSC resource authors to
+simplify their implementation, but in some cases a custom behavior may need
+to be implemented. This is often the case when DSC is acting on a collection
+of objects managed by resource, or where the structure of the settings is
+complex.
 
 ## Getting the Current State
 
@@ -155,17 +174,22 @@ OK, enough of the basics. Go ahead and click "Get".
 
 ![Local Image][16]
 
-WinGet Studio will render a progress indicator just below the title bar to let you know it's working. When it's done you should see something similar to the following image. The package
+WinGet Studio will render a progress indicator just below the title bar to
+let you know it's working. When it's done you should see something similar
+to the following image. The package
 "version:" and "useLatest:" might vary.
 
 ![Local Image][17]
 
-The settings you provided WinGet via the Microsoft.WinGet/Package resource gave it enough information know you're looking to see if the Microsoft.AppInstaller package is installed (it
+The settings you provided WinGet via the Microsoft.WinGet/Package resource
+gave it enough information know you're looking to see if the
+Microsoft.AppInstaller package is installed (it
 should be since that's how WinGet is installed). Additional properties were returned. These
 additional properties represent a more complete picture of the state the device is currently
 in.
 
 ## Testing against the Desired State
+
 Next, click "Test".
 
 ![Local Image][18]
@@ -197,9 +221,10 @@ way to know what's not installed on your device), it's time to try a different r
 In the resource input field, search for the "Microsoft.WinGet/UserSettingsFile" and select that
 resource. If you take a look at the information for the resource (using the circled "i" button)
 and then "View" the JSON schema for the resource, you might notice "settings:" is a required
-property (currently line 6 shows required properties). 
+property (currently line 6 shows required properties).
 
-Ensure the only properties you have specified under "Settings" is an empty "settings:" property in the editor. Then click the "Get" button.
+Ensure the only properties you have specified under "Settings" is an empty
+"settings:" property in the editor. Then click the "Get" button.
 
 > [!TIP]
 > If you copy the YAML under the results and save it somewhere, you can easily restore those
@@ -212,7 +237,6 @@ bar in WinGet as well as having Sixels (icons rendered as images in the terminal
 image below is the result on my machine. On your machine, the settings will include anything
 you have configured with WinGet, or it could be a pair of empty curly braces ("settings {}") for
 the settings property under "Results".
-
 
 ![Local Image][21]
 
@@ -229,14 +253,17 @@ settings:
 ```
 
 The other progressBar values you could try are:
-* accent
-* retro
-* sixel
-* disabled
+
+- accent
+- retro
+- sixel
+- disabled
 
 > [!TIP]
 > You can open up the raw [WinGet Settings Schema][22] to see what other WinGet settings you might
-> want. 
+> want.
+
+<!-- -->
 
 > [!IMPORTANT]
 > The "action:" property in the Microsoft.WinGet/UserSettingsFile resource determines
@@ -318,7 +345,7 @@ should not be set.
 > WinGet Studio.
 > ![Local Image][29]
 > Remember the synthetic test provided by DSC.exe could also lead you to believe elevation isn't
-> required because you can run set on the resource as long as you don't attempt to change the 
+> required because you can run set on the resource as long as you don't attempt to change the
 > value.
 
 You can change the other settings without requiring elevation. Below is an image when I changed the
@@ -340,7 +367,6 @@ fully applied in this case, but restarting WinGet Studio did result in the chang
 [10]: ../images/studio/0.100.302.0/Validate-winget-package-schema-enumeration.png
 [11]: ../images/studio/0.100.302.0/Validate-winget-package-resource-info.png
 [12]: ../images/studio/0.100.302.0/Validate-winget-package-resource-summary.png
-[12]: ../images/studio/0.100.302.0/Validate-winget-package-copy-as-YAML.png
 [13]: ../images/studio/0.100.302.0/Validate-winget-package-resource-settings.png
 [14]: https://github.com/microsoft/winget-cli/issues/5833
 [15]: ../images/studio/0.100.302.0/Validate-winget-package-AppInstaller.png
