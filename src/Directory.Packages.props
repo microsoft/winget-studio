@@ -25,6 +25,9 @@
     <PackageVersion Include="CommunityToolkit.WinUI.Converters" Version="8.2.250402" />
     <!-- WinGet -->
     <PackageVersion Include="Microsoft.WindowsPackageManager.Configuration.OutOfProc" Version="1.12.350" />
+    <!-- Graph layout -->
+    <PackageVersion Include="AutomaticGraphLayout" Version="1.1.12" />
+    <PackageVersion Include="AutomaticGraphLayout.Drawing" Version="1.1.12" />
     <!-- WinUI and related -->
     <PackageVersion Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
     <PackageVersion Include="NSwag.MSBuild" Version="14.6.1" />

@@ -153,6 +153,12 @@
                     </AppBarButton.Flyout>
                 </AppBarButton>
                 <AppBarSeparator />
+                <AppBarButton x:Uid="PreviewPage_VisualizeDependencies" Command="{x:Bind ViewModel.NavigateToDagCommand}">
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xE9D9;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarSeparator />
                 <AppBarButton Icon="Save" x:Uid="PreviewPage_Save" Command="{x:Bind ViewModel.PreviewSet.SaveConfigurationCommand, Mode=OneWay}" />
                 <AppBarButton Icon="Save" x:Uid="PreviewPage_SaveAs" Click="SaveConfigurationFileAs" IsEnabled="{x:Bind ViewModel.PreviewSet.CanSaveConfigurationAs, Mode=OneWay}" />
             </CommandBar>
