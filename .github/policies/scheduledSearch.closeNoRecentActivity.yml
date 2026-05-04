@@ -30,5 +30,27 @@ configuration:
           days: 5
       actions:
       - closeIssue
+    - description: >-
+          Search for PRs where -
+          * Pull Request is Open
+          * Pull Request has the label Needs-Author-Feedback
+          * Pull Request has the label No-Recent-Activity
+          * Has not had activity in the last 5 days
+          Then -
+          * Close the PR
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isPullRequest
+      - isOpen
+      - hasLabel:
+          label: Needs-Author-Feedback
+      - hasLabel:
+          label: No-Recent-Activity
+      - noActivitySince:
+          days: 5
+      actions:
+      - closeIssue
 onFailure: 
 onSuccess: 

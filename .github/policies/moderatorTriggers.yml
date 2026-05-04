@@ -19,20 +19,23 @@ configuration:
       if:
       - payloadType: Issue_Comment
       - commentContains:
-          pattern: '(\/)?[Dd]up(licate|e)?(\s+of)?\s+(\#[\d]+|https)'
+          pattern: '(?in)(\/(dup|dupe)|Duplicate)(\s+of)?\s+(\#[\d]+|https)'
           isRegex: True
       - or:
-        - activitySenderHasAssociation:
-            association: Owner
-        - activitySenderHasAssociation:
-            association: Member
+        - activitySenderHasPermission:
+            permission: Admin
+        - activitySenderHasPermission:
+            permission: Write
       then:
       - addReply:
-          reply: >- 
-              We've identified this as a duplicate of another one that already exists. This 
-              specific instance is being closed in favor of tracking the concern over on the the 
-              linked issue. Please add your 👍 to the other issue to raise its priority. Thanks 
+          reply: >-
+              We've identified this as a duplicate of another one that already exists. This
+              specific instance is being closed in favor of tracking the concern over on the
+              linked issue. Please add your 👍 to the other issue to raise its priority. Thanks
               for your report!
+
+
+              Template: msftbot/duplicate/closed
       - closeIssue
       - removeLabel:
           label: Needs-Attention
@@ -46,13 +49,13 @@ configuration:
       if:
       - payloadType: Issue_Comment
       - commentContains:
-          pattern: '\/needinfo'
+          pattern: '(?in)\/needinfo'
           isRegex: True
       - or:
-        - activitySenderHasAssociation:
-            association: Owner
-        - activitySenderHasAssociation:
-            association: Member
+        - activitySenderHasPermission:
+            permission: Admin
+        - activitySenderHasPermission:
+            permission: Write
       then:
       - removeLabel:
           label: Needs-Attention
@@ -66,13 +69,13 @@ configuration:
       if:
       - payloadType: Issue_Comment
       - commentContains:
-          pattern: '\/loc\b'
+          pattern: '(?in)\/loc\b'
           isRegex: True
       - or:
-        - activitySenderHasAssociation:
-            association: Owner
-        - activitySenderHasAssociation:
-            association: Member
+        - activitySenderHasPermission:
+            permission: Admin
+        - activitySenderHasPermission:
+            permission: Write
       then:
       - removeLabel:
           label: Needs-Triage
@@ -82,5 +85,8 @@ configuration:
           reply: >-
               Hi! Thanks for making us aware of the problem. We raised the issue with our internal 
               localization team.
+
+
+              Template: msftbot/localization
 onFailure: 
 onSuccess: 

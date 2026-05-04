@@ -31,7 +31,28 @@ configuration:
       actions:
       - addLabel:
           label: No-Recent-Activity
-      - addReply:
-          reply: This issue has been automatically marked as stale because it has been marked as requiring author feedback but has not had any activity for **5 days**. It will be closed if no further activity occurs **within 5 days of this comment**.
+    - description: >-
+          Search for PRs where -
+          * Pull Request is Open
+          * Pull Request has the label Needs-Author-Feedback
+          * Pull Request does not have the label No-Recent-Activity
+          * Has not had activity in the last 5 days
+          Then -
+          * Mark the PR as No-Recent-Activity
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isPullRequest
+      - isOpen
+      - hasLabel:
+          label: Needs-Author-Feedback
+      - noActivitySince:
+          days: 5
+      - isNotLabeledWith:
+          label: No-Recent-Activity
+      actions:
+      - addLabel:
+          label: No-Recent-Activity
 onFailure: 
 onSuccess: 

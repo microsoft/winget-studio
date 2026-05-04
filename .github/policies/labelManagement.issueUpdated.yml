@@ -36,7 +36,9 @@ configuration:
           label: No-Recent-Activity
     - description: Clean email replies on every comment
       if:
-      - payloadType: Issue_Comment
+      - or:
+        - payloadType: Issue_Comment
+        - payloadType: Pull_Request_Review_Comment
       then:
       - cleanEmailReply
     - description: Add In-PR when an issue has a linked PR that will close it
