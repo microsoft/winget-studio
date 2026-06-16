@@ -11,7 +11,7 @@ on:
       - '**'
     paths:
       - "**/*.md"
-  pull_request_target:
+  pull_request:
     branches:
       - '**'
     tags-ignore:
@@ -28,18 +28,7 @@ jobs:
     name: Check Markdown linting
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout (pull_request_target -> head repo)
-      if: github.event_name == 'pull_request_target'
-      uses: actions/checkout@v4
-      with:
-        # When running under pull_request_target, checkout the head repo/sha
-        # so the runner can find the exact commit (handles forked PRs).
-        repository: ${{ github.event.pull_request.head.repo.full_name }}
-        ref: ${{ github.event.pull_request.head.sha }}
-        fetch-depth: 0
-    - name: Checkout (default)
-      if: github.event_name != 'pull_request_target'
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - uses: tj-actions/changed-files@v47.0.0
