@@ -42,6 +42,8 @@ extends:
   parameters:
     platform:
       name: 'windows_undocked'
+    featureFlags:
+      WindowsHostVersion: '1ESWindows2022'
     git:
       fetchTags: false
     stages:
