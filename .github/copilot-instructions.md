@@ -53,6 +53,15 @@ Run tests via Visual Studio Test Explorer against `WinGetStudio.Tests.MSTest`, o
 - This project is **experimental** — expect API/format churn; check `docs/changelog.md` before assuming stability of a given surface.
 - CI runs via Azure Pipelines.
 
+## Issues and Pull Requests
+
+- Before filing an issue, search existing open and closed issues for duplicates.
+- Use the GitHub issue forms in `.github/ISSUE_TEMPLATE/`; do not file a blank issue unless a maintainer explicitly asks for one.
+- Bug reports should include the form fields for brief description, steps to reproduce, expected behavior, actual behavior, and environment.
+- Feature requests should include the form fields for feature or enhancement description and proposed technical implementation details when known.
+- Keep issue bodies concise and evidence-based. Do not paste large speculative patches into issue bodies; open a pull request or link a branch when code is available.
+- Before opening a pull request, review `CONTRIBUTING.md`, follow the PR template, keep the change focused, and summarize validation performed.
+
 ## Privacy & Telemetry
 
 The application logs basic diagnostic telemetry. See `docs/` and `PRIVACY.md` for details on what is collected.
