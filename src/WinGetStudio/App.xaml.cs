@@ -118,6 +118,8 @@ public partial class App : Application
                 services.AddTransient<PreviewFileViewModel>();
                 services.AddTransient<ApplyFilePage>();
                 services.AddTransient<ApplyFileViewModel>();
+                services.AddTransient<DagPage>();
+                services.AddTransient<DagViewModel>();
                 services.AddTransient<NotificationPaneViewModel>();
                 services.AddTransient<LoadingProgressBarViewModel>();
                 services.AddTransient<ResourceAutoSuggestBoxViewModel>();

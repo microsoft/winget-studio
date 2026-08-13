@@ -53,6 +53,8 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" />
     <PackageReference Include="WinUIEx" />
+    <PackageReference Include="AutomaticGraphLayout" />
+    <PackageReference Include="AutomaticGraphLayout.Drawing" />
   </ItemGroup>
 
   <ItemGroup>

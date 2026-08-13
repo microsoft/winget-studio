@@ -13,5 +13,6 @@ internal sealed class ConfigurationPageService : PageService, IConfigurationPage
     {
         Configure<PreviewFileViewModel, PreviewFilePage>();
         Configure<ApplyFileViewModel, ApplyFilePage>();
+        Configure<DagViewModel, DagPage>();
     }
 }
