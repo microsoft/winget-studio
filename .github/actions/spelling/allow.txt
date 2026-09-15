@@ -50,6 +50,7 @@ configfile
 contoso
 COSTDEFERRED
 cotaskmem
+cooldown
 cpprest
 cpprestsdk
 cppwinrt
